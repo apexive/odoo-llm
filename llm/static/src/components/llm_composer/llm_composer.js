@@ -1,6 +1,6 @@
 /** @odoo-module **/
 
-import { Component, useRef, onMounted, onWillUnmount } from "@odoo/owl";
+import { Component, useState, useRef, onMounted, onWillUnmount } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
@@ -19,48 +19,39 @@ export class LLMComposer extends Component {
     // Services
     this.uiService = useService("ui");
 
+    // Local state
+    this.state = useState({
+      content: "",
+      isDisabled: false
+    });
+
     // Command history
     this.commandHistory = [];
     this.historyIndex = -1;
 
     // Bind methods
     this.onInputThrottled = _.throttle(this._onInput.bind(this), 100);
-    this.updateTextareaHeight = _.throttle(this._updateTextareaHeight.bind(this), 16);
-
-    // Setup lifecycle hooks
-    onMounted(() => this._mounted());
-    onWillUnmount(() => this._cleanup());
-
-    // Setup auto-resize observer
-    this._setupResizeObserver();
-  }
-
-  /**
-   * @returns {Object} The composer record from props
-   */
-  get composerView() {
-    return this.props.record;
   }
 
   /**
    * @returns {string} The current content
    */
   get content() {
-    return this.composerView.content || '';
+    return this.state.content;
   }
 
   /**
    * @returns {string} Placeholder text
    */
   get placeholder() {
-    return this.composerView.placeholder || this.env._t("Type a message...");
+    return this.props.placeholder || this.env._t("Type a message...");
   }
 
   /**
    * @returns {boolean} Whether composer is disabled
    */
   get isDisabled() {
-    return this.composerView.isDisabled;
+    return this.props.isDisabled || this.state.isDisabled;
   }
 
   /**
@@ -71,67 +62,6 @@ export class LLMComposer extends Component {
   }
 
   /**
-   * Component mounted hook
-   * @private
-   */
-  _mounted() {
-    if (this.textareaRef.el) {
-      this.textareaRef.el.focus();
-      this._updateTextareaHeight();
-    }
-  }
-
-  /**
-   * Clean up resources
-   * @private
-   */
-  _cleanup() {
-    if (this.onInputThrottled?.cancel) {
-      this.onInputThrottled.cancel();
-    }
-    if (this.updateTextareaHeight?.cancel) {
-      this.updateTextareaHeight.cancel();
-    }
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-  }
-
-  /**
-   * Setup resize observer
-   * @private
-   */
-  _setupResizeObserver() {
-    this.resizeObserver = new ResizeObserver(() => {
-      this._updateTextareaHeight();
-    });
-  }
-
-  /**
-   * Update textarea height based on content
-   * @private
-   */
-  _updateTextareaHeight() {
-    const textarea = this.textareaRef.el;
-    const mirroredTextarea = this.mirroredTextareaRef.el;
-    if (!textarea || !mirroredTextarea) return;
-
-    // Copy content to mirrored textarea
-    mirroredTextarea.value = textarea.value;
-    textarea.style.height = 'auto';
-
-    // Calculate and set new height
-    const newHeight = Math.min(
-        Math.max(mirroredTextarea.scrollHeight, TEXTAREA_MIN_HEIGHT),
-        TEXTAREA_MAX_HEIGHT
-    );
-    textarea.style.height = `${newHeight}px`;
-
-    // Update scroll status if at max height
-    textarea.classList.toggle('o-is-scrollable', mirroredTextarea.scrollHeight > TEXTAREA_MAX_HEIGHT);
-  }
-
-  /**
    * Handle input changes
    * @private
    */
@@ -139,10 +69,10 @@ export class LLMComposer extends Component {
     if (!this.textareaRef.el) return;
 
     const content = this.textareaRef.el.value;
-    this.updateTextareaHeight();
+    this.state.content = content;
 
-    // Update model
-    this.composerView.update({ content });
+    // Notify parent of content change
+    this.props.onContentChange?.(content);
   }
 
   /**
@@ -169,13 +99,6 @@ export class LLMComposer extends Component {
       this._navigateHistory('down');
       return;
     }
-
-    // Handle common keyboard shortcuts
-    if (ev.key === 'l' && (ev.ctrlKey || ev.metaKey)) {
-      ev.preventDefault();
-      this._clearContent();
-      return;
-    }
   }
 
   /**
@@ -193,31 +116,10 @@ export class LLMComposer extends Component {
     }
 
     const content = this.historyIndex >= 0 ? this.commandHistory[this.historyIndex] : '';
-    this._setContent(content);
-  }
-
-  /**
-   * Set textarea content
-   * @param {string} content
-   * @private
-   */
-  _setContent(content) {
-    if (!this.textareaRef.el) return;
-
-    this.textareaRef.el.value = content;
-    this.composerView.update({ content });
-    this._updateTextareaHeight();
-
-    // Move cursor to end
-    this.textareaRef.el.setSelectionRange(content.length, content.length);
-  }
-
-  /**
-   * Clear textarea content
-   * @private
-   */
-  _clearContent() {
-    this._setContent('');
+    this.state.content = content;
+    if (this.textareaRef.el) {
+      this.textareaRef.el.value = content;
+    }
   }
 
   /**
@@ -239,56 +141,43 @@ export class LLMComposer extends Component {
     }
     this.historyIndex = -1;
 
-    // Submit message
+    // Notify parent
     this.props.onSubmit(content);
 
-    // Clear composer
+    // Clear content
     this._clearContent();
   }
 
   /**
-   * Handle paste events
+   * Clear textarea content
+   * @private
+   */
+  _clearContent() {
+    this.state.content = "";
+    if (this.textareaRef.el) {
+      this.textareaRef.el.value = "";
+    }
+  }
+
+  /**
+   * Handle paste event
    * @param {ClipboardEvent} ev
    * @private
    */
   _onPaste(ev) {
-    // Handle file paste
-    const files = Array.from(ev.clipboardData?.files || []);
-    if (files.length) {
-      ev.preventDefault();
-      this.props.onFilesPasted?.(files);
-      return;
-    }
-
-    // Handle text paste
-    const text = ev.clipboardData?.getData('text/plain');
-    if (text) {
-      // Let default paste behavior handle it
-      this.updateTextareaHeight();
-    }
+    // Handle paste events if needed
   }
 }
 
+LLMComposer.components = {};
 LLMComposer.template = "llm.Composer";
 
 LLMComposer.props = {
-  record: {
-    type: Object,
-    required: true,
-  },
-  onSubmit: {
-    type: Function,
-    required: true,
-  },
-  onFilesPasted: {
-    type: Function,
-    optional: true,
-  },
-  className: {
-    type: String,
-    optional: true,
-  }
+  placeholder: { type: String, optional: true },
+  isDisabled: { type: Boolean, optional: true },
+  onSubmit: { type: Function, required: true },
+  onContentChange: { type: Function, optional: true },
+  className: { type: String, optional: true }
 };
 
-// Register the component
 registry.category("components").add("LLMComposer", LLMComposer);

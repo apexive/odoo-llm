@@ -7,9 +7,6 @@ import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { LLMMessageList } from "../llm_message_list/llm_message_list";
 import { LLMComposer } from "../llm_composer/llm_composer";
 
-/**
- * Thread view component for LLM chat interface
- */
 export class LLMThreadView extends Component {
   setup() {
     // Services
@@ -28,15 +25,8 @@ export class LLMThreadView extends Component {
       hasError: false,
       errorMessage: null,
       currentResponse: null,
-      thread: null
-    });
-
-    // Composer state
-    this.composerState = useState({
-      content: "",
-      isDisabled: false,
-      placeholder: this.env._t("Type a message..."),
-      error: null
+      thread: null,
+      composerDisabled: false
     });
 
     // Get thread ID from props or params
@@ -56,8 +46,8 @@ export class LLMThreadView extends Component {
 
   /**
    * Get thread ID from props or params
-   * @private
    * @returns {number|null}
+   * @private
    */
   _getThreadId() {
     // Try to get ID from record props
@@ -83,7 +73,7 @@ export class LLMThreadView extends Component {
    * @private
    */
   async _loadMessages() {
-    if (this.state.isLoadingMore || !this.threadId) return;
+    if (!this.threadId || this.state.isLoadingMore) return;
 
     try {
       this.state.isLoadingMore = true;
@@ -115,7 +105,7 @@ export class LLMThreadView extends Component {
     if (!content.trim() || !this.threadId) return;
 
     // Disable composer while processing
-    this.composerState.isDisabled = true;
+    this.state.composerDisabled = true;
 
     try {
       await this.rpc("/llm/thread/post_message", {
@@ -132,9 +122,8 @@ export class LLMThreadView extends Component {
           error.message || "Failed to send message",
           { type: "danger" }
       );
-      this.composerState.error = error.message || "Failed to send message";
     } finally {
-      this.composerState.isDisabled = false;
+      this.state.composerDisabled = false;
     }
   }
 
@@ -144,11 +133,10 @@ export class LLMThreadView extends Component {
    * @private
    */
   async _onMessageRetry(message) {
-    const index = this.state.messages.indexOf(message);
-    if (index === -1) return;
+    if (!message || !this.threadId) return;
 
     // Remove failed message and try again
-    this.state.messages.splice(index, 1);
+    this.state.messages = this.state.messages.filter(m => m.id !== message.id);
     await this._onMessageSubmit(message.content);
   }
 
@@ -157,7 +145,7 @@ export class LLMThreadView extends Component {
    * @private
    */
   _cleanup() {
-    // Add any cleanup needed
+    // Clean up any resources or event listeners if needed
   }
 }
 

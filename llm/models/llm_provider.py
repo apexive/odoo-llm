@@ -1,4 +1,5 @@
 from odoo import api, fields, models, _
+
 from odoo.exceptions import UserError
 
 
@@ -9,6 +10,8 @@ class LLMProviderBase(models.AbstractModel):
     _description = "Base LLM Provider Implementation"
 
     provider_id = fields.Many2one("llm.provider", required=True, ondelete="cascade")
+
+    _client = None
 
     @property
     def api_key(self):
@@ -21,14 +24,59 @@ class LLMProviderBase(models.AbstractModel):
     def get_client(self):
         raise NotImplementedError()
 
-    def chat(self, messages, model=None, stream=False):
-        raise NotImplementedError()
+    def chat(self, messages, model=None, stream=False, **kwargs):
+        client = self.get_client()
+
+        response = client.chat(
+            messages=messages,
+            stream=stream,
+            model=self.get_model(model, model_use="chat").name, **kwargs)
+        if not stream:
+            yield response
+            return
+
+        for chunk in response:
+
+            if chunk.delta is not None:
+                yield {
+                    "role": "asistant",
+                    "content": response.delta,
+                }
 
     def embedding(self, texts, model=None):
-        raise NotImplementedError()
+        client = self.get_client()
+        response = client.embeddings(
+            model=self.get_model(model, "embedding").name, texts=texts
+        )
+        return [r["embedding"] for r in response["data"]]
 
-    def list_models(self):
-        raise NotImplementedError()
+    def get_model(self, model=None, model_use="chat"):
+        """Get a model to use for the given purpose
+
+        Args:
+            model: Optional specific model to use
+            model_use: Type of model to get if no specific model provided
+
+        Returns:
+            llm.model record to use
+        """
+        if model:
+            return model
+
+        # Get models from the main provider record
+        models = self.provider_id.model_ids
+
+        # Filter for default model of requested type
+        default_models = models.filtered(lambda m: m.default and m.model_use == model_use)
+
+        if not default_models:
+            # Fallback to any model of requested type
+            default_models = models.filtered(lambda m: m.model_use == model_use)
+
+        if not default_models:
+            raise ValueError(f"No {model_use} model found for provider {self.provider_id.name}")
+
+        return default_models[0]
 
 
 class LLMProvider(models.Model):

@@ -81,7 +81,7 @@
 
                 <!-- Composer -->
                 <LLMComposer
-                        record="composerState"
+                        isDisabled="state.composerDisabled"
                         onSubmit.bind="_onMessageSubmit"/>
             </div>
         </div>

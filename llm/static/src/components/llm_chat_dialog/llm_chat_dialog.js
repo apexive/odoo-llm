@@ -178,6 +178,15 @@ class LLMChatDialogClientAction extends Component {
     setup() {
         this.notification = useService("notification");
         this.actionService = useService("action");
+
+        // Validate thread_id from action params
+        const threadId = this.props.action.params?.thread_id;
+        if (!threadId) {
+            this.notification.add(this.env._t("No thread ID provided"), {
+                type: "danger",
+                sticky: true,
+            });
+        }
     }
 
     /**

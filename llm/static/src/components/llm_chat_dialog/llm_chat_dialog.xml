@@ -64,7 +64,7 @@
                     <!-- Thread View -->
                     <LLMThreadView
                             className="'flex-grow-1 overflow-hidden'"
-                            record="state.thread"/>
+                            threadId="props.threadId"/>
                 </t>
             </div>
         </Dialog>
@@ -72,8 +72,14 @@
 
     <!-- Dialog Action Template -->
     <t t-name="llm.ChatDialogAction" owl="1">
-        <Dialog size="'lg'" fullscreen="true" title="title">
+        <div t-if="threadId" class="h-100">
             <LLMChatDialog threadId="threadId"/>
-        </Dialog>
+        </div>
+        <div t-else="" class="d-flex align-items-center justify-content-center h-100">
+            <div class="text-center text-danger">
+                <i class="fa fa-exclamation-triangle fa-2x mb-3"/>
+                <div>No thread ID provided</div>
+            </div>
+        </div>
     </t>
 </templates>
