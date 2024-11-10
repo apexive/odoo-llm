@@ -11,8 +11,6 @@ class LLMProviderBase(models.AbstractModel):
 
     provider_id = fields.Many2one("llm.provider", required=True, ondelete="cascade")
 
-    _client = None
-
     @property
     def api_key(self):
         return self.provider_id.api_key
@@ -25,50 +23,14 @@ class LLMProviderBase(models.AbstractModel):
         raise NotImplementedError()
 
     def chat(self, messages, model=None, stream=False):
-        print("BASE PROVIDER")
         client = self.get_client()
         model = self.get_model(model, model_use="chat")
 
-        print("PROVIDE")
-        print(messages)
-        response = client.chat(
+        return client.chat(
             messages=messages,
             stream=stream,
             model=model.name,
         )
-        print(response)
-
-        if not stream:
-            # For non-streaming, extract the content from the response
-            # Handle different provider response formats
-            if hasattr(response, "choices") and response.choices:
-                # OpenAI-style response
-                return response.choices[0].message.content
-            elif hasattr(response, "content"):
-                # Anthropic-style response
-                return response.content[0].text
-            elif hasattr(response, "message"):
-                return response.message["content"]
-            else:
-                # Fallback for other formats - convert response to string
-                return str(response)
-        else:
-            # For streaming, yield chunks as they come
-            for chunk in response:
-                if hasattr(chunk, "choices") and chunk.choices:
-                    # OpenAI-style chunks
-                    if chunk.choices[0].delta.content:
-                        yield chunk.choices[0].delta.content
-                elif hasattr(chunk, "delta"):
-                    # Alternative format
-                    if chunk.delta:
-                        yield chunk.delta
-                elif hasattr(chunk, "text"):
-                    # Anthropic-style chunks
-                    yield chunk.text
-                else:
-                    # Fallback - convert chunk to string
-                    yield str(chunk)
 
     def embedding(self, texts, model=None):
         client = self.get_client()

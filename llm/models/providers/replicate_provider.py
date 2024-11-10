@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from odoo import models
+import replicate
 
 
 def serialize_datetime(obj):
@@ -35,11 +36,12 @@ def serialize_model_data(data: dict) -> dict:
 class ReplicateProvider(models.Model):
     _name = "llm.provider.replicate"
     _inherit = "llm.provider.base"
+    _client = None
 
     def get_client(self):
-        import replicate
-
-        return replicate.Client(api_token=self.api_key)
+        if not ReplicateProvider._client:
+            ReplicateProvider._client = replicate.Client(api_token=self.api_key)
+        return ReplicateProvider._client
 
     # def chat(self, messages, model=None, stream=False):
     #     client = self.get_client()
@@ -75,18 +77,11 @@ class ReplicateProvider(models.Model):
     def list_models(self):
         """Fetch all available models from Replicate, handling pagination"""
         client = self.get_client()
-        all_models = []
 
         # Get first page
         page = False
 
         while page is False or page.next:
             page = client.models.list()
-            all_models.extend(
-                [
-                    {"name": model.id, "details": serialize_model_data(model.dict())}
-                    for model in page.results
-                ]
-            )
-
-        return all_models
+            for model in page.results:
+                yield {"name": model.id, "details": serialize_model_data(model.dict())}

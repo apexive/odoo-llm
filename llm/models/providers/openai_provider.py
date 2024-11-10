@@ -1,26 +1,28 @@
 from odoo import models
+from openai import OpenAI
 
 
 class OpenAIProvider(models.Model):
     _name = "llm.provider.openai"
     _inherit = "llm.provider.base"
+    _client = None
 
     def get_client(self):
-        from openai import OpenAI
+        if not OpenAIProvider._client:
+            OpenAIProvider._client = OpenAI(api_key=self.api_key, base_url=self.api_base or None)
+            return OpenAIProvider._client
 
-        return OpenAI(api_key=self.api_key, base_url=self.api_base or None)
-
-    # def chat(self, messages, model=None, stream=False):
-    #     client = self.get_client()
-    #     model = self.get_model(model, "chat")
-    #     response = client.chat.completions.create(
-    #         model=model.name,
-    #         messages=messages,
-    #         stream=stream,
-    #     )
-    #     if not stream:
-    #         return response.choices[0].message.content
-    #     return response
+    def chat(self, messages, model=None, stream=False):
+        client = self.get_client()
+        model = self.get_model(model, "chat")
+        response = client.chat.completions.create(
+            model=model.name,
+            messages=messages,
+            stream=stream,
+        )
+        if not stream:
+            return response.choices[0].message
+        return response
 
     def embedding(self, texts, model=None):
         client = self.get_client()

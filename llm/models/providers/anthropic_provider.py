@@ -1,14 +1,16 @@
 from odoo import models
+from anthropic import Anthropic
 
 
 class AnthropicProvider(models.Model):
     _name = "llm.provider.anthropic"
     _inherit = "llm.provider.base"
+    _client = None
 
     def get_client(self):
-        from anthropic import Anthropic
-
-        return Anthropic(api_key=self.api_key)
+        if not AnthropicProvider._client:
+            AnthropicProvider._client = Anthropic(api_key=self.api_key)
+        return AnthropicProvider._client
 
     # def chat(self, messages, model=None, stream=False):
     #     client = self.get_client()
