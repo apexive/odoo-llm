@@ -25,12 +25,12 @@ class LLMProviderBase(models.AbstractModel):
     def chat(self, messages, model=None, stream=False):
         client = self.get_client()
         model = self.get_model(model, model_use="chat")
-
+        print(messages)
         return client.chat(
             messages=messages,
             stream=stream,
             model=model.name,
-        )
+        )['message']
 
     def embedding(self, texts, model=None):
         client = self.get_client()
