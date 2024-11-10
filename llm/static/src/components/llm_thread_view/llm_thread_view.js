@@ -13,18 +13,17 @@ export class LLMThreadView extends Component {
     this.rpc = useService("rpc");
     this.notification = useService("notification");
     this.orm = useService("orm");
+    this.messaging = useService("messaging");
 
     // Refs
     this.containerRef = useRef("container");
 
     // State
     this.state = useState({
-      messages: [],
       isLoadingInitial: true,
       isLoadingMore: false,
       hasError: false,
       errorMessage: null,
-      currentResponse: null,
       thread: null,
       composerDisabled: false
     });
@@ -42,6 +41,26 @@ export class LLMThreadView extends Component {
     }
 
     onWillDestroy(() => this._cleanup());
+  }
+
+  /**
+   * Get message list record for the template
+   * @returns {Object} Message list record
+   */
+  get messageListRecord() {
+    if (!this.state.thread?.messages) {
+      return null;
+    }
+
+    return {
+      messages: this.state.thread.messages,
+      isLoadingMore: this.state.isLoadingMore,
+      hasMoreMessages: false, // Add logic to determine if there are more messages
+      isAtBottom: true, // Add logic to determine scroll position
+      updateScroll: (position, isAtBottom) => {
+        // Add scroll position update logic
+      },
+    };
   }
 
   /**
@@ -83,7 +102,6 @@ export class LLMThreadView extends Component {
         thread_id: this.threadId
       });
 
-      this.state.messages = data.messages || [];
       this.state.thread = data;
 
     } catch (error) {
@@ -125,19 +143,6 @@ export class LLMThreadView extends Component {
     } finally {
       this.state.composerDisabled = false;
     }
-  }
-
-  /**
-   * Handle message retry
-   * @param {Object} message Message to retry
-   * @private
-   */
-  async _onMessageRetry(message) {
-    if (!message || !this.threadId) return;
-
-    // Remove failed message and try again
-    this.state.messages = this.state.messages.filter(m => m.id !== message.id);
-    await this._onMessageSubmit(message.content);
   }
 
   /**

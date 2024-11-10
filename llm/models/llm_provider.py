@@ -32,12 +32,14 @@ class LLMProviderBase(models.AbstractModel):
             stream=stream,
             model=self.get_model(model, model_use="chat").name, **kwargs)
         if not stream:
+            print(response)
             yield response
             return
 
         for chunk in response:
 
             if chunk.delta is not None:
+                print(chunk.delta)
                 yield {
                     "role": "asistant",
                     "content": response.delta,

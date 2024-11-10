@@ -6,13 +6,13 @@
              t-ref="container">
 
             <!-- Header -->
-            <div t-if="thread" class="o_LLMThreadView_header border-bottom p-3">
+            <div t-if="state.thread" class="o_LLMThreadView_header border-bottom p-3">
                 <div class="d-flex align-items-center justify-content-between">
                     <!-- Title and Model -->
                     <div class="d-flex align-items-center">
-                        <h6 class="mb-0" t-esc="thread.name"/>
-                        <small t-if="thread.model" class="text-muted ms-2">
-                            <t t-esc="thread.model.name"/>
+                        <h6 class="mb-0" t-esc="state.thread.name"/>
+                        <small t-if="state.thread.model" class="text-muted ms-2">
+                            <t t-esc="state.thread.model.name"/>
                         </small>
                     </div>
 
@@ -33,9 +33,9 @@
                 </div>
 
                 <!-- Provider Info -->
-                <div t-if="thread.model" class="mt-2 small text-muted">
+                <div t-if="state.thread.model" class="mt-2 small text-muted">
                     <i class="fa fa-info-circle me-1"/>
-                    <t t-esc="thread.provider.name"/>
+                    <t t-esc="state.thread.provider.name"/>
                 </div>
             </div>
 
@@ -64,11 +64,10 @@
                 </div>
 
                 <!-- Message List -->
-                <t t-elif="state.messages.length">
+                <t t-elif="messageListRecord">
                     <LLMMessageList
                             className="'flex-grow-1'"
-                            messages="state.messages"
-                            onRetry.bind="_onMessageRetry"/>
+                            record="messageListRecord"/>
                 </t>
 
                 <!-- Empty State -->

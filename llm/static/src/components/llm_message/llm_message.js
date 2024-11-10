@@ -12,7 +12,6 @@ export class LLMMessage extends Component {
     this.contentRef = useRef("content");
     this.prettyBodyRef = useRef("prettyBody");
     this.notification = useService("notification");
-    this.markdownService = useService("markdownService");
   }
 
   /**
@@ -76,15 +75,7 @@ export class LLMMessage extends Component {
       return;
     }
 
-    try {
-      // Convert markdown to HTML if markdown service is available
-      if (this.markdownService) {
-        const html = await this.markdownService.convertToHtml(this.message.content);
-        this.prettyBodyRef.el.innerHTML = html;
-      } else {
-        // Fallback to plain text if no markdown service
         this.prettyBodyRef.el.textContent = this.message.content;
-      }
 
       // Handle code blocks if any
       const codeBlocks = this.prettyBodyRef.el.querySelectorAll('pre code');
@@ -93,11 +84,6 @@ export class LLMMessage extends Component {
           window.hljs.highlightElement(block);
         });
       }
-    } catch (error) {
-      // Fallback to plain text on error
-      this.prettyBodyRef.el.textContent = this.message.content;
-      console.error("Error rendering message content:", error);
-    }
   }
 
   /**
