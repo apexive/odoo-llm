@@ -2,7 +2,7 @@
 <templates xml:space="preserve">
     <!-- Main Chat Dialog Template -->
     <t t-name="llm.ChatDialog" owl="1">
-        <Dialog size="'lg'" fullscreen="true" title="state.thread?.thread.name || env._t('Chat')">
+        <Dialog size="'lg'" fullscreen="true" title="state.thread?.name || env._t('Chat')">
             <div class="o_LLMChatDialog h-100 d-flex flex-column">
                 <!-- Loading State -->
                 <t t-if="state.isLoading">
@@ -53,10 +53,10 @@
                         </div>
 
                         <!-- Model Info -->
-                        <div t-if="state.thread.thread.model" class="ms-3 d-inline-flex align-items-center">
+                        <div t-if="state.thread.model" class="ms-3 d-inline-flex align-items-center">
                             <span class="badge bg-light text-dark">
                                 <i class="fa fa-robot me-1"/>
-                                <t t-esc="state.thread.thread.model.name"/>
+                                <t t-esc="state.thread.model.name"/>
                             </span>
                         </div>
                     </div>
@@ -64,8 +64,7 @@
                     <!-- Thread View -->
                     <LLMThreadView
                             className="'flex-grow-1 overflow-hidden'"
-                            record="state.thread"
-                    />
+                            record="state.thread"/>
                 </t>
             </div>
         </Dialog>
@@ -73,29 +72,8 @@
 
     <!-- Dialog Action Template -->
     <t t-name="llm.ChatDialogAction" owl="1">
-        <Dialog size="'lg'"
-                fullscreen="true"
-                title="title"
-                closed="onClose">
-            <LLMChatDialog threadId="threadId" close="() => onClose()"/>
-        </Dialog>
-    </t>
-
-    <!-- Confirm Dialog Template -->
-    <t t-name="llm.ConfirmDialog" owl="1">
-        <Dialog size="'sm'"
-                title="title"
-                closed="close">
-            <div class="modal-body" t-if="body" t-esc="body"/>
-            <t t-slot="default"/>
-            <div class="modal-footer">
-                <button class="btn btn-secondary" t-on-click="close">
-                    <t t-esc="cancelLabel || env._t('Cancel')"/>
-                </button>
-                <button class="btn btn-primary" t-on-click="confirm">
-                    <t t-esc="confirmLabel || env._t('Confirm')"/>
-                </button>
-            </div>
+        <Dialog size="'lg'" fullscreen="true" title="title">
+            <LLMChatDialog threadId="threadId"/>
         </Dialog>
     </t>
 </templates>

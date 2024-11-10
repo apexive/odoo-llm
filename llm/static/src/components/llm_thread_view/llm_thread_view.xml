@@ -2,11 +2,13 @@
 <templates xml:space="preserve">
     <t t-name="llm.ThreadView" owl="1">
         <div class="o_LLMThreadView d-flex flex-column h-100"
-             t-att-class="props.className">
+             t-att-class="props.className"
+             t-ref="container">
+
             <!-- Header -->
-            <div t-if="thread.name" class="o_LLMThreadView_header border-bottom p-3">
+            <div t-if="thread" class="o_LLMThreadView_header border-bottom p-3">
                 <div class="d-flex align-items-center justify-content-between">
-                    <!-- Title -->
+                    <!-- Title and Model -->
                     <div class="d-flex align-items-center">
                         <h6 class="mb-0" t-esc="thread.name"/>
                         <small t-if="thread.model" class="text-muted ms-2">
@@ -16,7 +18,7 @@
 
                     <!-- Actions -->
                     <div class="o_LLMThreadView_actions">
-                        <button t-if="thread.isLoading"
+                        <button t-if="state.isLoadingInitial || state.isLoadingMore"
                                 class="btn btn-link btn-sm text-muted"
                                 disabled="1">
                             <i class="fa fa-circle-o-notch fa-spin"/>
@@ -30,17 +32,17 @@
                     </div>
                 </div>
 
-                <!-- Model info -->
+                <!-- Provider Info -->
                 <div t-if="thread.model" class="mt-2 small text-muted">
                     <i class="fa fa-info-circle me-1"/>
                     <t t-esc="thread.provider.name"/>
                 </div>
             </div>
 
-            <!-- Main content -->
+            <!-- Main Content -->
             <div class="o_LLMThreadView_content flex-grow-1 d-flex flex-column">
-                <!-- Initial loading -->
-                <div t-if="isLoadingInitial"
+                <!-- Initial Loading State -->
+                <div t-if="state.isLoadingInitial"
                      class="flex-grow-1 d-flex align-items-center justify-content-center">
                     <div class="text-center text-muted">
                         <i class="fa fa-circle-o-notch fa-spin fa-2x mb-2"/>
@@ -48,49 +50,39 @@
                     </div>
                 </div>
 
-                <!-- Error state -->
-                <div t-elif="thread.hasError"
+                <!-- Error State -->
+                <div t-elif="state.hasError"
                      class="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4">
                     <div class="text-danger mb-3">
                         <i class="fa fa-exclamation-triangle fa-2x"/>
                     </div>
-                    <div class="text-danger mb-2" t-esc="thread.errorMessage || env._t('Something went wrong')"/>
-                    <button class="btn btn-outline-danger"
-                            t-on-click="_loadMessages">
+                    <div class="text-danger mb-2" t-esc="state.errorMessage || env._t('Something went wrong')"/>
+                    <button class="btn btn-outline-danger" t-on-click="_loadMessages">
                         <i class="fa fa-refresh me-1"/>
                         Try Again
                     </button>
                 </div>
 
-                <!-- Message list -->
-                <LLMMessageList t-else=""
-                                className="'flex-grow-1'"
-                                record="threadView"
-                                onMessageRetry.bind="_onMessageRetry"/>
+                <!-- Message List -->
+                <t t-elif="state.messages.length">
+                    <LLMMessageList
+                            className="'flex-grow-1'"
+                            messages="state.messages"
+                            onRetry.bind="_onMessageRetry"/>
+                </t>
+
+                <!-- Empty State -->
+                <div t-else="" class="flex-grow-1 d-flex align-items-center justify-content-center p-4">
+                    <div class="text-center text-muted">
+                        <i class="fa fa-comments-o fa-3x mb-2"/>
+                        <div>Start a conversation...</div>
+                    </div>
+                </div>
 
                 <!-- Composer -->
                 <LLMComposer
-                        record="threadView.composer"
-                        onSubmit.bind="_onMessageSubmit"
-                        onFilesPasted.bind="_onFilesPasted"/>
-
-                <!-- Typing indicator -->
-                <div t-if="currentResponse"
-                     class="o_LLMThreadView_typing position-absolute bottom-0 start-0 p-3 w-100">
-                    <div class="d-flex align-items-center text-muted small">
-                        <div class="o_LLMThreadView_typingDots me-2">
-                            <span/><span/><span/>
-                        </div>
-                        <span>Assistant is typing...</span>
-
-                        <!-- Cancel button -->
-                        <button class="btn btn-link btn-sm text-muted ms-auto"
-                                t-on-click="() => currentResponse.signal.abort()"
-                                t-att-title="env._t('Cancel response')">
-                            <i class="fa fa-times"/>
-                        </button>
-                    </div>
-                </div>
+                        record="composerState"
+                        onSubmit.bind="_onMessageSubmit"/>
             </div>
         </div>
     </t>

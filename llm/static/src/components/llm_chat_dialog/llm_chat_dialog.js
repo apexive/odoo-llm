@@ -3,8 +3,8 @@
 import { Component, useState, onWillDestroy } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
-import { LLMThreadView } from "../llm_thread_view/llm_thread_view";
 import { registry } from "@web/core/registry";
+import { LLMThreadView } from "../llm_thread_view/llm_thread_view";
 
 /**
  * Dialog wrapper component for LLM chat
@@ -48,17 +48,7 @@ export class LLMChatDialog extends Component {
                 throw new Error(this.env._t("Thread not found"));
             }
 
-            // Create thread view
-            this.state.thread = this.env.models.LLMThreadView.insert({
-                thread: {
-                    id: threadData.id,
-                    name: threadData.name,
-                    messages: threadData.messages || [],
-                    provider: threadData.provider,
-                    model: threadData.model,
-                },
-            });
-
+            this.state.thread = threadData;
             this.state.isLoading = false;
 
         } catch (error) {
@@ -87,9 +77,7 @@ export class LLMChatDialog extends Component {
      * @private
      */
     _cleanup() {
-        if (this.state.thread) {
-            this.state.thread.delete();
-        }
+        // Add cleanup if needed
     }
 
     /**
@@ -128,24 +116,46 @@ export class LLMChatDialog extends Component {
      * @private
      */
     async _onClear() {
-        this.dialog.add(ConfirmDialog, {
-            title: this.env._t("Clear Chat"),
-            body: this.env._t("Are you sure you want to clear all messages? This cannot be undone."),
-            confirm: async () => {
-                try {
-                    await this.orm.call(
-                        'llm.thread',
-                        'action_clear_messages',
-                        [[this.props.threadId]]
-                    );
-                    await this._loadThread();
-                } catch (error) {
-                    this.notification.add(
-                        this.env._t("Failed to clear messages"),
-                        { type: "danger" }
-                    );
-                }
-            },
+        const dialog = this.dialog;
+        return new Promise((resolve) => {
+            dialog.add(Dialog, {
+                title: this.env._t("Clear Chat"),
+                body: this.env._t("Are you sure you want to clear all messages? This cannot be undone."),
+                confirmLabel: this.env._t("Clear"),
+                cancelLabel: this.env._t("Cancel"),
+                technical: false,
+                size: 'md',
+                onClose: () => resolve(false),
+                buttons: [
+                    {
+                        text: this.env._t("Cancel"),
+                        click: () => resolve(false),
+                        close: true,
+                    },
+                    {
+                        text: this.env._t("Clear"),
+                        classes: 'btn-danger',
+                        click: async () => {
+                            try {
+                                await this.orm.call(
+                                    'llm.thread',
+                                    'action_clear_messages',
+                                    [[this.props.threadId]]
+                                );
+                                await this._loadThread();
+                                resolve(true);
+                            } catch (error) {
+                                this.notification.add(
+                                    this.env._t("Failed to clear messages"),
+                                    { type: "danger" }
+                                );
+                                resolve(false);
+                            }
+                        },
+                        close: true,
+                    },
+                ],
+            });
         });
     }
 }
@@ -157,51 +167,47 @@ LLMChatDialog.components = {
 };
 
 LLMChatDialog.props = {
-    threadId: {
-        type: Number,
-        required: true,
-    },
-    close: {
-        type: Function,
-        required: true,
-    },
+    threadId: { type: Number, required: true },
+    close: { type: Function, optional: true },
 };
 
 /**
- * Chat dialog action component
+ * Client action component for the chat dialog
  */
-export class LLMChatDialogAction extends Component {
+class LLMChatDialogClientAction extends Component {
     setup() {
-        this.title = this.env.config.actionTitle || this.env._t("Chat");
-        this.threadId = this.props.params?.thread_id;
-
-        if (!this.threadId) {
-            this.notification.add(
-                this.env._t("No thread specified"),
-                { type: "danger" }
-            );
-            if (this.props.close) {
-                this.props.close();
-            }
-        }
+        this.notification = useService("notification");
+        this.actionService = useService("action");
     }
 
     /**
-     * Handle dialog close
+     * @returns {string} Dialog title
      */
-    onClose() {
-        if (this.props.close) {
-            this.props.close();
-        }
+    get title() {
+        return this.props.action.name || this.env._t("Chat");
+    }
+
+    /**
+     * @returns {number|undefined} Thread ID from action params
+     */
+    get threadId() {
+        return this.props.action.params?.thread_id;
     }
 }
 
-LLMChatDialogAction.template = "llm.ChatDialogAction";
-LLMChatDialogAction.components = {
+LLMChatDialogClientAction.template = 'llm.ChatDialogAction';
+LLMChatDialogClientAction.components = {
     Dialog,
     LLMChatDialog,
 };
 
-// Register components and action
-registry.category("components").add("LLMChatDialog", LLMChatDialog);
-registry.category("actions").add("llm_chat_dialog", LLMChatDialogAction);
+// Props for client action
+LLMChatDialogClientAction.props = {
+    action: Object,
+    actionId: { type: [Number, Boolean], optional: true },
+};
+
+// Register the client action
+registry.category("actions").add("llm_chat_dialog", LLMChatDialogClientAction);
+
+export { LLMChatDialogClientAction };

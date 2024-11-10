@@ -84,8 +84,14 @@ registerModel({
         errorMessage: attr({
             default: null,
         }),
-        provider: one('llm.provider'),
-        model: one('llm.model'),
+        // Changed from one('llm.provider') to attr() since we'll store provider data as attributes
+        provider: attr({
+            default: null,
+        }),
+        // Changed from one('llm.model') to attr() since we'll store model data as attributes
+        model: attr({
+            default: null,
+        }),
         composer: one('LLMComposer', {
             inverse: 'thread',
         }),
@@ -100,6 +106,9 @@ registerModel({
                 return this.messages.length === 0;
             },
             default: true,
+        }),
+        threadViews: many('LLMThreadView', {
+            inverse: 'thread',
         }),
     },
     recordMethods: {
@@ -120,7 +129,10 @@ registerModel({
                     thread: this,
                 })));
 
+                // Update provider and model data
                 this.update({
+                    provider: result.provider,
+                    model: result.model,
                     hasError: false,
                     errorMessage: null,
                 });
@@ -178,6 +190,9 @@ registerModel({
             default: null,
         }),
         thread: one('LLMThread', {
+            inverse: 'composer',
+        }),
+        threadView: one('LLMThreadView', {
             inverse: 'composer',
         }),
         isEmpty: attr({
