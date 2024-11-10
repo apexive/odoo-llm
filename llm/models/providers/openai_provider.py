@@ -10,17 +10,17 @@ class OpenAIProvider(models.Model):
 
         return OpenAI(api_key=self.api_key, base_url=self.api_base or None)
 
-    def chat(self, messages, model=None, stream=False):
-        client = self.get_client()
-        model = self.get_model(model, "chat")
-        response = client.chat.completions.create(
-            model=model.name,
-            messages=messages,
-            stream=stream,
-        )
-        if not stream:
-            return response.choices[0].message.content
-        return response
+    # def chat(self, messages, model=None, stream=False):
+    #     client = self.get_client()
+    #     model = self.get_model(model, "chat")
+    #     response = client.chat.completions.create(
+    #         model=model.name,
+    #         messages=messages,
+    #         stream=stream,
+    #     )
+    #     if not stream:
+    #         return response.choices[0].message.content
+    #     return response
 
     def embedding(self, texts, model=None):
         client = self.get_client()

@@ -48,26 +48,27 @@ class LLMThread(models.Model):
 
     def send_message(self, content, role="user"):
         """Send a new message in the thread"""
-        self.env["llm.message"].create(
-            {
-                "thread_id": self.id,
-                "content": content,
-                "role": role,
-            }
-        )
+        # Save user message
+        self.env["llm.message"].create({
+            "thread_id": self.id,
+            "content": content,
+            "role": role,
+        })
+
         if role == "user":
             # Get AI response
             messages = self.get_chat_messages()
-            response = self.provider_id.chat(messages)
+            print(messages)
+            # Call chat() directly and get first (only) value from generator
+            response = self.model_id.chat(messages, stream=False)
+            print(response)
 
             # Save AI response
-            self.env["llm.message"].create(
-                {
-                    "thread_id": self.id,
-                    "content": response,
-                    "role": "assistant",
-                }
-            )
+            self.env["llm.message"].create({
+                "thread_id": self.id,
+                "content": response,
+                "role": "assistant",
+            })
         return True
 
     def action_open_chat(self):

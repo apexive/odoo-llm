@@ -11,11 +11,3 @@ class LLMThreadController(http.Controller):
     def post_message(self, thread_id, content, role):
         thread = request.env['llm.thread'].browse(int(thread_id))
         return thread.send_message(content, role)
-
-    @http.route('/llm/thread/get_response', type='json', auth='user')
-    def get_response(self, thread_id, content):
-        thread = request.env['llm.thread'].browse(int(thread_id))
-        return thread.provider_id.chat([{
-            'role': 'user',
-            'content': content
-        }])

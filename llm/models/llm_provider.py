@@ -24,26 +24,51 @@ class LLMProviderBase(models.AbstractModel):
     def get_client(self):
         raise NotImplementedError()
 
-    def chat(self, messages, model=None, stream=False, **kwargs):
+    def chat(self, messages, model=None, stream=False):
+        print("BASE PROVIDER")
         client = self.get_client()
+        model = self.get_model(model, model_use="chat")
 
+        print("PROVIDE")
+        print(messages)
         response = client.chat(
             messages=messages,
             stream=stream,
-            model=self.get_model(model, model_use="chat").name, **kwargs)
+            model=model.name,
+        )
+        print(response)
+
         if not stream:
-            print(response)
-            yield response
-            return
-
-        for chunk in response:
-
-            if chunk.delta is not None:
-                print(chunk.delta)
-                yield {
-                    "role": "asistant",
-                    "content": response.delta,
-                }
+            # For non-streaming, extract the content from the response
+            # Handle different provider response formats
+            if hasattr(response, 'choices') and response.choices:
+                # OpenAI-style response
+                return response.choices[0].message.content
+            elif hasattr(response, 'content'):
+                # Anthropic-style response
+                return response.content[0].text
+            elif hasattr(response, 'message'):
+                return response.message["content"]
+            else:
+                # Fallback for other formats - convert response to string
+                return str(response)
+        else:
+            # For streaming, yield chunks as they come
+            for chunk in response:
+                if hasattr(chunk, 'choices') and chunk.choices:
+                    # OpenAI-style chunks
+                    if chunk.choices[0].delta.content:
+                        yield chunk.choices[0].delta.content
+                elif hasattr(chunk, 'delta'):
+                    # Alternative format
+                    if chunk.delta:
+                        yield chunk.delta
+                elif hasattr(chunk, 'text'):
+                    # Anthropic-style chunks
+                    yield chunk.text
+                else:
+                    # Fallback - convert chunk to string
+                    yield str(chunk)
 
     def embedding(self, texts, model=None):
         client = self.get_client()
@@ -157,7 +182,9 @@ class LLMProvider(models.Model):
         return self.provider_impl_id.get_client()
 
     def chat(self, messages, model=None, stream=False):
-        return self.provider_impl_id.chat(messages, model, stream)
+        print("IN THE CHAIN")
+        print(stream)
+        return self.provider_impl_id.chat(messages, model=model, stream=stream)
 
     def embedding(self, texts, model=None):
         return self.provider_impl_id.embedding(texts, model)

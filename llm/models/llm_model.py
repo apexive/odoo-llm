@@ -47,6 +47,7 @@ class LLMModel(models.Model):
         return records
 
     def chat(self, messages, stream=False):
+        print("MODEL")
         """Send chat messages using this model"""
         return self.provider_id.chat(messages, model=self, stream=stream)
 

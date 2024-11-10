@@ -6,8 +6,10 @@ import ollama
 class OllamaProvider(models.Model):
     _name = "llm.provider.ollama"
     _inherit = "llm.provider.base"
+    _client = None
 
     def get_client(self):
+        return ollama.Client(host=self.api_base)
         if not self._client:
             self._client = ollama.Client(host=self.api_base)
         return self._client
@@ -24,3 +26,4 @@ class OllamaProvider(models.Model):
             {"name": model["name"], "details": model}
             for model in response.json().get("models", [])
         ]
+

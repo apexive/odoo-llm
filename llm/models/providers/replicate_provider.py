@@ -41,22 +41,22 @@ class ReplicateProvider(models.Model):
 
         return replicate.Client(api_token=self.api_key)
 
-    def chat(self, messages, model=None, stream=False):
-        client = self.get_client()
-        model = self.get_model(model, "chat")
-
-        # Format messages for Replicate
-        # Most Replicate models expect a simple prompt string
-        prompt = "\n".join(f"{msg['role']}: {msg['content']}" for msg in messages)
-
-        response = client.run(model.name, input={"prompt": prompt})
-
-        if not stream:
-            # Replicate responses can vary by model, handle common formats
-            if isinstance(response, list) or isinstance(response, tuple):
-                return "".join(response)
-            return str(response)
-        return response
+    # def chat(self, messages, model=None, stream=False):
+    #     client = self.get_client()
+    #     model = self.get_model(model, "chat")
+    #
+    #     # Format messages for Replicate
+    #     # Most Replicate models expect a simple prompt string
+    #     prompt = "\n".join(f"{msg['role']}: {msg['content']}" for msg in messages)
+    #
+    #     response = client.run(model.name, input={"prompt": prompt})
+    #
+    #     if not stream:
+    #         # Replicate responses can vary by model, handle common formats
+    #         if isinstance(response, list) or isinstance(response, tuple):
+    #             return "".join(response)
+    #         return str(response)
+    #     return response
 
     def embedding(self, texts, model=None):
         client = self.get_client()

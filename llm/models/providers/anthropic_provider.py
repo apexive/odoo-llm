@@ -10,37 +10,37 @@ class AnthropicProvider(models.Model):
 
         return Anthropic(api_key=self.api_key)
 
-    def chat(self, messages, model=None, stream=False):
-        client = self.get_client()
-        model = self.get_model(model, "chat")
-
-        # Convert messages to Anthropic format
-        formatted_messages = []
-        for msg in messages:
-            if msg["role"] == "user":
-                formatted_messages.append({"role": "user", "content": msg["content"]})
-            elif msg["role"] == "assistant":
-                formatted_messages.append(
-                    {"role": "assistant", "content": msg["content"]}
-                )
-            elif msg["role"] == "system":
-                # Anthropic handles system messages differently - prepend to first user message
-                if formatted_messages and formatted_messages[0]["role"] == "user":
-                    formatted_messages[0]["content"] = (
-                        f"{msg['content']}\n\n{formatted_messages[0]['content']}"
-                    )
-                else:
-                    formatted_messages.append(
-                        {"role": "user", "content": msg["content"]}
-                    )
-
-        response = client.messages.create(
-            model=model.name, messages=formatted_messages, stream=stream
-        )
-
-        if not stream:
-            return response.content[0].text
-        return response
+    # def chat(self, messages, model=None, stream=False):
+    #     client = self.get_client()
+    #     model = self.get_model(model, "chat")
+    #
+    #     # Convert messages to Anthropic format
+    #     formatted_messages = []
+    #     for msg in messages:
+    #         if msg["role"] == "user":
+    #             formatted_messages.append({"role": "user", "content": msg["content"]})
+    #         elif msg["role"] == "assistant":
+    #             formatted_messages.append(
+    #                 {"role": "assistant", "content": msg["content"]}
+    #             )
+    #         elif msg["role"] == "system":
+    #             # Anthropic handles system messages differently - prepend to first user message
+    #             if formatted_messages and formatted_messages[0]["role"] == "user":
+    #                 formatted_messages[0]["content"] = (
+    #                     f"{msg['content']}\n\n{formatted_messages[0]['content']}"
+    #                 )
+    #             else:
+    #                 formatted_messages.append(
+    #                     {"role": "user", "content": msg["content"]}
+    #                 )
+    #
+    #     response = client.messages.create(
+    #         model=model.name, messages=formatted_messages, stream=stream
+    #     )
+    #
+    #     if not stream:
+    #         return response.content[0].text
+    #     return response
 
     def embedding(self, texts, model=None):
         client = self.get_client()
