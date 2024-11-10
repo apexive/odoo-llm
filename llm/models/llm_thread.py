@@ -4,7 +4,6 @@ from odoo import api, fields, models
 class LLMThread(models.Model):
     _name = "llm.thread"
     _description = "LLM Chat Thread"
-    _inherit = ["mail.thread"]
     _order = "write_date DESC"
 
     name = fields.Char(string="Title", required=True)

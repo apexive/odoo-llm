@@ -18,7 +18,7 @@
     "website": "https://github.com/smartops-aero/flight",
     "category": "Technical",
     "version": "16.0.1.0.0",
-    "depends": ["mail"],
+    "depends": ["base"],
     "data": [
         "security/llm_security.xml",
         "security/ir.model.access.csv",
