@@ -1,13 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
         <!-- Define LLM Manager group -->
         <record id="group_llm_manager" model="res.groups">
             <field name="name">LLM Manager</field>
             <field
-        name="category_id"
-        ref="base.module_category_administration"
-      />
+      name="category_id"
+      ref="base.module_category_administration"
+    />
             <field name="implied_ids" eval="[(4, ref('base.group_user'))]" />
             <field name="users" eval="[(4, ref('base.user_admin'))]" />
         </record>
@@ -58,5 +57,4 @@
             <field name="perm_unlink" eval="True" />
             <field name="groups" eval="[(4, ref('group_llm_manager'))]" />
         </record>
-    </data>
 </odoo>

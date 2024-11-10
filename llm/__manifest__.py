@@ -18,11 +18,15 @@
     "website": "https://github.com/smartops-aero/flight",
     "category": "Technical",
     "version": "16.0.1.0.0",
-    "depends": ["base"],
+    "depends": ["mail"],
     "data": [
+        "security/llm_security.xml",
         "security/ir.model.access.csv",
         "views/llm_views.xml",
         "views/llm_thread_views.xml",
     ],
+    "external_dependencies": {
+        "python": ["openai", "replicate", "ollama", "anthropic"],
+    },
     "installable": True,
 }

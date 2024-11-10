@@ -35,12 +35,9 @@ class OllamaProvider(models.Model):
 
         return OllamaClient(base_url=self.api_base)
 
-    def chat(self, messages, stream=False):
+    def chat(self, messages, model=None, stream=False):
         client = self.get_client()
-        model = self.model_ids.filtered(
-            lambda m: m.is_default and m.model_use == "chat"
-        )[0]
-
+        model = self.get_model(model, "chat")
         response = client.chat_completions(
             model=model.name, messages=messages, stream=stream
         )
@@ -49,12 +46,9 @@ class OllamaProvider(models.Model):
             return response["message"]["content"]
         return response
 
-    def embedding(self, texts):
+    def embedding(self, texts, model=None):
         client = self.get_client()
-        model = self.model_ids.filtered(
-            lambda m: m.is_default and m.model_use == "embedding"
-        )[0]
-
+        model = self.get_model(model, "embedding")
         response = client.embeddings(model=model.name, texts=texts)
         return [r["embedding"] for r in response["data"]]
 

@@ -1,4 +1,13 @@
+# llm/models/llm_model.py
+
 from odoo import api, fields, models
+
+MODEL_USE = [
+    ("embedding", "Embedding"),
+    ("completion", "Completion"),
+    ("chat", "Chat"),
+    ("multimodal", "Multimodal"),
+]
 
 
 class LLMModel(models.Model):
@@ -9,16 +18,11 @@ class LLMModel(models.Model):
     name = fields.Char(required=True)
     provider_id = fields.Many2one("llm.provider", required=True, ondelete="cascade")
     model_use = fields.Selection(
-        [
-            ("embedding", "Embedding"),
-            ("completion", "Completion"),
-            ("chat", "Chat"),
-            ("multimodal", "Multimodal"),
-        ],
+        MODEL_USE,
         required=True,
     )
-    is_default = fields.Boolean(default=False)
-    is_active = fields.Boolean(default=True)
+    default = fields.Boolean(default=False)
+    active = fields.Boolean(default=True)
 
     # Model details
     details = fields.Json()
@@ -30,14 +34,22 @@ class LLMModel(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         for record in records:
-            if record.is_default:
+            if record.default:
                 # Ensure only one default per provider/use combo
                 self.search(
                     [
                         ("provider_id", "=", record.provider_id.id),
                         ("model_use", "=", record.model_use),
-                        ("is_default", "=", True),
+                        ("default", "=", True),
                         ("id", "!=", record.id),
                     ]
-                ).write({"is_default": False})
+                ).write({"default": False})
         return records
+
+    def chat(self, messages, stream=False):
+        """Send chat messages using this model"""
+        return self.provider_id.chat(messages, model=self, stream=stream)
+
+    def embedding(self, texts):
+        """Generate embeddings using this model"""
+        return self.provider_id.embedding(texts, model=self)

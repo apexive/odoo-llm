@@ -11,11 +11,9 @@ class AnthropicProvider(models.Model):
 
         return Anthropic(api_key=self.api_key)
 
-    def chat(self, messages, stream=False):
+    def chat(self, messages, model=None, stream=False):
         client = self.get_client()
-        model = self.model_ids.filtered(
-            lambda m: m.is_default and m.model_use == "chat"
-        )[0]
+        model = self.get_model(model, "chat")
 
         # Convert messages to Anthropic format
         formatted_messages = []
@@ -45,12 +43,9 @@ class AnthropicProvider(models.Model):
             return response.content[0].text
         return response
 
-    def embedding(self, texts):
+    def embedding(self, texts, model=None):
         client = self.get_client()
-        model = self.model_ids.filtered(
-            lambda m: m.is_default and m.model_use == "embedding"
-        )[0]
-
+        model = self.get_model(model, "embedding")
         response = client.embeddings.create(model=model.name, input=texts)
         return [r.embedding for r in response.data]
 

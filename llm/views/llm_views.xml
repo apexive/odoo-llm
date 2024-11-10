@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <!-- Provider Form View -->
-    <record id="llm_provider_view_form" model="ir.ui.view">
-        <field name="name">llm.provider.view.form</field>
-        <field name="model">llm.provider</field>
+    <!-- Model Form View -->
+    <record id="llm_model_view_form" model="ir.ui.view">
+        <field name="name">llm.model.view.form</field>
+        <field name="model">llm.model</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
@@ -23,118 +23,6 @@
                     </div>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" placeholder="Provider Name" />
-                        </h1>
-                    </div>
-                    <group>
-                        <group>
-                            <field name="provider" />
-                            <field
-                name="company_id"
-                groups="base.group_multi_company"
-              />
-                        </group>
-                        <group>
-                            <field name="api_key" password="True" />
-                            <field
-                name="api_base"
-                placeholder="http://localhost:11434"
-              />
-                        </group>
-                    </group>
-                    <notebook>
-                        <page string="Models" name="models">
-                            <field name="model_ids">
-                                <tree editable="bottom">
-                                    <field name="name" />
-                                    <field name="model_use" />
-                                    <field name="is_default" />
-                                    <field name="is_active" />
-                                    <field
-                    name="details"
-                    widget="json_inline"
-                  />
-                                </tree>
-                            </field>
-                        </page>
-                    </notebook>
-                </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids" />
-                    <field name="activity_ids" />
-                    <field name="message_ids" />
-                </div>
-            </form>
-        </field>
-    </record>
-
-    <!-- Provider Tree View -->
-    <record id="llm_provider_view_tree" model="ir.ui.view">
-        <field name="name">llm.provider.view.tree</field>
-        <field name="model">llm.provider</field>
-        <field name="arch" type="xml">
-            <tree>
-                <field name="name" />
-                <field name="provider" />
-                <field name="company_id" groups="base.group_multi_company" />
-                <field name="active" invisible="1" />
-            </tree>
-        </field>
-    </record>
-
-    <!-- Provider Search View -->
-    <record id="llm_provider_view_search" model="ir.ui.view">
-        <field name="name">llm.provider.view.search</field>
-        <field name="model">llm.provider</field>
-        <field name="arch" type="xml">
-            <search>
-                <field name="name" />
-                <field name="provider" />
-                <separator />
-                <filter
-          string="Archived"
-          name="inactive"
-          domain="[('active', '=', False)]"
-        />
-                <group expand="0" string="Group By">
-                    <filter
-            string="Provider Type"
-            name="group_by_provider"
-            context="{'group_by': 'provider'}"
-          />
-                    <filter
-            string="Company"
-            name="group_by_company"
-            context="{'group_by': 'company_id'}"
-          />
-                </group>
-            </search>
-        </field>
-    </record>
-
-    <!-- Model Form View -->
-    <record id="llm_model_view_form" model="ir.ui.view">
-        <field name="name">llm.model.view.form</field>
-        <field name="model">llm.model</field>
-        <field name="arch" type="xml">
-            <form>
-                <sheet>
-                    <div class="oe_button_box" name="button_box">
-                        <button
-              name="toggle_active"
-              type="object"
-              class="oe_stat_button"
-              icon="fa-archive"
-            >
-                            <field
-                name="is_active"
-                widget="boolean_button"
-                options="{'terminology': 'archive'}"
-              />
-                        </button>
-                    </div>
-                    <div class="oe_title">
-                        <h1>
                             <field name="name" placeholder="Model Name" />
                         </h1>
                     </div>
@@ -142,7 +30,7 @@
                         <group>
                             <field name="provider_id" />
                             <field name="model_use" />
-                            <field name="is_default" />
+                            <field name="default" />
                         </group>
                         <group>
                             <field name="details" widget="json_inline" />
@@ -169,8 +57,8 @@
                 <field name="name" />
                 <field name="provider_id" />
                 <field name="model_use" />
-                <field name="is_default" />
-                <field name="is_active" />
+                <field name="default" />
+                <field name="active" invisible="1" />
             </tree>
         </field>
     </record>
@@ -188,12 +76,12 @@
                 <filter
           string="Default Models"
           name="default"
-          domain="[('is_default', '=', True)]"
+          domain="[('default', '=', True)]"
         />
                 <filter
           string="Archived"
           name="inactive"
-          domain="[('is_active', '=', False)]"
+          domain="[('active', '=', False)]"
         />
                 <group expand="0" string="Group By">
                     <filter
@@ -211,6 +99,102 @@
         </field>
     </record>
 
+    <!-- Provider Form View -->
+    <!-- Provider Form View -->
+    <record id="llm_provider_view_form" model="ir.ui.view">
+        <field name="name">llm.provider.view.form</field>
+        <field name="model">llm.provider</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+            name="fetch_models"
+            string="Fetch Models"
+            type="object"
+            class="oe_highlight"
+            confirm="This will fetch available models from the provider. Continue?"
+          />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+              name="toggle_active"
+              type="object"
+              class="oe_stat_button"
+              icon="fa-archive"
+            >
+                            <field
+                name="active"
+                widget="boolean_button"
+                options="{'terminology': 'archive'}"
+              />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field
+                name="name"
+                placeholder="Provider Name"
+              /></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="provider" />
+                            <field
+                name="company_id"
+                groups="base.group_multi_company"
+              />
+                        </group>
+                        <group>
+                            <field name="api_key" password="True" />
+                            <field
+                name="api_base"
+                placeholder="http://localhost:11434"
+              />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Models" name="models">
+                            <field
+                name="model_ids"
+                context="{'active_test': False}"
+              >
+                                <tree editable="bottom">
+                                    <field name="name" />
+                                    <field name="model_use" />
+                                    <field name="default" />
+                                    <field name="active" />
+                                    <field
+                    name="details"
+                    widget="json_inline"
+                  />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" />
+                    <field name="activity_ids" />
+                    <field name="message_ids" />
+                </div>
+            </form>
+        </field>
+    </record>
+    <!-- Model Action with active_test context -->
+    <record id="llm_model_action" model="ir.actions.act_window">
+        <field name="name">LLM Models</field>
+        <field name="res_model">llm.model</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'active_test': False}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No models found!
+            </p>
+            <p>
+                Models will be automatically created when you configure a provider.
+            </p>
+        </field>
+    </record>
     <!-- Actions -->
     <record id="llm_provider_action" model="ir.actions.act_window">
         <field name="name">LLM Providers</field>
@@ -226,20 +210,6 @@
         </field>
     </record>
 
-    <record id="llm_model_action" model="ir.actions.act_window">
-        <field name="name">LLM Models</field>
-        <field name="res_model">llm.model</field>
-        <field name="view_mode">tree,form</field>
-        <field name="context">{'search_default_active': 1}</field>
-        <field name="help" type="html">
-            <p class="o_view_nocontent_smiling_face">
-                No models found!
-            </p>
-            <p>
-                Models will be automatically created when you configure a provider.
-            </p>
-        </field>
-    </record>
 
     <!-- Menus -->
     <menuitem id="menu_llm_root" name="LLM" sequence="100" />

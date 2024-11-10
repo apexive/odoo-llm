@@ -11,12 +11,11 @@ class OpenAIProvider(models.Model):
 
         return OpenAI(api_key=self.api_key, base_url=self.api_base or None)
 
-    def chat(self, messages, stream=False):
+    def chat(self, messages, model=None, stream=False):
         client = self.get_client()
+        model = self.get_model(model, "chat")
         response = client.chat.completions.create(
-            model=self.model_ids.filtered(
-                lambda m: m.is_default and m.model_use == "chat"
-            )[0].name,
+            model=model.name,
             messages=messages,
             stream=stream,
         )
@@ -24,10 +23,15 @@ class OpenAIProvider(models.Model):
             return response.choices[0].message.content
         return response
 
-    def embedding(self, texts):
+    def embedding(self, texts, model=None):
         client = self.get_client()
-        model = self.model_ids.filtered(
-            lambda m: m.is_default and m.model_use == "embedding"
-        )[0]
+        model = self.get_model(model, "embedding")
         response = client.embeddings.create(model=model.name, input=texts)
         return [r.embedding for r in response.data]
+
+    def list_models(self):
+        client = self.get_client()
+        models = client.models.list()
+        return [
+            {"name": model.id, "details": model.model_dump()} for model in models.data
+        ]
