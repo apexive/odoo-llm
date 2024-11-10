@@ -27,7 +27,8 @@ export class LLMThreadView extends Component {
       isLoadingMore: false,
       hasError: false,
       errorMessage: null,
-      currentResponse: null
+      currentResponse: null,
+      thread: null
     });
 
     // Composer state
@@ -38,12 +39,43 @@ export class LLMThreadView extends Component {
       error: null
     });
 
-    // Get record ID from props
-    this.threadId = this.props.record.data.id;
+    // Get thread ID from props or params
+    this.threadId = this._getThreadId();
 
     // Setup lifecycle hooks
-    onMounted(() => this._loadMessages());
+    if (this.threadId) {
+      onMounted(() => this._loadMessages());
+    } else {
+      this.state.isLoadingInitial = false;
+      this.state.hasError = true;
+      this.state.errorMessage = "No thread ID provided";
+    }
+
     onWillDestroy(() => this._cleanup());
+  }
+
+  /**
+   * Get thread ID from props or params
+   * @private
+   * @returns {number|null}
+   */
+  _getThreadId() {
+    // Try to get ID from record props
+    if (this.props.record?.data?.id) {
+      return this.props.record.data.id;
+    }
+
+    // Try to get ID from direct props
+    if (this.props.threadId) {
+      return this.props.threadId;
+    }
+
+    // Try to get ID from action params
+    if (this.env.action?.params?.thread_id) {
+      return this.env.action.params.thread_id;
+    }
+
+    return null;
   }
 
   /**
@@ -62,7 +94,7 @@ export class LLMThreadView extends Component {
       });
 
       this.state.messages = data.messages || [];
-      this.thread = data;
+      this.state.thread = data;
 
     } catch (error) {
       this.state.hasError = true;
@@ -135,6 +167,8 @@ LLMThreadView.components = { LLMMessageList, LLMComposer };
 // Define props including standard widget props
 LLMThreadView.props = {
   ...standardWidgetProps,
+  record: { type: Object, optional: true },
+  threadId: { type: Number, optional: true },
   className: { type: String, optional: true }
 };
 
