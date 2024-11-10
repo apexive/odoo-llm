@@ -1,103 +1,124 @@
 /** @odoo-module **/
 
-import { Component } from "@odoo/owl";
-import { useComponentToModel } from "@mail/component_hooks/use_component_to_model";
-import { useUpdate } from "@mail/component_hooks/use_update";
+import { Component, onWillDestroy } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { useUpdate } from "@web/core/utils/update";
+import { LLMMessageList } from "../llm_message_list/llm_message_list";
+import { LLMComposer } from "../llm_composer/llm_composer";
+import { ThreadViewModel } from "../models";
+import { ErrorBoundary } from "@web/core/errors/error_boundary";
 
 export class LLMThreadView extends Component {
   setup() {
     super.setup();
-    useComponentToModel({ fieldName: "component" });
+    this.rpc = useService("rpc");
+    this.notification = useService("notification");
+
     useUpdate({ func: () => this._update() });
+
+    // Cleanup on destroy
+    onWillDestroy(() => {
+      if (this.threadView) {
+        this.threadView.cleanup();
+      }
+    });
   }
 
-  /**
-   * @returns {LLMThreadView}
-   */
   get threadView() {
     return this.props.record;
   }
 
-  /**
-   * Handler for new messages
-   * @private
-   */
-  _update() {
-    if (!this.threadView || !this.threadView.thread) {
-      return;
-    }
+  async _update() {
+    if (!this.threadView?.thread) return;
 
-    // Auto-load messages if needed
     if (!this.threadView.hasLoadedMessages) {
-      this.threadView.thread.loadMessages();
-      this.threadView.update({ hasLoadedMessages: true });
+      try {
+        await this.threadView.thread.loadMessages();
+        this.threadView.update({ hasLoadedMessages: true });
+      } catch (error) {
+        this.notification.notify({
+          title: "Error",
+          message: error.message || "Failed to load messages",
+          type: "danger"
+        });
+      }
     }
   }
 
-  /**
-   * Handler for message submission
-   * @param {String} content
-   */
   async _onMessageSubmit(content) {
-    if (!this.threadView?.thread) {
-      return;
-    }
+    if (!this.threadView?.thread) return;
 
     const thread = this.threadView.thread;
+    const composer = this.threadView.composer;
 
-    // Update composer state
-    this.threadView.composer.update({
-      isDisabled: true,
-      textInputContent: "",
-    });
+    composer.disable();
+    composer.clearError();
 
     try {
-      // Add user message
-      await thread.postMessage({
-        content: content,
-        role: "user",
-      });
+      // Send user message
+      await thread.postMessage(content, "user");
 
-      // Start AI response
+      // Get and send AI response
       const response = await thread.getAIResponse(content);
+      await thread.postMessage(response, "assistant");
 
-      // Add AI response
-      await thread.postMessage({
-        content: response,
-        role: "assistant",
+      // Clear composer and re-enable
+      composer.enable();
+      composer.update({
+        textInputContent: "",
+        shouldFocus: true
       });
     } catch (error) {
-      this.threadView.update({
-        hasError: true,
-        errorMessage: error.message || "Failed to get response",
-      });
-    } finally {
-      // Re-enable composer
-      this.threadView.composer.update({
-        isDisabled: false,
-        shouldFocus: true,
+      composer.enable();
+      composer.setError(error.message || "Failed to send message");
+
+      this.notification.notify({
+        title: "Error",
+        message: error.message || "Failed to send message",
+        type: "danger"
       });
     }
   }
 
-  /**
-   * Retry loading messages
-   */
-  _onRetryLoad() {
-    if (!this.threadView?.thread) {
-      return;
+  async _onRetryMessage(messageId) {
+    const message = this.threadView.thread.messages.get(messageId);
+    if (!message) return;
+
+    message.setRetrying();
+
+    try {
+      await this._onMessageSubmit(message.content);
+      message.setSuccess();
+    } catch (error) {
+      message.setError(error.message);
     }
-    this.threadView.update({ hasError: false });
-    this.threadView.thread.loadMessages();
+  }
+
+  _onRetryLoad() {
+    if (!this.threadView?.thread) return;
+
+    this.threadView.update({
+      hasError: false,
+      errorMessage: ""
+    });
+
+    this.threadView.thread.loadMessages().catch(error => {
+      this.threadView.update({
+        hasError: true,
+        errorMessage: error.message || "Failed to load messages"
+      });
+    });
   }
 }
 
-Object.assign(LLMThreadView, {
-  components: {
-    LLMMessageList: () =>
-      import("@llm/components/llm_message_list/llm_message_list.js"),
-    LLMComposer: () => import("@llm/components/llm_composer/llm_composer.js"),
-  },
-  props: { record: Object },
-  template: "llm.ThreadView",
-});
+LLMThreadView.components = {
+  LLMMessageList,
+  LLMComposer,
+  ErrorBoundary
+};
+
+LLMThreadView.template = "llm.ThreadView";
+LLMThreadView.props = {
+  record: Object,
+  className: { type: String, optional: true },
+};

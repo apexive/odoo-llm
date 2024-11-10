@@ -1,21 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="llm.ChatDialog" owl="1">
-        <Dialog title="props.name" size="'lg'">
-            <div class="o_LLMChatDialog" style="height: 600px;">
-                <t t-if="threadView">
-                    <LLMThreadView record="threadView"/>
-                </t>
-                <t t-else="">
-                    <div class="d-flex align-items-center justify-content-center h-100">
-                        <i class="fa fa-circle-o-notch fa-spin me-2"/>
-                        Loading chat...
-                    </div>
-                </t>
-            </div>
-            <t t-set-slot="footer">
-                <button class="btn btn-secondary" t-on-click="close">Close</button>
-            </t>
+    <t t-name="llm.ChatDialogAction" owl="1">
+        <Dialog title="title" size="'lg'">
+            <LLMChatDialog
+                    threadId="threadId"
+                    close="() => onClose()"/>
         </Dialog>
+    </t>
+
+    <t t-name="llm.ChatDialog" owl="1">
+        <div class="o_LLMChatDialog" style="height: 600px;">
+            <t t-if="threadView">
+                <LLMThreadView record="threadView"/>
+            </t>
+            <t t-else="">
+                <div class="d-flex align-items-center justify-content-center h-100">
+                    <i class="fa fa-circle-o-notch fa-spin me-2"/>
+                    Loading chat...
+                </div>
+            </t>
+        </div>
     </t>
 </templates>

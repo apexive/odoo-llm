@@ -1,56 +1,95 @@
 /** @odoo-module **/
 
-import { Component } from "@odoo/owl";
-import { useRef } from "@odoo/owl";
-import { markdownToHtml } from "@web/core/utils/markdown"; // Assuming Odoo provides markdown utils
+import { Component, useRef } from "@odoo/owl";
+import { markdownToHtml } from "@web/core/utils/markdown";
+import { useService } from "@web/core/utils/hooks";
 
 export class LLMMessage extends Component {
   setup() {
     super.setup();
     this.contentRef = useRef("content");
     this.prettyBodyRef = useRef("prettyBody");
+    this.notification = useService("notification");
   }
 
-  /**
-   * @returns {boolean}
-   */
+  get message() {
+    return this.props.message;
+  }
+
   get isUserMessage() {
-    return this.props.message.role === "user";
+    return this.message.role === "user";
   }
 
-  /**
-   * @returns {string}
-   */
   get authorName() {
-    if (this.isUserMessage) {
-      return this.env.session.name;
-    }
-    return this.props.message.author || "Assistant";
+    return this.isUserMessage ?
+        this.env.session.name :
+        (this.message.author || "Assistant");
   }
 
-  /**
-   * @returns {string}
-   */
   get formattedDate() {
-    if (!this.props.message.timestamp) {
+    if (!this.message.timestamp) return "";
+
+    try {
+      return new Date(this.message.timestamp).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    } catch (error) {
       return "";
     }
-    return new Date(this.props.message.timestamp).toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   }
 
-  /**
-   * Handles markdown content updates
-   */
+  get statusClass() {
+    switch (this.message.status) {
+      case 'sending':
+        return 'text-muted';
+      case 'error':
+        return 'text-danger';
+      case 'sent':
+      default:
+        return '';
+    }
+  }
+
+  get showRetry() {
+    return this.message.status === 'error';
+  }
+
   async onContentMounted() {
-    if (this.contentRef.el && this.props.message.content) {
-      const html = await markdownToHtml(this.props.message.content);
+    if (!this.contentRef.el || !this.prettyBodyRef.el || !this.message.content) {
+      return;
+    }
+
+    try {
+      const html = await markdownToHtml(this.message.content);
       if (this.prettyBodyRef.el) {
         this.prettyBodyRef.el.innerHTML = html;
+
+        // Add syntax highlighting if needed
+        if (window.Prism) {
+          this.prettyBodyRef.el.querySelectorAll('pre code').forEach((block) => {
+            window.Prism.highlightElement(block);
+          });
+        }
+      }
+    } catch (error) {
+      this.notification.notify({
+        title: "Error",
+        message: "Failed to render message content",
+        type: "danger"
+      });
+
+      // Fallback to plain text
+      if (this.prettyBodyRef.el) {
+        this.prettyBodyRef.el.textContent = this.message.content;
       }
     }
+  }
+
+  onRetryClick() {
+    this.env.messageBus.trigger('message-retry', {
+      messageId: this.message.id
+    });
   }
 }
 
@@ -59,12 +98,14 @@ LLMMessage.props = {
   message: {
     type: Object,
     shape: {
-      id: String,
+      id: [String, Number],
       content: String,
       role: String,
       author: { type: String, optional: true },
       timestamp: { type: String, optional: true },
-    },
+      status: { type: String, optional: true },
+      error: { type: String, optional: true }
+    }
   },
   className: { type: String, optional: true },
 };
