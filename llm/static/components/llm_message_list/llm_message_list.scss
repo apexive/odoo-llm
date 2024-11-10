@@ -1,0 +1,76 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_LLMMessageList {
+  height: 100%;
+  max-height: var(--LLMMessageList-max-height, 600px);
+}
+
+.o_LLMMessageList_newMessages {
+  z-index: 1;
+  cursor: pointer;
+}
+
+.o_LLMMessageList_loading,
+.o_LLMMessageList_loadMore {
+  color: var(--o-gray-600, #{$gray-600});
+  font-size: $font-size-sm;
+}
+
+// ------------------------------------------------------------------
+// Animation
+// ------------------------------------------------------------------
+
+.o-message-fade-enter-active {
+  animation: o-message-fade-in 0.2s ease-out;
+}
+
+.o-fade-enter-active {
+  transition: opacity 0.2s ease;
+}
+
+.o-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.o-fade-enter-from,
+.o-fade-leave-to {
+  opacity: 0;
+}
+
+@keyframes o-message-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_LLMMessageList {
+  background-color: var(--o-view-background-color, #{$o-view-background-color});
+
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background-color: var(--o-gray-100, #{$gray-100});
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: var(--o-gray-300, #{$gray-300});
+    border-radius: $border-radius;
+
+    &:hover {
+      background-color: var(--o-gray-400, #{$gray-400});
+    }
+  }
+}

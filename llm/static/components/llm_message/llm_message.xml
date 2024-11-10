@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm.Message" owl="1">
+        <div
+      class="o_LLMMessage position-relative py-2"
+      t-att-class="{
+            'o-user-message': isUserMessage,
+            'o-assistant-message': !isUserMessage,
+        }"
+    >
+            <div
+        class="o_LLMMessage_container d-flex"
+        t-att-class="{
+                'justify-content-end': isUserMessage,
+                'justify-content-start': !isUserMessage,
+            }"
+      >
+                <div class="o_LLMMessage_content">
+                    <t t-if="!isUserMessage">
+                        <div class="o_LLMMessage_author mb-1">
+                            <span class="fw-bold" t-esc="authorName" />
+                        </div>
+                    </t>
+                    <div
+            class="o_LLMMessage_bubble position-relative"
+            t-ref="content"
+            t-att-class="{
+                            'o-user': isUserMessage,
+                            'o-assistant': !isUserMessage,
+                        }"
+          >
+                        <div
+              class="o_LLMMessage_text"
+              t-ref="prettyBody"
+              t-on-mounted="onContentMounted"
+            />
+                    </div>
+                    <div
+            t-if="formattedDate"
+            class="o_LLMMessage_date"
+            t-att-class="{
+                        'text-end': isUserMessage,
+                        'text-start': !isUserMessage,
+                    }"
+          >
+                        <small class="text-muted" t-esc="formattedDate" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm.MessageList" owl="1">
+        <div
+      class="o_LLMMessageList d-flex flex-column overflow-auto"
+      t-on-scroll="onScroll"
+      t-ref="scrollable"
+    >
+
+            <!-- Loading older messages indicator -->
+            <div
+        t-if="messageListView.isLoadingMore"
+        class="o_LLMMessageList_loading align-self-center py-2"
+      >
+                <i class="fa fa-spin fa-circle-o-notch me-1" />
+                Loading...
+            </div>
+
+            <!-- Load more messages button -->
+            <button
+        t-elif="messageListView.hasMoreMessages"
+        class="o_LLMMessageList_loadMore btn btn-link align-self-center py-2"
+        t-on-click="messageListView.loadMoreMessages"
+      >
+                Load more
+            </button>
+
+            <!-- Empty state -->
+            <div
+        t-if="messageListView.messages.length === 0 and !messageListView.isLoading"
+        class="o_LLMMessageList_empty flex-grow-1 d-flex align-items-center justify-content-center p-4"
+      >
+                <div class="text-center text-muted fst-italic">
+                    Start a conversation...
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <t
+        t-foreach="messageListView.messages"
+        t-as="message"
+        t-key="message.id"
+      >
+                <Transition visible="true" name="'o-message-fade'">
+                    <LLMMessage record="message" />
+                </Transition>
+            </t>
+
+            <!-- New message indicator -->
+            <Transition
+        visible="messageListView.hasUnreadMessages and !messageListView.isAtBottom"
+        name="'o-fade'"
+        t-slot-scope="transition"
+      >
+                <div
+          class="o_LLMMessageList_newMessages position-sticky bottom-0 start-50 translate-middle-x mb-3"
+          t-att-class="transition.className"
+          t-on-click="_scrollToEnd"
+        >
+                    <span
+            class="badge rounded-pill bg-primary px-3 py-2 cursor-pointer"
+          >
+                        New messages
+                    </span>
+                </div>
+            </Transition>
+        </div>
+    </t>
+</templates>

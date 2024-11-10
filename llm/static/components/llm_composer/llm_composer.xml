@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm.Composer" owl="1">
+        <t t-if="composerView">
+            <div
+        class="o_LLMComposer d-flex flex-column p-2 border-top"
+        t-att-class="{ 'o-disabled': composerView.isDisabled }"
+      >
+                <!-- Hidden mirrored textarea for height calculation -->
+                <textarea
+          class="o_LLMComposer_mirroredTextarea position-absolute opacity-0"
+          disabled="1"
+          t-ref="mirroredTextarea"
+        />
+
+                <!-- Main composer area -->
+                <div class="o_LLMComposer_inputContainer d-flex gap-2">
+                    <textarea
+            class="o_LLMComposer_textarea form-control"
+            t-att-placeholder="composerView.placeholder || 'Type a message...'"
+            t-att-disabled="composerView.isDisabled"
+            t-on-input="_onInput"
+            t-on-keydown="_onKeydown"
+            t-ref="textarea"
+          />
+                    <button
+            class="o_LLMComposer_sendButton btn btn-primary align-self-end"
+            t-on-click="_onSend"
+            t-att-disabled="composerView.isDisabled"
+          >
+                        <i class="fa fa-paper-plane" />
+                    </button>
+                </div>
+
+                <!-- Optional helper text -->
+                <small t-if="composerView.isDisabled" class="text-muted mt-2">
+                    <i class="fa fa-spinner fa-spin me-1" />
+                    Assistant is thinking...
+                </small>
+            </div>
+        </t>
+    </t>
+</templates>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm.ThreadView" owl="1">
+        <div
+      class="o_LLMThreadView d-flex flex-column"
+      t-att-class="threadView.extraClass"
+      t-attf-class="{{ className }}"
+      t-ref="root"
+    >
+
+            <!-- Thread Header -->
+            <div
+        t-if="threadView.thread.name"
+        class="o_LLMThreadView_header border-bottom p-3"
+      >
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0" t-esc="threadView.thread.name" />
+                    <div
+            t-if="threadView.thread.isLoading"
+            class="o_LLMThreadView_typing d-flex align-items-center text-muted"
+          >
+                        <small class="me-2">Assistant is typing</small>
+                        <div class="o_LLMThreadView_typingDots">
+                            <span /><span /><span />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="o_LLMThreadView_content d-flex flex-column flex-grow-1">
+                <!-- Initial Loading State -->
+                <t t-if="!threadView.hasLoadedMessages">
+                    <div
+            class="o_LLMThreadView_loading d-flex flex-grow-1 align-items-center justify-content-center"
+          >
+                        <i class="fa fa-circle-o-notch fa-spin me-2" />
+                        Loading conversation...
+                    </div>
+                </t>
+
+                <!-- Error State -->
+                <t t-elif="threadView.hasError">
+                    <div
+            class="o_LLMThreadView_error d-flex flex-grow-1 align-items-center justify-content-center flex-column p-4"
+          >
+                        <div
+              class="text-danger mb-2"
+              t-esc="threadView.errorMessage || 'Something went wrong'"
+            />
+                        <button class="btn btn-link" t-on-click="_onRetryLoad">
+                            Retry
+                        </button>
+                    </div>
+                </t>
+
+                <!-- Message List -->
+                <t t-elif="threadView.messageListView">
+                    <LLMMessageList
+            className="'o_LLMThreadView_messageList flex-grow-1'"
+            record="threadView.messageListView"
+          />
+                </t>
+
+                <!-- Empty State -->
+                <t t-elif="!threadView.thread.messages.length">
+                    <div
+            class="o_LLMThreadView_empty d-flex flex-grow-1 align-items-center justify-content-center text-muted p-4"
+          >
+                        Start a conversation...
+                    </div>
+                </t>
+
+                <!-- Composer -->
+                <t t-if="threadView.composer">
+                    <LLMComposer
+            className="'o_LLMThreadView_composer'"
+            record="threadView.composer"
+            onSubmit="_onMessageSubmit"
+          />
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>
