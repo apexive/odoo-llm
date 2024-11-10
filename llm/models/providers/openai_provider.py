@@ -2,11 +2,10 @@ from odoo import models
 
 
 class OpenAIProvider(models.Model):
-    _inherit = "llm.provider"
+    _name = "llm.provider.openai"
+    _inherit = "llm.provider.base"
 
     def get_client(self):
-        if self.provider != "openai":
-            return super().get_client()
         from openai import OpenAI
 
         return OpenAI(api_key=self.api_key, base_url=self.api_base or None)

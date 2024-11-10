@@ -4,12 +4,10 @@ from odoo import models
 
 
 class OllamaProvider(models.Model):
-    _inherit = "llm.provider"
+    _name = "llm.provider.ollama"
+    _inherit = "llm.provider.base"
 
     def get_client(self):
-        if self.provider != "ollama":
-            return super().get_client()
-
         class OllamaClient:
             def __init__(self, base_url):
                 self.base_url = base_url or "http://localhost:11434"

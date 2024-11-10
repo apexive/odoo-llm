@@ -2,6 +2,35 @@ from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
+class LLMProviderBase(models.AbstractModel):
+    """Base model for provider implementations"""
+
+    _name = "llm.provider.base"
+    _description = "Base LLM Provider Implementation"
+
+    provider_id = fields.Many2one("llm.provider", required=True, ondelete="cascade")
+
+    @property
+    def api_key(self):
+        return self.provider_id.api_key
+
+    @property
+    def api_base(self):
+        return self.provider_id.api_base
+
+    def get_client(self):
+        raise NotImplementedError()
+
+    def chat(self, messages, model=None, stream=False):
+        raise NotImplementedError()
+
+    def embedding(self, texts, model=None):
+        raise NotImplementedError()
+
+    def list_models(self):
+        raise NotImplementedError()
+
+
 class LLMProvider(models.Model):
     _name = "llm.provider"
     _inherit = ["mail.thread", "mail.activity.mixin"]
@@ -9,7 +38,7 @@ class LLMProvider(models.Model):
 
     name = fields.Char(required=True)
     provider = fields.Selection(
-        selection="_selection_provider",
+        selection="_get_available_providers",
         required=True,
     )
     active = fields.Boolean(default=True)
@@ -23,6 +52,22 @@ class LLMProvider(models.Model):
     api_base = fields.Char()
     model_ids = fields.One2many("llm.model", "provider_id", string="Models")
 
+    # Reference to provider implementation
+    provider_impl_id = fields.Reference(
+        selection="_get_provider_models",
+        string="Provider Implementation",
+        compute="_compute_provider_impl",
+        store=True,
+    )
+
+    @api.model
+    def _get_provider_models(self):
+        """Get available provider implementation models"""
+        return [
+            (f"llm.provider.{provider[0]}", provider[1])
+            for provider in self._get_available_providers()
+        ]
+
     @api.model
     def _get_available_providers(self):
         """Hook method for adding providers"""
@@ -33,29 +78,42 @@ class LLMProvider(models.Model):
             ("anthropic", "Anthropic"),
         ]
 
-    @api.model
-    def _selection_provider(self):
-        return self._get_available_providers()
+    @api.depends("provider")
+    def _compute_provider_impl(self):
+        """Create/get provider implementation based on provider type"""
+        for record in self:
+            if not record.provider:
+                record.provider_impl_id = False
+                continue
 
-    def get_model(self, model=None, model_use="chat"):
-        return self.model_ids.filtered(lambda m: m.default and m.model_use == "chat")[0]
+            # Map provider to implementation model
+            impl_model = f"llm.provider.{record.provider}"
+
+            # Find or create implementation
+            impl = self.env[impl_model].search(
+                [("provider_id", "=", record.id)], limit=1
+            )
+
+            if not impl:
+                impl = self.env[impl_model].create(
+                    {
+                        "provider_id": record.id,
+                    }
+                )
+
+            record.provider_impl_id = f"{impl_model},{impl.id}"
 
     def get_client(self):
-        return self._raise_not_implemented("get_client")
+        return self.provider_impl_id.get_client()
 
     def chat(self, messages, model=None, stream=False):
-        return self._raise_not_implemented("chat")
+        return self.provider_impl_id.chat(messages, model, stream)
 
     def embedding(self, texts, model=None):
-        return self._raise_not_implemented("embedding")
+        return self.provider_impl_id.embedding(texts, model)
 
     def list_models(self):
-        return self._raise_not_implemented("list_models")
-
-    def _raise_not_implemented(self, method_name):
-        raise NotImplementedError(
-            f"Method '{method_name}' not implemented for provider {self.provider}"
-        )
+        return self.provider_impl_id.list_models()
 
     def fetch_models(self):
         """Fetch available models from the provider and create/update them in Odoo"""

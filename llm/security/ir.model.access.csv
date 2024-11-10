@@ -7,3 +7,7 @@ access_llm_thread_user,llm.thread.user,model_llm_thread,base.group_user,1,1,1,0
 access_llm_thread_manager,llm.thread.manager,model_llm_thread,llm.group_llm_manager,1,1,1,1
 access_llm_message_user,llm.message.user,model_llm_message,base.group_user,1,1,1,0
 access_llm_message_manager,llm.message.manager,model_llm_message,llm.group_llm_manager,1,1,1,1
+access_llm_provider_openai_user,llm.provider.openai.user,model_llm_provider_openai,base.group_user,1,1,1,1
+access_llm_provider_ollama_user,llm.provider.ollama.user,model_llm_provider_ollama,base.group_user,1,1,1,1
+access_llm_provider_replicate_user,llm.provider.replicate.user,model_llm_provider_replicate,base.group_user,1,1,1,1
+access_llm_provider_anthropic_user,llm.provider.anthropic.user,model_llm_provider_anthropic,base.group_user,1,1,1,1

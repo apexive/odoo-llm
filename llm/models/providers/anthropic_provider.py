@@ -2,11 +2,10 @@ from odoo import models
 
 
 class AnthropicProvider(models.Model):
-    _inherit = "llm.provider"
+    _name = "llm.provider.anthropic"
+    _inherit = "llm.provider.base"
 
     def get_client(self):
-        if self.provider != "anthropic":
-            return super().get_client()
         from anthropic import Anthropic
 
         return Anthropic(api_key=self.api_key)

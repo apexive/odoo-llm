@@ -33,11 +33,10 @@ def serialize_model_data(data: dict) -> dict:
 
 
 class ReplicateProvider(models.Model):
-    _inherit = "llm.provider"
+    _name = "llm.provider.replicate"
+    _inherit = "llm.provider.base"
 
     def get_client(self):
-        if self.provider != "replicate":
-            return super().get_client()
         import replicate
 
         return replicate.Client(api_token=self.api_key)
@@ -79,22 +78,15 @@ class ReplicateProvider(models.Model):
         all_models = []
 
         # Get first page
-        page = client.models.list()
+        page = False
 
-        while True:
-            # Add current page results
+        while page is False or page.next:
+            page = client.models.list()
             all_models.extend(
                 [
                     {"name": model.id, "details": serialize_model_data(model.dict())}
                     for model in page.results
                 ]
             )
-
-            # Check if there are more pages
-            if not page.next:
-                break
-
-            # Fetch next page
-            page = client.models.list(cursor=page.next)
 
         return all_models
