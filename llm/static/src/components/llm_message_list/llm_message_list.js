@@ -1,6 +1,12 @@
 /** @odoo-module **/
 
-import { Component, onWillDestroy, useRef, onWillPatch, onMounted } from "@odoo/owl";
+import {
+  Component,
+  onWillDestroy,
+  useRef,
+  onWillPatch,
+  onMounted,
+} from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 import { Transition } from "@web/core/transition";
@@ -24,7 +30,10 @@ export class LLMMessageList extends Component {
     this.uiService = useService("ui");
 
     // Bind methods
-    this.onScrollThrottled = _.throttle(this._onScroll.bind(this), SCROLL_DEBOUNCE);
+    this.onScrollThrottled = _.throttle(
+      this._onScroll.bind(this),
+      SCROLL_DEBOUNCE
+    );
 
     // Setup lifecycle hooks
     onMounted(() => this._scrollToEnd(false));
@@ -77,7 +86,7 @@ export class LLMMessageList extends Component {
    * @private
    */
   _setupResizeObserver() {
-    this.resizeObserver = new ResizeObserver(entries => {
+    this.resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         if (entry.target === this.scrollableRef.el) {
           this._maintainScrollPosition();
@@ -136,7 +145,7 @@ export class LLMMessageList extends Component {
 
     this.scrollableRef.el.scrollTo({
       top: this.scrollableRef.el.scrollHeight,
-      behavior: smooth ? 'smooth' : 'auto'
+      behavior: smooth ? "smooth" : "auto",
     });
   }
 
@@ -147,8 +156,10 @@ export class LLMMessageList extends Component {
   _maintainScrollPosition() {
     if (!this.scrollableRef.el || !this.patchSnapshot) return;
 
-    const { scrollHeight: oldScrollHeight, scrollTop: oldScrollTop } = this.patchSnapshot;
-    const newScrollTop = this.scrollableRef.el.scrollHeight - oldScrollHeight + oldScrollTop;
+    const { scrollHeight: oldScrollHeight, scrollTop: oldScrollTop } =
+      this.patchSnapshot;
+    const newScrollTop =
+      this.scrollableRef.el.scrollHeight - oldScrollHeight + oldScrollTop;
 
     this.scrollableRef.el.scrollTop = newScrollTop;
   }
@@ -168,9 +179,11 @@ export class LLMMessageList extends Component {
     this.messageListView.updateScroll(scrollTop, isAtBottom);
 
     // Handle loading more messages
-    if (isNearTop &&
-        this.messageListView.hasMoreMessages &&
-        !this.messageListView.isLoadingMore) {
+    if (
+      isNearTop &&
+      this.messageListView.hasMoreMessages &&
+      !this.messageListView.isLoadingMore
+    ) {
       this.messageListView.loadMoreMessages();
     }
 
@@ -205,7 +218,10 @@ export class LLMMessageList extends Component {
     // Handle scroll position
     if (this.messageListView.isLoadingMore) {
       this._maintainScrollPosition();
-    } else if (isNewMessage && (wasNearBottom || this.messageListView.isAtBottom)) {
+    } else if (
+      isNewMessage &&
+      (wasNearBottom || this.messageListView.isAtBottom)
+    ) {
       this._scrollToEnd(!this.patchSnapshot);
     }
 
@@ -228,8 +244,8 @@ LLMMessageList.props = {
   },
   className: {
     type: String,
-    optional: true
-  }
+    optional: true,
+  },
 };
 
 // Register the component

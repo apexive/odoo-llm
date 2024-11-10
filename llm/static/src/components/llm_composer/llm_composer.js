@@ -1,6 +1,12 @@
 /** @odoo-module **/
 
-import { Component, useState, useRef, onMounted, onWillUnmount } from "@odoo/owl";
+import {
+  Component,
+  useState,
+  useRef,
+  onMounted,
+  onWillUnmount,
+} from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
 import { registry } from "@web/core/registry";
 
@@ -22,7 +28,7 @@ export class LLMComposer extends Component {
     // Local state
     this.state = useState({
       content: "",
-      isDisabled: false
+      isDisabled: false,
     });
 
     // Command history
@@ -82,21 +88,21 @@ export class LLMComposer extends Component {
    */
   _onKeydown(ev) {
     // Handle submit on Enter (without shift)
-    if (ev.key === 'Enter' && !ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
+    if (ev.key === "Enter" && !ev.shiftKey && !ev.ctrlKey && !ev.metaKey) {
       ev.preventDefault();
       this._onSubmit();
       return;
     }
 
     // Command history navigation
-    if (ev.key === 'ArrowUp' && !ev.shiftKey && this.content.trim() === '') {
+    if (ev.key === "ArrowUp" && !ev.shiftKey && this.content.trim() === "") {
       ev.preventDefault();
-      this._navigateHistory('up');
+      this._navigateHistory("up");
       return;
     }
-    if (ev.key === 'ArrowDown' && !ev.shiftKey && this.content.trim() === '') {
+    if (ev.key === "ArrowDown" && !ev.shiftKey && this.content.trim() === "") {
       ev.preventDefault();
-      this._navigateHistory('down');
+      this._navigateHistory("down");
       return;
     }
   }
@@ -109,13 +115,17 @@ export class LLMComposer extends Component {
   _navigateHistory(direction) {
     if (!this.commandHistory.length) return;
 
-    if (direction === 'up') {
-      this.historyIndex = Math.min(this.historyIndex + 1, this.commandHistory.length - 1);
+    if (direction === "up") {
+      this.historyIndex = Math.min(
+        this.historyIndex + 1,
+        this.commandHistory.length - 1
+      );
     } else {
       this.historyIndex = Math.max(this.historyIndex - 1, -1);
     }
 
-    const content = this.historyIndex >= 0 ? this.commandHistory[this.historyIndex] : '';
+    const content =
+      this.historyIndex >= 0 ? this.commandHistory[this.historyIndex] : "";
     this.state.content = content;
     if (this.textareaRef.el) {
       this.textareaRef.el.value = content;
@@ -177,7 +187,7 @@ LLMComposer.props = {
   isDisabled: { type: Boolean, optional: true },
   onSubmit: { type: Function, required: true },
   onContentChange: { type: Function, optional: true },
-  className: { type: String, optional: true }
+  className: { type: String, optional: true },
 };
 
 registry.category("components").add("LLMComposer", LLMComposer);

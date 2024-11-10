@@ -30,7 +30,10 @@ export class LLMMessage extends Component {
    * @returns {string} Author name
    */
   get authorName() {
-    return this.message.author || (this.isUserMessage ? this.env.session.name : "Assistant");
+    return (
+      this.message.author ||
+      (this.isUserMessage ? this.env.session.name : "Assistant")
+    );
   }
 
   /**
@@ -45,9 +48,12 @@ export class LLMMessage extends Component {
    */
   get statusClass() {
     switch (this.message.status) {
-      case 'sending': return 'text-muted';
-      case 'error': return 'text-danger';
-      default: return '';
+      case "sending":
+        return "text-muted";
+      case "error":
+        return "text-danger";
+      default:
+        return "";
     }
   }
 
@@ -55,7 +61,7 @@ export class LLMMessage extends Component {
    * @returns {boolean} Whether to show retry button
    */
   get showRetry() {
-    return this.message.status === 'error' && !this.isUserMessage;
+    return this.message.status === "error" && !this.isUserMessage;
   }
 
   /**
@@ -74,12 +80,12 @@ export class LLMMessage extends Component {
     try {
       await navigator.clipboard.writeText(this.message.content);
       this.notification.add(this.env._t("Copied to clipboard"), {
-        type: 'success',
+        type: "success",
         sticky: false,
       });
     } catch (error) {
       this.notification.add(this.env._t("Failed to copy message"), {
-        type: 'danger',
+        type: "danger",
         sticky: false,
       });
     }

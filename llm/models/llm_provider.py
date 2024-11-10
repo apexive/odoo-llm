@@ -1,10 +1,10 @@
-from odoo import api, fields, models, _
-
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 
 class LLMProviderBase(models.AbstractModel):
     """Base model for provider implementations"""
+
     _inherit = ["mail.thread"]
     _name = "llm.provider.base"
     _description = "Base LLM Provider Implementation"
@@ -41,13 +41,13 @@ class LLMProviderBase(models.AbstractModel):
         if not stream:
             # For non-streaming, extract the content from the response
             # Handle different provider response formats
-            if hasattr(response, 'choices') and response.choices:
+            if hasattr(response, "choices") and response.choices:
                 # OpenAI-style response
                 return response.choices[0].message.content
-            elif hasattr(response, 'content'):
+            elif hasattr(response, "content"):
                 # Anthropic-style response
                 return response.content[0].text
-            elif hasattr(response, 'message'):
+            elif hasattr(response, "message"):
                 return response.message["content"]
             else:
                 # Fallback for other formats - convert response to string
@@ -55,15 +55,15 @@ class LLMProviderBase(models.AbstractModel):
         else:
             # For streaming, yield chunks as they come
             for chunk in response:
-                if hasattr(chunk, 'choices') and chunk.choices:
+                if hasattr(chunk, "choices") and chunk.choices:
                     # OpenAI-style chunks
                     if chunk.choices[0].delta.content:
                         yield chunk.choices[0].delta.content
-                elif hasattr(chunk, 'delta'):
+                elif hasattr(chunk, "delta"):
                     # Alternative format
                     if chunk.delta:
                         yield chunk.delta
-                elif hasattr(chunk, 'text'):
+                elif hasattr(chunk, "text"):
                     # Anthropic-style chunks
                     yield chunk.text
                 else:
@@ -94,14 +94,18 @@ class LLMProviderBase(models.AbstractModel):
         models = self.provider_id.model_ids
 
         # Filter for default model of requested type
-        default_models = models.filtered(lambda m: m.default and m.model_use == model_use)
+        default_models = models.filtered(
+            lambda m: m.default and m.model_use == model_use
+        )
 
         if not default_models:
             # Fallback to any model of requested type
             default_models = models.filtered(lambda m: m.model_use == model_use)
 
         if not default_models:
-            raise ValueError(f"No {model_use} model found for provider {self.provider_id.name}")
+            raise ValueError(
+                f"No {model_use} model found for provider {self.provider_id.name}"
+            )
 
         return default_models[0]
 

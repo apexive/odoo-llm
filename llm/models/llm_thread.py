@@ -46,58 +46,70 @@ class LLMThread(models.Model):
         )
         return [msg.to_provider_message() for msg in messages]
 
-    def send_message(self, content, role="user"):
+    def send_message(self, content, role="user", stream=False):
         """Send a new message in the thread"""
         # Save user message
-        self.env["llm.message"].create({
-            "thread_id": self.id,
-            "content": content,
-            "role": role,
-        })
+        self.env["llm.message"].create(
+            {
+                "thread_id": self.id,
+                "content": content,
+                "role": role,
+            }
+        )
 
         if role == "user":
             # Get AI response
             messages = self.get_chat_messages()
             print(messages)
             # Call chat() directly and get first (only) value from generator
-            response = self.model_id.chat(messages, stream=False)
+            response = self.model_id.chat(messages, stream=stream)
+
+            if stream:
+                content = ""
+                for chunk in response:
+                    yield 'data: {"content": "' + chunk + '"}'
+                    content += chunk
+                yield "[DONE]"
+                response = content
             print(response)
 
             # Save AI response
-            self.env["llm.message"].create({
-                "thread_id": self.id,
-                "content": response,
-                "role": "assistant",
-            })
+            self.env["llm.message"].create(
+                {
+                    "thread_id": self.id,
+                    "content": response,
+                    "role": "assistant",
+                }
+            )
         return True
 
     def action_open_chat(self):
         """Open chat in dialog"""
         self.ensure_one()
         return {
-            'type': 'ir.actions.client',
-            'tag': 'llm_chat_dialog',
-            'name': f'Chat: {self.name}',
-            'params': {
-                'thread_id': self.id,
+            "type": "ir.actions.client",
+            "tag": "llm_chat_dialog",
+            "name": f"Chat: {self.name}",
+            "params": {
+                "thread_id": self.id,
             },
-            'target': 'new',
+            "target": "new",
         }
 
     def get_thread_data(self):
         """Get thread data for frontend"""
         self.ensure_one()
         return {
-            'id': self.id,
-            'name': self.name,
-            'messages': [msg.to_frontend_data() for msg in self.message_ids],
-            'model': {
-                'id': self.model_id.id,
-                'name': self.model_id.name,
+            "id": self.id,
+            "name": self.name,
+            "messages": [msg.to_frontend_data() for msg in self.message_ids],
+            "model": {
+                "id": self.model_id.id,
+                "name": self.model_id.name,
             },
-            'provider': {
-                'id': self.provider_id.id,
-                'name': self.provider_id.name,
+            "provider": {
+                "id": self.provider_id.id,
+                "name": self.provider_id.name,
             },
         }
 

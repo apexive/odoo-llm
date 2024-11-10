@@ -1,6 +1,7 @@
-import requests
-from odoo import models
 import ollama
+import requests
+
+from odoo import models
 
 
 class OllamaProvider(models.Model):
@@ -26,4 +27,3 @@ class OllamaProvider(models.Model):
             {"name": model["name"], "details": model}
             for model in response.json().get("models", [])
         ]
-
