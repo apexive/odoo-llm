@@ -1,0 +1,9 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_provider_user,llm.provider.user,model_llm_provider,base.group_user,1,0,0,0
+access_llm_provider_manager,llm.provider.manager,model_llm_provider,group_llm_manager,1,1,1,1
+access_llm_model_user,llm.model.user,model_llm_model,base.group_user,1,0,0,0
+access_llm_model_manager,llm.model.manager,model_llm_model,group_llm_manager,1,1,1,1
+access_llm_thread_user,llm.thread.user,model_llm_thread,base.group_user,1,1,1,0
+access_llm_thread_manager,llm.thread.manager,model_llm_thread,llm.group_llm_manager,1,1,1,1
+access_llm_message_user,llm.message.user,model_llm_message,base.group_user,1,1,1,0
+access_llm_message_manager,llm.message.manager,model_llm_message,llm.group_llm_manager,1,1,1,1

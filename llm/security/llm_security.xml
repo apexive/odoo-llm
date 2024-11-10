@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <!-- Define LLM Manager group -->
+        <record id="group_llm_manager" model="res.groups">
+            <field name="name">LLM Manager</field>
+            <field
+        name="category_id"
+        ref="base.module_category_administration"
+      />
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]" />
+            <field name="users" eval="[(4, ref('base.user_admin'))]" />
+        </record>
+
+        <!-- Record Rules -->
+        <!-- LLM Provider Rules -->
+        <record id="llm_provider_rule_all" model="ir.rule">
+            <field name="name">LLM Providers: read-only for all users</field>
+            <field name="model_id" ref="model_llm_provider" />
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True" />
+            <field name="perm_write" eval="False" />
+            <field name="perm_create" eval="False" />
+            <field name="perm_unlink" eval="False" />
+            <field name="groups" eval="[(4, ref('base.group_user'))]" />
+        </record>
+
+        <record id="llm_provider_rule_manager" model="ir.rule">
+            <field name="name">LLM Providers: full access for managers</field>
+            <field name="model_id" ref="model_llm_provider" />
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True" />
+            <field name="perm_write" eval="True" />
+            <field name="perm_create" eval="True" />
+            <field name="perm_unlink" eval="True" />
+            <field name="groups" eval="[(4, ref('group_llm_manager'))]" />
+        </record>
+
+        <!-- LLM Model Rules -->
+        <record id="llm_model_rule_all" model="ir.rule">
+            <field name="name">LLM Models: read-only for all users</field>
+            <field name="model_id" ref="model_llm_model" />
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True" />
+            <field name="perm_write" eval="False" />
+            <field name="perm_create" eval="False" />
+            <field name="perm_unlink" eval="False" />
+            <field name="groups" eval="[(4, ref('base.group_user'))]" />
+        </record>
+
+        <record id="llm_model_rule_manager" model="ir.rule">
+            <field name="name">LLM Models: full access for managers</field>
+            <field name="model_id" ref="model_llm_model" />
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="perm_read" eval="True" />
+            <field name="perm_write" eval="True" />
+            <field name="perm_create" eval="True" />
+            <field name="perm_unlink" eval="True" />
+            <field name="groups" eval="[(4, ref('group_llm_manager'))]" />
+        </record>
+    </data>
+</odoo>
