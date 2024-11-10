@@ -1,10 +1,10 @@
-from odoo import _, api, fields, models
+from odoo import api, fields, models, _
 from odoo.exceptions import UserError
 
 
 class LLMProviderBase(models.AbstractModel):
     """Base model for provider implementations"""
-
+    _inherit = ["mail.thread"]
     _name = "llm.provider.base"
     _description = "Base LLM Provider Implementation"
 
@@ -33,7 +33,7 @@ class LLMProviderBase(models.AbstractModel):
 
 class LLMProvider(models.Model):
     _name = "llm.provider"
-    _inherit = ["mail.thread", "mail.activity.mixin"]
+    _inherit = ["mail.thread"]
     _description = "LLM Provider"
 
     name = fields.Char(required=True)

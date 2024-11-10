@@ -52,48 +52,48 @@
 .o_LLMMessage {
   &.o-user-message {
     .o_LLMMessage_bubble {
-      background-color: var(--o-primary-100, #{$primary-100});
-      border: 1px solid var(--o-primary-200, #{$primary-200});
+      background-color: mix($o-brand-odoo, white, 10%);
+      border: 1px solid mix($o-brand-odoo, white, 20%);
 
       &.o-user {
-        color: var(--o-primary-900, #{$primary-900});
+        color: $o-main-text-color;
       }
     }
   }
 
   &.o-assistant-message {
     .o_LLMMessage_bubble {
-      background-color: var(--o-gray-100, #{$gray-100});
-      border: 1px solid var(--o-gray-200, #{$gray-200});
+      background-color: var(--o-gray-100, $gray-100);
+      border: 1px solid var(--o-gray-200, $gray-200);
 
       &.o-assistant {
-        color: var(--o-gray-900, #{$gray-900});
+        color: $o-main-text-color;
       }
     }
   }
 }
 
-// Dark mode support (if enabled in Odoo)
+// Dark mode support
 .o-dark-mode {
   .o_LLMMessage {
     &.o-user-message {
       .o_LLMMessage_bubble {
-        background-color: var(--o-primary-800, #{$primary-800});
-        border-color: var(--o-primary-700, #{$primary-700});
+        background-color: mix($o-brand-odoo, $o-gray-900, 15%);
+        border-color: mix($o-brand-odoo, $o-gray-800, 20%);
 
         &.o-user {
-          color: var(--o-primary-100, #{$primary-100});
+          color: $o-gray-100;
         }
       }
     }
 
     &.o-assistant-message {
       .o_LLMMessage_bubble {
-        background-color: var(--o-gray-800, #{$gray-800});
-        border-color: var(--o-gray-700, #{$gray-700});
+        background-color: var(--o-gray-800, $gray-800);
+        border-color: var(--o-gray-700, $gray-700);
 
         &.o-assistant {
-          color: var(--o-gray-100, #{$gray-100});
+          color: $o-gray-100;
         }
       }
     }

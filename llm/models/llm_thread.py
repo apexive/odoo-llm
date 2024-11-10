@@ -70,6 +70,36 @@ class LLMThread(models.Model):
             )
         return True
 
+    def action_open_chat(self):
+        """Open chat in dialog"""
+        self.ensure_one()
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'llm_chat_dialog',
+            'name': f'Chat: {self.name}',
+            'params': {
+                'thread_id': self.id,
+            },
+            'target': 'new',
+        }
+
+    def get_thread_data(self):
+        """Get thread data for frontend"""
+        self.ensure_one()
+        return {
+            'id': self.id,
+            'name': self.name,
+            'messages': [msg.to_frontend_data() for msg in self.message_ids],
+            'model': {
+                'id': self.model_id.id,
+                'name': self.model_id.name,
+            },
+            'provider': {
+                'id': self.provider_id.id,
+                'name': self.provider_id.name,
+            },
+        }
+
 
 class LLMMessage(models.Model):
     _name = "llm.message"
@@ -101,6 +131,24 @@ class LLMMessage(models.Model):
             "role": self.role,
             "content": self.content,
         }
+
+    def to_frontend_data(self):
+        """Convert to frontend-friendly format"""
+        return {
+            "id": self.id,
+            "role": self.role,
+            "content": self.content,
+            "timestamp": fields.Datetime.to_string(self.create_date),
+            "author": self.get_author_name(),
+        }
+
+    def get_author_name(self):
+        """Get author name based on role"""
+        if self.role == "user":
+            return self.thread_id.user_id.name
+        elif self.role == "assistant":
+            return self.thread_id.model_id.name
+        return self.role.title()
 
     @api.model
     def from_provider_message(self, thread_id, message):
