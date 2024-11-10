@@ -1,24 +1,101 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-    <t t-name="llm.ChatDialogAction" owl="1">
-        <Dialog title="title" size="'lg'">
-            <LLMChatDialog
-                    threadId="threadId"
-                    close="() => onClose()"/>
+    <!-- Main Chat Dialog Template -->
+    <t t-name="llm.ChatDialog" owl="1">
+        <Dialog size="'lg'" fullscreen="true" title="state.thread?.thread.name || env._t('Chat')">
+            <div class="o_LLMChatDialog h-100 d-flex flex-column">
+                <!-- Loading State -->
+                <t t-if="state.isLoading">
+                    <div class="flex-grow-1 d-flex align-items-center justify-content-center p-4">
+                        <div class="text-center">
+                            <i class="fa fa-circle-o-notch fa-spin fa-2x mb-2"/>
+                            <div class="text-muted">
+                                Loading chat...
+                            </div>
+                        </div>
+                    </div>
+                </t>
+
+                <!-- Error State -->
+                <t t-elif="state.hasError">
+                    <div class="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4">
+                        <div class="text-danger mb-3">
+                            <i class="fa fa-exclamation-triangle fa-2x"/>
+                        </div>
+                        <div class="text-danger mb-2" t-esc="state.errorMessage"/>
+                        <button class="btn btn-outline-danger" t-on-click="_onRetryLoad">
+                            <i class="fa fa-refresh me-1"/>
+                            Try Again
+                        </button>
+                    </div>
+                </t>
+
+                <!-- Chat Thread -->
+                <t t-elif="state.thread">
+                    <!-- Dialog Toolbar -->
+                    <div class="o_LLMChatDialog_toolbar border-bottom p-2">
+                        <div class="btn-group">
+                            <!-- Export Button -->
+                            <button class="btn btn-light"
+                                    t-on-click="_onExport"
+                                    t-att-title="env._t('Export conversation')">
+                                <i class="fa fa-download me-1"/>
+                                Export
+                            </button>
+
+                            <!-- Clear Button -->
+                            <button class="btn btn-light text-danger"
+                                    t-on-click="_onClear"
+                                    t-att-title="env._t('Clear conversation')">
+                                <i class="fa fa-trash-o me-1"/>
+                                Clear
+                            </button>
+                        </div>
+
+                        <!-- Model Info -->
+                        <div t-if="state.thread.thread.model" class="ms-3 d-inline-flex align-items-center">
+                            <span class="badge bg-light text-dark">
+                                <i class="fa fa-robot me-1"/>
+                                <t t-esc="state.thread.thread.model.name"/>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Thread View -->
+                    <LLMThreadView
+                            className="'flex-grow-1 overflow-hidden'"
+                            record="state.thread"
+                    />
+                </t>
+            </div>
         </Dialog>
     </t>
 
-    <t t-name="llm.ChatDialog" owl="1">
-        <div class="o_LLMChatDialog" style="height: 600px;">
-            <t t-if="threadView">
-                <LLMThreadView record="threadView"/>
-            </t>
-            <t t-else="">
-                <div class="d-flex align-items-center justify-content-center h-100">
-                    <i class="fa fa-circle-o-notch fa-spin me-2"/>
-                    Loading chat...
-                </div>
-            </t>
-        </div>
+    <!-- Dialog Action Template -->
+    <t t-name="llm.ChatDialogAction" owl="1">
+        <Dialog size="'lg'"
+                fullscreen="true"
+                title="title"
+                closed="onClose">
+            <LLMChatDialog threadId="threadId" close="() => onClose()"/>
+        </Dialog>
+    </t>
+
+    <!-- Confirm Dialog Template -->
+    <t t-name="llm.ConfirmDialog" owl="1">
+        <Dialog size="'sm'"
+                title="title"
+                closed="close">
+            <div class="modal-body" t-if="body" t-esc="body"/>
+            <t t-slot="default"/>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" t-on-click="close">
+                    <t t-esc="cancelLabel || env._t('Cancel')"/>
+                </button>
+                <button class="btn btn-primary" t-on-click="confirm">
+                    <t t-esc="confirmLabel || env._t('Confirm')"/>
+                </button>
+            </div>
+        </Dialog>
     </t>
 </templates>

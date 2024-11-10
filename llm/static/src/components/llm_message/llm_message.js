@@ -1,44 +1,54 @@
 /** @odoo-module **/
 
 import { Component, useRef } from "@odoo/owl";
-import { markdownToHtml } from "@web/core/utils/markdown";
 import { useService } from "@web/core/utils/hooks";
+import { registry } from "@web/core/registry";
 
+/**
+ * Message component for displaying LLM chat messages
+ */
 export class LLMMessage extends Component {
   setup() {
-    super.setup();
     this.contentRef = useRef("content");
     this.prettyBodyRef = useRef("prettyBody");
     this.notification = useService("notification");
+    this.markdownService = useService("markdownService");
   }
 
+  /**
+   * @returns {Object} The LLMMessage record from props
+   */
   get message() {
-    return this.props.message;
+    return this.props.record;
   }
 
+  /**
+   * @returns {boolean} True if message is from user
+   */
   get isUserMessage() {
     return this.message.role === "user";
   }
 
+  /**
+   * @returns {string} Name of message author
+   */
   get authorName() {
-    return this.isUserMessage ?
-        this.env.session.name :
-        (this.message.author || "Assistant");
-  }
-
-  get formattedDate() {
-    if (!this.message.timestamp) return "";
-
-    try {
-      return new Date(this.message.timestamp).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit"
-      });
-    } catch (error) {
-      return "";
+    if (this.isUserMessage) {
+      return this.env.session.name;
     }
+    return this.message.author || "Assistant";
   }
 
+  /**
+   * @returns {string} Formatted timestamp
+   */
+  get formattedDate() {
+    return this.message.formattedTime;
+  }
+
+  /**
+   * @returns {string} CSS class based on message status
+   */
   get statusClass() {
     switch (this.message.status) {
       case 'sending':
@@ -51,61 +61,89 @@ export class LLMMessage extends Component {
     }
   }
 
+  /**
+   * @returns {boolean} Whether to show retry button
+   */
   get showRetry() {
     return this.message.status === 'error';
   }
 
+  /**
+   * Handle mounting of content - renders markdown and code blocks
+   */
   async onContentMounted() {
     if (!this.contentRef.el || !this.prettyBodyRef.el || !this.message.content) {
       return;
     }
 
     try {
-      const html = await markdownToHtml(this.message.content);
-      if (this.prettyBodyRef.el) {
+      // Convert markdown to HTML if markdown service is available
+      if (this.markdownService) {
+        const html = await this.markdownService.convertToHtml(this.message.content);
         this.prettyBodyRef.el.innerHTML = html;
-
-        // Add syntax highlighting if needed
-        if (window.Prism) {
-          this.prettyBodyRef.el.querySelectorAll('pre code').forEach((block) => {
-            window.Prism.highlightElement(block);
-          });
-        }
-      }
-    } catch (error) {
-      this.notification.notify({
-        title: "Error",
-        message: "Failed to render message content",
-        type: "danger"
-      });
-
-      // Fallback to plain text
-      if (this.prettyBodyRef.el) {
+      } else {
+        // Fallback to plain text if no markdown service
         this.prettyBodyRef.el.textContent = this.message.content;
       }
+
+      // Handle code blocks if any
+      const codeBlocks = this.prettyBodyRef.el.querySelectorAll('pre code');
+      if (window.hljs && codeBlocks.length) {
+        codeBlocks.forEach(block => {
+          window.hljs.highlightElement(block);
+        });
+      }
+    } catch (error) {
+      // Fallback to plain text on error
+      this.prettyBodyRef.el.textContent = this.message.content;
+      console.error("Error rendering message content:", error);
     }
   }
 
+  /**
+   * Handle retry button click
+   */
   onRetryClick() {
-    this.env.messageBus.trigger('message-retry', {
-      messageId: this.message.id
-    });
+    if (this.props.onRetry) {
+      this.props.onRetry(this.message);
+    }
+  }
+
+  /**
+   * Handle copy button click
+   */
+  async onCopyClick() {
+    try {
+      await navigator.clipboard.writeText(this.message.content);
+      this.notification.add(this.env._t("Copied to clipboard"), {
+        type: 'success',
+        sticky: false,
+      });
+    } catch (error) {
+      this.notification.add(this.env._t("Failed to copy message"), {
+        type: 'danger',
+        sticky: false,
+      });
+    }
   }
 }
 
 LLMMessage.template = "llm.Message";
+
 LLMMessage.props = {
-  message: {
+  record: {
     type: Object,
-    shape: {
-      id: [String, Number],
-      content: String,
-      role: String,
-      author: { type: String, optional: true },
-      timestamp: { type: String, optional: true },
-      status: { type: String, optional: true },
-      error: { type: String, optional: true }
-    }
+    required: true,
   },
-  className: { type: String, optional: true },
+  className: {
+    type: String,
+    optional: true,
+  },
+  onRetry: {
+    type: Function,
+    optional: true,
+  },
 };
+
+// Register the component
+registry.category("components").add("LLMMessage", LLMMessage);

@@ -1,138 +1,216 @@
 /** @odoo-module **/
 
-import { Component, onWillDestroy, useRef, onWillPatch } from "@odoo/owl";
-import { useComponentToModel } from "@web/core/utils/component_to_model";
-import { useUpdate } from "@web/core/utils/update";
+import { Component, onWillDestroy, useRef, onWillPatch, onMounted } from "@odoo/owl";
+import { useService } from "@web/core/utils/hooks";
+import { registry } from "@web/core/registry";
 import { Transition } from "@web/core/transition";
 import { LLMMessage } from "../llm_message/llm_message";
 
 const SCROLL_THRESHOLD = 100; // pixels from bottom to trigger auto-scroll
 const LOAD_MORE_THRESHOLD = 50; // pixels from top to trigger loading more
+const SCROLL_DEBOUNCE = 100; // ms to debounce scroll events
 
+/**
+ * Message list component for LLM chat interface
+ */
 export class LLMMessageList extends Component {
   setup() {
-    super.setup();
-    useComponentToModel({ fieldName: "component" });
-    this._scrollableRef = useRef("scrollable");
+    this.scrollableRef = useRef("scrollable");
+    this.lastMessageCount = 0;
+    this.scrollTimeout = null;
+    this.isScrolling = false;
 
-    // Scroll management
-    this._lastMessageCount = 0;
-    this._scrollTimeout = null;
-    this._isScrolling = false;
+    // Setup services
+    this.uiService = useService("ui");
 
     // Bind methods
-    this._onScrollThrottled = _.throttle(this._onScrollThrottled.bind(this), 100);
+    this.onScrollThrottled = _.throttle(this._onScroll.bind(this), SCROLL_DEBOUNCE);
 
-    // Setup hooks
-    useUpdate({ func: () => this._update() });
+    // Setup lifecycle hooks
+    onMounted(() => this._scrollToEnd(false));
     onWillPatch(() => this._willPatch());
     onWillDestroy(() => this._cleanup());
+
+    // Setup resize observer
+    this._setupResizeObserver();
   }
 
+  /**
+   * @returns {Object} The message list record from props
+   */
+  get messageListView() {
+    return this.props.record;
+  }
+
+  /**
+   * @returns {Array} List of messages to display
+   */
+  get messages() {
+    return this.messageListView.messages || [];
+  }
+
+  /**
+   * @returns {boolean} Whether list is empty
+   */
+  get isEmpty() {
+    return this.messages.length === 0;
+  }
+
+  /**
+   * Clean up resources
+   * @private
+   */
   _cleanup() {
-    if (this._scrollTimeout) {
-      clearTimeout(this._scrollTimeout);
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
     }
-    if (this._onScrollThrottled.cancel) {
-      this._onScrollThrottled.cancel();
+    if (this.onScrollThrottled?.cancel) {
+      this.onScrollThrottled.cancel();
+    }
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
     }
   }
 
-  _willPatch() {
-    if (!this._scrollableRef.el) return;
+  /**
+   * Setup resize observer to handle container resizing
+   * @private
+   */
+  _setupResizeObserver() {
+    this.resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        if (entry.target === this.scrollableRef.el) {
+          this._maintainScrollPosition();
+        }
+      }
+    });
+  }
 
-    this._willPatchSnapshot = {
-      scrollHeight: this._scrollableRef.el.scrollHeight,
-      scrollTop: this._scrollableRef.el.scrollTop,
-      clientHeight: this._scrollableRef.el.clientHeight,
-      messageCount: this.props.record.messages.length,
+  /**
+   * Store current scroll state before patching
+   * @private
+   */
+  _willPatch() {
+    if (!this.scrollableRef.el) return;
+
+    this.patchSnapshot = {
+      scrollHeight: this.scrollableRef.el.scrollHeight,
+      scrollTop: this.scrollableRef.el.scrollTop,
+      clientHeight: this.scrollableRef.el.clientHeight,
+      messageCount: this.messages.length,
+      isNearBottom: this._isNearBottom(),
     };
   }
 
+  /**
+   * Check if scrolled near bottom
+   * @private
+   * @param {number} threshold Pixels from bottom to consider "near"
+   * @returns {boolean}
+   */
   _isNearBottom(threshold = SCROLL_THRESHOLD) {
-    if (!this._scrollableRef.el) return false;
+    if (!this.scrollableRef.el) return false;
 
-    const { scrollHeight, scrollTop, clientHeight } = this._scrollableRef.el;
+    const { scrollHeight, scrollTop, clientHeight } = this.scrollableRef.el;
     return scrollHeight - scrollTop - clientHeight <= threshold;
   }
 
+  /**
+   * Check if scrolled near top
+   * @private
+   * @param {number} threshold Pixels from top to consider "near"
+   * @returns {boolean}
+   */
   _isNearTop(threshold = LOAD_MORE_THRESHOLD) {
-    if (!this._scrollableRef.el) return false;
-    return this._scrollableRef.el.scrollTop <= threshold;
+    if (!this.scrollableRef.el) return false;
+    return this.scrollableRef.el.scrollTop <= threshold;
   }
 
+  /**
+   * Scroll to bottom of list
+   * @private
+   * @param {boolean} smooth Whether to use smooth scrolling
+   */
   _scrollToEnd(smooth = true) {
-    if (!this._scrollableRef.el) return;
+    if (!this.scrollableRef.el) return;
 
-    this._scrollableRef.el.scrollTo({
-      top: this._scrollableRef.el.scrollHeight,
+    this.scrollableRef.el.scrollTo({
+      top: this.scrollableRef.el.scrollHeight,
       behavior: smooth ? 'smooth' : 'auto'
     });
   }
 
+  /**
+   * Maintain relative scroll position after content changes
+   * @private
+   */
   _maintainScrollPosition() {
-    if (!this._scrollableRef.el || !this._willPatchSnapshot) return;
+    if (!this.scrollableRef.el || !this.patchSnapshot) return;
 
-    const {
-      scrollHeight: oldScrollHeight,
-      scrollTop: oldScrollTop
-    } = this._willPatchSnapshot;
+    const { scrollHeight: oldScrollHeight, scrollTop: oldScrollTop } = this.patchSnapshot;
+    const newScrollTop = this.scrollableRef.el.scrollHeight - oldScrollHeight + oldScrollTop;
 
-    const newScrollTop = this._scrollableRef.el.scrollHeight - oldScrollHeight + oldScrollTop;
-    this._scrollableRef.el.scrollTop = newScrollTop;
+    this.scrollableRef.el.scrollTop = newScrollTop;
   }
 
-  _update() {
-    if (!this._scrollableRef.el || !this.props.record) return;
+  /**
+   * Update scroll position and handling loading more messages
+   * @private
+   */
+  _onScroll() {
+    if (!this.scrollableRef.el || !this.messageListView) return;
 
-    const currentMessageCount = this.props.record.messages.length;
-    const isNewMessage = currentMessageCount > this._lastMessageCount;
-    const wasNearBottom = this._willPatchSnapshot?.isNearBottom;
-
-    // Handle scroll position
-    if (this.props.record.isLoadingMore) {
-      this._maintainScrollPosition();
-    } else if (isNewMessage && (wasNearBottom || this.props.record.isAtBottom)) {
-      this._scrollToEnd(!this._willPatchSnapshot); // Smooth scroll only if not initial load
-    }
-
-    // Update tracking variables
-    this._lastMessageCount = currentMessageCount;
-    this._willPatchSnapshot = undefined;
-  }
-
-  _onScrollThrottled() {
-    if (!this._scrollableRef.el || !this.props.record) return;
-
-    const { scrollHeight, scrollTop, clientHeight } = this._scrollableRef.el;
+    const { scrollTop } = this.scrollableRef.el;
     const isAtBottom = this._isNearBottom();
     const isNearTop = this._isNearTop();
 
-    // Update record state
-    this.props.record.update({
-      scrollHeight,
-      scrollTop,
-      isAtBottom,
-      hasUnreadMessages: !isAtBottom && this._lastMessageCount < this.props.record.messages.length
-    });
+    // Update list state
+    this.messageListView.updateScroll(scrollTop, isAtBottom);
 
     // Handle loading more messages
-    if (isNearTop && this.props.record.hasMoreMessages && !this.props.record.isLoadingMore) {
-      this.props.record.loadMoreMessages();
+    if (isNearTop &&
+        this.messageListView.hasMoreMessages &&
+        !this.messageListView.isLoadingMore) {
+      this.messageListView.loadMoreMessages();
     }
 
-    // Clear scrolling status after delay
-    if (this._scrollTimeout) {
-      clearTimeout(this._scrollTimeout);
+    // Update scrolling status
+    this.isScrolling = true;
+    if (this.scrollTimeout) {
+      clearTimeout(this.scrollTimeout);
     }
-    this._scrollTimeout = setTimeout(() => {
-      this._isScrolling = false;
+    this.scrollTimeout = setTimeout(() => {
+      this.isScrolling = false;
     }, 150);
   }
 
+  /**
+   * Handle scroll event
+   * @param {Event} ev Scroll event
+   */
   onScroll(ev) {
-    this._isScrolling = true;
-    this._onScrollThrottled();
+    this.onScrollThrottled();
+  }
+
+  /**
+   * Component update hook
+   */
+  _update() {
+    if (!this.scrollableRef.el || !this.messageListView) return;
+
+    const currentMessageCount = this.messages.length;
+    const isNewMessage = currentMessageCount > this.lastMessageCount;
+    const wasNearBottom = this.patchSnapshot?.isNearBottom;
+
+    // Handle scroll position
+    if (this.messageListView.isLoadingMore) {
+      this._maintainScrollPosition();
+    } else if (isNewMessage && (wasNearBottom || this.messageListView.isAtBottom)) {
+      this._scrollToEnd(!this.patchSnapshot);
+    }
+
+    this.lastMessageCount = currentMessageCount;
+    this.patchSnapshot = undefined;
   }
 }
 
@@ -141,9 +219,18 @@ LLMMessageList.components = {
   LLMMessage,
 };
 
+LLMMessageList.template = "llm.MessageList";
+
 LLMMessageList.props = {
-  record: Object,
-  className: { type: String, optional: true },
+  record: {
+    type: Object,
+    required: true,
+  },
+  className: {
+    type: String,
+    optional: true
+  }
 };
 
-LLMMessageList.template = "llm.MessageList";
+// Register the component
+registry.category("components").add("LLMMessageList", LLMMessageList);

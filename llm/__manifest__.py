@@ -49,9 +49,6 @@
 
             "llm/static/src/components/llm_chat_dialog/llm_chat_dialog.js",
             "llm/static/src/components/llm_chat_dialog/llm_chat_dialog.xml",
-
-            # Registry (must be loaded last)
-            "llm/static/src/components/registry.js",
         ],
     },
 

@@ -1,43 +1,64 @@
-<?xml version="1.0" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <t t-name="llm.Composer" owl="1">
-        <t t-if="composerView">
-            <div
-        class="o_LLMComposer d-flex flex-column p-2 border-top"
-        t-att-class="{ 'o-disabled': composerView.isDisabled }"
-      >
-                <!-- Hidden mirrored textarea for height calculation -->
-                <textarea
-          class="o_LLMComposer_mirroredTextarea position-absolute opacity-0"
-          disabled="1"
-          t-ref="mirroredTextarea"
-        />
+        <div class="o_LLMComposer d-flex flex-column p-2 border-top"
+             t-att-class="{
+                'o-disabled': composerView.isDisabled,
+                [className]: className,
+             }">
+            <!-- Hidden mirrored textarea for height calculation -->
+            <textarea class="o_LLMComposer_mirroredTextarea position-absolute opacity-0"
+                      disabled="1"
+                      t-ref="mirroredTextarea"/>
 
-                <!-- Main composer area -->
-                <div class="o_LLMComposer_inputContainer d-flex gap-2">
-                    <textarea
-            class="o_LLMComposer_textarea form-control"
-            t-att-placeholder="composerView.placeholder || 'Type a message...'"
-            t-att-disabled="composerView.isDisabled"
-            t-on-input="_onInput"
-            t-on-keydown="_onKeydown"
-            t-ref="textarea"
-          />
-                    <button
-            class="o_LLMComposer_sendButton btn btn-primary align-self-end"
-            t-on-click="_onSend"
-            t-att-disabled="composerView.isDisabled"
-          >
-                        <i class="fa fa-paper-plane" />
-                    </button>
+            <!-- Main composer area -->
+            <div class="o_LLMComposer_inputContainer d-flex gap-2">
+                <!-- Textarea with attachments preview -->
+                <div class="o_LLMComposer_textareaWrapper flex-grow-1 position-relative">
+                    <textarea class="o_LLMComposer_textarea form-control"
+                              t-att-placeholder="placeholder"
+                              t-att-disabled="isDisabled"
+                              t-att-value="content"
+                              t-on-input="onInputThrottled"
+                              t-on-keydown="_onKeydown"
+                              t-on-paste="_onPaste"
+                              t-ref="textarea"/>
+
+                    <!-- Character count -->
+                    <div t-if="content.length > 0"
+                         class="o_LLMComposer_charCount position-absolute bottom-0 end-0 p-1">
+                        <small class="text-muted">
+                            <t t-esc="content.length"/>
+                        </small>
+                    </div>
                 </div>
 
-                <!-- Optional helper text -->
-                <small t-if="composerView.isDisabled" class="text-muted mt-2">
-                    <i class="fa fa-spinner fa-spin me-1" />
-                    Assistant is thinking...
-                </small>
+                <!-- Send button -->
+                <button class="o_LLMComposer_sendButton btn btn-primary rounded-circle"
+                        t-att-disabled="!canSubmit"
+                        t-att-title="env._t('Send message (Enter)')"
+                        t-on-click="_onSubmit">
+                    <i class="fa fa-paper-plane"/>
+                </button>
             </div>
-        </t>
+
+            <!-- Error message -->
+            <small t-if="composerView.error" class="text-danger mt-2">
+                <i class="fa fa-exclamation-triangle me-1"/>
+                <t t-esc="composerView.error"/>
+            </small>
+
+            <!-- Loading state -->
+            <small t-elif="isDisabled" class="text-muted mt-2">
+                <i class="fa fa-spinner fa-spin me-1"/>
+                Assistant is thinking...
+            </small>
+
+            <!-- Keyboard shortcuts help -->
+            <small t-else="" class="text-muted mt-2">
+                <i class="fa fa-keyboard-o me-1"/>
+                Press Enter to send, Shift+Enter for new line
+            </small>
+        </div>
     </t>
 </templates>

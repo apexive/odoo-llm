@@ -1,103 +1,194 @@
 /** @odoo-module **/
 
-import { registry } from "@web/core/registry";
-import { Component, onWillDestroy } from "@odoo/owl";
-import { Dialog } from "@web/core/dialog/dialog";
+import { Component, useState, onWillDestroy } from "@odoo/owl";
 import { useService } from "@web/core/utils/hooks";
-import { ThreadViewModel } from "../models";
+import { Dialog } from "@web/core/dialog/dialog";
 import { LLMThreadView } from "../llm_thread_view/llm_thread_view";
-import { ErrorBoundary } from "@web/core/errors/error_boundary";
+import { registry } from "@web/core/registry";
 
+/**
+ * Dialog wrapper component for LLM chat
+ */
 export class LLMChatDialog extends Component {
     setup() {
-        super.setup();
+        // Services
         this.rpc = useService("rpc");
         this.notification = useService("notification");
-        this.messageBus = useService("messaging_service");
+        this.orm = useService("orm");
+        this.dialog = useService("dialog");
+        this.actionService = useService("action");
 
-        this.threadData = null;
-        this.threadView = null;
-        this._isDestroyed = false;
-
-        // Subscribe to events
-        this.messageBus.addEventListener('message-retry', this._onMessageRetry.bind(this));
-
-        // Cleanup on destroy
-        onWillDestroy(() => {
-            this._isDestroyed = true;
-            if (this.threadView) {
-                this.threadView.cleanup();
-            }
-            this.messageBus.removeEventListener('message-retry', this._onMessageRetry);
+        // State
+        this.state = useState({
+            isLoading: true,
+            hasError: false,
+            errorMessage: null,
+            thread: null,
         });
 
+        // Load thread data
         this._loadThread();
+
+        // Cleanup on destroy
+        onWillDestroy(() => this._cleanup());
     }
 
+    /**
+     * Load thread data from server
+     * @private
+     */
     async _loadThread() {
         try {
-            this.threadData = await this.rpc("/llm/thread/data", {
+            // Get thread data
+            const threadData = await this.rpc("/llm/thread/data", {
                 thread_id: this.props.threadId,
             });
 
-            if (this._isDestroyed) return;
+            if (!threadData) {
+                throw new Error(this.env._t("Thread not found"));
+            }
 
-            this.threadView = new ThreadViewModel(this.env, {
+            // Create thread view
+            this.state.thread = this.env.models.LLMThreadView.insert({
                 thread: {
-                    id: this.threadData.id,
-                    name: this.threadData.name,
-                    messages: this.threadData.messages,
-                    provider: this.threadData.provider,
-                    model: this.threadData.model
+                    id: threadData.id,
+                    name: threadData.name,
+                    messages: threadData.messages || [],
+                    provider: threadData.provider,
+                    model: threadData.model,
                 },
-                hasLoadedMessages: true,
             });
-        } catch (error) {
-            if (this._isDestroyed) return;
 
-            this.notification.notify({
-                title: "Error",
-                message: error.message || "Failed to load chat thread",
-                type: "danger"
-            });
+            this.state.isLoading = false;
+
+        } catch (error) {
+            this._handleError(error);
         }
     }
 
-    async _onMessageRetry({ detail: { messageId } }) {
-        if (!this.threadView) return;
+    /**
+     * Handle errors
+     * @param {Error} error Error object
+     * @private
+     */
+    _handleError(error) {
+        this.state.isLoading = false;
+        this.state.hasError = true;
+        this.state.errorMessage = error.message || this.env._t("Failed to load chat thread");
 
-        try {
-            await this.threadView.retryMessage(messageId);
-        } catch (error) {
-            this.notification.notify({
-                title: "Error",
-                message: error.message || "Failed to retry message",
-                type: "danger"
-            });
+        this.notification.add(this.state.errorMessage, {
+            type: "danger",
+            sticky: false,
+        });
+    }
+
+    /**
+     * Cleanup resources
+     * @private
+     */
+    _cleanup() {
+        if (this.state.thread) {
+            this.state.thread.delete();
         }
+    }
+
+    /**
+     * Handle retry loading
+     * @private
+     */
+    async _onRetryLoad() {
+        this.state.isLoading = true;
+        this.state.hasError = false;
+        this.state.errorMessage = null;
+        await this._loadThread();
+    }
+
+    /**
+     * Handle thread export
+     * @private
+     */
+    async _onExport() {
+        try {
+            const action = await this.orm.call(
+                'llm.thread',
+                'action_export_messages',
+                [[this.props.threadId]]
+            );
+            await this.actionService.doAction(action);
+        } catch (error) {
+            this.notification.add(
+                this.env._t("Failed to export messages"),
+                { type: "danger" }
+            );
+        }
+    }
+
+    /**
+     * Handle thread clearing
+     * @private
+     */
+    async _onClear() {
+        this.dialog.add(ConfirmDialog, {
+            title: this.env._t("Clear Chat"),
+            body: this.env._t("Are you sure you want to clear all messages? This cannot be undone."),
+            confirm: async () => {
+                try {
+                    await this.orm.call(
+                        'llm.thread',
+                        'action_clear_messages',
+                        [[this.props.threadId]]
+                    );
+                    await this._loadThread();
+                } catch (error) {
+                    this.notification.add(
+                        this.env._t("Failed to clear messages"),
+                        { type: "danger" }
+                    );
+                }
+            },
+        });
     }
 }
 
+LLMChatDialog.template = "llm.ChatDialog";
 LLMChatDialog.components = {
     Dialog,
     LLMThreadView,
-    ErrorBoundary
 };
 
 LLMChatDialog.props = {
-    threadId: Number,
-    close: Function,
+    threadId: {
+        type: Number,
+        required: true,
+    },
+    close: {
+        type: Function,
+        required: true,
+    },
 };
 
-LLMChatDialog.template = "llm.ChatDialog";
-
-// Client Action Component
+/**
+ * Chat dialog action component
+ */
 export class LLMChatDialogAction extends Component {
     setup() {
-        this.title = this.env.config.actionTitle || "Chat";
+        this.title = this.env.config.actionTitle || this.env._t("Chat");
         this.threadId = this.props.params?.thread_id;
+
+        if (!this.threadId) {
+            this.notification.add(
+                this.env._t("No thread specified"),
+                { type: "danger" }
+            );
+            if (this.props.close) {
+                this.props.close();
+            }
+        }
     }
 
+    /**
+     * Handle dialog close
+     */
     onClose() {
         if (this.props.close) {
             this.props.close();
@@ -105,14 +196,12 @@ export class LLMChatDialogAction extends Component {
     }
 }
 
+LLMChatDialogAction.template = "llm.ChatDialogAction";
 LLMChatDialogAction.components = {
     Dialog,
     LLMChatDialog,
 };
 
-LLMChatDialogAction.template = "llm.ChatDialogAction";
-
-// Register the client action
-registry.category("actions").add("llm_chat_dialog", {
-    component: LLMChatDialogAction,
-});
+// Register components and action
+registry.category("components").add("LLMChatDialog", LLMChatDialog);
+registry.category("actions").add("llm_chat_dialog", LLMChatDialogAction);
