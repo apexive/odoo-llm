@@ -13,7 +13,7 @@
                     'justify-content-start': !isUserMessage,
                  }">
                 <div class="o_LLMMessage_content">
-                    <!-- Author name for non-user messages -->
+                    <!-- Author name -->
                     <t t-if="!isUserMessage">
                         <div class="o_LLMMessage_author mb-1">
                             <span class="fw-bold" t-esc="authorName"/>
@@ -22,20 +22,18 @@
 
                     <!-- Message bubble -->
                     <div class="o_LLMMessage_bubble position-relative"
-                         t-ref="content"
                          t-att-class="{
                             'o-user': isUserMessage,
                             'o-assistant': !isUserMessage,
                             [statusClass]: statusClass
                          }">
-                        <!-- Message content -->
-                        <div class="o_LLMMessage_text"
-                             t-ref="prettyBody"
-                             t-on-mounted="onContentMounted"/>
+                        <!-- Simple message content -->
+                        <div class="o_LLMMessage_text" style="white-space: pre-wrap;">
+                            <t t-esc="message.content"/>
+                        </div>
 
                         <!-- Action buttons -->
                         <div t-if="!isUserMessage" class="o_LLMMessage_actions mt-2">
-                            <!-- Copy button -->
                             <button class="btn btn-link btn-sm text-muted me-2"
                                     t-on-click="onCopyClick"
                                     title="Copy message">
@@ -69,12 +67,8 @@
 
                     <!-- Error message -->
                     <div t-if="message.error"
-                         class="o_LLMMessage_error mt-1"
-                         t-att-class="{
-                            'text-end': isUserMessage,
-                            'text-start': !isUserMessage,
-                         }">
-                        <small class="text-danger">
+                         class="o_LLMMessage_error mt-1 text-danger">
+                        <small>
                             <i class="fa fa-exclamation-triangle me-1"/>
                             <t t-esc="message.error"/>
                         </small>

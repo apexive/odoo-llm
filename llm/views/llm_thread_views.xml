@@ -22,9 +22,16 @@
                                 <field name="model_id" />
                             </group>
                         </group>
-                        <div class="o_llm_chat_container">
-                            <widget name="llm_thread_view"/>
-                        </div>
+                        <field name="message_ids">
+                            <tree>
+                                <field name="create_date" />
+                                <field name="role" />
+                                <field name="content" />
+                            </tree>
+                        </field>
+<!--                        <div class="o_llm_chat_container">-->
+<!--                            <widget name="llm_thread_view"/>-->
+<!--                        </div>-->
                     </sheet>
                 </form>
             </field>
