@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm.Composer" owl="1">
+        <div
+      class="o_LLMComposer d-flex flex-column p-2 border-top"
+      t-att-class="{
+                'o-disabled': isDisabled,
+                [props.className]: props.className,
+             }"
+    >
+            <!-- Main composer area -->
+            <div class="o_LLMComposer_inputContainer d-flex gap-2">
+                <!-- Textarea -->
+                <div
+          class="o_LLMComposer_textareaWrapper flex-grow-1 position-relative"
+        >
+                    <textarea
+            class="o_LLMComposer_textarea form-control"
+            t-att-placeholder="placeholder"
+            t-att-disabled="isDisabled"
+            t-model="state.content"
+            t-on-input="onInputThrottled"
+            t-on-keydown="_onKeydown"
+            t-on-paste="_onPaste"
+            t-ref="textarea"
+          />
+
+                    <!-- Character count -->
+                    <div
+            t-if="state.content.length > 0"
+            class="o_LLMComposer_charCount position-absolute bottom-0 end-0 p-1"
+          >
+                        <small class="text-muted">
+                            <t t-esc="state.content.length" />
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Send button -->
+                <button
+          class="o_LLMComposer_sendButton btn btn-primary rounded-circle"
+          t-att-disabled="!canSubmit"
+          t-att-title="env._t('Send message (Enter)')"
+          t-on-click="_onSubmit"
+        >
+                    <i class="fa fa-paper-plane" />
+                </button>
+            </div>
+
+            <!-- Loading state -->
+            <small t-if="isDisabled" class="text-muted mt-2">
+                <i class="fa fa-spinner fa-spin me-1" />
+                Assistant is thinking...
+            </small>
+
+            <!-- Keyboard shortcuts help -->
+            <small t-else="" class="text-muted mt-2">
+                <i class="fa fa-keyboard-o me-1" />
+                Press Enter to send, Shift+Enter for new line
+            </small>
+        </div>
+    </t>
+</templates>

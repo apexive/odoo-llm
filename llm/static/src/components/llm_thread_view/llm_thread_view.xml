@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm.ThreadView" owl="1">
+        <div
+      class="o_LLMThreadView d-flex flex-column h-100"
+      t-att-class="props.className"
+      t-ref="container"
+    >
+
+            <!-- Header -->
+            <div
+        t-if="state.thread"
+        class="o_LLMThreadView_header border-bottom p-3"
+      >
+                <div class="d-flex align-items-center justify-content-between">
+                    <!-- Title and Model -->
+                    <div class="d-flex align-items-center">
+                        <h6 class="mb-0" t-esc="state.thread.name" />
+                        <small
+              t-if="state.thread.model"
+              class="text-muted ms-2"
+            >
+                            <t t-esc="state.thread.model.name" />
+                        </small>
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="o_LLMThreadView_actions">
+                        <button
+              t-if="state.isLoadingInitial || state.isLoadingMore"
+              class="btn btn-link btn-sm text-muted"
+              disabled="1"
+            >
+                            <i class="fa fa-circle-o-notch fa-spin" />
+                        </button>
+                        <button
+              t-else=""
+              class="btn btn-link btn-sm text-muted"
+              t-on-click="_loadMessages"
+              t-att-title="env._t('Refresh')"
+            >
+                            <i class="fa fa-refresh" />
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Provider Info -->
+                <div t-if="state.thread.model" class="mt-2 small text-muted">
+                    <i class="fa fa-info-circle me-1" />
+                    <t t-esc="state.thread.provider.name" />
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="o_LLMThreadView_content flex-grow-1 d-flex flex-column">
+                <!-- Initial Loading State -->
+                <div
+          t-if="state.isLoadingInitial"
+          class="flex-grow-1 d-flex align-items-center justify-content-center"
+        >
+                    <div class="text-center text-muted">
+                        <i class="fa fa-circle-o-notch fa-spin fa-2x mb-2" />
+                        <div>Loading conversation...</div>
+                    </div>
+                </div>
+
+                <!-- Error State -->
+                <div
+          t-elif="state.hasError"
+          class="flex-grow-1 d-flex flex-column align-items-center justify-content-center p-4"
+        >
+                    <div class="text-danger mb-3">
+                        <i class="fa fa-exclamation-triangle fa-2x" />
+                    </div>
+                    <div
+            class="text-danger mb-2"
+            t-esc="state.errorMessage || env._t('Something went wrong')"
+          />
+                    <button
+            class="btn btn-outline-danger"
+            t-on-click="_loadMessages"
+          >
+                        <i class="fa fa-refresh me-1" />
+                        Try Again
+                    </button>
+                </div>
+
+                <!-- Message List -->
+                <t t-elif="messageListRecord">
+                    <LLMMessageList
+            className="'flex-grow-1'"
+            record="messageListRecord"
+          />
+                </t>
+
+                <!-- Empty State -->
+                <div
+          t-else=""
+          class="flex-grow-1 d-flex align-items-center justify-content-center p-4"
+        >
+                    <div class="text-center text-muted">
+                        <i class="fa fa-comments-o fa-3x mb-2" />
+                        <div>Start a conversation...</div>
+                    </div>
+                </div>
+
+                <!-- Composer -->
+                <LLMComposer
+          isDisabled="state.composerDisabled"
+          onSubmit.bind="_onMessageSubmit"
+        />
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm.MessageList" owl="1">
+        <div
+      class="o_LLMMessageList position-relative d-flex flex-column overflow-auto"
+      t-att-class="props.className"
+      t-on-scroll="onScroll"
+      t-ref="scrollable"
+    >
+
+            <!-- Loading older messages indicator -->
+            <div
+        t-if="messageListView.isLoadingMore"
+        class="o_LLMMessageList_loading align-self-center py-2"
+      >
+                <div class="d-flex align-items-center text-muted">
+                    <i class="fa fa-circle-o-notch fa-spin me-2" />
+                    Loading older messages...
+                </div>
+            </div>
+
+            <!-- Load more messages button -->
+            <button
+        t-elif="messageListView.hasMoreMessages"
+        class="o_LLMMessageList_loadMore btn btn-link align-self-center py-2"
+        t-on-click="messageListView.loadMoreMessages"
+      >
+                <i class="fa fa-chevron-up me-1" />
+                Load more
+            </button>
+
+            <!-- Empty state -->
+            <div
+        t-if="isEmpty and !messageListView.isLoading"
+        class="o_LLMMessageList_empty flex-grow-1 d-flex align-items-center justify-content-center p-4"
+      >
+                <div class="text-center text-muted">
+                    <i class="fa fa-comments-o fa-3x mb-2" />
+                    <div>Start a conversation...</div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <t t-else="">
+                <div class="o_LLMMessageList_messages px-3">
+                    <t t-foreach="messages" t-as="message" t-key="message.id">
+                        <Transition visible="true" name="'o-message-fade'">
+                            <LLMMessage
+                record="message"
+                onRetry="(msg) => props.onMessageRetry?.(msg)"
+              />
+                        </Transition>
+                    </t>
+                </div>
+            </t>
+
+            <!-- New messages indicator -->
+            <Transition
+        visible="messageListView.hasUnreadMessages and !messageListView.isAtBottom"
+        name="'o-fade'"
+        t-slot-scope="transition"
+      >
+                <div
+          class="o_LLMMessageList_newMessages position-sticky bottom-0 start-50 translate-middle-x mb-3"
+          t-att-class="transition.className"
+          t-on-click="_scrollToEnd"
+        >
+                    <button
+            class="btn btn-primary btn-sm rounded-pill shadow-sm"
+          >
+                        <i class="fa fa-arrow-down me-1" />
+                        New messages
+                    </button>
+                </div>
+            </Transition>
+
+            <!-- Typing indicator -->
+            <div
+        t-if="messageListView.isTyping"
+        class="o_LLMMessageList_typing position-sticky bottom-0 start-0 p-3"
+      >
+                <div class="text-muted small">
+                    <i class="fa fa-circle-o-notch fa-spin me-1" />
+                    Assistant is typing...
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

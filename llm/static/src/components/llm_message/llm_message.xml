@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm.Message" owl="1">
+        <div
+      class="o_LLMMessage position-relative py-2"
+      t-att-class="{
+                'o-user-message': isUserMessage,
+                'o-assistant-message': !isUserMessage,
+                [className]: className,
+             }"
+    >
+            <div
+        class="o_LLMMessage_container d-flex"
+        t-att-class="{
+                    'justify-content-end': isUserMessage,
+                    'justify-content-start': !isUserMessage,
+                 }"
+      >
+                <div class="o_LLMMessage_content">
+                    <!-- Author name -->
+                    <t t-if="!isUserMessage">
+                        <div class="o_LLMMessage_author mb-1">
+                            <span class="fw-bold" t-esc="authorName" />
+                        </div>
+                    </t>
+
+                    <!-- Message bubble -->
+                    <div
+            class="o_LLMMessage_bubble position-relative"
+            t-att-class="{
+                            'o-user': isUserMessage,
+                            'o-assistant': !isUserMessage,
+                            [statusClass]: statusClass
+                         }"
+          >
+                        <!-- Simple message content -->
+                        <div
+              class="o_LLMMessage_text"
+              style="white-space: pre-wrap;"
+            >
+                            <t t-esc="message.content" />
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div
+              t-if="!isUserMessage"
+              class="o_LLMMessage_actions mt-2"
+            >
+                            <button
+                class="btn btn-link btn-sm text-muted me-2"
+                t-on-click="onCopyClick"
+                title="Copy message"
+              >
+                                <i class="fa fa-copy" /> Copy
+                            </button>
+
+                            <!-- Retry button for error state -->
+                            <button
+                t-if="showRetry"
+                class="btn btn-link btn-sm text-danger"
+                t-on-click="onRetryClick"
+              >
+                                <i class="fa fa-refresh" /> Retry
+                            </button>
+                        </div>
+
+                        <!-- Loading indicator -->
+                        <div
+              t-if="message.status === 'sending'"
+              class="o_LLMMessage_loading position-absolute top-0 end-0 p-2"
+            >
+                            <i class="fa fa-circle-o-notch fa-spin" />
+                        </div>
+                    </div>
+
+                    <!-- Timestamp -->
+                    <div
+            t-if="formattedDate"
+            class="o_LLMMessage_date"
+            t-att-class="{
+                            'text-end': isUserMessage,
+                            'text-start': !isUserMessage,
+                         }"
+          >
+                        <small class="text-muted" t-esc="formattedDate" />
+                    </div>
+
+                    <!-- Error message -->
+                    <div
+            t-if="message.error"
+            class="o_LLMMessage_error mt-1 text-danger"
+          >
+                        <small>
+                            <i class="fa fa-exclamation-triangle me-1" />
+                            <t t-esc="message.error" />
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,68 @@
+// ------------------------------------------------------------------
+// Layout
+// ------------------------------------------------------------------
+
+.o_LLMComposer {
+  min-height: 0;
+  background-color: var(--o-view-background-color, #{$o-view-background-color});
+}
+
+.o_LLMComposer_textarea {
+  min-height: 60px;
+  max-height: 200px;
+  resize: none;
+  overflow-y: auto;
+  line-height: 1.4;
+  padding: $input-padding-y $input-padding-x;
+}
+
+.o_LLMComposer_mirroredTextarea {
+  min-height: 0;
+  height: 0;
+  top: -10000px;
+  visibility: hidden;
+  position: absolute;
+}
+
+.o_LLMComposer_sendButton {
+  height: 38px;
+  width: 38px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:disabled {
+    opacity: 0.65;
+  }
+}
+
+// ------------------------------------------------------------------
+// Style
+// ------------------------------------------------------------------
+
+.o_LLMComposer {
+  &.o-disabled {
+    .o_LLMComposer_textarea {
+      background-color: var(--o-gray-100, #{$gray-100});
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Dark mode support
+.o-dark-mode .o_LLMComposer {
+  .o_LLMComposer_textarea {
+    background-color: var(--o-gray-800, #{$gray-800});
+    border-color: var(--o-gray-700, #{$gray-700});
+    color: var(--o-gray-100, #{$gray-100});
+
+    &::placeholder {
+      color: var(--o-gray-500, #{$gray-500});
+    }
+
+    &:disabled {
+      background-color: var(--o-gray-900, #{$gray-900});
+    }
+  }
+}
