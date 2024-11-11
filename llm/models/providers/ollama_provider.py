@@ -1,5 +1,4 @@
 import ollama
-import requests
 
 from odoo import models
 

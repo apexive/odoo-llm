@@ -1,5 +1,6 @@
-from odoo import models
 from openai import OpenAI
+
+from odoo import models
 
 
 class OpenAIProvider(models.Model):
@@ -9,7 +10,9 @@ class OpenAIProvider(models.Model):
 
     def get_client(self):
         if not OpenAIProvider._client:
-            OpenAIProvider._client = OpenAI(api_key=self.api_key, base_url=self.api_base or None)
+            OpenAIProvider._client = OpenAI(
+                api_key=self.api_key, base_url=self.api_base or None
+            )
             return OpenAIProvider._client
 
     def embedding(self, texts, model=None):
@@ -27,10 +30,16 @@ class OpenAIProvider(models.Model):
 
     @staticmethod
     def response2message(response):
-        print(response)
         return {
             "role": response.choices[0].message.role,
             "content": response.choices[0].message.content,
+        }
+
+    @staticmethod
+    def chunk2message(response):
+        return {
+            "role": "assistant",
+            "content": response.choices[0].delta.content,
         }
 
     def chat(self, messages, model=None, stream=False):
@@ -48,4 +57,4 @@ class OpenAIProvider(models.Model):
         else:
             for chunk in response:
                 if chunk.choices[0].delta.content:
-                    yield OpenAIProvider.response2message(chunk)
+                    yield OpenAIProvider.chunk2message(chunk)

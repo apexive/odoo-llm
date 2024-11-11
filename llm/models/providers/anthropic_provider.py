@@ -1,5 +1,6 @@
-from odoo import models
 from anthropic import Anthropic
+
+from odoo import models
 
 
 class AnthropicProvider(models.Model):

@@ -1,7 +1,8 @@
 from datetime import datetime
 
-from odoo import models
 import replicate
+
+from odoo import models
 
 
 def serialize_datetime(obj):

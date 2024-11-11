@@ -84,11 +84,13 @@ class LLMThread(models.Model):
         """Simply post a message to the thread"""
         _logger.debug("Posting message - role: %s, content: %s", role, content)
 
-        message = self.env["llm.message"].create({
-            "thread_id": self.id,
-            "content": content,
-            "role": role,
-        })
+        message = self.env["llm.message"].create(
+            {
+                "thread_id": self.id,
+                "content": content,
+                "role": role,
+            }
+        )
         return message
 
     def get_assistant_response(self, stream=True):
@@ -108,11 +110,13 @@ class LLMThread(models.Model):
             # Save final AI response if we have content
             if content:
                 _logger.debug("Saving assistant response: %s", content)
-                self.env["llm.message"].create({
-                    "thread_id": self.id,
-                    "content": content,
-                    "role": "assistant",
-                })
+                self.env["llm.message"].create(
+                    {
+                        "thread_id": self.id,
+                        "content": content,
+                        "role": "assistant",
+                    }
+                )
 
         except Exception as e:
             _logger.error("Error getting AI response: %s", str(e))

@@ -23,6 +23,7 @@ export class LLMThreadView extends Component {
 
     // Refs
     this.containerRef = useRef("container");
+    this.eventSource = null;
 
     // State
     this.state = useState({
@@ -53,57 +54,13 @@ export class LLMThreadView extends Component {
   }
 
   /**
-   * Read and process streaming response
-   * @param {ReadableStream} stream Response stream
+   * Get CSRF token from the page
+   * @returns {string} CSRF token
    * @private
    */
-  async _processStream(response) {
-    const reader = response.body.getReader();
-    let accumulatedContent = "";
-
-    try {
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Parse the streamed data
-        const chunk = new TextDecoder().decode(value);
-        const lines = chunk.split("\n").filter(line => line.trim());
-
-        for (const line of lines) {
-          if (line.startsWith("data: ")) {
-            const data = line.slice(5);
-            if (data === "[DONE]") continue;
-
-            try {
-              const parsed = JSON.parse(data);
-              if (parsed.content) {
-                accumulatedContent += parsed.content;
-
-                // Update streaming message in state
-                this.state.streamedMessage = {
-                  id: "streaming",
-                  role: "assistant",
-                  content: accumulatedContent,
-                  timestamp: new Date().toISOString(),
-                  author: this.state.thread?.model?.name || "Assistant",
-                  isStreaming: true,
-                };
-
-                // Force component update
-                this.render();
-              }
-            } catch (e) {
-              console.error("Error parsing stream data:", e);
-            }
-          }
-        }
-      }
-    } finally {
-      reader.releaseLock();
-    }
-
-    return accumulatedContent;
+  _getCSRFToken() {
+    const tokenEl = document.querySelector('meta[name="csrf-token"]');
+    return tokenEl ? tokenEl.getAttribute("content") : "";
   }
 
   /**
@@ -117,57 +74,126 @@ export class LLMThreadView extends Component {
     // Disable composer while processing
     this.state.composerDisabled = true;
 
+    // Clean up any existing EventSource
+    this._closeEventSource();
+
     try {
-      // First, post the user's message
+      // Post user message
       await this.rpc("/llm/thread/post_message", {
         thread_id: this.threadId,
         content,
         role: "user",
       });
 
-      // Reload to show the user's message immediately
+      // Reload to show user message
       await this._loadMessages();
 
-      // Start streaming the assistant's response
+      // Start streaming
       this.state.isStreaming = true;
       this.state.streamedMessage = null;
 
-      // Make RPC call - CSRF token is automatically handled by the rpc service
-      const response = await this.rpc("/llm/thread/get_assistant_response", {
-        thread_id: this.threadId,
-      });
+      // Get CSRF token
+      const token = this._getCSRFToken();
 
-      if (response.error) {
-        throw new Error(response.error);
-      }
+      // Create new EventSource
+      this.eventSource = new EventSource(
+        `/llm/thread/stream_response?thread_id=${this.threadId}&csrf_token=${token}`
+      );
 
-      // Process the messages from the response
-      for (const message of response) {
-        if (message.content) {
-          this.state.streamedMessage = {
-            id: "streaming",
-            role: "assistant",
-            content: message.content,
-            timestamp: new Date().toISOString(),
-            author: this.state.thread?.model?.name || "Assistant",
-            isStreaming: true,
-          };
-          // Force component update
-          this.render();
+      let accumulatedContent = "";
+
+      await new Promise((resolve, reject) => {
+        if (!this.eventSource) {
+          reject(new Error("EventSource not initialized"));
+          return;
         }
-      }
 
-      // Final reload to get the complete conversation
-      await this._loadMessages();
+        this.eventSource.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+
+            switch (data.type) {
+              case "start":
+                // Stream started
+                break;
+
+              case "content":
+                if (this.isDestroyed()) {
+                  this._closeEventSource();
+                  resolve();
+                  return;
+                }
+
+                // Accumulate content
+                accumulatedContent += data.content;
+
+                // Update streaming message
+                this.state.streamedMessage = {
+                  id: "streaming",
+                  role: "assistant",
+                  content: accumulatedContent,
+                  timestamp: new Date().toISOString(),
+                  author: this.state.thread?.model?.name || "Assistant",
+                  isStreaming: true,
+                };
+                this.render();
+                break;
+
+              case "error":
+                this._closeEventSource();
+                reject(new Error(data.error));
+                break;
+
+              case "end":
+                this._closeEventSource();
+                resolve();
+                break;
+            }
+          } catch (error) {
+            this._closeEventSource();
+            reject(error);
+          }
+        };
+
+        this.eventSource.onerror = (error) => {
+          this._closeEventSource();
+          reject(new Error("Stream connection failed"));
+        };
+      });
     } catch (error) {
       this.notification.add(error.message || "Failed to send message", {
         type: "danger",
       });
     } finally {
+      // Clean up
       this.state.composerDisabled = false;
       this.state.isStreaming = false;
       this.state.streamedMessage = null;
+      this._closeEventSource();
+
+      // Final reload to get complete conversation
+      await this._loadMessages();
     }
+  }
+
+  /**
+   * Close and cleanup EventSource
+   * @private
+   */
+  _closeEventSource() {
+    if (this.eventSource) {
+      this.eventSource.close();
+      this.eventSource = null;
+    }
+  }
+
+  /**
+   * Check if component is destroyed
+   * @returns {boolean}
+   * @private
+   */
+  isDestroyed() {
+    return !this.containerRef.el || !this.containerRef.el.isConnected;
   }
 
   /**
@@ -244,7 +270,7 @@ export class LLMThreadView extends Component {
    * @private
    */
   _cleanup() {
-    // Add cleanup logic if needed
+    this._closeEventSource();
   }
 }
 
