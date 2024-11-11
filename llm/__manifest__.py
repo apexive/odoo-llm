@@ -15,9 +15,9 @@
         - Anthropic
     """,
     "author": "Apexive Solutions LLC",
-    "website": "https://github.com/smartops-aero/flight",
+    "website": "https://github.com/apexive/odoo-llm",
     "category": "Technical",
-    "version": "16.0.1.0.0",
+    "version": "16.0.1.0.1",
     "depends": ["mail", "web"],
     "data": [
         "security/llm_security.xml",
@@ -25,6 +25,7 @@
         "views/llm_views.xml",
         "views/llm_thread_views.xml",
     ],
+    "license": "LGPL-3",
     "assets": {
         "web.assets_backend": [
             # Base Models
@@ -50,4 +51,7 @@
         "python": ["openai", "replicate", "ollama", "anthropic"],
     },
     "installable": True,
+    "images": [
+        "static/description/banner.jpeg",
+    ],
 }
