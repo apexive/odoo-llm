@@ -25,12 +25,14 @@ class LLMProviderBase(models.AbstractModel):
     def chat(self, messages, model=None, stream=False):
         client = self.get_client()
         model = self.get_model(model, model_use="chat")
-        print(messages)
-        return client.chat(
+
+        responses = client.chat(
             messages=messages,
             stream=stream,
             model=model.name,
-        )['message']
+        )
+        for response in responses if stream else (responses,):
+            yield response["message"]
 
     def embedding(self, texts, model=None):
         client = self.get_client()
@@ -148,8 +150,6 @@ class LLMProvider(models.Model):
         return self.provider_impl_id.get_client()
 
     def chat(self, messages, model=None, stream=False):
-        print("IN THE CHAIN")
-        print(stream)
         return self.provider_impl_id.chat(messages, model=model, stream=stream)
 
     def embedding(self, texts, model=None):

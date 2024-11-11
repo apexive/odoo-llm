@@ -46,7 +46,7 @@ class LLMThread(models.Model):
         )
         return [msg.to_provider_message() for msg in messages]
 
-    def chat(self, content, role="user"):
+    def post_message(self, content, role="user", stream=False):
         """Regular non-streaming chat method"""
         # Save user message
         self.env["llm.message"].create({
@@ -58,53 +58,21 @@ class LLMThread(models.Model):
         if role == "user":
             # Get AI response
             messages = self.get_chat_messages()
-            response = self.model_id.chat(messages, stream=False)
+            print(messages)
+            responses = self.model_id.chat(messages, stream=stream)
+            print(responses)
+
+            content = ""
+            for response in responses:
+                content += response["content"]
+                yield response
 
             # Save AI response
             self.env["llm.message"].create({
                 "thread_id": self.id,
-                "content": response,
+                "content": content,
                 "role": "assistant",
             })
-        return True
-
-    def chat_stream(self, content, role="user"):
-        """Streaming chat method"""
-        # Save user message
-        self.env["llm.message"].create({
-            "thread_id": self.id,
-            "content": content,
-            "role": role,
-        })
-
-        if role == "user":
-            # Get AI response with streaming
-            messages = self.get_chat_messages()
-            response_stream = self.model_id.chat(messages, stream=True)
-
-            # Initialize content accumulator
-            accumulated_content = ""
-
-            # Stream response chunks
-            for chunk in response_stream:
-                accumulated_content += chunk
-                yield f'data: {{"content": "{chunk}"}}'
-
-            # End stream
-            yield "[DONE]"
-
-            # Save complete response
-            self.env["llm.message"].create({
-                "thread_id": self.id,
-                "content": accumulated_content,
-                "role": "assistant",
-            })
-
-    def send_message(self, content, role="user", stream=False):
-        """Unified message sending interface"""
-        if stream:
-            return self.chat_stream(content, role)
-        return self.chat(content, role)
 
     def action_open_chat(self):
         """Open chat in dialog"""
