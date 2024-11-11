@@ -1,4 +1,8 @@
+import logging
+
 from odoo import api, fields, models
+
+_logger = logging.getLogger(__name__)
 
 
 class LLMThread(models.Model):
@@ -46,34 +50,6 @@ class LLMThread(models.Model):
         )
         return [msg.to_provider_message() for msg in messages]
 
-    def post_message(self, content, role="user", stream=False):
-        """Regular non-streaming chat method"""
-        # Save user message
-        self.env["llm.message"].create({
-            "thread_id": self.id,
-            "content": content,
-            "role": role,
-        })
-
-        if role == "user":
-            # Get AI response
-            messages = self.get_chat_messages()
-            print(messages)
-            responses = self.model_id.chat(messages, stream=stream)
-            print(responses)
-
-            content = ""
-            for response in responses:
-                content += response["content"]
-                yield response
-
-            # Save AI response
-            self.env["llm.message"].create({
-                "thread_id": self.id,
-                "content": content,
-                "role": "assistant",
-            })
-
     def action_open_chat(self):
         """Open chat in dialog"""
         self.ensure_one()
@@ -103,6 +79,44 @@ class LLMThread(models.Model):
                 "name": self.provider_id.name,
             },
         }
+
+    def post_message(self, content, role="user"):
+        """Simply post a message to the thread"""
+        _logger.debug("Posting message - role: %s, content: %s", role, content)
+
+        message = self.env["llm.message"].create({
+            "thread_id": self.id,
+            "content": content,
+            "role": role,
+        })
+        return message
+
+    def get_assistant_response(self, stream=True):
+        """Get streaming response from assistant based on conversation history"""
+        try:
+            # Get conversation history
+            messages = self.get_chat_messages()
+            _logger.debug("Getting assistant response for messages: %s", messages)
+
+            # Get AI response
+            content = ""
+            for response in self.model_id.chat(messages, stream=stream):
+                if response.get("content"):
+                    content += response.get("content", "")
+                    yield response
+
+            # Save final AI response if we have content
+            if content:
+                _logger.debug("Saving assistant response: %s", content)
+                self.env["llm.message"].create({
+                    "thread_id": self.id,
+                    "content": content,
+                    "role": "assistant",
+                })
+
+        except Exception as e:
+            _logger.error("Error getting AI response: %s", str(e))
+            yield {"error": str(e)}
 
 
 class LLMMessage(models.Model):

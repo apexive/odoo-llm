@@ -1,5 +1,3 @@
-# llm/models/llm_model.py
-
 from odoo import api, fields, models
 
 MODEL_USE = [
@@ -53,3 +51,4 @@ class LLMModel(models.Model):
     def embedding(self, texts):
         """Generate embeddings using this model"""
         return self.provider_id.embedding(texts, model=self)
+

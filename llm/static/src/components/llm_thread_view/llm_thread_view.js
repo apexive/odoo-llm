@@ -34,6 +34,7 @@ export class LLMThreadView extends Component {
       composerDisabled: false,
       isStreaming: false,
       streamedMessage: null,
+      messages: [],
     });
 
     // Get thread ID from props or params
@@ -52,40 +53,46 @@ export class LLMThreadView extends Component {
   }
 
   /**
-   * Read stream response data
+   * Read and process streaming response
    * @param {ReadableStream} stream Response stream
    * @private
    */
-  async _readStream(stream) {
-    const reader = stream.getReader();
-    let content = "";
+  async _processStream(response) {
+    const reader = response.body.getReader();
+    let accumulatedContent = "";
 
     try {
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        // Parse and accumulate streamed content
-        const text = new TextDecoder().decode(value);
-        const lines = text.split("\n").filter((line) => line.trim());
+        // Parse the streamed data
+        const chunk = new TextDecoder().decode(value);
+        const lines = chunk.split("\n").filter(line => line.trim());
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
             const data = line.slice(5);
             if (data === "[DONE]") continue;
+
             try {
               const parsed = JSON.parse(data);
-              content += parsed;
+              if (parsed.content) {
+                accumulatedContent += parsed.content;
 
-              // Update streamed message in state
-              this.state.streamedMessage = {
-                id: "streaming",
-                role: "assistant",
-                content,
-                timestamp: new Date().toISOString(),
-                author: this.state.thread?.model?.name || "Assistant",
-                isStreaming: true,
-              };
+                // Update streaming message in state
+                this.state.streamedMessage = {
+                  id: "streaming",
+                  role: "assistant",
+                  content: accumulatedContent,
+                  timestamp: new Date().toISOString(),
+                  author: this.state.thread?.model?.name || "Assistant",
+                  isStreaming: true,
+                };
+
+                // Force component update
+                this.render();
+              }
             } catch (e) {
               console.error("Error parsing stream data:", e);
             }
@@ -94,15 +101,13 @@ export class LLMThreadView extends Component {
       }
     } finally {
       reader.releaseLock();
-      // Clear streaming state and reload messages
-      this.state.isStreaming = false;
-      this.state.streamedMessage = null;
-      await this._loadMessages();
     }
+
+    return accumulatedContent;
   }
 
   /**
-   * Handle message submission with streaming support
+   * Handle message submission with streaming response
    * @param {string} content Message content
    * @private
    */
@@ -113,41 +118,47 @@ export class LLMThreadView extends Component {
     this.state.composerDisabled = true;
 
     try {
-      // Start streaming state
+      // First, post the user's message
+      await this.rpc("/llm/thread/post_message", {
+        thread_id: this.threadId,
+        content,
+        role: "user",
+      });
+
+      // Reload to show the user's message immediately
+      await this._loadMessages();
+
+      // Start streaming the assistant's response
       this.state.isStreaming = true;
       this.state.streamedMessage = null;
 
-      const response = await fetch(`/llm/thread/post_message`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          method: "call",
-          params: {
-            thread_id: this.threadId,
-            content,
-            role: "user",
-            stream: true,
-          },
-        }),
+      // Make RPC call - CSRF token is automatically handled by the rpc service
+      const response = await this.rpc("/llm/thread/get_assistant_response", {
+        thread_id: this.threadId,
       });
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+      if (response.error) {
+        throw new Error(response.error);
       }
 
-      if (response.headers.get("content-type").includes("text/event-stream")) {
-        await this._readStream(response.body);
-      } else {
-        // Handle non-streaming response
-        const result = await response.json();
-        if (result.error) {
-          throw new Error(result.error.message || "Unknown error");
+      // Process the messages from the response
+      for (const message of response) {
+        if (message.content) {
+          this.state.streamedMessage = {
+            id: "streaming",
+            role: "assistant",
+            content: message.content,
+            timestamp: new Date().toISOString(),
+            author: this.state.thread?.model?.name || "Assistant",
+            isStreaming: true,
+          };
+          // Force component update
+          this.render();
         }
-        await this._loadMessages();
       }
+
+      // Final reload to get the complete conversation
+      await this._loadMessages();
     } catch (error) {
       this.notification.add(error.message || "Failed to send message", {
         type: "danger",
@@ -155,6 +166,7 @@ export class LLMThreadView extends Component {
     } finally {
       this.state.composerDisabled = false;
       this.state.isStreaming = false;
+      this.state.streamedMessage = null;
     }
   }
 
@@ -178,7 +190,7 @@ export class LLMThreadView extends Component {
       hasMoreMessages: false,
       isAtBottom: true,
       updateScroll: (position, isAtBottom) => {
-        // Add scroll position update logic
+        // Add scroll position update logic if needed
       },
     };
   }
@@ -189,21 +201,15 @@ export class LLMThreadView extends Component {
    * @private
    */
   _getThreadId() {
-    // Try to get ID from record props
     if (this.props.record?.data?.id) {
       return this.props.record.data.id;
     }
-
-    // Try to get ID from direct props
     if (this.props.threadId) {
       return this.props.threadId;
     }
-
-    // Try to get ID from action params
     if (this.env.action?.params?.thread_id) {
       return this.env.action.params.thread_id;
     }
-
     return null;
   }
 
@@ -234,40 +240,11 @@ export class LLMThreadView extends Component {
   }
 
   /**
-   * Handle message submission
-   * @param {string} content Message content
-   * @private
-   */
-  async _onMessageSubmit(content) {
-    if (!content.trim() || !this.threadId) return;
-
-    // Disable composer while processing
-    this.state.composerDisabled = true;
-
-    try {
-      await this.rpc("/llm/thread/post_message", {
-        thread_id: this.threadId,
-        content,
-        role: "user",
-      });
-
-      // Reload messages to get the response
-      await this._loadMessages();
-    } catch (error) {
-      this.notification.add(error.message || "Failed to send message", {
-        type: "danger",
-      });
-    } finally {
-      this.state.composerDisabled = false;
-    }
-  }
-
-  /**
    * Cleanup resources
    * @private
    */
   _cleanup() {
-    // Clean up any resources or event listeners if needed
+    // Add cleanup logic if needed
   }
 }
 
