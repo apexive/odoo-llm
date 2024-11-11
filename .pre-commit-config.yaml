@@ -48,7 +48,7 @@ repos:
       # update the NOT INSTALLABLE ADDONS section above
       - id: oca-update-pre-commit-excluded-addons
       - id: oca-fix-manifest-website
-        args: ["https://github.com/smartops-aero/flight"]
+        args: ["https://github.com/apexive/odoo-llm"]
       - id: oca-gen-addon-readme
         args:
           - --addons-dir=.
