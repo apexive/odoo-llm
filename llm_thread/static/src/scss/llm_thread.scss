@@ -1,0 +1,10 @@
+.o_Message {
+    &[data-llm-role="assistant"] {
+        background-color: var(--o-gray-100);
+        border-left: 3px solid var(--o-primary);
+        
+        .o_Message_prettyBody {
+            font-family: var(--o-font-family-monospace);
+        }
+    }
+}

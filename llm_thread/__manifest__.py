@@ -21,20 +21,9 @@
     "assets": {
         "web.assets_backend": [
             # Components
-            "llm_thread/static/src/components/llm_message/llm_message.js",
-            "llm_thread/static/src/components/llm_message/llm_message.scss",
-            "llm_thread/static/src/components/llm_message/llm_message.xml",
-            "llm_thread/static/src/components/llm_message_list/llm_message_list.js",
-            "llm_thread/static/src/components/llm_message_list/llm_message_list.scss",
-            "llm_thread/static/src/components/llm_message_list/llm_message_list.xml",
-            "llm_thread/static/src/components/llm_composer/llm_composer.js",
-            "llm_thread/static/src/components/llm_composer/llm_composer.scss",
-            "llm_thread/static/src/components/llm_composer/llm_composer.xml",
-            "llm_thread/static/src/components/llm_thread_view/llm_thread_view.js",
-            "llm_thread/static/src/components/llm_thread_view/llm_thread_view.scss",
-            "llm_thread/static/src/components/llm_thread_view/llm_thread_view.xml",
             "llm_thread/static/src/components/llm_chat_dialog/llm_chat_dialog.js",
             "llm_thread/static/src/components/llm_chat_dialog/llm_chat_dialog.xml",
+            "llm_thread/static/src/scss/llm_thread.scss",
         ],
     },
     "license": "LGPL-3",
