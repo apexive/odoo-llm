@@ -1,4 +1,6 @@
-.o_LLMThread {
+/* llm_thread/static/src/scss/llm_chat.scss */
+
+.o_LLMChat {
     .o_Message {
         &[data-llm-role="assistant"] {
             background-color: var(--o-gray-100);
@@ -35,4 +37,8 @@
             min-height: 2.5rem;
         }
     }
+}
+
+.o_LLMChatDialog_loading {
+    min-height: 200px;
 }

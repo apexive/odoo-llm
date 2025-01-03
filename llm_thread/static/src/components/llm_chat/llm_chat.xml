@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="llm.Chat" owl="1">
+        <div class="o_LLMChat d-flex flex-column h-100">
+            <t t-if="chat.thread">
+                <t t-if="chat.threadView">
+                    <ThreadView
+                        className="'flex-grow-1'"
+                        record="chat.threadView"
+                    />
+                </t>
+                <t t-else="">
+                    <div class="d-flex align-items-center justify-content-center h-100">
+                        <i class="fa fa-circle-o-notch fa-spin"/>
+                    </div>
+                </t>
+            </t>
+        </div>
+    </t>
+
+    <t t-name="llm.ChatContainer" owl="1">
+        <Dialog size="'xl'" fullscreen="true" title="chat?.thread?.name || 'Chat'">
+            <t t-if="chat">
+                <LLMChat record="chat"/>
+            </t>
+            <t t-else="">
+                <div class="o_LLMChatDialog_loading d-flex align-items-center justify-content-center p-4">
+                    <i class="fa fa-circle-o-notch fa-spin me-2"/>Loading chat...
+                </div>
+            </t>
+        </Dialog>
+    </t>
+
+    <t t-name="llm.ChatDialogAction" owl="1">
+        <div class="h-100">
+            <t t-if="threadId">
+                <LLMChatContainer threadId="threadId"/>
+            </t>
+            <t t-else="">
+                <div class="d-flex align-items-center justify-content-center h-100">
+                    <div class="text-center text-danger">
+                        <i class="fa fa-exclamation-triangle fa-2x mb-3"/>
+                        <div>No thread ID provided</div>
+                    </div>
+                </div>
+            </t>
+        </div>
+    </t>
+
+</templates>

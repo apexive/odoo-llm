@@ -20,10 +20,14 @@
     ],
     "assets": {
         "web.assets_backend": [
+            # Models
+            "llm_thread/static/src/models/llm_chat.js",
+            
             # Components
-            "llm_thread/static/src/components/llm_chat_dialog/llm_chat_dialog.js",
-            "llm_thread/static/src/components/llm_chat_dialog/llm_chat_dialog.xml",
-            "llm_thread/static/src/scss/llm_thread.scss",
+            "llm_thread/static/src/components/llm_chat/llm_chat.js",
+            "llm_thread/static/src/components/llm_chat/llm_chat.xml",
+            "llm_thread/static/src/components/llm_chat/llm_chat_container.js",
+            "llm_thread/static/src/components/llm_chat/llm_chat.scss",
         ],
     },
     "license": "LGPL-3",

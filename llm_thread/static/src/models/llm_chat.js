@@ -11,13 +11,11 @@ registerModel({
          * @returns {Thread}
          */
         async loadThread() {
-            const threadData = await this.messaging.rpc({
-                route: '/llm/thread/data',
-                params: {
-                    thread_id: this.threadId
-                }
+            const env = this.messaging.env;
+            const threadData = await env.services.rpc('/llm/thread/data', {
+                thread_id: this.threadId
             });
-            
+
             if (!this.exists()) {
                 return;
             }
@@ -27,7 +25,7 @@ registerModel({
                     id: this.threadId,
                     model: 'llm.thread',
                     name: threadData.name,
-                    messages: threadData.messages.map(msg => ({
+                    message_ids: threadData.messages.map(msg => ({
                         id: msg.id,
                         body: msg.content,
                         author: {
@@ -35,24 +33,32 @@ registerModel({
                             name: msg.author
                         },
                         date: msg.timestamp,
-                        llm_role: msg.role,
                         message_type: 'comment',
+                        attachments: [],
                     }))
-                }
+                },
             });
+
+            // Initialize the thread viewer and view after thread is set
+            if (this.thread) {
+                this.update({
+                    threadViewer: {
+                        thread: this.thread,
+                        hasComposer: true,
+                    },
+                });
+            }
         },
 
         /**
          * @param {string} content 
          */
         async sendMessage(content) {
-            const message = await this.messaging.rpc({
-                route: '/llm/thread/post_message',
-                params: {
-                    thread_id: this.threadId,
-                    content: content,
-                    role: 'user'
-                }
+            const env = this.messaging.env;
+            await env.services.rpc('/llm/thread/post_message', {
+                thread_id: this.threadId,
+                content: content,
+                role: 'user'
             });
 
             // Start streaming response
@@ -75,8 +81,7 @@ registerModel({
                 }
 
                 if (data.type === 'error') {
-                    this.messaging.notify({
-                        message: data.error,
+                    env.services.notification.add(data.error, {
                         type: 'danger',
                     });
                     eventSource.close();
@@ -85,8 +90,7 @@ registerModel({
 
             eventSource.onerror = () => {
                 eventSource.close();
-                this.messaging.notify({
-                    message: "Error receiving AI response",
+                env.services.notification.add("Error receiving AI response", {
                     type: 'danger',
                 });
             };
@@ -97,19 +101,19 @@ registerModel({
          * @param {string} content 
          */
         _updateAssistantMessage(content) {
-            if (!this.exists()) {
+            if (!this.exists() || !this.thread) {
                 return;
             }
 
-            const messages = [...this.thread.messages];
+            const messages = [...this.thread.message_ids];
             const lastMessage = messages[messages.length - 1];
 
-            if (lastMessage?.llm_role === 'assistant') {
+            if (lastMessage?.is_ai_response) {
                 lastMessage.body = content;
-                this.thread.update({ messages });
+                this.thread.update({ message_ids: messages });
             } else {
                 this.thread.update({
-                    messages: [...messages, {
+                    message_ids: [...messages, {
                         id: `temp_${Date.now()}`,
                         body: content,
                         author: {
@@ -117,8 +121,9 @@ registerModel({
                             name: 'Assistant'
                         },
                         date: new Date().toISOString(),
-                        llm_role: 'assistant',
+                        is_ai_response: true,
                         message_type: 'comment',
+                        attachments: [],
                     }]
                 });
             }
@@ -129,20 +134,23 @@ registerModel({
          * States the OWL component of this chat
          */
         component: attr(),
+        
         /**
          * ID of the thread being displayed
          */
         threadId: attr({
             identifying: true,
         }),
+        
         /**
          * The thread containing messages
          */
         thread: one('Thread'),
+        
         /**
-         * View of the thread
+         * Viewer of the thread
          */
-        threadView: one('ThreadView', {
+        threadViewer: one('ThreadViewer', {
             compute() {
                 if (!this.thread) {
                     return clear();
@@ -150,14 +158,25 @@ registerModel({
                 return {
                     thread: this.thread,
                     hasComposer: true,
-                    order: 'asc',
                 };
-            }
+            },
         }),
-        messaging: one('Messaging', {
+
+        /**
+         * View of the thread
+         */
+        threadView: one('ThreadView', {
             compute() {
-                return this.messaging;
-            }
+                if (!this.threadViewer) {
+                    return clear();
+                }
+                return {
+                    threadViewer: this.threadViewer,
+                    hasComposer: true,
+                    order: 'asc',
+                    showTypingStatus: false,
+                };
+            },
         }),
     },
 });
