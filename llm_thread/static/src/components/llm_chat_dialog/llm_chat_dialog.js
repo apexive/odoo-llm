@@ -17,8 +17,7 @@ export class LLMChatDialog extends Component {
             isLoading: true,
             hasError: false,
             errorMessage: null,
-            threadViewer: null,
-            threadData: null,
+            threadView: null,
         });
 
         this._loadThread();
@@ -29,43 +28,65 @@ export class LLMChatDialog extends Component {
             this.state.isLoading = true;
             this.state.hasError = false;
 
-            // First fetch thread data
-            this.state.threadData = await this.rpc('/llm/thread/data', {
+            // Fetch thread data
+            const threadData = await this.rpc('/llm/thread/data', {
                 thread_id: this.props.threadId
             });
 
-            // Then initialize messaging
-            const messaging = await this.messaging.get();
-            
-            if (!messaging || !messaging.models) {
-                throw new Error("Messaging system not initialized");
-            }
-
-            // Create thread in the messaging store
-            const thread = messaging.models['Thread'].insert({
+            // Create thread structure
+            const thread = {
                 id: this.props.threadId,
                 model: 'llm.thread',
-                name: this.state.threadData.name,
-                message_ids: this.state.threadData.messages.map(msg => ({
+                name: threadData.name,
+                isTemporary: false,
+                channel: null,
+                hasCallFeature: false,
+                message_ids: threadData.messages.map(msg => ({
                     id: msg.id,
                     body: msg.content,
-                    author: { id: messaging.currentPartner.id, name: msg.author },
-                    llm_role: msg.role,
+                    author: { id: msg.author_id, name: msg.author },
                     date: msg.timestamp,
+                    message_type: 'comment',
+                    llm_role: msg.role,
                 })),
-            });
+            };
 
-            // Create thread viewer
-            const threadViewer = messaging.models['ThreadViewer'].insert({
+            // Create threadCache
+            const threadCache = {
+                id: `cache_${this.props.threadId}`,
                 thread,
-                hasThreadView: true,
-                threadView: {
-                    messageListPosition: 'bottom',
-                    hasScrollAdjust: true,
-                },
-            });
+                isLoaded: true,
+                hasLoadingFailed: false,
+                messages: thread.message_ids,
+            };
 
-            this.state.threadViewer = threadViewer;
+            // Create messageListView
+            const messageListView = {
+                thread,
+                threadCache,
+                messages: threadCache.messages,
+                components: { ThreadView },
+            };
+
+            // Create composerView
+            const composerView = {
+                thread,
+                isDisabled: false,
+                onInput: this._onComposerInput.bind(this),
+                onSend: this._onSendMessage.bind(this),
+            };
+
+            // Create threadView structure
+            this.state.threadView = {
+                thread,
+                threadCache,
+                messageListView,
+                composerView,
+                threadViewer: { chatWindow: false },
+                isLoading: false,
+                extraClass: 'o_LLMThread',
+            };
+
             this.state.isLoading = false;
         } catch (error) {
             console.error('Chat loading error:', error);
@@ -75,15 +96,26 @@ export class LLMChatDialog extends Component {
         }
     }
 
-    async _sendMessage(content) {
+    _onComposerInput(value) {
+        if (this.state.threadView?.composerView) {
+            this.state.threadView.composerView.textInputContent = value;
+        }
+    }
+
+    async _onSendMessage(content) {
+        if (!content.trim()) return;
+
         try {
-            // Post message to backend
+            // Post user message
             const message = await this.rpc('/llm/thread/post_message', {
                 thread_id: this.props.threadId,
                 content: content,
             });
 
-            // Create SSE connection for streaming response
+            // Add message to threadCache
+            this.state.threadView.threadCache.messages.push(message);
+
+            // Start streaming response
             const eventSource = new EventSource(
                 `/llm/thread/stream_response?thread_id=${this.props.threadId}`,
                 { withCredentials: true }
@@ -96,7 +128,6 @@ export class LLMChatDialog extends Component {
                 
                 if (data.type === 'content' && data.content) {
                     assistantMessage += data.content;
-                    // Update UI with partial response
                     this._updateAssistantMessage(assistantMessage);
                 }
                 
@@ -118,6 +149,7 @@ export class LLMChatDialog extends Component {
                     type: 'danger',
                 });
             };
+
         } catch (error) {
             this.notification.add(this.env._t("Failed to send message"), {
                 type: 'danger',
@@ -127,37 +159,36 @@ export class LLMChatDialog extends Component {
     }
 
     _updateAssistantMessage(content) {
-        if (!this.state.threadViewer?.thread) return;
-
-        const messaging = this.messaging.get();
-        if (!messaging) return;
-
-        // Update or create assistant message
-        const lastMessage = this.state.threadViewer.thread.messages[this.state.threadViewer.thread.messages.length - 1];
+        const messages = this.state.threadView.threadCache.messages;
+        const lastMessage = messages[messages.length - 1];
         
         if (lastMessage && lastMessage.llm_role === 'assistant') {
-            lastMessage.update({ body: content });
+            lastMessage.body = content;
         } else {
-            messaging.models['Message'].insert({
+            messages.push({
                 id: `temp_${Date.now()}`,
-                author: { id: messaging.currentPartner.id, name: 'Assistant' },
-                body: content,
                 llm_role: 'assistant',
-                thread: this.state.threadViewer.thread,
+                body: content,
+                author: { id: -1, name: 'Assistant' },
+                date: new Date().toISOString(),
             });
         }
+
+        // Force update
+        this.state.threadView = { ...this.state.threadView };
     }
 }
 
 LLMChatDialog.template = "llm.ChatDialog";
 LLMChatDialog.components = { 
-    Dialog, 
-    ThreadView,
+    Dialog,
+    ThreadView
 };
 
 LLMChatDialog.props = {
     threadId: { type: Number, required: true },
     close: { type: Function, optional: true },
+    title: { type: String, optional: true },
 };
 
 export class LLMChatDialogAction extends Component {

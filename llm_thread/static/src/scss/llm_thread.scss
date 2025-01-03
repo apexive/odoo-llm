@@ -1,10 +1,38 @@
-.o_Message {
-    &[data-llm-role="assistant"] {
-        background-color: var(--o-gray-100);
-        border-left: 3px solid var(--o-primary);
-        
-        .o_Message_prettyBody {
-            font-family: var(--o-font-family-monospace);
+.o_LLMThread {
+    .o_Message {
+        &[data-llm-role="assistant"] {
+            background-color: var(--o-gray-100);
+            border-left: 3px solid var(--o-primary);
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 0.375rem;
+            
+            .o_Message_content {
+                font-family: var(--o-font-family-monospace);
+                white-space: pre-wrap;
+            }
+        }
+
+        &[data-llm-role="user"] {
+            border-left: none;
+            background-color: var(--o-primary-100);
+        }
+    }
+
+    .o_ThreadView_messageList {
+        padding: 1rem;
+    }
+
+    .o_Composer {
+        border-top: 1px solid var(--o-gray-300);
+        background-color: white;
+        padding: 1rem;
+
+        &_input {
+            border: 1px solid var(--o-gray-300);
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            min-height: 2.5rem;
         }
     }
 }
