@@ -8,13 +8,47 @@ export class LLMChat extends LegacyComponent {
     setup() {
         super.setup();
         useComponentToModel({ fieldName: 'component' });
+        
+        // Debug setup
+        console.log('LLMChat Component: Setup', {
+            props: this.props,
+            record: this.chat
+        });
+        
+        // Watch for changes
+        this.env.bus.on('LLMChat:thread-updated', this, () => {
+            console.log('LLMChat Component: Thread Updated', {
+                chat: this.chat,
+                thread: this.chat?.thread,
+                threadView: this.chat?.threadView
+            });
+        });
     }
 
     /**
      * @returns {LLMChat}
      */
     get chat() {
-        return this.props.record;
+        const chat = this.props.record;
+        console.log('LLMChat Component: Get chat', {
+            chat,
+            thread: chat?.thread,
+            threadView: chat?.threadView
+        });
+        return chat;
+    }
+
+    /**
+     * Debugging method to check component state
+     */
+    debugRender() {
+        console.log('LLMChat Component: Rendering', {
+            chat: this.chat,
+            hasThread: Boolean(this.chat?.thread),
+            hasThreadView: Boolean(this.chat?.threadView),
+            threadName: this.chat?.thread?.name,
+            messageCount: this.chat?.thread?.messages?.length
+        });
     }
 }
 

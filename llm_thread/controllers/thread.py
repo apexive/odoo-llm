@@ -10,8 +10,19 @@ _logger = logging.getLogger(__name__)
 class LLMThreadController(http.Controller):
     @http.route("/llm/thread/data", type="json", auth="user")
     def get_thread_data(self, thread_id):
-        thread = request.env["llm.thread"].browse(int(thread_id))
-        return thread.get_thread_data()
+        _logger.info("Getting thread data for ID: %s", thread_id)
+        try:
+            thread = request.env["llm.thread"].browse(int(thread_id))
+            if not thread.exists():
+                _logger.error("Thread %s not found", thread_id)
+                return {'error': 'Thread not found'}
+            
+            data = thread.get_thread_data()
+            _logger.info("Retrieved thread data: %s", data)
+            return data
+        except Exception as e:
+            _logger.exception("Error getting thread data: %s", str(e))
+            return {'error': str(e)}
 
     @http.route("/llm/thread/post_message", type="json", auth="user")
     def post_message(self, thread_id, content, role="user"):
