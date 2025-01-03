@@ -1,8 +1,6 @@
-/* llm_thread/static/src/scss/llm_chat.scss */
-
 .o_LLMChat {
     .o_Message {
-        &[data-llm-role="assistant"] {
+        &[data-role="assistant"] {
             background-color: var(--o-gray-100);
             border-left: 3px solid var(--o-primary);
             margin: 0.5rem 0;
@@ -15,13 +13,16 @@
             }
         }
 
-        &[data-llm-role="user"] {
+        &[data-role="user"] {
             border-left: none;
             background-color: var(--o-primary-100);
+            margin: 0.5rem 0;
+            padding: 1rem;
+            border-radius: 0.375rem;
         }
     }
 
-    .o_ThreadView_messageList {
+    .o_MessageList {
         padding: 1rem;
     }
 
@@ -35,6 +36,7 @@
             border-radius: 0.375rem;
             padding: 0.5rem;
             min-height: 2.5rem;
+            resize: vertical;
         }
     }
 }

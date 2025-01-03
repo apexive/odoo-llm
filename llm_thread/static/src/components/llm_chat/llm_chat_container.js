@@ -12,8 +12,6 @@ export class LLMChatContainer extends Component {
         useModels();
         this.messagingService = useService("messaging");
         this.notification = useService("notification");
-        this.rpc = useService("rpc");
-        this.orm = useService("orm");
         
         this.localChat = undefined;
         this._insertFromProps(this.props);
@@ -31,50 +29,31 @@ export class LLMChatContainer extends Component {
     }
 
     async _insertFromProps(props) {
-        try {
-            const messaging = await this.messagingService.get();
-            if (this.isDestroyed) {
-                return;
-            }
-            
-            const values = { 
+        const messaging = await this.messagingService.get();
+        if (this.isDestroyed) {
+            console.log("LLMChatContainer: destroyed");
+            return;
+        }
+        console.log("LLMChatContainer: props", props);
+        if (!props.chat && !this.localChat) {
+            this.localChat = messaging.models['LLMChat'].insert({ 
                 threadId: props.threadId,
-                env: this.env
-            };
-            
-            const hasToCreateChat = !props.chat && !this.localChat;
-            
-            if (hasToCreateChat) {
-                this.localChat = messaging.models['LLMChat'].insert(values);
-            }
-
-            const chat = props.chat || this.localChat;
-            
-            if (!hasToCreateChat) {
-                chat.update(values);
-            }
-            
-            if (this.isDestroyed) {
-                this.deleteLocalChat();
-                return;
-            }
-
-            await chat.loadThread();
-        } catch (error) {
-            console.error('Error in _insertFromProps:', error);
-            this.notification.add('Failed to load chat thread', {
-                type: 'danger',
-                details: error.toString()
             });
+        }
+
+        const chat = props.chat || this.localChat;
+
+        console.log("LLMChatContainer: chat", chat);    
+        await chat.loadThread();
+
+        if (this.isDestroyed) {
+            this.deleteLocalChat();
         }
     }
 }
 
 LLMChatContainer.template = 'llm.ChatContainer';
-LLMChatContainer.components = { 
-    Dialog,
-    LLMChat,
-};
+LLMChatContainer.components = { Dialog, LLMChat };
 LLMChatContainer.props = {
     chat: { type: Object, optional: true },
     threadId: { type: Number, optional: true },
@@ -99,11 +78,10 @@ export class LLMChatDialogAction extends Component {
 }
 
 LLMChatDialogAction.template = 'llm.ChatDialogAction';
-LLMChatDialogAction.components = {
-    LLMChatContainer,
-};
+LLMChatDialogAction.components = { LLMChatContainer };
 LLMChatDialogAction.props = {
     action: Object,
     actionId: { type: [Number, Boolean], optional: true },
 };
+
 registry.category("actions").add("llm_chat_dialog", LLMChatDialogAction);
