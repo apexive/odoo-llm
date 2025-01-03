@@ -64,57 +64,94 @@ registerModel({
             });
 
             try {
-                // Create base thread record if it doesn't exist
-                const thread = this.messaging.models['Thread'].insert({
+                console.log('LLMChat: Starting thread creation');
+                
+                // Create the thread first
+                const thread = await this.messaging.models['Thread'].insert({
                     id: threadData.id,
                     model: 'llm.thread',
                     name: threadData.name,
-                    message_needaction_counter: 0,
+                });
+                
+                console.log('LLMChat: Thread created', { thread });
+
+                // Create thread cache with messages
+                const messageRecords = threadData.messages.map(msg => {
+                    const messageData = {
+                        id: msg.id,
+                        body: msg.content,
+                        date: moment(msg.timestamp),
+                        message_type: 'message',
+                        // model: 'llm.thread',
+                        // llmRole: msg.role,
+                    };
+
+                    // Handle author information differently for AI vs human messages
+                    if (msg.role === 'assistant') {
+                        // messageData.author_id = false;  // No partner for AI messages
+                        messageData.email_from = msg.author;  // Use as display name
+                    } else if (msg.role === 'user') {
+                        messageData.author = this.messaging.currentPartner;
+                    }
+
+                    return messageData;
                 });
 
-                // Update thread cache
-                const cache = this.messaging.models['ThreadCache'].insert({
-                    messages: [],
-                    thread: thread,
+                // Insert messages
+                const messages = await this.messaging.models['Message'].insert(messageRecords);
+                
+                console.log('LLMChat: Messages created', { 
+                    messageCount: messages.length,
+                    firstMessage: messages[0] 
                 });
 
-                // Create thread viewer
-                const threadViewer = this.messaging.models['ThreadViewer'].insert({
+                // Create cache with messages
+                const cache = await this.messaging.models['ThreadCache'].insert({
+                    isLoaded: true,
+                    thread: [['replace', thread]], // Use replace instead of link
+                    rawFetchedMessages: [['replace', messages]], // Use replace for messages
+                });
+
+                console.log('LLMChat: Cache created', {
+                    cache,
+                    hasMessages: cache.rawFetchedMessages.length 
+                });
+
+                // Create ThreadViewer with everything linked
+                const threadViewer = await this.messaging.models['ThreadViewer'].insert({
                     hasThreadView: true,
-                    thread: thread,
-                    threadCache: cache,
+                    thread: [['replace', thread]], // Use replace for thread
+                    threadCache: [['replace', cache]], // Use replace for cache
+                    order: 'desc',
                 });
 
-                // Update chat state
-                this.update({
-                    name: threadData.name,
-                    thread: thread,
-                    threadViewer: threadViewer,
+                console.log('ThreadViewer created', {
+                    thread: threadViewer.thread,
+                    threadCache: threadViewer.threadCache,
+                    messageListView: threadViewer.threadView?.messageListView
                 });
 
-                // Process messages
-                if (threadData.messages?.length > 0) {
-                    const messageCommands = threadData.messages.map(messageData => ({
-                        id: messageData.id,
-                        author: [['insert', { id: messageData.author }]],
-                        body: messageData.content,
-                        message_type: 'comment',
-                    }));
-
-                    this.messaging.models['Message'].insert(messageCommands);
+                // Finally update thread 
+                // Defensive update with fallback
+                try {
+                    await this.update({
+                        name: threadData.name,
+                        thread: [['link', thread.id]],
+                        threadViewer: [['link', threadViewer.id]],
+                    });
+                } catch (updateError) {
+                    console.error('Error updating LLMChat:', updateError);
+                    throw updateError;
                 }
 
-                console.log('LLMChat: Thread loaded successfully', {
-                    currentName: this.name,
-                    currentThread: this.thread,
-                    currentThreadView: this.threadView,
-                    messageCount: this.thread.messages.length
-                });
+                // Fire event to trigger re-render in container
+                this.messaging.messagingBus.trigger('o-thread-loaded');
+
             } catch (error) {
-                console.error('LLMChat: Error updating thread:', error);
+                console.error('LLMChat: Error creating thread:', error);
                 throw error;
             }
-        },
+        }
     },
     fields: {
         name: attr(),

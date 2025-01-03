@@ -1,7 +1,7 @@
 /** @odoo-module **/
 
 import { registry } from "@web/core/registry";
-import { Component, onWillDestroy, useEffect } from "@odoo/owl";
+import { Component, onWillDestroy } from "@odoo/owl";
 import { LLMChat } from "./llm_chat";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
@@ -14,37 +14,35 @@ export class LLMChatContainer extends Component {
         this.notification = useService("notification");
         
         this.localChat = undefined;
+        
+        console.log('LLMChatContainer: Setup Start');
         this._insertFromProps(this.props);
         
-        // Debug setup state
-        console.log('LLMChatContainer: Setup', {
-            props: this.props,
-            localChat: this.localChat
+        // Watch for chat changes
+        this.env.bus.on('LLMChat:thread-loaded', this, () => {
+            console.log('LLMChatContainer: Thread loaded event received');
+            this.render();
         });
-
-        // Watch for chat updates
-        useEffect(
-            () => {
-                console.log('LLMChatContainer: State Updated', {
-                    chat: this.chat,
-                    hasThread: Boolean(this.chat?.thread),
-                    hasThreadView: Boolean(this.chat?.threadView)
-                });
-            },
-            () => [this.chat, this.chat?.thread, this.chat?.threadView]
-        );
         
-        onWillDestroy(() => this.deleteLocalChat());
+        // onWillDestroy(() => {
+        //     this.env.bus.off('LLMChat:thread-loaded', this);
+        //     this.deleteLocalChat();
+        // });
     }
 
     get chat() {
         const chat = this.props.chat || this.localChat;
-        console.log('LLMChatContainer: Get chat', {
+        console.log('LLMChatContainer: Get chat (detailed)', {
             propsChat: this.props.chat,
             localChat: this.localChat,
             returnedChat: chat,
+            chatExists: Boolean(chat),
+            chatIsRecord: chat && typeof chat === 'object',
+            propTypes: chat && Object.keys(chat),
             hasThread: Boolean(chat?.thread),
-            hasThreadView: Boolean(chat?.threadView)
+            threadName: chat?.thread?.name,
+            hasThreadView: Boolean(chat?.threadView),
+            threadType: chat?.thread?.constructor?.name
         });
         return chat;
     }
@@ -92,6 +90,9 @@ export class LLMChatContainer extends Component {
                 thread: chat.thread,
                 threadView: chat.threadView
             });
+            
+            // Trigger re-render after thread is loaded
+            this.env.bus.trigger('LLMChat:thread-loaded');
         } catch (error) {
             console.error("LLMChatContainer: Error loading thread:", error);
             this.notification.add(error.message || "Failed to load chat", {
@@ -99,9 +100,9 @@ export class LLMChatContainer extends Component {
             });
         }
 
-        if (this.isDestroyed) {
-            this.deleteLocalChat();
-        }
+        // if (this.isDestroyed) {
+        //     this.deleteLocalChat();
+        // }
     }
 }
 
@@ -112,6 +113,7 @@ LLMChatContainer.props = {
     threadId: { type: Number, optional: true },
     close: { type: Function, optional: true },
 };
+
 export class LLMChatDialogAction extends Component {
     setup() {
         this.notification = useService("notification");

@@ -155,13 +155,28 @@ class MailMessage(models.Model):
 
     def to_frontend_data(self):
         """Convert to frontend-friendly format"""
-        return {
-            "id": self.id,
-            "role": self.llm_role,
-            "content": self.body,
-            "timestamp": fields.Datetime.to_string(self.create_date),
-            "author": self.get_author_name(),
+        data = {
+            'id': self.id,
+            'role': self.llm_role,
+            'content': self.body,
+            'timestamp': fields.Datetime.to_string(self.create_date),
         }
+        
+        # Handle author information
+        if self.llm_role == 'assistant':
+            # For AI messages, use email_from as author display name
+            data['author'] = self.email_from or 'AI Assistant'
+            data['author_id'] = False
+        else:
+            # For user messages, use the actual partner
+            if self.author_id:
+                data['author'] = self.author_id.name
+                data['author_id'] = self.author_id.id
+            else:
+                data['author'] = self.email_from or 'Unknown'
+                data['author_id'] = False
+                
+        return data
 
     def get_author_name(self):
         """Get author name based on role"""

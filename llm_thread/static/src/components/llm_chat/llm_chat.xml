@@ -1,32 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
-
     <t t-name="llm.Chat" owl="1">
-        <div class="o_LLMChat d-flex flex-column h-100">
+        <div class="o_LLMChat d-flex flex-column h-100" 
+             t-att-data-has-thread="chat.thread and 'true' or 'false'"
+             t-att-data-has-thread-view="chat.threadView and 'true' or 'false'"
+             t-att-data-thread-name="chat.thread and chat.thread.name or ''"
+             t-att-data-message-count="chat.thread and chat.thread.messages.length or 0">
             <t t-if="chat.thread">
                 <t t-if="chat.threadView">
                     <ThreadView
-                        className="'flex-grow-1'"
                         record="chat.threadView"
                     />
                 </t>
                 <t t-else="">
                     <div class="d-flex align-items-center justify-content-center h-100">
-                        <i class="fa fa-circle-o-notch fa-spin"/>
+                        <i class="fa fa-circle-o-notch fa-spin me-2"/>Loading ThreadView...
                     </div>
                 </t>
+            </t>
+            <t t-else="">
+                <div class="d-flex align-items-center justify-content-center h-100">
+                    <i class="fa fa-circle-o-notch fa-spin me-2"/>Loading Thread...
+                </div>
             </t>
         </div>
     </t>
 
     <t t-name="llm.ChatContainer" owl="1">
         <Dialog size="'xl'" fullscreen="true" title="chat?.thread?.name || 'Chat'">
-            <t t-if="chat">
+            <t t-if="chat and chat.thread">
                 <LLMChat record="chat"/>
             </t>
-            <t t-else="">
+            <t t-elif="chat and !chat.thread">
                 <div class="o_LLMChatDialog_loading d-flex align-items-center justify-content-center p-4">
-                    <i class="fa fa-circle-o-notch fa-spin me-2"/>Loading chat...
+                    <i class="fa fa-circle-o-notch fa-spin me-2"/>Loading thread...
+                </div>
+            </t>
+            <t t-elif="!chat">
+                <div class="o_LLMChatDialog_loading d-flex align-items-center justify-content-center p-4">
+                    <i class="fa fa-circle-o-notch fa-spin me-2"/>Initializing chat...
+                </div>
+            </t>
+            <t t-else="">
+                <div class="o_LLMChatDialog_error d-flex align-items-center justify-content-center p-4 text-danger">
+                    <i class="fa fa-warning me-2"/>Unable to load chat.
                 </div>
             </t>
         </Dialog>
