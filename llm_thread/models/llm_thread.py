@@ -47,6 +47,62 @@ class LLMThread(models.Model):
         domain=lambda self: [("model", "=", self._name)],
     )
 
+    def _message_post_after_hook(self, message, msg_vals):
+        """Handle message posting and trigger AI response if needed."""
+        print("\n=== Message Post Hook Started ===")
+        print(f"Message Type: {msg_vals.get('message_type')}")
+        print(f"Author ID: {msg_vals.get('author_id')}")
+        print(f"Message Body: {msg_vals.get('body')}")
+        print(f"Context: {self.env.context}")
+        
+        res = super(LLMThread, self)._message_post_after_hook(message, msg_vals)
+
+        # Only generate response for user messages
+        if (msg_vals.get('message_type') == 'comment' and 
+            msg_vals.get('author_id') and  # Has author (not AI/system message)
+            not self.env.context.get('skip_ai_response')):  # Not already an AI response
+            
+            print("\n--> Generating AI Response")
+            print(f"Thread ID: {self.id}")
+            print(f"Model: {self.model_id.name}")
+            
+            try:
+                # Get AI response (non-streaming for hook)
+                for response in self.with_context(skip_ai_response=True).get_assistant_response(stream=False):
+                    if response.get('error'):
+                        print(f"\nError in AI Response: {response['error']}")
+                        _logger.error("Error getting AI response: %s", response['error'])
+                        break
+                    
+                    content = response.get('content')
+                    if content:
+                        print(f"\nAI Response Content: {content[:100]}...")  # Print first 100 chars
+                        
+                        # Post AI response as message
+                        ai_message = self.with_context(skip_ai_response=True).message_post(
+                            body=content,
+                            message_type='comment',
+                            subtype_xmlid='mail.mt_comment',
+                            author_id=False,  # No author for AI messages
+                            email_from=f"{self.model_id.name} <ai@{self.provider_id.name.lower()}.ai>",
+                        )
+                        print(f"\nAI Message posted with ID: {ai_message.id}")
+                        
+            except Exception as e:
+                print(f"\nException in AI Response Generation: {str(e)}")
+                _logger.exception("Failed to generate AI response")
+        else:
+            print("\n--> Skipping AI Response")
+            if msg_vals.get('message_type') != 'comment':
+                print("Reason: Not a comment message")
+            if not msg_vals.get('author_id'):
+                print("Reason: No author ID (likely AI message)")
+            if self.env.context.get('skip_ai_response'):
+                print("Reason: skip_ai_response in context")
+                
+        print("\n=== Message Post Hook Completed ===\n")
+        return res
+
     @api.model_create_multi
     def create(self, vals_list):
         """Set default title if not provided"""
