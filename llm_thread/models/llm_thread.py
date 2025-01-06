@@ -53,6 +53,9 @@ class LLMThread(models.Model):
         print(f"Message Type: {msg_vals.get('message_type')}")
         print(f"Author ID: {msg_vals.get('author_id')}")
         print(f"Message Body: {msg_vals.get('body')}")
+        print(f"Message ID: {message.id}")
+        print(f"Parent ID: {msg_vals.get('parent_id')}")
+        print(f"Subtype: {msg_vals.get('subtype_id')}")
         print(f"Context: {self.env.context}")
         
         res = super(LLMThread, self)._message_post_after_hook(message, msg_vals)
@@ -65,6 +68,7 @@ class LLMThread(models.Model):
             print("\n--> Generating AI Response")
             print(f"Thread ID: {self.id}")
             print(f"Model: {self.model_id.name}")
+            print(f"Original Message ID: {message.id}")
             
             try:
                 # Get AI response (non-streaming for hook)
@@ -78,15 +82,23 @@ class LLMThread(models.Model):
                     if content:
                         print(f"\nAI Response Content: {content[:100]}...")  # Print first 100 chars
                         
-                        # Post AI response as message
-                        ai_message = self.with_context(skip_ai_response=True).message_post(
+                        # Post AI response as message with proper guest author settings
+                        ai_message = self.with_context(skip_ai_response=True, mail_create_nosubscribe=True).message_post(
                             body=content,
                             message_type='comment',
                             subtype_xmlid='mail.mt_comment',
                             author_id=False,  # No author for AI messages
                             email_from=f"{self.model_id.name} <ai@{self.provider_id.name.lower()}.ai>",
+                            partner_ids=[],  # No partner notifications
+                            parent_id=message.id  # Link to original message
                         )
-                        print(f"\nAI Message posted with ID: {ai_message.id}")
+                        # Set the role and ensure proper guest author
+                        ai_message.write({
+                            'llm_role': 'assistant',
+                            'author_id': False,
+                            'guest_id': False,
+                        })
+                        print(f"\nAI Message posted with ID: {ai_message.id} replying to {message.id}")
                         
             except Exception as e:
                 print(f"\nException in AI Response Generation: {str(e)}")
