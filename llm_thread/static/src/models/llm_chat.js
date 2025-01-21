@@ -134,8 +134,29 @@ registerModel({
                 // Finally update thread 
                 // Defensive update with fallback
                 try {
+                     // Use a different update strategy
+                    // this.messaging.models['LLMChat'].update(
+                    //     this, // Current record
+                    //     {
+                    //         name: threadData.name,
+                    //         thread: thread, // Direct reference instead of link command
+                    //         threadViewer: threadViewer,
+                    //     },
+                    //     { 
+                    //         // Optional: add context or additional options
+                    //         allowWriteNull: true 
+                    //     }
+                    // );
+
+                    // Alternative approach
+                    // Object.assign(this, {
+                    //     name: threadData.name,
+                    //     thread,
+                    //     threadViewer,
+                    // });
                     await this.update({
                         name: threadData.name,
+                        threadId: threadData.id, // This will trigger the computed fields
                         thread: [['link', thread.id]],
                         threadViewer: [['link', threadViewer.id]],
                     });
