@@ -18,6 +18,8 @@
             'task_timer/static/src/components/timer/timer.scss',
             'task_timer/static/src/components/task_list/task_list.js',
             'task_timer/static/src/components/task_list/task_list.xml',
+            'task_timer/static/src/components/task_form/task_form.js',
+            'task_timer/static/src/components/task_form/task_form.xml',
             'task_timer/static/src/components/timer_dashboard/timer_dashboard.js',
             'task_timer/static/src/components/timer_dashboard/timer_dashboard.xml',
         ],

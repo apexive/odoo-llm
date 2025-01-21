@@ -2,7 +2,27 @@
 <templates xml:space="preserve">
     <t t-name="task_timer.TaskList" owl="1">
         <div class="task-list p-4">
-            <table class="table">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Tasks</h2>
+                <button t-if="!state.showCreateForm" 
+                        class="btn btn-primary"
+                        t-on-click="toggleCreateForm">
+                    Create Task
+                </button>
+            </div>
+            
+            <t t-if="state.showCreateForm">
+                <TaskForm 
+                    onTaskCreated="() => this.handleTaskCreated()"
+                    onClose="() => this.toggleCreateForm()"/>
+            </t>
+            
+            <div t-if="state.tasks.length === 0 and !state.showCreateForm" 
+                 class="alert alert-info">
+                No tasks found. Create your first task to get started!
+            </div>
+            
+            <table t-if="state.tasks.length > 0" class="table">
                 <thead>
                     <tr>
                         <th>Task</th>
