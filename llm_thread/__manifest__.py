@@ -19,6 +19,13 @@
         "security/ir.model.access.csv",
         "views/llm_thread_views.xml",
     ],
+    'assets': {
+        'web.assets_backend': [
+            ('include', 'web_editor.assets_wysiwyg'),
+            'llm_thread/static/src/components/thread/thread.xml',
+            'llm_thread/static/src/components/thread/thread.scss',
+        ],
+    },
     "license": "LGPL-3",
     "installable": True,
 }

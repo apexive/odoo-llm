@@ -1,0 +1,18 @@
+.o_composer_ask_ai {
+    padding: 8px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+    margin-bottom: 8px;
+
+    .o_composer_input {
+        margin-bottom: 8px;
+        
+        textarea {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+        }
+    }
+}
