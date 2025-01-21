@@ -9,7 +9,9 @@
     'depends': ['web'],
     'data': [
         'security/ir.model.access.csv',
+        'views/task_views.xml',
         'views/timer_menus.xml',
+        
     ],
     'assets': {
         'web.assets_backend': [
@@ -22,6 +24,8 @@
             'task_timer/static/src/components/task_form/task_form.xml',
             'task_timer/static/src/components/timer_dashboard/timer_dashboard.js',
             'task_timer/static/src/components/timer_dashboard/timer_dashboard.xml',
+            'task_timer/static/src/components/task_timer_widget/task_timer_widget.js',
+            'task_timer/static/src/components/task_timer_widget/task_timer_widget.xml',
         ],
     },
     'application': True,

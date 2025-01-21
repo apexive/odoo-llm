@@ -18,4 +18,11 @@
         parent="menu_timer_root"
         action="action_timer_dashboard"
         sequence="10"/>
+        
+    <menuitem
+        id="menu_task_timer"
+        name="Tasks"
+        parent="menu_timer_root"
+        action="action_task_timer"
+        sequence="20"/>
 </odoo>
