@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="mt_llm_question" model="mail.message.subtype">
+        <field name="name">LLM Question</field>
+        <field name="description">Question for AI Assistant</field>
+        <field name="internal">True</field>
+        <field name="default">True</field>
+    </record>
+    
+    <record id="mt_llm_answer" model="mail.message.subtype">
+        <field name="name">LLM Answer</field>
+        <field name="description">AI Assistant Response</field>
+        <field name="internal">True</field>
+        <field name="default">True</field>
+    </record>
+</odoo>

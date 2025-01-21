@@ -58,11 +58,15 @@ class LLMThread(models.Model):
         print(f"Subtype: {msg_vals.get('subtype_id')}")
         print(f"Context: {self.env.context}")
         
-        res = super(LLMThread, self)._message_post_after_hook(message, msg_vals)
+        msg_vals = msg_vals.copy()
+        if msg_vals.get('subtype_id') not in [self.env.ref('llm_thread.mt_llm_question').id, self.env.ref('llm_thread.mt_llm_answer').id]:
+            msg_vals['subtype_id'] = self.env.ref('llm_thread.mt_llm_question').id
+
+        res = super()._message_post_after_hook(message, msg_vals)
+        _logger.info("Message Post Hook Started")
 
         # Only generate response for user messages
-        if (msg_vals.get('message_type') == 'comment' and 
-            msg_vals.get('author_id') and  # Has author (not AI/system message)
+        if (msg_vals.get('subtype_id') == self.env.ref('llm_thread.mt_llm_question').id and
             not self.env.context.get('skip_ai_response')):  # Not already an AI response
             
             print("\n--> Generating AI Response")
@@ -86,7 +90,7 @@ class LLMThread(models.Model):
                         ai_message = self.with_context(skip_ai_response=True, mail_create_nosubscribe=True).message_post(
                             body=content,
                             message_type='comment',
-                            subtype_xmlid='mail.mt_comment',
+                            subtype_xmlid='llm_thread.mt_llm_answer',
                             author_id=False,  # No author for AI messages
                             email_from=f"{self.model_id.name} <ai@{self.provider_id.name.lower()}.ai>",
                             partner_ids=[],  # No partner notifications
@@ -192,9 +196,9 @@ class LLMThread(models.Model):
                     content += response.get("content", "")
                     yield response
 
-            if content:
-                _logger.debug("Saving assistant response: %s", content)
-                self.post_message(content=content, role="assistant")
+            # if content:
+            #     _logger.debug("Saving assistant response: %s", content)
+            #     self.post_message(content=content, role="assistant")
 
         except Exception as e:
             _logger.error("Error getting AI response: %s", str(e))
@@ -254,3 +258,70 @@ class MailMessage(models.Model):
         elif self.llm_role == "assistant":
             return thread.model_id.name
         return self.llm_role.title()
+
+
+def _message_post_after_hook(self, message, msg_vals):
+        """Handle message posting and trigger AI response if needed."""
+        # replace subtype with id with self.env.ref('llm_thread.mt_llm_question').id if not llm_thread.mt_llm_question or llm_thread.mt_llm_answer
+        msg_vals = msg_vals.copy()
+        if msg_vals.get('subtype_id') not in [self.env.ref('llm_thread.mt_llm_question').id, self.env.ref('llm_thread.mt_llm_answer').id]:
+            msg_vals['subtype_id'] = self.env.ref('llm_thread.mt_llm_question').id
+
+        result = super()._message_post_after_hook(message, msg_vals)
+        _logger.info("Message Post Hook Started")
+        
+        # Check if this is an LLM question message
+        if (msg_vals.get('subtype_id') == self.env.ref('llm_thread.mt_llm_question').id and
+            not self.env.context.get('skip_ai_response')):
+            
+            try:
+                # Get default model for chat
+                model = self.env['llm.model'].search([
+                    ('model_use', 'in', ['chat', 'multimodal']),
+                    ('is_default', '=', True)
+                ], limit=1)
+                
+                if not model:
+                    _logger.warning("No default LLM model configured")
+                    return result
+                
+                # Get conversation history
+                domain = [
+                    ('model', '=', self._name),
+                    ('res_id', '=', self.id),
+                    ('message_type', '=', 'comment'),
+                    ('subtype_id', 'in', [
+                        self.env.ref('llm_thread.mt_llm_question').id,
+                        self.env.ref('llm_thread.mt_llm_answer').id
+                    ])
+                ]
+                messages = self.env['mail.message'].search(domain, order='create_date ASC')
+                
+                # Convert to provider format
+                provider_messages = [{
+                    'role': 'user' if msg.subtype_id == self.env.ref('llm_thread.mt_llm_question').id else 'assistant',
+                    'content': msg.body
+                } for msg in messages]
+                
+                # Get AI response
+                for response in model.chat(provider_messages, stream=False):
+                    if response.get('error'):
+                        _logger.error("Error getting AI response: %s", response['error'])
+                        break
+                        
+                    content = response.get('content')
+                    if content:
+                        # Post AI response
+                        self.with_context(skip_ai_response=True, mail_create_nosubscribe=True).message_post(
+                            body=content,
+                            message_type='comment',
+                            subtype_id=self.env.ref('llm_thread.mt_llm_answer').id,
+                            author_id=False,
+                            email_from=f"{model.name} <ai@{model.provider_id.name.lower()}.ai>"
+                        )
+                        
+            except Exception as e:
+                _logger.exception("Failed to generate AI response")
+
+                
+        return result

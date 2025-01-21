@@ -14,6 +14,7 @@
     "depends": ["llm", "mail"],
     "external_dependencies": {},
     "data": [
+        "data/mail_message_subtype.xml",
         "security/llm_thread_security.xml",
         "security/ir.model.access.csv",
         "views/llm_thread_views.xml",
