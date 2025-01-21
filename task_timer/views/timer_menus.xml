@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Client Action -->
+    <record id="action_timer_dashboard" model="ir.actions.client">
+        <field name="name">Task Timer</field>
+        <field name="tag">task_timer.dashboard</field>
+    </record>
+
+    <!-- Menu Items -->
+    <menuitem 
+        id="menu_timer_root"
+        name="Task Timer"
+        sequence="10"/>
+        
+    <menuitem
+        id="menu_timer_dashboard"
+        name="Dashboard"
+        parent="menu_timer_root"
+        action="action_timer_dashboard"
+        sequence="10"/>
+</odoo>

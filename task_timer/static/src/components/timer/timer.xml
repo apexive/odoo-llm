@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="task_timer.Timer" owl="1">
+        <div class="d-flex align-items-center">
+            <button t-if="!state.isRunning" 
+                    class="btn btn-success me-2"
+                    t-on-click="startTimer">
+                Start Timer
+            </button>
+            <button t-else=""
+                    class="btn btn-danger me-2"
+                    t-on-click="stopTimer">
+                Stop Timer
+            </button>
+            <span t-if="state.isRunning" class="badge bg-success">Timer Active</span>
+        </div>
+    </t>
+</templates>

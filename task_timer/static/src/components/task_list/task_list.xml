@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="task_timer.TaskList" owl="1">
+        <div class="task-list p-4">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Task</th>
+                        <th>Total Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <t t-foreach="state.tasks" t-as="task" t-key="task.id">
+                        <tr>
+                            <td>
+                                <div class="fw-bold"><t t-esc="task.name"/></div>
+                                <div class="text-muted"><t t-esc="task.description"/></div>
+                            </td>
+                            <td><t t-esc="task.total_time"/> hours</td>
+                            <td>
+                                <Timer taskId="task.id" onTimerUpdate="() => this.loadTasks()"/>
+                            </td>
+                        </tr>
+                    </t>
+                </tbody>
+            </table>
+        </div>
+    </t>
+</templates>
