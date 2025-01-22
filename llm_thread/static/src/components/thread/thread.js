@@ -18,6 +18,57 @@ registerPatch({
     },
     recordMethods: {
         /**
+         * Common error notification handler
+         */
+        _notifyError(message, type = "warning") {
+            this.messaging.notify({
+                message: this.env._t(message),
+                type,
+            });
+        },
+
+        /**
+         * Common RPC call handler with error handling
+         */
+        async _makeRPCCall(route, params) {
+            try {
+                const result = await this.messaging.rpc({
+                    route,
+                    params,
+                });
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+                return result;
+            } catch (error) {
+                console.error(`[${route}] Error:`, error);
+                throw error;
+            }
+        },
+
+        /**
+         * Validate provider and model availability
+         */
+        async _validateProviderAndModel() {
+            const providers = await this._fetchProviders();
+            if (!providers.length) {
+                this._notifyError("No AI providers configured. Please contact your administrator.");
+                return null;
+            }
+
+            const models = await this._fetchModels(providers[0].id);
+            if (!models.length) {
+                this._notifyError("No AI models available for the selected provider.");
+                return null;
+            }
+
+            return {
+                provider_id: providers[0].id,
+                model_id: models[0].id,
+            };
+        },
+
+        /**
          * Handle AI button click
          */
         onClickAskAI: async function () {
@@ -33,6 +84,7 @@ registerPatch({
                 await this._sendQuestionForAi();
             }
         },
+
         /**
          * Handle AI config button click
          */
@@ -42,9 +94,9 @@ registerPatch({
                 this._openLLMThreadEditDialog();
             }
         },
+
         /**
          * Ensure thread LLMThread exists for this mail.thread
-         * Creates a LLMThread if none exists from the default LLMModel and LLMProvider
          */
         async _ensureLLMThreadExists() {
             if (!this.llmThreadConfig) {
@@ -52,37 +104,15 @@ registerPatch({
                 if (defaultConfig) {
                     await this._createLLMThread(defaultConfig);
                 } else {
-                    // Try to find default chat model
-                    const providers = await this._fetchProviders();
-                    if (!providers.length) {
-                        this.messaging.notify({
-                            message: this.env._t(
-                                "No AI providers configured. Please contact your administrator."
-                            ),
-                            type: "warning",
-                        });
-                        return;
+                    const config = await this._validateProviderAndModel();
+                    if (config) {
+                        await this._createLLMThread(config);
                     }
-
-                    const models = await this._fetchModels(providers[0].id);
-                    if (!models.length) {
-                        this.messaging.notify({
-                            message: this.env._t(
-                                "No AI models available for the selected provider."
-                            ),
-                            type: "warning",
-                        });
-                        return;
-                    }
-
-                    await this._createLLMThread({
-                        provider_id: providers[0].id,
-                        model_id: models[0].id,
-                    });
                 }
                 await this._fetchLlmThread();
             }
         },
+
         /**
          * Open LLMThread edit dialog
          */
@@ -94,7 +124,6 @@ registerPatch({
                 views: [[false, 'form']],
                 target: 'new',
                 context: {
-                    form_view_ref: 'llm_thread.llm_thread_view_form',
                 },
             }, {
                 onClose: async () => {
@@ -102,6 +131,7 @@ registerPatch({
                 },
             });
         },
+
         /**
          * Fetch LLM thread for the current user's mail.thread
          */
@@ -112,72 +142,23 @@ registerPatch({
             }
 
             try {
-                const result = await this.messaging.rpc({
-                    route: "/llm/thread/user",
-                    params: {
-                        record_model_name: composer.thread.model,
-                        record_id: composer.thread.id,
-                    },
+                const result = await this._makeRPCCall("/llm/thread/user", {
+                    record_model_name: composer.thread.model,
+                    record_id: composer.thread.id,
                 });
-                if (!result.error) {
-                    this.update({ llmThreadConfig: result });
-                }
+                this.update({ llmThreadConfig: result });
             } catch (error) {
-                console.error("[_fetchLlmThread] Error:", error);
+                // Silent fail as this is just a check
             }
         },
 
         /**
          * Get default provider and model configuration
          */
-        _getDefaultConfig: async function () {
+        async _getDefaultConfig() {
             try {
-                // Search for default chat model
-                const defaultModel = await this.messaging.rpc({
-                    model: "llm.model",
-                    method: "search_read",
-                    args: [
-                        [
-                            ["model_use", "=", "chat"],
-                            ["default", "=", true],
-                            ["active", "=", true],
-                        ],
-                        ["id", "name", "provider_id"],
-                    ],
-                    kwargs: { limit: 1 },
-                });
-
-                if (defaultModel.length) {
-                    return {
-                        providerId: defaultModel[0].provider_id[0],
-                        modelId: defaultModel[0].id,
-                    };
-                }
-
-                // Fallback: get any active chat model
-                const anyModel = await this.messaging.rpc({
-                    model: "llm.model",
-                    method: "search_read",
-                    args: [
-                        [
-                            ["model_use", "=", "chat"],
-                            ["active", "=", true],
-                        ],
-                        ["id", "name", "provider_id"],
-                    ],
-                    kwargs: { limit: 1 },
-                });
-
-                if (anyModel.length) {
-                    return {
-                        providerId: anyModel[0].provider_id[0],
-                        modelId: anyModel[0].id,
-                    };
-                }
-
-                return null;
+                return await this._makeRPCCall("/llm/default/config", {});
             } catch (error) {
-                console.error("Failed to get default config:", error);
                 return null;
             }
         },
@@ -187,14 +168,10 @@ registerPatch({
          */
         async _fetchProviders() {
             try {
-                const result = await this.messaging.rpc({
-                    model: "llm.provider",
-                    method: "search_read",
-                    args: [[["active", "=", true]], ["id", "name"]],
-                });
-                return result;
+                const result = await this._makeRPCCall("/llm/providers", {});
+                return result.providers || [];
             } catch (error) {
-                console.error("Failed to fetch providers:", error);
+                this._notifyError("Failed to fetch providers");
                 return [];
             }
         },
@@ -204,20 +181,12 @@ registerPatch({
          */
         async _fetchModels(providerId) {
             try {
-                const result = await this.messaging.rpc({
-                    model: "llm.model",
-                    method: "search_read",
-                    args: [
-                        [
-                            ["provider_id", "=", providerId],
-                            ["active", "=", true],
-                        ],
-                        ["id", "name", "provider_id"],
-                    ],
+                const result = await this._makeRPCCall("/llm/models", {
+                    provider_id: providerId,
                 });
-                return result;
+                return result.models || [];
             } catch (error) {
-                console.error("Failed to fetch models:", error);
+                this._notifyError("Failed to fetch models");
                 return [];
             }
         },
@@ -228,26 +197,14 @@ registerPatch({
         async _createLLMThread(config) {
             try {
                 const composer = this.composer;
-                const result = await this.messaging.rpc({
-                    route: "/llm/thread/create",
-                    params: {
-                        model: composer.thread.model,
-                        record_id: composer.thread.id,
-                        provider_id: config.providerId,
-                        model_id: config.modelId,
-                    },
+                return await this._makeRPCCall("/llm/thread/create", {
+                    model: composer.thread.model,
+                    record_id: composer.thread.id,
+                    provider_id: config.provider_id,
+                    model_id: config.model_id,
                 });
-                if (result.error) {
-                    throw new Error(result.error);
-                }
-
-                return result;
             } catch (error) {
-                console.error("Failed to create LLMThread:", error);
-                this.messaging.notify({
-                    message: this.env._t("Failed to create LLMThread"),
-                    type: "danger",
-                });
+                this._notifyError("Failed to create LLMThread", "danger");
                 return null;
             }
         },
