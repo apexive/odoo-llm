@@ -12,7 +12,9 @@
     "category": "Technical",
     "version": "16.0.1.0.0",
     "depends": ["llm", "mail"],
-    "external_dependencies": {},
+    "external_dependencies": {
+        "python": ["markdown2"]
+    },
     "data": [
         "data/mail_message_subtype.xml",
         "security/llm_thread_security.xml",
