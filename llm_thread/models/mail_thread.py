@@ -1,5 +1,8 @@
 import logging
 from odoo import fields, models
+import markdown2
+import html
+import re
 
 _logger = logging.getLogger(__name__)
 
@@ -67,8 +70,33 @@ class MailThread(models.AbstractModel):
         
     def _post_ai_response(self, llm_thread, content):
         """Post AI response message with proper settings"""
+        # Convert markdown to HTML with extras for better formatting
+        html_content = markdown2.markdown(content, extras=[
+            'fenced-code-blocks',  # Support ```code blocks```
+            'tables',              # Support markdown tables
+            'break-on-newline',    # Convert newlines to <br>
+            'header-ids',          # Add ids to headers
+            'code-friendly',       # Better code block handling
+            'smarty-pants',        # Smart quotes, dashes, etc.
+        ])
+        
+        # Clean up any existing div wrappers
+        html_content = re.sub(r'<div[^>]*>', '', html_content)
+        html_content = html_content.replace('</div>', '')
+        
+        # Wrap code blocks with pre tags and add syntax highlighting class
+        html_content = html_content.replace(
+            '<code>', 
+            '<pre class="o_codeblock"><code>'
+        ).replace('</code>', '</code></pre>')
+        
+        # Ensure proper wrapping without double-escaping
+        safe_content = f'<div class="o_mail_note_content">{html_content}</div>'
+        
+        _logger.info("Posting AI Response: %s", safe_content)
+        
         return self.message_post(
-            body=content,
+            body=safe_content,
             message_type='comment',
             subtype_xmlid='llm_thread.mt_llm_answer',
             author_id=False,  # No author for AI messages
