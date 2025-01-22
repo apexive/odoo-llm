@@ -24,6 +24,7 @@
             ('include', 'web_editor.assets_wysiwyg'),
             'llm_thread/static/src/components/thread/thread.xml',
             'llm_thread/static/src/components/thread/thread.scss',
+            'llm_thread/static/src/components/thread/thread.js',
         ],
     },
     "license": "LGPL-3",

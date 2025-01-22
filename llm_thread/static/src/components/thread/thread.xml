@@ -2,7 +2,12 @@
 <templates xml:space="preserve">
     <t t-name="llm_thread.Composer.button"  t-inherit="mail.Composer.actionButtons" t-inherit-mode="extension" owl="1">
         <xpath expr="//div[hasclass('o_Composer_actionButtons')]" position="inside">
-            <button class="btn btn-secondary o_composer_button_ask_ai" title="Ask AI" type="button">
+            <button 
+                class="btn btn-secondary o_composer_button_ask_ai" 
+                title="Ask AI" 
+                type="button"
+                t-on-click="composerView.onClickAskAI"
+            >
                 <i class="fa fa-robot"/> Ask AI
             </button>
         </xpath>

@@ -49,42 +49,23 @@ class LLMThread(models.Model):
 
     def _message_post_after_hook(self, message, msg_vals):
         """Handle message posting and trigger AI response if needed."""
-        print("\n=== Message Post Hook Started ===")
-        print(f"Message Type: {msg_vals.get('message_type')}")
-        print(f"Author ID: {msg_vals.get('author_id')}")
-        print(f"Message Body: {msg_vals.get('body')}")
-        print(f"Message ID: {message.id}")
-        print(f"Parent ID: {msg_vals.get('parent_id')}")
-        print(f"Subtype: {msg_vals.get('subtype_id')}")
-        print(f"Context: {self.env.context}")
-        
-        msg_vals = msg_vals.copy()
-        if msg_vals.get('subtype_id') not in [self.env.ref('llm_thread.mt_llm_question').id, self.env.ref('llm_thread.mt_llm_answer').id]:
-            msg_vals['subtype_id'] = self.env.ref('llm_thread.mt_llm_question').id
 
         res = super()._message_post_after_hook(message, msg_vals)
-        _logger.info("Message Post Hook Started")
 
         # Only generate response for user messages
         if (msg_vals.get('subtype_id') == self.env.ref('llm_thread.mt_llm_question').id and
             not self.env.context.get('skip_ai_response')):  # Not already an AI response
             
-            print("\n--> Generating AI Response")
-            print(f"Thread ID: {self.id}")
-            print(f"Model: {self.model_id.name}")
-            print(f"Original Message ID: {message.id}")
             
             try:
                 # Get AI response (non-streaming for hook)
                 for response in self.with_context(skip_ai_response=True).get_assistant_response(stream=False):
                     if response.get('error'):
-                        print(f"\nError in AI Response: {response['error']}")
                         _logger.error("Error getting AI response: %s", response['error'])
                         break
                     
                     content = response.get('content')
                     if content:
-                        print(f"\nAI Response Content: {content[:100]}...")  # Print first 100 chars
                         
                         # Post AI response as message with proper guest author settings
                         ai_message = self.with_context(skip_ai_response=True, mail_create_nosubscribe=True).message_post(
@@ -97,10 +78,8 @@ class LLMThread(models.Model):
                             parent_id=message.id  # Link to original message
                         )
                         
-                        print(f"\nAI Message posted with ID: {ai_message.id} replying to {message.id}")
                         
             except Exception as e:
-                print(f"\nException in AI Response Generation: {str(e)}")
                 _logger.exception("Failed to generate AI response")
         else:
             print("\n--> Skipping AI Response")
@@ -111,7 +90,6 @@ class LLMThread(models.Model):
             if self.env.context.get('skip_ai_response'):
                 print("Reason: skip_ai_response in context")
                 
-        print("\n=== Message Post Hook Completed ===\n")
         return res
 
     @api.model_create_multi
