@@ -4,8 +4,14 @@
         <field name="name">LiteLLM</field>
         <field name="official" eval="True" />
         <field name="frontier" eval="False" />
-        <field name="description">LiteLLM is a unified API proxy that standardizes the interface across different LLM providers like OpenAI, Anthropic, Google PaLM, etc. It provides features like cost tracking, rate limiting, and load balancing across providers.</field>
-        <field name="logo" type="base64" file="llm_litellm/static/description/litellm_logo.png"/>
+        <field
+      name="description"
+    >LiteLLM is a unified API proxy that standardizes the interface across different LLM providers like OpenAI, Anthropic, Google PaLM, etc. It provides features like cost tracking, rate limiting, and load balancing across providers.</field>
+        <field
+      name="logo"
+      type="base64"
+      file="llm_litellm/static/description/litellm_logo.png"
+    />
         <field name="meta">{
             "website": "https://litellm.ai",
             "github": "https://github.com/BerriAI/litellm",

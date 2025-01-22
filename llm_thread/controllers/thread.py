@@ -1,95 +1,90 @@
 from odoo import http
 from odoo.http import request
 
+
 class LLMThreadController(http.Controller):
     @http.route("/llm/thread/user", type="json", auth="user")
     def get_user_thread(self, record_model_name, record_id):
         """Get user's LLM thread for a record"""
-        thread = request.env['llm.thread'].get_user_thread(record_model_name, int(record_id))
+        thread = request.env["llm.thread"].get_user_thread(
+            record_model_name, int(record_id)
+        )
         if not thread:
-            return {'error': 'No LLM thread found'}
-        
+            return {"error": "No LLM thread found"}
+
         return {
-            'thread_id': thread.id,
-            'provider_id': thread.provider_id.id,
-            'provider_name': thread.provider_id.name,
-            'model_id': thread.model_id.id,
-            'model_name': thread.model_id.name,
+            "thread_id": thread.id,
+            "provider_id": thread.provider_id.id,
+            "provider_name": thread.provider_id.name,
+            "model_id": thread.model_id.id,
+            "model_name": thread.model_id.name,
         }
-    
+
     @http.route("/llm/thread/update", type="json", auth="user")
     def update_config(self, thread_id, provider_id=None, model_id=None):
         """Update user's LLM thread"""
-        thread = request.env['llm.thread'].browse(int(thread_id))
+        thread = request.env["llm.thread"].browse(int(thread_id))
         if not thread.exists() or thread.user_id != request.env.user:
-            return {'error': 'Invalid thread'}
-            
+            return {"error": "Invalid thread"}
+
         vals = {}
         if provider_id:
-            vals['provider_id'] = int(provider_id)
+            vals["provider_id"] = int(provider_id)
         if model_id:
-            vals['model_id'] = int(model_id)
-            
+            vals["model_id"] = int(model_id)
+
         if vals:
             thread.write(vals)
-            
+
         return self.get_user_thread(thread.res_model, thread.res_id)
-        
+
     @http.route("/llm/thread/create", type="json", auth="user")
     def create_thread(self, model, record_id, provider_id, model_id):
         """Create new LLM thread"""
         vals = {
-            'user_id': request.env.user.id,
-            'res_model': model,
-            'res_id': int(record_id),
-            'provider_id': int(provider_id),
-            'model_id': int(model_id),
+            "user_id": request.env.user.id,
+            "res_model": model,
+            "res_id": int(record_id),
+            "provider_id": int(provider_id),
+            "model_id": int(model_id),
         }
-        
-        request.env['llm.thread'].create(vals)
+
+        request.env["llm.thread"].create(vals)
         return self.get_user_thread(model, record_id)
 
     @http.route("/llm/providers", type="json", auth="user")
     def get_providers(self):
         """Get available LLM providers"""
-        providers = request.env['llm.provider'].search([('active', '=', True)])
+        providers = request.env["llm.provider"].search([("active", "=", True)])
         return {
-            'providers': [{
-                'id': provider.id,
-                'name': provider.name
-            } for provider in providers]
+            "providers": [
+                {"id": provider.id, "name": provider.name} for provider in providers
+            ]
         }
 
     @http.route("/llm/models", type="json", auth="user")
     def get_models(self, provider_id):
         """Get available models for a provider"""
-        provider = request.env['llm.provider'].browse(int(provider_id))
+        provider = request.env["llm.provider"].browse(int(provider_id))
         if not provider.exists():
-            return {'error': 'Invalid provider'}
+            return {"error": "Invalid provider"}
 
-        models = request.env['llm.model'].search([
-            ('provider_id', '=', provider.id),
-            ('active', '=', True)
-        ])
-        return {
-            'models': [{
-                'id': model.id,
-                'name': model.name
-            } for model in models]
-        }
+        models = request.env["llm.model"].search(
+            [("provider_id", "=", provider.id), ("active", "=", True)]
+        )
+        return {"models": [{"id": model.id, "name": model.name} for model in models]}
 
     @http.route("/llm/default/config", type="json", auth="user")
     def get_default_config(self):
         """Get default provider and model configuration"""
-        default_model = request.env['llm.model'].search([
-            ('active', '=', True),
-            ('default', '=', True)
-        ], limit=1)
+        default_model = request.env["llm.model"].search(
+            [("active", "=", True), ("default", "=", True)], limit=1
+        )
 
         if not default_model:
             return None
 
         return {
-            'provider_id': default_model.provider_id.id,
-            'model_id': default_model.id
+            "provider_id": default_model.provider_id.id,
+            "model_id": default_model.id,
         }

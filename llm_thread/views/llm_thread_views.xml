@@ -12,23 +12,24 @@
                 <sheet>
                     <div class="oe_title">
                         <h1>
-                            <field name="name" readonly="1"/>
+                            <field name="name" readonly="1" />
                         </h1>
                     </div>
                     <group>
                         <group string="Configuration">
-                            <field name="user_id" readonly="1"/>
-                            <field name="provider_id" required="1"/>
-                            <field name="model_id" required="1"/>
+                            <field name="user_id" readonly="1" />
+                            <field name="provider_id" required="1" />
+                            <field name="model_id" required="1" />
                         </group>
                         <group string="Reference">
-                            <field name="res_model" readonly="1"/>
-                            <field name="res_id" readonly="1"/>
-                            <button 
-                                string="View Record"
-                                name="action_view_record" 
-                                type="object"
-                                class="oe_link"/>
+                            <field name="res_model" readonly="1" />
+                            <field name="res_id" readonly="1" />
+                            <button
+                string="View Record"
+                name="action_view_record"
+                type="object"
+                class="oe_link"
+              />
                         </group>
                     </group>
                 </sheet>
@@ -48,12 +49,13 @@
                 <field name="model_id" />
                 <field name="res_model" />
                 <field name="write_date" />
-                <button 
-                    name="action_view_record" 
-                    type="object" 
-                    string="View Record" 
-                    class="btn btn-link"
-                    icon="fa-external-link"/>
+                <button
+          name="action_view_record"
+          type="object"
+          string="View Record"
+          class="btn btn-link"
+          icon="fa-external-link"
+        />
             </tree>
         </field>
     </record>
@@ -71,36 +73,36 @@
                 <field name="res_model" />
                 <separator />
                 <filter
-                    string="My LLM Threads"
-                    name="my_threads"
-                    domain="[('user_id', '=', uid)]"
-                />
+          string="My LLM Threads"
+          name="my_threads"
+          domain="[('user_id', '=', uid)]"
+        />
                 <filter
-                    string="Archived"
-                    name="inactive"
-                    domain="[('active', '=', False)]"
-                />
+          string="Archived"
+          name="inactive"
+          domain="[('active', '=', False)]"
+        />
                 <group expand="0" string="Group By">
                     <filter
-                        string="User"
-                        name="group_by_user"
-                        context="{'group_by': 'user_id'}"
-                    />
+            string="User"
+            name="group_by_user"
+            context="{'group_by': 'user_id'}"
+          />
                     <filter
-                        string="Provider"
-                        name="group_by_provider"
-                        context="{'group_by': 'provider_id'}"
-                    />
+            string="Provider"
+            name="group_by_provider"
+            context="{'group_by': 'provider_id'}"
+          />
                     <filter
-                        string="Model"
-                        name="group_by_model"
-                        context="{'group_by': 'model_id'}"
-                    />
+            string="Model"
+            name="group_by_model"
+            context="{'group_by': 'model_id'}"
+          />
                     <filter
-                        string="Record Type"
-                        name="group_by_res_model"
-                        context="{'group_by': 'res_model'}"
-                    />
+            string="Record Type"
+            name="group_by_res_model"
+            context="{'group_by': 'res_model'}"
+          />
                 </group>
             </search>
         </field>
@@ -117,7 +119,7 @@
                 No LLM threads yet
             </p>
             <p>
-                LLM threads will be automatically created when you start 
+                LLM threads will be automatically created when you start
                 using LLM responses in your conversations.
             </p>
         </field>
@@ -125,10 +127,10 @@
 
     <!-- Menu Items -->
     <menuitem
-        id="menu_llm_thread"
-        name="LLM Threads"
-        action="llm_thread_action"
-        parent="llm.menu_llm_root"
-        sequence="20"
-    />
+    id="menu_llm_thread"
+    name="LLM Threads"
+    action="llm_thread_action"
+    parent="llm.menu_llm_root"
+    sequence="20"
+  />
 </odoo>

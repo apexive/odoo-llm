@@ -1,80 +1,80 @@
 .o_composer_ask_ai {
-    padding: 8px;
-    background-color: #f8f9fa;
-    border-radius: 4px;
+  padding: 8px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+  margin-bottom: 8px;
+
+  .o_composer_input {
     margin-bottom: 8px;
 
-    .o_composer_input {
-        margin-bottom: 8px;
-        
-        textarea {
-            width: 100%;
-            min-height: 60px;
-            padding: 8px;
-            border: 1px solid #dee2e6;
-            border-radius: 4px;
-        }
+    textarea {
+      width: 100%;
+      min-height: 60px;
+      padding: 8px;
+      border: 1px solid #dee2e6;
+      border-radius: 4px;
     }
+  }
 }
 
 @keyframes attention-pulse {
-    0% { 
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
-    }
-    70% { 
-        box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
-    }
-    100% { 
-        box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
-    }
+  0% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
 }
 
 // Container to handle overflow
 .o_Composer_coreFooter {
-    overflow: visible !important;
+  overflow: visible !important;
 }
 
 .o_Composer_button.o_composer_button_ask_ai {
-    position: relative;
-    transition: all 0.2s ease;
-    animation: attention-pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
-    overflow: visible !important;
+  position: relative;
+  transition: all 0.2s ease;
+  animation: attention-pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+  overflow: visible !important;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: -3px;
+    background: inherit;
+    border-radius: inherit;
+    z-index: 1;
+    transition: opacity 0.2s ease;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &:hover {
+    transform: translateY(-1px);
 
     &::before {
-        content: '';
-        position: absolute;
-        inset: -3px;
-        background: inherit;
-        border-radius: inherit;
-        z-index: 1;
-        transition: opacity 0.2s ease;
-        opacity: 0;
-        pointer-events: none;
+      opacity: 0.15;
     }
+  }
 
-    &:hover {
-        transform: translateY(-1px);
-        
-        &::before {
-            opacity: 0.15;
-        }
-    }
+  &:active {
+    transform: scale(0.95);
+    transition-duration: 0.1s;
 
-    &:active {
-        transform: scale(0.95);
-        transition-duration: 0.1s;
-        
-        &::before {
-            opacity: 0.25;
-        }
+    &::before {
+      opacity: 0.25;
     }
+  }
 
-    &:disabled {
-        animation: none;
-        transform: none;
-        
-        &::before {
-            display: none;
-        }
+  &:disabled {
+    animation: none;
+    transform: none;
+
+    &::before {
+      display: none;
     }
+  }
 }

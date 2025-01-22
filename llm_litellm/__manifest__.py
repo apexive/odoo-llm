@@ -4,10 +4,10 @@
     "description": """
         Implements LiteLLM proxy service for the LLM integration module.
         Supports proxying requests to various LLM providers through a central LiteLLM proxy server.
-        
+
         Features:
         - Chat completions with streaming support
-        - Text embeddings 
+        - Text embeddings
         - Model listing
         - Rate limiting and cost tracking through proxy
     """,

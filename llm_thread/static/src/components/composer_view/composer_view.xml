@@ -1,15 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t t-name="llm_thread.Composer.button" t-inherit="mail.Composer.actionButtons" t-inherit-mode="extension" owl="1">
-        <xpath expr="//div[hasclass('o_Composer_actionButtons')]" position="inside">
-            <div class="o_Composer_aiButtons" t-att-class="{
+    <t
+    t-name="llm_thread.Composer.button"
+    t-inherit="mail.Composer.actionButtons"
+    t-inherit-mode="extension"
+    owl="1"
+  >
+        <xpath
+      expr="//div[hasclass('o_Composer_actionButtons')]"
+      position="inside"
+    >
+            <div
+        class="o_Composer_aiButtons"
+        t-att-class="{
                 'd-flex': composerView.isCompact,
                 'mt-2': !composerView.isCompact,
                 'border-start': composerView.isCompact
-            }">
-                <button 
-                    class="o_Composer_button o_composer_button_ask_ai btn" 
-                    t-att-class="{
+            }"
+      >
+                <button
+          class="o_Composer_button o_composer_button_ask_ai btn"
+          t-att-class="{
                         'btn-secondary': composerView.isCompact,
                         'btn-primary': !composerView.isCompact,
                         'o-composer-is-compact': composerView.isCompact,
@@ -17,21 +28,21 @@
                         'border-start-0': composerView.isCompact,
                         'me-1': !composerView.isCompact
                     }"
-                    title="Ask AI"
-                    type="button"
-                    t-att-disabled="!composerView.composer.canPostMessage ? 'disabled' : ''"
-                    t-on-click="composerView.onClickAskAI"
-                >
+          title="Ask AI"
+          type="button"
+          t-att-disabled="!composerView.composer.canPostMessage ? 'disabled' : ''"
+          t-on-click="composerView.onClickAskAI"
+        >
                     <t t-if="composerView.isCompact">
                         <t t-call="llm_thread.Icon.Robot" />
                     </t>
                     <t t-else="">
-                        <i class="fa fa-robot me-1"/>ASK AI
+                        <i class="fa fa-robot me-1" />ASK AI
                     </t>
                 </button>
-                <button 
-                    class="o_Composer_button o_composer_button_ai_config btn" 
-                    t-att-class="{
+                <button
+          class="o_Composer_button o_composer_button_ai_config btn"
+          t-att-class="{
                         'btn-light': composerView.isCompact,
                         'btn-secondary': !composerView.isCompact,
                         'o-composer-is-compact': composerView.isCompact,
@@ -39,11 +50,11 @@
                         'border-start-0': composerView.isCompact,
                         'rounded-end-3': composerView.hasCurrentPartnerAvatar and composerView.isCompact
                     }"
-                    title="Configure AI" 
-                    type="button"
-                    t-on-click="composerView.onClickAIConfig"
-                >
-                    <i class="fa fa-cog"/>
+          title="Configure AI"
+          type="button"
+          t-on-click="composerView.onClickAIConfig"
+        >
+                    <i class="fa fa-cog" />
                 </button>
             </div>
         </xpath>

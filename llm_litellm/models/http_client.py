@@ -1,17 +1,19 @@
 import json
+
 import requests
 from requests.exceptions import RequestException
 
+
 class LiteLLMClient:
     """HTTP client for LiteLLM proxy"""
+
     def __init__(self, api_key, api_base=None):
         self.api_key = api_key
         self.api_base = api_base or "http://localhost:4000"
         self.session = requests.Session()
-        self.session.headers.update({
-            "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
-        })
+        self.session.headers.update(
+            {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+        )
 
     def _make_request(self, method, endpoint, data=None, stream=False, **kwargs):
         """Make HTTP request to LiteLLM proxy"""
@@ -22,7 +24,7 @@ class LiteLLMClient:
                 url=url,
                 json=data if data else None,
                 stream=stream,
-                **kwargs
+                **kwargs,
             )
             response.raise_for_status()
             return response
@@ -38,12 +40,10 @@ class LiteLLMClient:
 
     def chat_completion(self, messages, model, stream=False):
         """Create chat completion"""
-        data = {
-            "model": model,
-            "messages": messages,
-            "stream": stream
-        }
-        response = self._make_request("POST", "/chat/completions", data=data, stream=stream)
+        data = {"model": model, "messages": messages, "stream": stream}
+        response = self._make_request(
+            "POST", "/chat/completions", data=data, stream=stream
+        )
 
         if not stream:
             return response.json()
@@ -65,10 +65,7 @@ class LiteLLMClient:
         if isinstance(texts, str):
             texts = [texts]
 
-        data = {
-            "model": model,
-            "input": texts
-        }
+        data = {"model": model, "input": texts}
         response = self._make_request("POST", "/embeddings", data=data)
         return response.json()
 
