@@ -1,3 +1,0 @@
-id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_task_timer_task,task.timer.task,model_task_timer_task,base.group_user,1,1,1,1
-access_task_timer_entry,task.timer.entry,model_task_timer_entry,base.group_user,1,1,1,1
