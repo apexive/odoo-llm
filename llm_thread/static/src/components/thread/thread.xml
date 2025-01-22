@@ -10,6 +10,14 @@
             >
                 <i class="fa fa-robot"/> Ask AI
             </button>
+            <button 
+                class="btn btn-secondary o_composer_button_ai_config ms-1" 
+                title="Configure AI" 
+                type="button"
+                t-on-click="composerView.onClickAIConfig"
+            >
+                <i class="fa fa-cog"/>
+            </button>
         </xpath>
     </t>
 </templates>

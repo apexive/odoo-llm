@@ -6,6 +6,7 @@ import session from "web.session";
 import { attr } from "@mail/model/model_field";
 import { clear } from "@mail/model/model_field_command";
 import { sprintf } from "@web/core/utils/strings";
+import { Dialog } from "web.Dialog";
 
 registerPatch({
     name: "ComposerView",
@@ -30,15 +31,31 @@ registerPatch({
             }
 
             if (!this.llmThreadConfig) {
-                console.log('[onClickAskAI] Getting default config...');
-                const defaultConfig = await this._getDefaultConfig();
-                console.log('[onClickAskAI] Default config:', defaultConfig);
+                await this._ensureThreadConfig();
+            }
 
+            if (this.llmThreadConfig) {
+                await this._sendQuestionForAi();
+            }
+        },
+        /**
+         * Handle AI config button click
+         */
+        onClickAIConfig: async function () {
+            await this._ensureThreadConfig();
+            if (this.llmThreadConfig) {
+                this._openConfigDialog();
+            }
+        },
+        /**
+         * Ensure thread configuration exists
+         * Creates a default configuration if none exists
+         */
+        async _ensureThreadConfig() {
+            if (!this.llmThreadConfig) {
+                const defaultConfig = await this._getDefaultConfig();
                 if (defaultConfig) {
-                    console.log('[onClickAskAI] Creating thread with config:', defaultConfig);
                     await this._createThreadConfig(defaultConfig);
-                    await this._fetchLlmConfig();
-                    console.log('[onClickAskAI] Thread created and config fetched');
                 } else {
                     // Try to find default chat model
                     const providers = await this._fetchProviders();
@@ -52,6 +69,7 @@ registerPatch({
                         return;
                     }
 
+                    const models = await this._fetchModels(providers[0].id);
                     if (!models.length) {
                         this.messaging.notify({
                             message: this.env._t(
@@ -62,18 +80,32 @@ registerPatch({
                         return;
                     }
 
-                    // Show config dialog
-                    const config = await this._showConfigDialog(providers, models);
-                    if (config) {
-                        await this._createThreadConfig(config);
-                        await this._fetchLlmConfig(); // Refresh config
-                    }
+                    await this._createThreadConfig({
+                        provider_id: providers[0].id,
+                        model_id: models[0].id,
+                    });
                 }
+                await this._fetchLlmConfig();
             }
-
-            if (this.llmThreadConfig) {
-                await this._sendQuestionForAi();
-            }
+        },
+        /**
+         * Open thread configuration dialog
+         */
+        _openConfigDialog() {
+            this.env.services.action.doAction({
+                type: 'ir.actions.act_window',
+                res_model: 'llm.thread',
+                res_id: this.llmThreadConfig.thread_id,
+                views: [[false, 'form']],
+                target: 'new',
+                context: {
+                    form_view_ref: 'llm_thread.llm_thread_view_form',
+                },
+            }, {
+                onClose: async () => {
+                    await this._fetchLlmConfig();
+                },
+            });
         },
         /**
          * Fetch LLM thread configuration for the current thread
@@ -168,7 +200,7 @@ registerPatch({
                 const result = await this.messaging.rpc({
                     model: "llm.provider",
                     method: "search_read",
-                    args: [[["active", "=", true]], ["id", "name", "code"]],
+                    args: [[["active", "=", true]], ["id", "name"]],
                 });
                 return result;
             } catch (error) {
@@ -198,61 +230,6 @@ registerPatch({
                 console.error("Failed to fetch models:", error);
                 return [];
             }
-        },
-
-        /**
-         * Show configuration dialog
-         */
-        async _showConfigDialog(providers, models) {
-            return new Promise((resolve) => {
-                const dialog = new Dialog(this, {
-                    title: this.env._t("Configure AI Assistant"),
-                    $content: $(
-                        QWeb.render("llm_thread.ConfigModal", {
-                            providers: providers,
-                            models: models,
-                        })
-                    ),
-                    buttons: [
-                        {
-                            text: this.env._t("Save"),
-                            classes: "btn-primary",
-                            click: () => {
-                                const providerId = parseInt(dialog.$("#provider").val());
-                                const modelId = parseInt(dialog.$("#model").val());
-                                dialog.close();
-                                resolve({ providerId, modelId });
-                            },
-                        },
-                        {
-                            text: this.env._t("Cancel"),
-                            click: () => {
-                                dialog.close();
-                                resolve(null);
-                            },
-                        },
-                    ],
-                    size: "medium",
-                });
-
-                dialog.opened(() => {
-                    const $provider = dialog.$("#provider");
-                    const $model = dialog.$("#model");
-
-                    // Handle provider change
-                    $provider.on("change", async () => {
-                        const providerId = parseInt($provider.val());
-                        const models = await this._fetchModels(providerId);
-
-                        $model.empty();
-                        models.forEach((model) => {
-                            $model.append(new Option(model.name, model.id));
-                        });
-                    });
-                });
-
-                dialog.open();
-            });
         },
 
         /**
