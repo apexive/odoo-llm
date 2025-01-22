@@ -19,6 +19,7 @@
                     }"
                     title="Ask AI"
                     type="button"
+                    t-att-disabled="!composerView.composer.canPostMessage ? 'disabled' : ''"
                     t-on-click="composerView.onClickAskAI"
                 >
                     <t t-if="composerView.isCompact">
