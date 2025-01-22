@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Inherit llm.model form view -->
+    <record id="llm_model_view_form_inherit_thread" model="ir.ui.view">
+        <field name="name">llm.model.view.form.inherit.thread</field>
+        <field name="model">llm.model</field>
+        <field name="inherit_id" ref="llm.llm_model_view_form" />
+        <field name="arch" type="xml">
+            <!-- Add header and button before sheet -->
+            <xpath expr="//sheet" position="before">
+                <header>
+                    <button
+            string="Start Chat"
+            name="action_start_chat"
+            type="object"
+            class="oe_highlight"
+            icon="fa-comments"
+          />
+                </header>
+            </xpath>
+        </field>
+    </record>
+</odoo>

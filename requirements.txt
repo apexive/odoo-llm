@@ -3,3 +3,4 @@ anthropic
 ollama
 openai
 replicate
+requests

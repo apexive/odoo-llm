@@ -29,7 +29,7 @@ class LLMProvider(models.Model):
             # Replicate responses can vary by model, handle common formats
             content = (
                 "".join(response)
-                if isinstance(response, (list, tuple))
+                if isinstance(response, list) or isinstance(response, tuple)
                 else str(response)
             )
             yield {"role": "assistant", "content": content}

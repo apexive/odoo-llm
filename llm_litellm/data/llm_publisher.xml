@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_publisher_litellm" model="llm.publisher">
+        <field name="name">LiteLLM</field>
+        <field name="official" eval="True" />
+        <field name="frontier" eval="False" />
+        <field name="description">LiteLLM is a unified API proxy that standardizes the interface across different LLM providers like OpenAI, Anthropic, Google PaLM, etc. It provides features like cost tracking, rate limiting, and load balancing across providers.</field>
+        <field name="logo" type="base64" file="llm_litellm/static/description/litellm_logo.png"/>
+        <field name="meta">{
+            "website": "https://litellm.ai",
+            "github": "https://github.com/BerriAI/litellm",
+            "key_features": [
+            "Unified API Interface",
+            "Multiple Provider Support",
+            "Cost Tracking",
+            "Rate Limiting",
+            "Load Balancing",
+            "Streaming Responses"
+            ]
+            }</field>
+    </record>
+</odoo>
