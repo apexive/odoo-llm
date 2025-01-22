@@ -1,7 +1,6 @@
 import logging
 from odoo import fields, models
 import markdown2
-import html
 import re
 
 _logger = logging.getLogger(__name__)
