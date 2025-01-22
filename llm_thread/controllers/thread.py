@@ -1,100 +1,50 @@
-import json
-import logging
-
-from odoo import api, http, registry
-from odoo.http import Response, request
-
-_logger = logging.getLogger(__name__)
-
+from odoo import http
+from odoo.http import request
 
 class LLMThreadController(http.Controller):
-    @http.route("/llm/thread/data", type="json", auth="user")
-    def get_thread_data(self, thread_id):
-        _logger.info("Getting thread data for ID: %s", thread_id)
-        try:
-            thread = request.env["llm.thread"].browse(int(thread_id))
-            if not thread.exists():
-                _logger.error("Thread %s not found", thread_id)
-                return {'error': 'Thread not found'}
-            
-            data = thread.get_thread_data()
-            _logger.info("Retrieved thread data: %s", data)
-            return data
-        except Exception as e:
-            _logger.exception("Error getting thread data: %s", str(e))
-            return {'error': str(e)}
-
-    @http.route("/llm/thread/post_message", type="json", auth="user")
-    def post_message(self, thread_id, content, role="user"):
-        thread = request.env["llm.thread"].browse(int(thread_id))
-        message = thread.post_message(content=content, role=role)
-        return message.to_frontend_data()
-
-    def generate(self, dbname, env, thread_id):
-        with registry(dbname).cursor() as cr:
-            env = api.Environment(cr, env.uid, env.context)
-            thread = env["llm.thread"].browse(int(thread_id))
-
-            # Convert string data to bytes for all yields
-            yield f"data: {json.dumps({'type': 'start'})}\n\n".encode()
-
-            # Stream responses
-            for response in thread.get_assistant_response(stream=True):
-                if response.get("error"):
-                    error_data = f"data: {json.dumps({'type': 'error', 'error': response['error']})}\n\n"
-                    yield error_data.encode("utf-8")
-                    break
-
-                if response.get("content"):
-                    content_data = f"data: {json.dumps({'type': 'content', 'content': response['content']})}\n\n"
-                    yield content_data.encode("utf-8")
-
-            # Send end event
-            yield f"data: {json.dumps({'type': 'end'})}\n\n".encode()
-
-    @http.route("/llm/thread/stream_response", type="http", auth="user", csrf=True)
-    def stream_response(self, thread_id):
-        """Stream assistant responses using server-sent events"""
-        headers = {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",  # Disable nginx buffering
+    @http.route("/llm/thread/config", type="json", auth="user")
+    def get_user_config(self, model, record_id):
+        """Get or create user's LLM configuration for a thread"""
+        thread = request.env['llm.thread'].get_user_thread(model, int(record_id))
+        if not thread:
+            return {'error': 'No LLM configuration found'}
+        
+        return {
+            'thread_id': thread.id,
+            'provider_id': thread.provider_id.id,
+            'provider_name': thread.provider_id.name,
+            'model_id': thread.model_id.id,
+            'model_name': thread.model_id.name,
         }
-
-        return Response(
-            self.generate(request.cr.dbname, request.env, thread_id),
-            direct_passthrough=True,
-            headers=headers,
-        )
-
-    @http.route("/llm/thread/<int:thread_id>/export", type="http", auth="user")
-    def export_thread(self, thread_id):
-        """Export thread messages as text file"""
-        try:
-            thread = request.env["llm.thread"].browse(int(thread_id))
-
-            # Generate export content
-            content = []
-            for message in thread.message_ids:
-                author = message.get_author_name()
-                content.append(f"{author} ({message.role}):")
-                content.append(message.content)
-                content.append("")  # Empty line between messages
-
-            export_text = "\n".join(content)
-
-            # Generate filename
-            filename = f"chat_export_{thread.id}.txt"
-
-            # Return file response with proper encoding
-            return request.make_response(
-                export_text.encode("utf-8"),
-                headers=[
-                    ("Content-Type", "text/plain; charset=utf-8"),
-                    ("Content-Disposition", f'attachment; filename="{filename}"'),
-                ],
-            )
-
-        except Exception:
-            _logger.exception("Error exporting thread")
-            return request.not_found()
+    
+    @http.route("/llm/thread/update", type="json", auth="user")
+    def update_config(self, thread_id, provider_id=None, model_id=None):
+        """Update user's LLM configuration"""
+        thread = request.env['llm.thread'].browse(int(thread_id))
+        if not thread.exists() or thread.user_id != request.env.user:
+            return {'error': 'Invalid thread'}
+            
+        vals = {}
+        if provider_id:
+            vals['provider_id'] = int(provider_id)
+        if model_id:
+            vals['model_id'] = int(model_id)
+            
+        if vals:
+            thread.write(vals)
+            
+        return self.get_user_config(thread.res_model, thread.res_id)
+        
+    @http.route("/llm/thread/create", type="json", auth="user")
+    def create_thread(self, model, record_id, provider_id, model_id):
+        """Create new LLM thread configuration"""
+        vals = {
+            'user_id': request.env.user.id,
+            'res_model': model,
+            'res_id': int(record_id),
+            'provider_id': int(provider_id),
+            'model_id': int(model_id),
+        }
+        
+        thread = request.env['llm.thread'].create(vals)
+        return self.get_user_config(model, record_id)
