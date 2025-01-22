@@ -22,9 +22,9 @@
     'assets': {
         'web.assets_backend': [
             ('include', 'web_editor.assets_wysiwyg'),
-            'llm_thread/static/src/components/thread/thread.xml',
-            'llm_thread/static/src/components/thread/thread.scss',
-            'llm_thread/static/src/components/thread/thread.js',
+            'llm_thread/static/src/components/composer_view/composer_view.xml',
+            'llm_thread/static/src/components/composer_view/composer_view.scss',
+            'llm_thread/static/src/components/composer_view/composer_view_patch.js',
         ],
     },
     "license": "LGPL-3",
