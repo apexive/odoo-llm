@@ -8,7 +8,10 @@
                 type="button"
                 t-on-click="composerView.onClickAskAI"
             >
-                <i class="fa fa-robot"/> Ask AI
+                <t t-call="llm_thread.Icon.Robot">
+                    <t t-set="props" t-value="{ class: 'me-1', style: '' }" />
+                </t>
+                Ask AI
             </button>
             <button 
                 class="btn btn-secondary o_composer_button_ai_config ms-1" 

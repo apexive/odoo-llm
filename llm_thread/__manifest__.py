@@ -22,6 +22,8 @@
     'assets': {
         'web.assets_backend': [
             ('include', 'web_editor.assets_wysiwyg'),
+            'llm_thread/static/src/components/icons.xml',
+            'llm_thread/static/src/components/icons.scss',
             'llm_thread/static/src/components/composer_view/composer_view.xml',
             'llm_thread/static/src/components/composer_view/composer_view.scss',
             'llm_thread/static/src/components/composer_view/composer_view_patch.js',
