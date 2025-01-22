@@ -67,9 +67,16 @@ class MailThread(models.AbstractModel):
             })
                 
         return res
+    
+    def _markdown_to_html(self, content):
+        """Convert markdown content to HTML suitable for Odoo messages.
         
-    def _post_ai_response(self, llm_thread, content):
-        """Post AI response message with proper settings"""
+        Args:
+            content (str): Markdown formatted content
+            
+        Returns:
+            str: HTML content wrapped in appropriate Odoo classes
+        """
         # Convert markdown to HTML with extras for better formatting
         html_content = markdown2.markdown(content, extras=[
             'fenced-code-blocks',  # Support ```code blocks```
@@ -91,9 +98,11 @@ class MailThread(models.AbstractModel):
         ).replace('</code>', '</code></pre>')
         
         # Ensure proper wrapping without double-escaping
-        safe_content = f'<div class="o_mail_note_content">{html_content}</div>'
+        return f'<div class="o_mail_note_content">{html_content}</div>'
         
-        _logger.info("Posting AI Response: %s", safe_content)
+    def _post_ai_response(self, llm_thread, content):
+        """Post AI response message with proper settings"""
+        safe_content = self._markdown_to_html(content)
         
         return self.message_post(
             body=safe_content,
