@@ -8,403 +8,415 @@ import { clear } from "@mail/model/model_field_command";
 import { sprintf } from "@web/core/utils/strings";
 
 registerPatch({
-  name: "ComposerView",
-  fields: {
-    isAiThinking: attr({
-      default: false,
-    }),
-    llmThreadConfig: attr({
-      default: null,
-    }),
-  },
-  recordMethods: {
-    /**
-     * Handle AI button click
-     */
-    onClickAskAI: async function () {
-        console.log('onClickAskAI');
-      if (!this.llmThreadConfig) {
-        await this._fetchLlmConfig();
-      }
+    name: "ComposerView",
+    fields: {
+        isAiThinking: attr({
+            default: false,
+        }),
+        llmThreadConfig: attr({
+            default: null,
+        }),
+    },
+    recordMethods: {
+        /**
+         * Handle AI button click
+         */
+        onClickAskAI: async function () {
+            console.log('[onClickAskAI] Starting with llmThreadConfig:', this.llmThreadConfig);
+            if (!this.llmThreadConfig) {
+                console.log('[onClickAskAI] Fetching thread config...');
+                await this._fetchLlmConfig();
+                console.log('[onClickAskAI] After fetch, llmThreadConfig:', this.llmThreadConfig);
+            }
 
-      if (!this.llmThreadConfig) {
-        // Try to find default chat model
-        const defaultConfig = await this._getDefaultConfig();
+            if (!this.llmThreadConfig) {
+                console.log('[onClickAskAI] Getting default config...');
+                const defaultConfig = await this._getDefaultConfig();
+                console.log('[onClickAskAI] Default config:', defaultConfig);
 
-        if (defaultConfig) {
-          // Create thread with default configuration
-          await this._createThreadConfig(defaultConfig);
-          await this._fetchLlmConfig();
-        } else {
-          // No defaults - show config dialog
-          const providers = await this._fetchProviders();
-          if (!providers.length) {
-            this.messaging.notify({
-              message: this.env._t(
-                "No AI providers configured. Please contact your administrator."
-              ),
-              type: "warning",
+                if (defaultConfig) {
+                    console.log('[onClickAskAI] Creating thread with config:', defaultConfig);
+                    await this._createThreadConfig(defaultConfig);
+                    await this._fetchLlmConfig();
+                    console.log('[onClickAskAI] Thread created and config fetched');
+                } else {
+                    // Try to find default chat model
+                    const providers = await this._fetchProviders();
+                    if (!providers.length) {
+                        this.messaging.notify({
+                            message: this.env._t(
+                                "No AI providers configured. Please contact your administrator."
+                            ),
+                            type: "warning",
+                        });
+                        return;
+                    }
+
+                    if (!models.length) {
+                        this.messaging.notify({
+                            message: this.env._t(
+                                "No AI models available for the selected provider."
+                            ),
+                            type: "warning",
+                        });
+                        return;
+                    }
+
+                    // Show config dialog
+                    const config = await this._showConfigDialog(providers, models);
+                    if (config) {
+                        await this._createThreadConfig(config);
+                        await this._fetchLlmConfig(); // Refresh config
+                    }
+                }
+            }
+
+            if (this.llmThreadConfig) {
+                await this._sendQuestionForAi();
+            }
+        },
+        /**
+         * Fetch LLM thread configuration for the current thread
+         */
+        async _fetchLlmConfig() {
+            console.log('[_fetchLlmConfig] Starting');
+            const composer = this.composer;
+            if (!composer.thread) {
+                console.log('[_fetchLlmConfig] No composer thread, returning');
+                return;
+            }
+
+            try {
+                console.log('[_fetchLlmConfig] Fetching for model:', composer.thread.model, 'id:', composer.thread.id);
+                const result = await this.messaging.rpc({
+                    route: "/llm/thread/config",
+                    params: {
+                        model: composer.thread.model,
+                        record_id: composer.thread.id,
+                    },
+                });
+                console.log('[_fetchLlmConfig] Result:', result);
+                if (!result.error) {
+                    this.update({ llmThreadConfig: result });
+                    console.log('[_fetchLlmConfig] Config updated');
+                }
+            } catch (error) {
+                console.error("[_fetchLlmConfig] Error:", error);
+            }
+        },
+
+        /**
+         * Get default provider and model configuration
+         */
+        _getDefaultConfig: async function () {
+            try {
+                // Search for default chat model
+                const defaultModel = await this.messaging.rpc({
+                    model: "llm.model",
+                    method: "search_read",
+                    args: [
+                        [
+                            ["model_use", "=", "chat"],
+                            ["default", "=", true],
+                            ["active", "=", true],
+                        ],
+                        ["id", "name", "provider_id"],
+                    ],
+                    kwargs: { limit: 1 },
+                });
+
+                if (defaultModel.length) {
+                    return {
+                        providerId: defaultModel[0].provider_id[0],
+                        modelId: defaultModel[0].id,
+                    };
+                }
+
+                // Fallback: get any active chat model
+                const anyModel = await this.messaging.rpc({
+                    model: "llm.model",
+                    method: "search_read",
+                    args: [
+                        [
+                            ["model_use", "=", "chat"],
+                            ["active", "=", true],
+                        ],
+                        ["id", "name", "provider_id"],
+                    ],
+                    kwargs: { limit: 1 },
+                });
+
+                if (anyModel.length) {
+                    return {
+                        providerId: anyModel[0].provider_id[0],
+                        modelId: anyModel[0].id,
+                    };
+                }
+
+                return null;
+            } catch (error) {
+                console.error("Failed to get default config:", error);
+                return null;
+            }
+        },
+
+        /**
+         * Fetch available LLM providers
+         */
+        async _fetchProviders() {
+            try {
+                const result = await this.messaging.rpc({
+                    model: "llm.provider",
+                    method: "search_read",
+                    args: [[["active", "=", true]], ["id", "name", "code"]],
+                });
+                return result;
+            } catch (error) {
+                console.error("Failed to fetch providers:", error);
+                return [];
+            }
+        },
+
+        /**
+         * Fetch available models for a provider
+         */
+        async _fetchModels(providerId) {
+            try {
+                const result = await this.messaging.rpc({
+                    model: "llm.model",
+                    method: "search_read",
+                    args: [
+                        [
+                            ["provider_id", "=", providerId],
+                            ["active", "=", true],
+                        ],
+                        ["id", "name", "provider_id"],
+                    ],
+                });
+                return result;
+            } catch (error) {
+                console.error("Failed to fetch models:", error);
+                return [];
+            }
+        },
+
+        /**
+         * Show configuration dialog
+         */
+        async _showConfigDialog(providers, models) {
+            return new Promise((resolve) => {
+                const dialog = new Dialog(this, {
+                    title: this.env._t("Configure AI Assistant"),
+                    $content: $(
+                        QWeb.render("llm_thread.ConfigModal", {
+                            providers: providers,
+                            models: models,
+                        })
+                    ),
+                    buttons: [
+                        {
+                            text: this.env._t("Save"),
+                            classes: "btn-primary",
+                            click: () => {
+                                const providerId = parseInt(dialog.$("#provider").val());
+                                const modelId = parseInt(dialog.$("#model").val());
+                                dialog.close();
+                                resolve({ providerId, modelId });
+                            },
+                        },
+                        {
+                            text: this.env._t("Cancel"),
+                            click: () => {
+                                dialog.close();
+                                resolve(null);
+                            },
+                        },
+                    ],
+                    size: "medium",
+                });
+
+                dialog.opened(() => {
+                    const $provider = dialog.$("#provider");
+                    const $model = dialog.$("#model");
+
+                    // Handle provider change
+                    $provider.on("change", async () => {
+                        const providerId = parseInt($provider.val());
+                        const models = await this._fetchModels(providerId);
+
+                        $model.empty();
+                        models.forEach((model) => {
+                            $model.append(new Option(model.name, model.id));
+                        });
+                    });
+                });
+
+                dialog.open();
             });
-            return;
-          }
+        },
 
-          if (!models.length) {
-            this.messaging.notify({
-              message: this.env._t(
-                "No AI models available for the selected provider."
-              ),
-              type: "warning",
-            });
-            return;
-          }
+        /**
+         * Create new thread configuration
+         */
+        async _createThreadConfig(config) {
+            console.log('[_createThreadConfig] Starting with:', config);
+            try {
+                const composer = this.composer;
+                const result = await this.messaging.rpc({
+                    route: "/llm/thread/create",
+                    params: {
+                        model: composer.thread.model,
+                        record_id: composer.thread.id,
+                        provider_id: config.providerId,
+                        model_id: config.modelId,
+                    },
+                });
+                console.log('[_createThreadConfig] Result:', result);
+                if (result.error) {
+                    throw new Error(result.error);
+                }
 
-          // Show config dialog
-          const config = await this._showConfigDialog(providers, models);
-          if (config) {
-            await this._createThreadConfig(config);
-            await this._fetchLlmConfig(); // Refresh config
-          }
-        }
+                return result;
+            } catch (error) {
+                console.error("Failed to create thread config:", error);
+                this.messaging.notify({
+                    message: this.env._t("Failed to create AI configuration"),
+                    type: "danger",
+                });
+                return null;
+            }
+        },
 
-        if (this.llmThreadConfig) {
-          await this._sendQuestionForAi();
-        }
-      }
-    },
-    /**
-     * Fetch LLM thread configuration for the current thread
-     */
-    async _fetchLlmConfig() {
-      const composer = this.composer;
-      if (!composer.thread) return;
+        /**
+         * Update AI thinking state
+         */
+        updateIsAiThinking(isAiThinking) {
+            this.update({ isAiThinking });
+        },
 
-      try {
-        const result = await this.messaging.rpc({
-          route: "/llm/thread/config",
-          params: {
-            model: composer.thread.model,
-            record_id: composer.thread.id,
-          },
-        });
-        if (!result.error) {
-          this.update({ llmThreadConfig: result });
-        }
-      } catch (error) {
-        console.error("Failed to fetch LLM config:", error);
-      }
-    },
+        /**
+         * Send question to AI
+         */
+        async _sendQuestionForAi() {
+            this.updateIsAiThinking(true);
+            const composer = this.composer;
+            const postData = this._getMessageData();
 
-    /**
-     * Get default provider and model configuration
-     */
-    _getDefaultConfig: async function () {
-      try {
-        // Search for default chat model
-        const defaultModel = await this.messaging.rpc({
-          model: "llm.model",
-          method: "search_read",
-          args: [
-            [
-              ["model_use", "=", "chat"],
-              ["default", "=", true],
-              ["active", "=", true],
-            ],
-            ["id", "name", "provider_id"],
-          ],
-          kwargs: { limit: 1 },
-        });
+            try {
+                composer.update({ isPostingMessage: true });
 
-        if (defaultModel.length) {
-          return {
-            providerId: defaultModel[0].provider_id[0],
-            modelId: defaultModel[0].id,
-          };
-        }
+                // Add LLM specific data
+                Object.assign(postData, {
+                    subtype_xmlid: "llm_thread.mt_llm_question",
+                    llm_thread_id: this.llmThreadConfig.thread_id,
+                });
 
-        // Fallback: get any active chat model
-        const anyModel = await this.messaging.rpc({
-          model: "llm.model",
-          method: "search_read",
-          args: [
-            [
-              ["model_use", "=", "chat"],
-              ["active", "=", true],
-            ],
-            ["id", "name", "provider_id"],
-          ],
-          kwargs: { limit: 1 },
-        });
+                // Handle reply context
+                if (
+                    this.threadView?.replyingToMessageView &&
+                    this.threadView.thread !== this.messaging.inbox.thread
+                ) {
+                    postData.parent_id = this.threadView.replyingToMessageView.message.id;
+                }
 
-        if (anyModel.length) {
-          return {
-            providerId: anyModel[0].provider_id[0],
-            modelId: anyModel[0].id,
-          };
-        }
+                // Post message
+                const params = {
+                    post_data: postData,
+                    thread_id: composer.thread.id,
+                    thread_model: composer.thread.model,
+                    context: Object.assign({}, session.user_context),
+                };
 
-        return null;
-      } catch (error) {
-        console.error("Failed to get default config:", error);
-        return null;
-      }
-    },
+                const messageData = await this.messaging.rpc({
+                    route: "/mail/message/post",
+                    params,
+                });
 
-    /**
-     * Fetch available LLM providers
-     */
-    async _fetchProviders() {
-      try {
-        const result = await this.messaging.rpc({
-          model: "llm.provider",
-          method: "search_read",
-          args: [[["active", "=", true]], ["id", "name", "code"]],
-        });
-        return result;
-      } catch (error) {
-        console.error("Failed to fetch providers:", error);
-        return [];
-      }
-    },
+                // Handle message posting success
+                if (this.messaging.exists()) {
+                    const message = this.messaging.models["Message"].insert(
+                        this.messaging.models["Message"].convertData(messageData)
+                    );
 
-    /**
-     * Fetch available models for a provider
-     */
-    async _fetchModels(providerId) {
-      try {
-        const result = await this.messaging.rpc({
-          model: "llm.model",
-          method: "search_read",
-          args: [
-            [
-              ["provider_id", "=", providerId],
-              ["active", "=", true],
-            ],
-            ["id", "name", "provider_id"],
-          ],
-        });
-        return result;
-      } catch (error) {
-        console.error("Failed to fetch models:", error);
-        return [];
-      }
-    },
+                    // Handle link previews if enabled
+                    if (this.messaging.hasLinkPreviewFeature && !message.isBodyEmpty) {
+                        this.messaging.rpc(
+                            {
+                                route: "/mail/link_preview",
+                                params: { message_id: message.id },
+                            },
+                            { shadow: true }
+                        );
+                    }
 
-    /**
-     * Show configuration dialog
-     */
-    async _showConfigDialog(providers, models) {
-      return new Promise((resolve) => {
-        const dialog = new Dialog(this, {
-          title: this.env._t("Configure AI Assistant"),
-          $content: $(
-            QWeb.render("llm_thread.ConfigModal", {
-              providers: providers,
-              models: models,
-            })
-          ),
-          buttons: [
-            {
-              text: this.env._t("Save"),
-              classes: "btn-primary",
-              click: () => {
-                const providerId = parseInt(dialog.$("#provider").val());
-                const modelId = parseInt(dialog.$("#model").val());
-                dialog.close();
-                resolve({ providerId, modelId });
-              },
-            },
-            {
-              text: this.env._t("Cancel"),
-              click: () => {
-                dialog.close();
-                resolve(null);
-              },
-            },
-          ],
-          size: "medium",
-        });
+                    // Update thread views
+                    this._updateThreadViews(message);
 
-        dialog.opened(() => {
-          const $provider = dialog.$("#provider");
-          const $model = dialog.$("#model");
+                    // Handle chatter specific logic
+                    this._handleChatterLogic();
 
-          // Handle provider change
-          $provider.on("change", async () => {
-            const providerId = parseInt($provider.val());
-            const models = await this._fetchModels(providerId);
+                    // Reset composer
+                    if (composer.exists()) {
+                        composer._reset();
+                    }
+                }
+            } catch (error) {
+                console.error("Failed to send message:", error);
+                this.messaging.notify({
+                    message: this.env._t("Failed to send message to AI"),
+                    type: "danger",
+                });
+            } finally {
+                if (composer.exists()) {
+                    composer.update({ isPostingMessage: false });
+                }
+                this.updateIsAiThinking(false);
+            }
+        },
 
-            $model.empty();
-            models.forEach((model) => {
-              $model.append(new Option(model.name, model.id));
-            });
-          });
-        });
+        /**
+         * Update thread views after message post
+         */
+        _updateThreadViews(message) {
+            for (const threadView of message.originThread.threadViews) {
+                threadView.update({ hasAutoScrollOnMessageReceived: true });
+                threadView.addComponentHint("message-posted", { message });
+            }
 
-        dialog.open();
-      });
+            if (this.threadView?.exists()) {
+                this.threadView.update({ replyingToMessageView: clear() });
+            }
+        },
+
+        /**
+         * Handle chatter specific logic
+         */
+        _handleChatterLogic() {
+            const chatter = this.chatter;
+            if (!chatter?.exists()) return;
+
+            if (chatter.hasParentReloadOnMessagePosted) {
+                chatter.reloadParentView();
+            }
+
+            const chatterThread = chatter.thread;
+            if (chatterThread?.exists()) {
+                if (this.exists()) {
+                    this.delete();
+                }
+                chatterThread.fetchData([
+                    "followers",
+                    "messages",
+                    "suggestedRecipients",
+                ]);
+            }
+        },
     },
 
-    /**
-     * Create new thread configuration
-     */
-    async _createThreadConfig(config) {
-      try {
-        const composer = this.composer;
-        const result = await this.messaging.rpc({
-          route: "/llm/thread/create",
-          params: {
-            model: composer.thread.model,
-            record_id: composer.thread.id,
-            provider_id: config.providerId,
-            model_id: config.modelId,
-          },
-        });
-
-        if (result.error) {
-          throw new Error(result.error);
-        }
-
-        return result;
-      } catch (error) {
-        console.error("Failed to create thread config:", error);
-        this.messaging.notify({
-          message: this.env._t("Failed to create AI configuration"),
-          type: "danger",
-        });
-        return null;
-      }
+    lifecycleHooks: {
+        _created() {
+            this._super();
+            this._fetchLlmConfig();
+        },
     },
-
-    /**
-     * Update AI thinking state
-     */
-    updateIsAiThinking(isAiThinking) {
-      this.update({ isAiThinking });
-    },
-
-    /**
-     * Send question to AI
-     */
-    async _sendQuestionForAi() {
-      this.updateIsAiThinking(true);
-      const composer = this.composer;
-      const postData = this._getMessageData();
-
-      try {
-        composer.update({ isPostingMessage: true });
-
-        // Add LLM specific data
-        Object.assign(postData, {
-          subtype_xmlid: "llm_thread.mt_llm_question",
-          llm_thread_id: this.llmThreadConfig.thread_id,
-        });
-
-        // Handle reply context
-        if (
-          this.threadView?.replyingToMessageView &&
-          this.threadView.thread !== this.messaging.inbox.thread
-        ) {
-          postData.parent_id = this.threadView.replyingToMessageView.message.id;
-        }
-
-        // Post message
-        const params = {
-          post_data: postData,
-          thread_id: composer.thread.id,
-          thread_model: composer.thread.model,
-          context: Object.assign({}, session.user_context),
-        };
-
-        const messageData = await this.messaging.rpc({
-          route: "/mail/message/post",
-          params,
-        });
-
-        // Handle message posting success
-        if (this.messaging.exists()) {
-          const message = this.messaging.models["Message"].insert(
-            this.messaging.models["Message"].convertData(messageData)
-          );
-
-          // Handle link previews if enabled
-          if (this.messaging.hasLinkPreviewFeature && !message.isBodyEmpty) {
-            this.messaging.rpc(
-              {
-                route: "/mail/link_preview",
-                params: { message_id: message.id },
-              },
-              { shadow: true }
-            );
-          }
-
-          // Update thread views
-          this._updateThreadViews(message);
-
-          // Handle chatter specific logic
-          this._handleChatterLogic();
-
-          // Reset composer
-          if (composer.exists()) {
-            composer._reset();
-          }
-        }
-      } catch (error) {
-        console.error("Failed to send message:", error);
-        this.messaging.notify({
-          message: this.env._t("Failed to send message to AI"),
-          type: "danger",
-        });
-      } finally {
-        if (composer.exists()) {
-          composer.update({ isPostingMessage: false });
-        }
-        this.updateIsAiThinking(false);
-      }
-    },
-
-    /**
-     * Update thread views after message post
-     */
-    _updateThreadViews(message) {
-      for (const threadView of message.originThread.threadViews) {
-        threadView.update({ hasAutoScrollOnMessageReceived: true });
-        threadView.addComponentHint("message-posted", { message });
-      }
-
-      if (this.threadView?.exists()) {
-        this.threadView.update({ replyingToMessageView: clear() });
-      }
-    },
-
-    /**
-     * Handle chatter specific logic
-     */
-    _handleChatterLogic() {
-      const chatter = this.chatter;
-      if (!chatter?.exists()) return;
-
-      if (chatter.hasParentReloadOnMessagePosted) {
-        chatter.reloadParentView();
-      }
-
-      const chatterThread = chatter.thread;
-      if (chatterThread?.exists()) {
-        if (this.exists()) {
-          this.delete();
-        }
-        chatterThread.fetchData([
-          "followers",
-          "messages",
-          "suggestedRecipients",
-        ]);
-      }
-    },
-  },
-
-  lifecycleHooks: {
-    _created() {
-      this._super();
-      this._fetchLlmConfig();
-    },
-  },
 });

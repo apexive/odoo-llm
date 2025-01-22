@@ -23,33 +23,55 @@ class MailThread(models.AbstractModel):
             )
     
     def _message_post_after_hook(self, message, msg_vals):
-        """Handle AI response generation after message post"""
+        """Handle message posting and trigger AI response if needed."""
         res = super()._message_post_after_hook(message, msg_vals)
-        
+
+        # Only generate response for user messages
         if (msg_vals.get('subtype_id') == self.env.ref('llm_thread.mt_llm_question').id and
-            not self.env.context.get('skip_ai_response')):
+            not self.env.context.get('skip_ai_response')):  # Not already an AI response
             
             llm_thread = self.env['llm.thread'].get_user_thread(
                 self._name, self.id
             )
             
             if llm_thread:
-                response = llm_thread.generate_response(message)
-                if not response.get('error'):
-                    self._post_ai_response(llm_thread, response['content'])
-        
+                try:
+                    # Get AI response (non-streaming for hook)
+                    accumulated_content = ""
+                    for response in llm_thread.generate_response(message):
+                        if response.get('error'):
+                            _logger.error("Error getting AI response: %s", response['error'])
+                            break
+                        
+                        content = response.get('content', '')
+                        if content:
+                            accumulated_content += content
+                    
+                    # Post accumulated response
+                    if accumulated_content:
+                        self.with_context(
+                            skip_ai_response=True,
+                            mail_create_nosubscribe=True
+                        )._post_ai_response(llm_thread, accumulated_content)
+                            
+                except Exception as e:
+                    _logger.exception("Failed to generate AI response")
+        else:
+            _logger.debug("Skipping AI Response: %s", {
+                'is_comment': msg_vals.get('message_type') == 'comment',
+                'has_author': bool(msg_vals.get('author_id')),
+                'skip_response': bool(self.env.context.get('skip_ai_response'))
+            })
+                
         return res
         
     def _post_ai_response(self, llm_thread, content):
-        """Post AI response message"""
-        return self.with_context(
-            skip_ai_response=True,
-            mail_create_nosubscribe=True,
-            llm_thread_id=llm_thread.id
-        ).message_post(
+        """Post AI response message with proper settings"""
+        return self.message_post(
             body=content,
             message_type='comment',
             subtype_xmlid='llm_thread.mt_llm_answer',
-            author_id=False,
-            email_from=f"{llm_thread.model_id.name} <ai@{llm_thread.provider_id.name.lower()}.ai>"
+            author_id=False,  # No author for AI messages
+            email_from=f"{llm_thread.model_id.name} <ai@{llm_thread.provider_id.name.lower()}.ai>",
+            partner_ids=[],  # No partner notifications
         )
