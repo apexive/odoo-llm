@@ -75,7 +75,7 @@ class LLMThread(models.Model):
             domain.append(('id', '<=', trigger_message.id))
             
         messages.extend(
-            message._to_llm_format() 
+            message.to_llm_format() 
             for message in self.env['mail.message'].search(
                 domain, limit=10, order='id DESC'
             )
