@@ -213,7 +213,9 @@ registerPatch({
          * Update AI thinking state
          */
         updateIsAiThinking(isAiThinking) {
-            this.update({ isAiThinking });
+            if (this.exists()) {
+                this.update({ isAiThinking });
+            }
         },
 
         /**
@@ -292,7 +294,9 @@ registerPatch({
                 if (composer.exists()) {
                     composer.update({ isPostingMessage: false });
                 }
+                
                 this.updateIsAiThinking(false);
+                
             }
         },
 
