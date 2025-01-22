@@ -13,7 +13,7 @@ class LLMThread(models.Model):
     model_id = fields.Many2one('llm.model', required=True, ondelete='restrict',
         domain="[('provider_id', '=', provider_id)]")
         
-    # Reference to the mail thread
+    # Reference to the mail thread following mail.message's pattern to store related model name and record id
     res_model = fields.Char('Related Document Model', required=True, index=True)
     res_id = fields.Integer('Related Document ID', required=True, index=True)
     
