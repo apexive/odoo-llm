@@ -48,3 +48,48 @@ class LLMThreadController(http.Controller):
         
         request.env['llm.thread'].create(vals)
         return self.get_user_thread(model, record_id)
+
+    @http.route("/llm/providers", type="json", auth="user")
+    def get_providers(self):
+        """Get available LLM providers"""
+        providers = request.env['llm.provider'].search([('active', '=', True)])
+        return {
+            'providers': [{
+                'id': provider.id,
+                'name': provider.name
+            } for provider in providers]
+        }
+
+    @http.route("/llm/models", type="json", auth="user")
+    def get_models(self, provider_id):
+        """Get available models for a provider"""
+        provider = request.env['llm.provider'].browse(int(provider_id))
+        if not provider.exists():
+            return {'error': 'Invalid provider'}
+
+        models = request.env['llm.model'].search([
+            ('provider_id', '=', provider.id),
+            ('active', '=', True)
+        ])
+        return {
+            'models': [{
+                'id': model.id,
+                'name': model.name
+            } for model in models]
+        }
+
+    @http.route("/llm/default/config", type="json", auth="user")
+    def get_default_config(self):
+        """Get default provider and model configuration"""
+        default_model = request.env['llm.model'].search([
+            ('active', '=', True),
+            ('default', '=', True)
+        ], limit=1)
+
+        if not default_model:
+            return None
+
+        return {
+            'provider_id': default_model.provider_id.id,
+            'model_id': default_model.id
+        }
