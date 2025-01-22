@@ -2,12 +2,12 @@ from odoo import http
 from odoo.http import request
 
 class LLMThreadController(http.Controller):
-    @http.route("/llm/thread/config", type="json", auth="user")
-    def get_user_config(self, model, record_id):
-        """Get or create user's LLM configuration for a thread"""
-        thread = request.env['llm.thread'].get_user_thread(model, int(record_id))
+    @http.route("/llm/thread/user", type="json", auth="user")
+    def get_user_thread(self, record_model_name, record_id):
+        """Get user's LLM thread for a record"""
+        thread = request.env['llm.thread'].get_user_thread(record_model_name, int(record_id))
         if not thread:
-            return {'error': 'No LLM configuration found'}
+            return {'error': 'No LLM thread found'}
         
         return {
             'thread_id': thread.id,
@@ -19,7 +19,7 @@ class LLMThreadController(http.Controller):
     
     @http.route("/llm/thread/update", type="json", auth="user")
     def update_config(self, thread_id, provider_id=None, model_id=None):
-        """Update user's LLM configuration"""
+        """Update user's LLM thread"""
         thread = request.env['llm.thread'].browse(int(thread_id))
         if not thread.exists() or thread.user_id != request.env.user:
             return {'error': 'Invalid thread'}
@@ -33,11 +33,11 @@ class LLMThreadController(http.Controller):
         if vals:
             thread.write(vals)
             
-        return self.get_user_config(thread.res_model, thread.res_id)
+        return self.get_user_thread(thread.res_model, thread.res_id)
         
     @http.route("/llm/thread/create", type="json", auth="user")
     def create_thread(self, model, record_id, provider_id, model_id):
-        """Create new LLM thread configuration"""
+        """Create new LLM thread"""
         vals = {
             'user_id': request.env.user.id,
             'res_model': model,
@@ -46,5 +46,5 @@ class LLMThreadController(http.Controller):
             'model_id': int(model_id),
         }
         
-        thread = request.env['llm.thread'].create(vals)
-        return self.get_user_config(model, record_id)
+        request.env['llm.thread'].create(vals)
+        return self.get_user_thread(model, record_id)

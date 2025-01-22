@@ -5,7 +5,7 @@ _logger = logging.getLogger(__name__)
 
 class LLMThread(models.Model):
     _name = 'llm.thread'
-    _description = 'LLM Chat Thread Configuration'
+    _description = 'LLM Chat Thread'
     
     name = fields.Char(compute='_compute_name', store=True)
     user_id = fields.Many2one('res.users', required=True, ondelete='cascade')

@@ -5,8 +5,6 @@ import "@mail/models/composer_view";
 import session from "web.session";
 import { attr } from "@mail/model/model_field";
 import { clear } from "@mail/model/model_field_command";
-import { sprintf } from "@web/core/utils/strings";
-import { Dialog } from "web.Dialog";
 
 registerPatch({
     name: "ComposerView",
@@ -23,15 +21,12 @@ registerPatch({
          * Handle AI button click
          */
         onClickAskAI: async function () {
-            console.log('[onClickAskAI] Starting with llmThreadConfig:', this.llmThreadConfig);
             if (!this.llmThreadConfig) {
-                console.log('[onClickAskAI] Fetching thread config...');
-                await this._fetchLlmConfig();
-                console.log('[onClickAskAI] After fetch, llmThreadConfig:', this.llmThreadConfig);
+                await this._fetchLlmThread();
             }
 
             if (!this.llmThreadConfig) {
-                await this._ensureThreadConfig();
+                await this._ensureLLMThreadExists();
             }
 
             if (this.llmThreadConfig) {
@@ -42,20 +37,20 @@ registerPatch({
          * Handle AI config button click
          */
         onClickAIConfig: async function () {
-            await this._ensureThreadConfig();
+            await this._ensureLLMThreadExists();
             if (this.llmThreadConfig) {
-                this._openConfigDialog();
+                this._openLLMThreadEditDialog();
             }
         },
         /**
-         * Ensure thread configuration exists
-         * Creates a default configuration if none exists
+         * Ensure thread LLMThread exists for this mail.thread
+         * Creates a LLMThread if none exists from the default LLMModel and LLMProvider
          */
-        async _ensureThreadConfig() {
+        async _ensureLLMThreadExists() {
             if (!this.llmThreadConfig) {
                 const defaultConfig = await this._getDefaultConfig();
                 if (defaultConfig) {
-                    await this._createThreadConfig(defaultConfig);
+                    await this._createLLMThread(defaultConfig);
                 } else {
                     // Try to find default chat model
                     const providers = await this._fetchProviders();
@@ -80,18 +75,18 @@ registerPatch({
                         return;
                     }
 
-                    await this._createThreadConfig({
+                    await this._createLLMThread({
                         provider_id: providers[0].id,
                         model_id: models[0].id,
                     });
                 }
-                await this._fetchLlmConfig();
+                await this._fetchLlmThread();
             }
         },
         /**
-         * Open thread configuration dialog
+         * Open LLMThread edit dialog
          */
-        _openConfigDialog() {
+        _openLLMThreadEditDialog() {
             this.env.services.action.doAction({
                 type: 'ir.actions.act_window',
                 res_model: 'llm.thread',
@@ -103,37 +98,32 @@ registerPatch({
                 },
             }, {
                 onClose: async () => {
-                    await this._fetchLlmConfig();
+                    await this._fetchLlmThread();
                 },
             });
         },
         /**
-         * Fetch LLM thread configuration for the current thread
+         * Fetch LLM thread for the current user's mail.thread
          */
-        async _fetchLlmConfig() {
-            console.log('[_fetchLlmConfig] Starting');
+        async _fetchLlmThread() {
             const composer = this.composer;
             if (!composer.thread) {
-                console.log('[_fetchLlmConfig] No composer thread, returning');
                 return;
             }
 
             try {
-                console.log('[_fetchLlmConfig] Fetching for model:', composer.thread.model, 'id:', composer.thread.id);
                 const result = await this.messaging.rpc({
-                    route: "/llm/thread/config",
+                    route: "/llm/thread/user",
                     params: {
-                        model: composer.thread.model,
+                        record_model_name: composer.thread.model,
                         record_id: composer.thread.id,
                     },
                 });
-                console.log('[_fetchLlmConfig] Result:', result);
                 if (!result.error) {
                     this.update({ llmThreadConfig: result });
-                    console.log('[_fetchLlmConfig] Config updated');
                 }
             } catch (error) {
-                console.error("[_fetchLlmConfig] Error:", error);
+                console.error("[_fetchLlmThread] Error:", error);
             }
         },
 
@@ -233,10 +223,9 @@ registerPatch({
         },
 
         /**
-         * Create new thread configuration
+         * Create new LLMThread
          */
-        async _createThreadConfig(config) {
-            console.log('[_createThreadConfig] Starting with:', config);
+        async _createLLMThread(config) {
             try {
                 const composer = this.composer;
                 const result = await this.messaging.rpc({
@@ -248,16 +237,15 @@ registerPatch({
                         model_id: config.modelId,
                     },
                 });
-                console.log('[_createThreadConfig] Result:', result);
                 if (result.error) {
                     throw new Error(result.error);
                 }
 
                 return result;
             } catch (error) {
-                console.error("Failed to create thread config:", error);
+                console.error("Failed to create LLMThread:", error);
                 this.messaging.notify({
-                    message: this.env._t("Failed to create AI configuration"),
+                    message: this.env._t("Failed to create LLMThread"),
                     type: "danger",
                 });
                 return null;
@@ -393,7 +381,7 @@ registerPatch({
     lifecycleHooks: {
         _created() {
             this._super();
-            this._fetchLlmConfig();
+            this._fetchLlmThread();
         },
     },
 });

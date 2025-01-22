@@ -71,7 +71,7 @@
                 <field name="res_model" />
                 <separator />
                 <filter
-                    string="My Configurations"
+                    string="My LLM Threads"
                     name="my_threads"
                     domain="[('user_id', '=', uid)]"
                 />
@@ -108,17 +108,17 @@
 
     <!-- Actions -->
     <record id="llm_thread_action" model="ir.actions.act_window">
-        <field name="name">AI Chat Configurations</field>
+        <field name="name">LLM Thread</field>
         <field name="res_model">llm.thread</field>
         <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_my_threads': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                No AI chat configurations yet
+                No LLM threads yet
             </p>
             <p>
-                AI chat configurations will be automatically created when you start 
-                using AI responses in your conversations.
+                LLM threads will be automatically created when you start 
+                using LLM responses in your conversations.
             </p>
         </field>
     </record>
@@ -126,7 +126,7 @@
     <!-- Menu Items -->
     <menuitem
         id="menu_llm_thread"
-        name="AI Chat Configurations"
+        name="LLM Threads"
         action="llm_thread_action"
         parent="llm.menu_llm_root"
         sequence="20"
