@@ -1,3 +1,5 @@
+import datetime
+
 import ollama
 
 from odoo import api, models
@@ -68,18 +70,22 @@ class LLMProvider(models.Model):
         for model in response.get("models", []):
             # Basic model info
             model_info = {
-                "name": model["name"],
+                "name": model.get("model", ""),
                 "details": {
-                    "id": model["name"],
+                    "id": model.get("model", ""),
                     "capabilities": ["chat"],  # Default capability
-                    "modified_at": model.get("modified_at"),
+                    "modified_at": model.get("modified_at").strftime(
+                        "%Y-%m-%dT%H:%M:%S.%fZ"
+                    )
+                    if isinstance(model.get("modified_at"), datetime)
+                    else model.get("modified_at"),
                     "size": model.get("size"),
                     "digest": model.get("digest"),
                 },
             }
 
             # Add embedding capability if model name suggests it
-            if "embedding" in model["name"].lower():
+            if "embedding" in model["model"].lower():
                 model_info["details"]["capabilities"].append("embedding")
 
             yield model_info
