@@ -1,28 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
-    <t
-    t-name="llm_prompt.LLMChatThreadHeader"
-    t-inherit="llm_thread.LLMChatThreadHeader"
-    t-inherit-mode="extension"
-  >
-        <xpath
-      expr="//div[hasclass('o_ThreadDropdowns')]/div[hasclass('dropdown')][1]"
-      position="before"
-    >
+    <t t-name="llm_prompt.LLMChatThreadHeader" t-inherit="llm_thread.LLMChatThreadHeader" t-inherit-mode="extension">
+        <xpath expr="//div[hasclass('o_ThreadDropdowns')]/div[hasclass('dropdown')][1]" position="before">
             <!-- LLM Prompt Dropdown -->
             <div class="dropdown me-2">
                 <button
-          class="btn btn-light dropdown-toggle d-flex align-items-center gap-2"
-          type="button"
-          data-bs-toggle="dropdown"
-          aria-expanded="false"
-          style="max-width: 200px;"
-        >
+                    class="btn btn-light dropdown-toggle d-flex align-items-center gap-2"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    style="max-width: 200px;"
+                >
                     <div class="text-truncate">
                         <t t-if="llmChatThreadHeaderView.selectedPrompt">
-                            <t
-                t-esc="llmChatThreadHeaderView.selectedPrompt.name"
-              />
+                            <t t-esc="llmChatThreadHeaderView.selectedPrompt.name" />
                         </t>
                         <t t-else="">
                             Select Prompt
@@ -32,11 +23,11 @@
                 <ul class="dropdown-menu">
                     <li>
                         <a
-              class="dropdown-item text-truncate"
-              href="#"
-              t-on-click="onClearPrompt"
-              t-attf-class="{{ !llmChatThreadHeaderView.selectedPrompt ? 'active' : '' }}"
-            >
+                            class="dropdown-item text-truncate"
+                            href="#"
+                            t-on-click="onClearPrompt"
+                            t-attf-class="{{ !llmChatThreadHeaderView.selectedPrompt ? 'active' : '' }}"
+                        >
                             <i class="fa fa-times me-1" /> No Prompt
                         </a>
                     </li>
@@ -44,12 +35,12 @@
                     <t t-foreach="llmPrompts" t-as="prompt" t-key="prompt.id">
                         <li>
                             <a
-                class="dropdown-item text-truncate"
-                href="#"
-                t-on-click="() => this.onSelectPrompt(prompt)"
-                t-att-title="prompt.name"
-                t-attf-class="{{ llmChatThreadHeaderView.selectedPrompt and llmChatThreadHeaderView.selectedPrompt.id === prompt.id ? 'active' : '' }}"
-              >
+                                class="dropdown-item text-truncate"
+                                href="#"
+                                t-on-click="() => this.onSelectPrompt(prompt)"
+                                t-att-title="prompt.name"
+                                t-attf-class="{{ llmChatThreadHeaderView.selectedPrompt and llmChatThreadHeaderView.selectedPrompt.id === prompt.id ? 'active' : '' }}"
+                            >
                                 <t t-esc="prompt.name" />
                             </a>
                         </li>

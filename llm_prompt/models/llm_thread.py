@@ -53,9 +53,9 @@ class LLMThreadPrompt(models.Model):
             # Both have system messages, merge them
             for source_msg in system_messages_in_source:
                 for target_msg in system_messages_in_target:
-                    target_msg["content"] = (
-                        f"{source_msg['content']}\n\n{target_msg['content']}"
-                    )
+                    target_msg[
+                        "content"
+                    ] = f"{source_msg['content']}\n\n{target_msg['content']}"
                 # Remove the source system message as we've merged it
                 source_messages_copy.remove(source_msg)
 

@@ -8,10 +8,7 @@
             <form string="Prompt Template">
                 <sheet>
                     <group>
-                        <field
-              name="prompt_id"
-              invisible="context.get('hide_prompt_id', False)"
-            />
+                        <field name="prompt_id" invisible="context.get('hide_prompt_id', False)" />
                         <field name="role" />
                         <field name="sequence" />
                         <field name="used_arguments" readonly="1" />
@@ -19,22 +16,21 @@
                     <notebook>
                         <page string="Content" name="content">
                             <field
-                name="content"
-                widget="ace"
-                options="{'mode': 'twig'}"
-                placeholder="Write your prompt template here with {{argument_name}} placeholders..."
-              />
+                                name="content"
+                                widget="ace"
+                                options="{'mode': 'twig'}"
+                                placeholder="Write your prompt template here with {{argument_name}} placeholders..."
+                            />
                         </page>
                         <page string="Condition" name="condition">
                             <group>
                                 <field
-                  name="condition"
-                  placeholder="e.g. 'debug' in arguments or context == 'technical'"
-                />
+                                    name="condition"
+                                    placeholder="e.g. 'debug' in arguments or context == 'technical'"
+                                />
                             </group>
                             <div class="alert alert-info" role="alert">
-                                <p
-                >Use a Python expression to conditionally include this template.
+                                <p>Use a Python expression to conditionally include this template.
                                     You can access argument values directly by name (e.g., 'debug' in arguments or input_type == 'analysis').</p>
                             </div>
                         </page>

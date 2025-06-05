@@ -4,6 +4,7 @@ import logging
 from jinja2 import Environment, Undefined
 
 from odoo import _, api, fields, models
+from odoo.tools import safe_eval
 
 _logger = logging.getLogger(__name__)
 
@@ -142,7 +143,7 @@ class LLMPromptTemplate(models.Model):
         # If we still don't have a related record, return empty string
         if not related_record:
             _logger.info(
-                f"No related record available, returning empty value for {field_name}"
+                "No related record available, returning empty value for %s", field_name
             )
             return ""
 
@@ -163,21 +164,21 @@ class LLMPromptTemplate(models.Model):
                                 key_name,
                                 field_name,
                             )
-                            return ""  # Return empty string instead of error message
+                            result = ""  # Return empty string instead of error message
                     else:
                         _logger.warning(
                             "Field '%s' is not a dictionary, cannot access key '%s'",
                             field_name,
                             key_name,
                         )
-                        return ""  # Return empty string instead of error message
+                        result = ""  # Return empty string instead of error message
                 else:  # No key, just return the attribute value
-                    final_value = attr_value
+                    result = attr_value
 
                 # Convert to string with proper JSON handling for booleans
-                if isinstance(final_value, bool):
+                if isinstance(result, bool):
                     return "true" if final_value else "false"
-                return final_value
+                return result
 
             except Exception as e:
                 _logger.error(
@@ -240,4 +241,4 @@ class LLMPromptTemplate(models.Model):
             eval_context[k] = arguments[k]
 
         # Evaluate the condition expression
-        return eval(condition, {"__builtins__": {}}, eval_context)
+        return safe_eval(condition, {"__builtins__": {}}, eval_context)

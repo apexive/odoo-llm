@@ -2,35 +2,35 @@
 <odoo>
     <!-- Root Menu for Prompts -->
     <menuitem
-    id="llm_prompt_menu"
-    name="Prompts"
-    parent="llm.menu_llm_root"
-    action="llm_prompt_action"
-    sequence="20"
-  />
+        id="llm_prompt_menu"
+        name="Prompts"
+        parent="llm.menu_llm_root"
+        action="llm_prompt_action"
+        sequence="20"
+    />
 
     <!-- Configuration Menu -->
     <menuitem
-    id="llm_prompt_configuration_menu"
-    name="Prompts Configuration"
-    parent="llm.menu_llm_config"
-    sequence="30"
-  />
+        id="llm_prompt_configuration_menu"
+        name="Prompts Configuration"
+        parent="llm.menu_llm_config"
+        sequence="30"
+    />
 
     <!-- Configuration Sub-menus -->
     <menuitem
-    id="llm_prompt_category_menu"
-    name="Categories"
-    parent="llm_prompt_configuration_menu"
-    action="llm_prompt_category_action"
-    sequence="10"
-  />
+        id="llm_prompt_category_menu"
+        name="Categories"
+        parent="llm_prompt_configuration_menu"
+        action="llm_prompt_category_action"
+        sequence="10"
+    />
 
     <menuitem
-    id="llm_prompt_tag_menu"
-    name="Tags"
-    parent="llm_prompt_configuration_menu"
-    action="llm_prompt_tag_action"
-    sequence="20"
-  />
+        id="llm_prompt_tag_menu"
+        name="Tags"
+        parent="llm_prompt_configuration_menu"
+        action="llm_prompt_tag_action"
+        sequence="20"
+    />
 </odoo>

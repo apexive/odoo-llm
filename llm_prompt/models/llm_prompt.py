@@ -432,7 +432,7 @@ class LLMPrompt(models.Model):
                     and "text" in system_message["content"]
                 ):
                     return system_message["content"]["text"]
-                elif isinstance(system_message["content"], str):
+                if isinstance(system_message["content"], str):
                     return system_message["content"]
 
             # If no system message found, return the first message content
@@ -442,7 +442,7 @@ class LLMPrompt(models.Model):
                     and "text" in messages[0]["content"]
                 ):
                     return messages[0]["content"]["text"]
-                elif isinstance(messages[0]["content"], str):
+                if isinstance(messages[0]["content"], str):
                     return messages[0]["content"]
 
         except Exception as e:

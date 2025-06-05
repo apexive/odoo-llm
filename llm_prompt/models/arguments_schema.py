@@ -1,3 +1,5 @@
+import json
+
 import jsonschema
 
 from odoo import _
@@ -45,8 +47,6 @@ def validate_arguments_schema(schema_text):
     Returns:
         tuple: (is_valid, error_message)
     """
-    import json
-
     try:
         schema = json.loads(schema_text)
         jsonschema.validate(instance=schema, schema=ARGUMENTS_JSON_SCHEMA)

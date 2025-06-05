@@ -8,43 +8,27 @@
             <form string="LLM Prompt">
                 <header>
                     <button
-            name="auto_detect_arguments"
-            string="Auto-detect Arguments"
-            type="object"
-            class="oe_highlight"
-          />
+                        name="auto_detect_arguments"
+                        string="Auto-detect Arguments"
+                        type="object"
+                        class="oe_highlight"
+                    />
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button
-              name="toggle_active"
-              type="object"
-              class="oe_stat_button"
-              icon="fa-archive"
-            >
-                            <field
-                name="active"
-                widget="boolean_toggle"
-                options="{'terminology': 'archive'}"
-              />
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_toggle" options="{'terminology': 'archive'}" />
                         </button>
                     </div>
                     <div class="oe_title">
                         <h1>
-                            <field
-                name="name"
-                placeholder="e.g. Data Analysis Prompt"
-              />
+                            <field name="name" placeholder="e.g. Data Analysis Prompt" />
                         </h1>
                     </div>
                     <group>
                         <group>
                             <field name="category_id" />
-                            <field
-                name="tag_ids"
-                widget="many2many_tags"
-                options="{'color_field': 'color'}"
-              />
+                            <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" />
                         </group>
                         <group>
                             <field name="template_count" readonly="1" />
@@ -55,16 +39,10 @@
                     </group>
                     <notebook>
                         <page string="Description" name="description">
-                            <field
-                name="description"
-                placeholder="Describe the purpose and usage of this prompt..."
-              />
+                            <field name="description" placeholder="Describe the purpose and usage of this prompt..." />
                         </page>
                         <page string="Templates" name="templates">
-                            <field
-                name="template_ids"
-                context="{'default_prompt_id': active_id}"
-              >
+                            <field name="template_ids" context="{'default_prompt_id': active_id}">
                                 <tree editable="bottom">
                                     <field name="sequence" widget="handle" />
                                     <field name="role" />
@@ -75,23 +53,19 @@
                         </page>
                         <page string="Arguments" name="arguments">
                             <div
-                class="alert alert-warning"
-                role="alert"
-                attrs="{'invisible': [('undefined_arguments', '=', False)]}"
-              >
+                                class="alert alert-warning"
+                                role="alert"
+                                attrs="{'invisible': [('undefined_arguments', '=', False)]}"
+                            >
                                 <strong
-                >Warning:</strong> The following arguments are used in templates but not defined in the schema:
-                                <field
-                  name="undefined_arguments"
-                  readonly="1"
-                  class="oe_inline"
-                />
+                                >Warning:</strong> The following arguments are used in templates but not defined in the schema:
+                                <field name="undefined_arguments" readonly="1" class="oe_inline" />
                             </div>
                             <group>
                                 <field
-                  name="arguments_json"
-                  widget="json_editor"
-                  placeholder="{
+                                    name="arguments_json"
+                                    widget="json_editor"
+                                    placeholder="{
   'system_prompt': {
     'type': 'string',
     'description': 'The system instructions for the LLM',
@@ -104,61 +78,41 @@
     'required': true
   }
 }"
-                />
-                <field
-                  name="input_schema_json"
-                  readonly="1"
-                  widget="json_editor"
-                />
+                                />
+                <field name="input_schema_json" readonly="1" widget="json_editor" />
                             </group>
                             <div class="alert alert-info" role="alert">
                                 <p><strong>Arguments Schema Format:</strong></p>
                                 <p
-                >Define arguments as a JSON object where each key is the argument name and the value is its schema.</p>
+                                >Define arguments as a JSON object where each key is the argument name and the value is its schema.</p>
                                 <p>Each argument schema can include:</p>
                                 <ul>
-                                    <li><strong
-                    >type</strong>: string, number, boolean, etc.</li>
-                                    <li><strong
-                    >description</strong>: Human-readable description</li>
-                                    <li><strong
-                    >required</strong>: Whether the argument is required (boolean)</li>
-                                    <li><strong
-                    >default</strong>: Default value if not provided</li>
-                                    <li><strong
-                    >examples</strong>: Array of example values</li>
+                                    <li><strong>type</strong>: string, number, boolean, etc.</li>
+                                    <li><strong>description</strong>: Human-readable description</li>
+                                    <li><strong>required</strong>: Whether the argument is required (boolean)</li>
+                                    <li><strong>default</strong>: Default value if not provided</li>
+                                    <li><strong>examples</strong>: Array of example values</li>
                                 </ul>
-                                <p>Referenced in templates using <strong
-                  >{{argument_name}}</strong> placeholders.</p>
+                                <p>Referenced in templates using <strong>{{argument_name}}</strong> placeholders.</p>
                             </div>
                         </page>
                         <page string="Testing" name="testing">
                             <group>
-                                <field
-                  name="example_args"
-                  widget="json_editor"
-                />
+                                <field name="example_args" widget="json_editor" />
                             </group>
                             <div class="alert alert-info" role="alert">
-                                <p
-                >Enter example arguments in JSON format to test this prompt.</p>
+                                <p>Enter example arguments in JSON format to test this prompt.</p>
                             </div>
                             <button
-                name="action_test_prompt"
-                string="Test Prompt"
-                type="object"
-                class="oe_highlight"
-              />
+                                name="action_test_prompt"
+                                string="Test Prompt"
+                                type="object"
+                                class="oe_highlight"
+                            />
                         </page>
                         <page string="Providers" name="providers">
-                            <field
-                name="provider_ids"
-                widget="many2many_tags"
-              />
-                            <field
-                name="publisher_ids"
-                widget="many2many_tags"
-              />
+                            <field name="provider_ids" widget="many2many_tags" />
+                            <field name="publisher_ids" widget="many2many_tags" />
                         </page>
                     </notebook>
                 </sheet>
@@ -199,24 +153,20 @@
                 <field name="description" />
                 <field name="category_id" />
                 <field name="tag_ids" />
-                <filter
-          string="Archived"
-          name="inactive"
-          domain="[('active', '=', False)]"
-        />
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]" />
                 <group expand="0" string="Group By">
                     <filter
-            string="Category"
-            name="group_by_category"
-            domain="[]"
-            context="{'group_by': 'category_id'}"
-          />
+                        string="Category"
+                        name="group_by_category"
+                        domain="[]"
+                        context="{'group_by': 'category_id'}"
+                    />
                     <filter
-            string="Last Used"
-            name="group_by_last_used"
-            domain="[]"
-            context="{'group_by': 'last_used'}"
-          />
+                        string="Last Used"
+                        name="group_by_last_used"
+                        domain="[]"
+                        context="{'group_by': 'last_used'}"
+                    />
                 </group>
             </search>
         </field>
