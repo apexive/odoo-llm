@@ -1,6 +1,7 @@
+import json
 import logging
 
-from odoo import fields, models
+from odoo import fields, models, tools
 
 _logger = logging.getLogger(__name__)
 
@@ -81,9 +82,21 @@ class LLMThreadPrompt(models.Model):
             # Create a context with the thread_id
             context = dict(self.env.context, thread_id=self.id)
             # Use the prompt to get messages with the new context
-            prompt_messages = self.with_context(context).prompt_id.get_messages({})
+            arguments = self._get_prompt_default_arguments()
+            prompt_messages = self.with_context(context).prompt_id.get_messages(
+                arguments
+            )
             if prompt_messages:
                 messages = self.merge_message_lists(prompt_messages, messages)
                 _logger.info("Added %d messages from prompt", len(prompt_messages))
 
         return messages
+
+    def _get_prompt_default_arguments(self):
+        """Return the arguments of the last message.
+
+        Returns:
+            dict: Dictionary of arguments in the last message.
+        """
+        last_message = tools.html2plaintext(self.message_ids[0].body)
+        return json.loads(last_message)
