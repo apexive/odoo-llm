@@ -9,11 +9,19 @@
                 <LLMChatComposerTextInput record="composerView" />
                 <t t-if="!isStreaming">
                     <button
-            class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary o-last o-composer-is-compact border-start-0"
-            t-on-click="_onClickSend"
-            t-att-disabled="isDisabled"
-          >
+                        class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary o-last o-composer-is-compact border-start-0"
+                        t-on-click="_onClickSend"
+                        t-att-disabled="isSendDisabled"
+                    >
                         <i class="fa fa-paper-plane-o" />
+                    </button>
+                    <button
+                        class="o_Composer_actionButton o_Composer_button o_Composer_buttonLight btn btn-primary o-composer-is-compact border-start-0 mt-2"
+                        t-on-click="_onClickContinue"
+                        t-att-disabled="isContinueDisabled"
+                        aria-label="Toggle Light"
+                    >
+                        <i class="fa fa-lightbulb-o" />
                     </button>
                 </t>
                 <t t-if="isStreaming">
