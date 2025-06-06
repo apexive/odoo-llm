@@ -8,13 +8,27 @@
       >
                 <LLMChatComposerTextInput record="composerView" />
                 <t t-if="!isStreaming">
-                    <button
-            class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary o-last o-composer-is-compact border-start-0"
-            t-on-click="_onClickSend"
-            t-att-disabled="isDisabled"
-          >
-                        <i class="fa fa-paper-plane-o" />
-                    </button>
+                    <div class="d-flex flex-column">
+                        <button
+                            class="o_Composer_actionButton o_Composer_button o_Composer_buttonLight btn btn-primary o-composer-is-compact border-start-0 mb-2"
+                            t-on-click="_onClickContinue"
+                            t-att-disabled="isContinueDisabled"
+                            aria-label="Toggle Light"
+                            data-tooltip="Give LLM time to think"
+                            data-tooltip-position="top"
+                        >
+                            <i class="fa fa-lightbulb-o" />
+                        </button>
+                        <button
+                            class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary o-last o-composer-is-compact border-start-0"
+                            t-on-click="_onClickSend"
+                            t-att-disabled="isSendDisabled"
+                            data-tooltip="Send Message To LLM"
+                            data-tooltip-position="top"
+                        >
+                            <i class="fa fa-paper-plane-o" />
+                        </button>
+                    </div>
                 </t>
                 <t t-if="isStreaming">
                     <button

@@ -15,6 +15,12 @@ registerPatch({
       },
       default: true,
     }),
+    isContinueDisabled: attr({
+      compute() {
+        return !this.thread.messages.some((v) => v.messageSubtypeXmlid === 'llm_mail_message_subtypes.mt_llm_assistant')
+      },
+    default: true
+    }),
     eventSource: attr({
       default: null,
     }),
@@ -29,7 +35,7 @@ registerPatch({
       // This should close event source
       this._closeEventSource();
     },
-    async postUserMessageForLLM() {
+    postUserMessageForLLM() {
       const thread = this.thread;
 
       const messageBody = this.textInputContent.trim();
@@ -43,12 +49,28 @@ registerPatch({
 
       this._reset();
 
+      this.handleResponsesFromLLM(thread, `/llm/thread/generate?thread_id=${thread.id}&message=${encodeURIComponent(messageBody)}`);
+    },
+
+    repostExistingUserMessagesForLLM() {
+      const thread = this.thread;
+
+      if (!thread) {
+        this.messaging.notify({
+          message: this.env._t("Thread not found."),
+          type: "danger",
+        });
+        return;
+      }
+
+      this._reset();
+
+      this.handleResponsesFromLLM(thread, `/llm/thread/generate?thread_id=${thread.id}`);
+    },
+
+    handleResponsesFromLLM(thread, url) {
       try {
-        const eventSource = new EventSource(
-          `/llm/thread/generate?thread_id=${
-            thread.id
-          }&message=${encodeURIComponent(messageBody)}`
-        );
+        const eventSource = new EventSource(url);
         this.update({ eventSource });
 
         eventSource.onmessage = async (event) => {

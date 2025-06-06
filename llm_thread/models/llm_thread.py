@@ -169,7 +169,7 @@ class LLMThread(models.Model):
             )
         return self._get_last_message_from_history()
 
-    def _should_continue(self, last_message):
+    def _should_continue(self, last_message, time_to_think):
         """Whether to keep looping on the last_message."""
         if not last_message:
             return False
@@ -178,11 +178,11 @@ class LLMThread(models.Model):
             or last_message.is_llm_tool_result_message()
         ):
             return True
-        if last_message.is_llm_assistant_message() and last_message.tool_calls:
+        if last_message.is_llm_assistant_message() and (last_message.tool_calls or time_to_think):
             return True
         return False
 
-    def _next_step(self, last_message):
+    def _next_step(self, last_message, time_to_think):
         """Dispatch to the next generator based on message type."""
         if (
             last_message.is_llm_user_message()
@@ -191,7 +191,8 @@ class LLMThread(models.Model):
             return self._get_assistant_response()
         if last_message.is_llm_assistant_message() and last_message.tool_calls:
             return self._process_tool_calls(last_message)
-        return last_message
+        elif last_message.is_llm_assistant_message() and time_to_think:
+            return self._get_assistant_response()
 
     def generate(self, user_message_body, **kwargs):
         self.ensure_one()
@@ -205,9 +206,15 @@ class LLMThread(models.Model):
             # orchestrate via hooks
             last = self._init_message(user_message_body, **kwargs)
             if user_message_body:
+                time_to_think = False
                 yield {"type": "message_create", "message": last.message_format()[0]}
-            while self._should_continue(last):
-                last = yield from self._next_step(last)
+            else:
+                time_to_think = True
+            while self._should_continue(last, time_to_think):
+                last = yield from self._next_step(last, time_to_think)
+
+                if last.is_llm_assistant_message():
+                    time_to_think = False
             return last
         finally:
             self._unlock()
