@@ -31,8 +31,8 @@ export class LLMChatComposer extends Component {
   /**
    * @returns {Boolean}
    */
-  get isContinueDisabled() {
-    return this.composerView.composer.isContinueDisabled;
+  get isRegenerateDisabled() {
+    return this.composerView.composer.isRegenerateDisabled;
   }
 
   get isStreaming() {
@@ -44,27 +44,17 @@ export class LLMChatComposer extends Component {
   // --------------------------------------------------------------------------
 
   /**
-   * Intercept send button click
+   * Intercept send / regenerate button click
    * @private
    */
-  _onClickSend() {
-    if (this.isSendDisabled) {
-      return;
+  _onMessageSendOrRegenerate() {
+    if (!this.isSendDisabled) {
+      this.composerView.composer.postUserMessageForLLM();
     }
 
-    this.composerView.composer.postUserMessageForLLM();
-  }
-
-  /**
-   * Intercept continue button click
-   * @private
-   */
-  _onClickContinue() {
-    if (this.isContinueDisabled) {
-      return;
+    if (!this.isRegenerateDisabled) {
+      this.composerView.composer.repostExistingUserMessagesForLLM();
     }
-
-    this.composerView.composer.repostExistingUserMessagesForLLM();
   }
 
   /**

@@ -15,7 +15,7 @@ registerPatch({
       },
       default: true,
     }),
-    isContinueDisabled: attr({
+    isRegenerateDisabled: attr({
       compute() {
         return !this.thread.messages.some((v) => v.messageSubtypeXmlid === 'llm_mail_message_subtypes.mt_llm_assistant')
       },
