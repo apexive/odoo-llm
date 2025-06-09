@@ -238,6 +238,8 @@ class LLMPrompt(models.Model):
         self.ensure_one()
         arguments = arguments or {}
 
+        print("get messages:", arguments)
+
         # Fill default values for missing arguments
         arguments = self._fill_default_values(arguments)
 
@@ -293,6 +295,8 @@ class LLMPrompt(models.Model):
             ValidationError: If arguments are invalid
         """
         self.ensure_one()
+
+        print("Validating arguments:", arguments)
 
         try:
             schema = json.loads(self.arguments_json or "{}")
