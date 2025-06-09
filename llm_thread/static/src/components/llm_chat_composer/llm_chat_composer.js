@@ -50,10 +50,12 @@ export class LLMChatComposer extends Component {
   _onMessageSendOrRegenerate() {
     if (!this.isSendDisabled) {
       this.composerView.composer.postUserMessageForLLM();
+      return;
     }
 
     if (!this.isRegenerateDisabled) {
       this.composerView.composer.repostExistingUserMessagesForLLM();
+      return;
     }
   }
 

@@ -9,26 +9,27 @@
                 <LLMChatComposerTextInput record="composerView" />
                 <t t-if="!isStreaming">
                     <div class="d-flex flex-column">
-                    <div class="d-flex flex-column">
                         <button
                             class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary o-last o-composer-is-compact border-start-0"
                             t-on-click="_onMessageSendOrRegenerate"
-                            t-att-disabled="isSendDisabled && isRegenerateDisabled"
-                            data-tooltip="!isSendDisabled ? 'Send Message' : !isRegenerateDisabled ? 'Regenerate' : ''"
+                            t-att-disabled="isSendDisabled and isRegenerateDisabled"
+                            t-att-data-tooltip="!isSendDisabled ? 'Send Message' : 'Regenerate'"
                             data-tooltip-position="top"
                         >
-                            <i t-if="isMessageEmpty" class="fa fa-refresh" />
-                            <i t-if="!isMessageEmpty" class="fa fa-paper-plane-o" />
+                            <t t-if="!isSendDisabled">
+                                <i class="fa fa-paper-plane-o" />
+                            </t>
+                            <t t-else="">
+                                <i class="fa fa-refresh" />
+                            </t>
                         </button>
-                    </div>
-
                     </div>
                 </t>
                 <t t-if="isStreaming">
                     <button
-            class="o_Composer_actionButton o_Composer_button o_Composer_buttonStop btn btn-danger o-last o-composer-is-compact border-start-0"
-            t-on-click="_onClickStop"
-          >
+                        class="o_Composer_actionButton o_Composer_button o_Composer_buttonStop btn btn-danger o-last o-composer-is-compact border-start-0"
+                        t-on-click="_onClickStop"
+                    >
                         <i class="fa fa-stop" />
                     </button>
                 </t>

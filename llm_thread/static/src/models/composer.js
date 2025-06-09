@@ -19,7 +19,7 @@ registerPatch({
       compute() {
         return !this.thread.messages.some((v) => v.messageSubtypeXmlid === 'llm_mail_message_subtypes.mt_llm_assistant')
       },
-    default: true
+      default: true
     }),
     eventSource: attr({
       default: null,
