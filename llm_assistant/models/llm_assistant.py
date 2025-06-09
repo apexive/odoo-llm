@@ -227,6 +227,8 @@ class LLMAssistant(models.Model):
         # Get the evaluated default values
         default_values = self.get_evaluated_default_values(thread) or "{}"
 
+        print("Default values from get messages:", default_values)
+
         # If we have a thread, add it to the context
         if thread:
             # Create a context with the thread_id
