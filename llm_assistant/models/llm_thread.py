@@ -22,6 +22,10 @@ class LLMThread(models.Model):
             self.provider_id = self.assistant_id.provider_id
             self.model_id = self.assistant_id.model_id
             self.tool_ids = self.assistant_id.tool_ids
+            
+            if not self.prompt_id:
+                # If no prompt is set, use the assistant's prompt
+                self.prompt_id = self.assistant_id.prompt_id
 
     def set_assistant(self, assistant_id):
         """Set the assistant for this thread and update related fields
