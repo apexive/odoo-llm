@@ -107,6 +107,11 @@ registerPatch({
         await this.threadView.thread.llmChat.refreshThread(
           this.threadView.thread.id
         );
+        
+        this.update({
+          selectedPromptId: this.threadView.thread.prompt_id?.id || clear(),
+        });
+
         if (assistantId === false) {
           this.update({
             selectedAssistantId: clear(),
