@@ -52,6 +52,9 @@ class LLMThread(models.Model):
             update_vals["provider_id"] = assistant.provider_id.id
         if assistant.model_id.id:
             update_vals["model_id"] = assistant.model_id.id
+        if assistant.prompt_id and not self.prompt_id:
+            update_vals["prompt_id"] = assistant.prompt_id.id
+
         return self.write(update_vals)
 
     def action_open_thread(self):
