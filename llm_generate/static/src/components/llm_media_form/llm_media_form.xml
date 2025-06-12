@@ -85,9 +85,25 @@
               class="fa fa-info-circle me-1"
             /> Autocomplete is not available as no schema is defined for this model.
                     </div>
-                </div>
-
-                <div class="d-flex justify-content-end mt-4">
+                </div>                <div class="d-flex justify-content-end mt-4 gap-2">
+                    <button
+            t-if="state.supportsAsyncGeneration"
+            type="button"
+            class="btn btn-info"
+            t-att-disabled="(state.isLoading or isStreaming() or (state.inputMode === 'json' and !state.isJsonValid)) ? 'disabled' : null"
+            t-on-click="onSendJob"
+          >
+                        <i
+              t-if="state.isLoading"
+              class="fa fa-spinner fa-spin me-1"
+            />
+                        <i
+              t-elif="!state.isLoading"
+              class="fa fa-clock-o me-1"
+            />
+                        <t t-if="!isStreaming()">Send Job</t>
+                        <t t-else="">Processing...</t>
+                    </button>
                     <button
             type="submit"
             class="btn btn-primary"

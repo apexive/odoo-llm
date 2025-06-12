@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Generation Jobs Menu Items -->
+        <menuitem id="menu_llm_generate_job_root" 
+                  name="Generation Jobs" 
+                  parent="llm.menu_llm_root" 
+                  sequence="40"/>
+
+        <menuitem id="menu_llm_generate_job_active" 
+                  name="Active Jobs" 
+                  parent="menu_llm_generate_job_root"
+                  action="action_llm_generate_job" 
+                  sequence="10"/>
+
+        <menuitem id="menu_llm_generate_job_all" 
+                  name="All Jobs" 
+                  parent="menu_llm_generate_job_root"
+                  action="action_llm_generate_job_all" 
+                  sequence="20"
+                  groups="group_llm_generation_job_manager"/>
+
+    </data>
+</odoo>

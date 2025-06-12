@@ -1,0 +1,4 @@
+# Python dependencies for llm_generate_job module
+PyNaCl>=1.5.0
+requests>=2.25.0
+fal-client>=0.2.0

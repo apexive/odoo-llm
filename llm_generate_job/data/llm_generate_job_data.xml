@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        
+        <!-- Cron Job for Cleaning Up Old Generation Jobs -->
+        <record id="ir_cron_cleanup_generation_jobs" model="ir.cron">
+            <field name="name">Cleanup Old Generation Jobs</field>
+            <field name="model_id" ref="model_llm_generate_job"/>
+            <field name="state">code</field>
+            <field name="code">model.cleanup_completed_jobs(days_old=7)</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+            <field name="user_id" ref="base.user_admin"/>
+        </record>
+
+        <!-- Server Action: Hide Selected Jobs from Tree -->
+        <record id="action_server_hide_jobs" model="ir.actions.server">
+            <field name="name">Hide from Tree View</field>
+            <field name="model_id" ref="model_llm_generate_job"/>
+            <field name="binding_model_id" ref="model_llm_generate_job"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+records.filtered(lambda r: r.state in ['completed', 'failed', 'cancelled']).write({'visible_in_tree': False})
+            </field>
+        </record>
+
+        <!-- Server Action: Show Selected Jobs in Tree -->
+        <record id="action_server_show_jobs" model="ir.actions.server">
+            <field name="name">Show in Tree View</field>
+            <field name="model_id" ref="model_llm_generate_job"/>
+            <field name="binding_model_id" ref="model_llm_generate_job"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+records.write({'visible_in_tree': True})
+            </field>
+        </record>
+
+        <!-- Server Action: Retry Failed Jobs -->
+        <record id="action_server_retry_jobs" model="ir.actions.server">
+            <field name="name">Retry Failed Jobs</field>
+            <field name="model_id" ref="model_llm_generate_job"/>
+            <field name="binding_model_id" ref="model_llm_generate_job"/>
+            <field name="binding_view_types">list</field>
+            <field name="state">code</field>
+            <field name="code">
+for record in records.filtered(lambda r: r.state == 'failed' and r.retry_count &lt; r.max_retries):
+    try:
+        record.action_retry()
+    except Exception as e:
+        pass  # Continue with other records
+            </field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Generation Job Tree View -->
+        <record id="view_llm_generate_job_tree" model="ir.ui.view">
+            <field name="name">llm.generate.job.tree</field>
+            <field name="model">llm.generate.job</field>
+            <field name="arch" type="xml">
+                <tree string="Generation Jobs" decoration-info="state == 'draft'" 
+                      decoration-warning="state in ('submitted', 'queued')" 
+                      decoration-success="state == 'completed'"
+                      decoration-danger="state == 'failed'"
+                      decoration-muted="state == 'cancelled'">
+                    <field name="name"/>
+                    <field name="state" widget="badge" 
+                           decoration-info="state == 'draft'"
+                           decoration-warning="state in ('submitted', 'queued', 'processing')"
+                           decoration-success="state == 'completed'"
+                           decoration-danger="state == 'failed'"
+                           decoration-muted="state == 'cancelled'"/>
+                    <field name="provider_id"/>
+                    <field name="model_id"/>
+                    <field name="thread_id"/>
+                    <field name="submitted_date"/>
+                    <field name="completed_date"/>
+                    <field name="retry_count"/>
+                    <field name="visible_in_tree" invisible="1"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Generation Job Form View -->
+        <record id="view_llm_generate_job_form" model="ir.ui.view">
+            <field name="name">llm.generate.job.form</field>
+            <field name="model">llm.generate.job</field>
+            <field name="arch" type="xml">
+                <form string="Generation Job">
+                    <header>
+                        <button name="action_submit" type="object" string="Submit Job" 
+                                class="btn-primary" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                        <button name="action_cancel" type="object" string="Cancel" 
+                                attrs="{'invisible': [('state', 'in', ['completed', 'failed', 'cancelled'])]}"/>
+                        <button name="action_retry" type="object" string="Retry" 
+                                class="btn-warning" attrs="{'invisible': [('state', '!=', 'failed')]}"/>
+                        <button name="action_check_status" type="object" string="Check Status" 
+                                attrs="{'invisible': [('external_job_id', '=', False)]}"/>
+                        <button name="action_hide_from_tree" type="object" string="Hide from List" 
+                                attrs="{'invisible': ['|', ('visible_in_tree', '=', False), ('state', 'not in', ['completed', 'failed', 'cancelled'])]}"/>
+                        <field name="state" widget="statusbar" statusbar_visible="draft,submitted,queued,processing,completed"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button name="action_check_status" type="object" 
+                                    class="oe_stat_button" icon="fa-refresh"
+                                    attrs="{'invisible': [('external_job_id', '=', False)]}">
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_text">Check</span>
+                                    <span class="o_stat_text">Status</span>
+                                </div>
+                            </button>
+                        </div>
+                        
+                        <div class="oe_title">
+                            <h1>
+                                <field name="name" placeholder="Generation Job Name"/>
+                            </h1>
+                        </div>
+                        
+                        <group>
+                            <group name="basic_info">
+                                <field name="description"/>
+                                <field name="active"/>
+                                <field name="visible_in_tree"/>
+                            </group>
+                            <group name="provider_info">
+                                <field name="provider_id" options="{'no_create': True}"/>
+                                <field name="model_id" domain="[('provider_id', '=', provider_id)]" options="{'no_create': True}"/>
+                                <field name="thread_id" options="{'no_create': True}"/>
+                                <field name="webhook_url" readonly="1"/>
+                            </group>
+                        </group>
+                        
+                        <notebook>
+                            <page string="Generation Configuration" name="configuration">
+                                <group>
+                                    <field name="generation_inputs" widget="ace" options="{'mode': 'json'}"/>
+                                </group>
+                            </page>
+                            
+                            <page string="Job Details" name="job_details">
+                                <group>
+                                    <group name="external_ids">
+                                        <field name="external_job_id" readonly="1"/>
+                                        <field name="gateway_request_id" readonly="1"/>
+                                    </group>
+                                    <group name="retry_config">
+                                        <field name="retry_count" readonly="1"/>
+                                        <field name="max_retries"/>
+                                    </group>
+                                </group>
+                                <group>
+                                    <group name="timestamps">
+                                        <field name="submitted_date" readonly="1"/>
+                                        <field name="started_date" readonly="1"/>
+                                        <field name="completed_date" readonly="1"/>
+                                    </group>
+                                </group>
+                            </page>
+                            
+                            <page string="Results" name="results" attrs="{'invisible': [('state', 'not in', ['completed', 'failed'])]}">
+                                <group>
+                                    <field name="error_message" attrs="{'invisible': [('state', '!=', 'failed')]}" readonly="1"/>
+                                    <field name="result_payload" widget="ace" options="{'mode': 'json'}" readonly="1" 
+                                           attrs="{'invisible': [('result_payload', '=', False)]}"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <div class="oe_chatter">
+                        <field name="message_follower_ids"/>
+                        <field name="activity_ids"/>
+                        <field name="message_ids"/>
+                    </div>
+                </form>
+            </field>
+        </record>
+
+        <!-- Generation Job Search View -->
+        <record id="view_llm_generate_job_search" model="ir.ui.view">
+            <field name="name">llm.generate.job.search</field>
+            <field name="model">llm.generate.job</field>
+            <field name="arch" type="xml">
+                <search string="Generation Jobs">
+                    <field name="name" string="Job Name"/>
+                    <field name="provider_id"/>
+                    <field name="model_id"/>
+                    <field name="thread_id"/>
+                    <field name="state"/>
+                    <field name="external_job_id"/>
+                    
+                    <filter string="My Jobs" name="my_jobs" domain="[('create_uid', '=', uid)]"/>
+                    <filter string="Draft" name="draft" domain="[('state', '=', 'draft')]"/>
+                    <filter string="In Progress" name="in_progress" domain="[('state', 'in', ['submitted', 'queued', 'processing'])]"/>
+                    <filter string="Completed" name="completed" domain="[('state', '=', 'completed')]"/>
+                    <filter string="Failed" name="failed" domain="[('state', '=', 'failed')]"/>
+                    <filter string="Visible in Tree" name="visible" domain="[('visible_in_tree', '=', True)]"/>
+                    <filter string="Hidden from Tree" name="hidden" domain="[('visible_in_tree', '=', False)]"/>
+                    
+                    <separator/>
+                    <filter string="Today" name="today" domain="[('create_date', '&gt;=', datetime.datetime.combine(context_today(), datetime.time(0,0,0)))]"/>
+                    <filter string="This Week" name="this_week" domain="[('create_date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                    
+                    <group expand="0" string="Group By">
+                        <filter string="State" name="group_state" context="{'group_by': 'state'}"/>
+                        <filter string="Provider" name="group_provider" context="{'group_by': 'provider_id'}"/>
+                        <filter string="Model" name="group_model" context="{'group_by': 'model_id'}"/>
+                        <filter string="Creation Date" name="group_create_date" context="{'group_by': 'create_date:day'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Generation Job Kanban View -->
+        <record id="view_llm_generate_job_kanban" model="ir.ui.view">
+            <field name="name">llm.generate.job.kanban</field>
+            <field name="model">llm.generate.job</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state" class="o_kanban_small_column">
+                    <field name="name"/>
+                    <field name="state"/>
+                    <field name="provider_id"/>
+                    <field name="model_id"/>
+                    <field name="thread_id"/>
+                    <field name="submitted_date"/>
+                    <field name="completed_date"/>
+                    <field name="error_message"/>
+                    <field name="retry_count"/>
+                    <templates>
+                        <t t-name="kanban-box">
+                            <div class="oe_kanban_card oe_kanban_global_click">
+                                <div class="oe_kanban_content">
+                                    <div class="o_kanban_record_top">
+                                        <div class="o_kanban_record_headings">
+                                            <strong class="o_kanban_record_title">
+                                                <field name="name"/>
+                                            </strong>
+                                        </div>
+                                        <div class="o_kanban_record_action dropdown">
+                                            <a class="dropdown-toggle btn" data-toggle="dropdown" href="#">
+                                                <span class="fa fa-ellipsis-v"/>
+                                            </a>
+                                            <div class="dropdown-menu" role="menu">
+                                                <a type="object" name="action_submit" class="dropdown-item" 
+                                                   t-if="record.state.raw_value == 'draft'">Submit Job</a>
+                                                <a type="object" name="action_cancel" class="dropdown-item"
+                                                   t-if="record.state.raw_value not in ['completed', 'failed', 'cancelled']">Cancel</a>
+                                                <a type="object" name="action_retry" class="dropdown-item"
+                                                   t-if="record.state.raw_value == 'failed'">Retry</a>
+                                                <a type="object" name="action_check_status" class="dropdown-item">Check Status</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="o_kanban_record_body">
+                                        <div class="o_kanban_record_subtitle">
+                                            <field name="provider_id"/> • <field name="model_id"/>
+                                        </div>
+                                        <div t-if="record.thread_id.value">
+                                            Thread: <field name="thread_id"/>
+                                        </div>
+                                        <div t-if="record.retry_count.raw_value > 0" class="text-warning">
+                                            Retries: <field name="retry_count"/>
+                                        </div>
+                                        <div t-if="record.error_message.value" class="text-danger">
+                                            <small><field name="error_message"/></small>
+                                        </div>
+                                    </div>
+                                    <div class="o_kanban_record_bottom">
+                                        <div class="oe_kanban_bottom_left">
+                                            <div t-if="record.submitted_date.value">
+                                                Submitted: <field name="submitted_date" widget="date"/>
+                                            </div>
+                                            <div t-if="record.completed_date.value">
+                                                Completed: <field name="completed_date" widget="date"/>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Generation Job Action -->
+        <record id="action_llm_generate_job" model="ir.actions.act_window">
+            <field name="name">Generation Jobs</field>
+            <field name="res_model">llm.generate.job</field>
+            <field name="view_mode">kanban,tree,form</field>
+            <field name="domain">[('visible_in_tree', '=', True)]</field>
+            <field name="context">{
+                'search_default_my_jobs': 1,
+                'search_default_visible': 1
+            }</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first generation job
+                </p>
+                <p>
+                    Generation jobs allow you to queue long-running tasks like image or video generation
+                    with webhook support for asynchronous completion notifications.
+                </p>
+            </field>
+        </record>
+
+        <!-- All Generation Jobs Action (including hidden) -->
+        <record id="action_llm_generate_job_all" model="ir.actions.act_window">
+            <field name="name">All Generation Jobs</field>
+            <field name="res_model">llm.generate.job</field>
+            <field name="view_mode">tree,kanban,form</field>
+            <field name="context">{
+                'search_default_my_jobs': 1
+            }</field>
+        </record>
+
+    </data>
+</odoo>
