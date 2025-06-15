@@ -27,7 +27,7 @@ class LLMProvider(models.Model):
 
     def _dispatch(self, method_name, *args, **kwargs):
         """Dispatch method calls to provider-specific implementations"""
-        method = getattr(self, f"{self.type}_{method_name}", None)
+        method = getattr(self, f"{self.service}_{method_name}", None)
         if method:
             return method(*args, **kwargs)
         else:
@@ -35,7 +35,7 @@ class LLMProvider(models.Model):
             default_method = getattr(self, f"default_{method_name}", None)
             if default_method:
                 return default_method(*args, **kwargs)
-            raise UserError(f"Method {method_name} not implemented for provider {self.type}")
+            raise UserError(f"Method {method_name} not implemented for provider {self.service}")
 
     # Default implementations that can be overridden by specific providers
 

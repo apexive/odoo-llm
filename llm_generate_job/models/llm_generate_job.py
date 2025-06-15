@@ -55,6 +55,21 @@ class LLMGenerateJob(models.Model):
         help="URL where the provider will send completion notification"
     )
 
+    job_type = fields.Selection(
+        [
+            ('image_generation', 'Image Generation'),
+            ('video_generation', 'Video Generation'),
+            ('audio_generation', 'Audio Generation'),
+            ('text_generation', 'Text Generation'),
+            ('media_generation', 'Media Generation'),
+        ],
+        string="Job Type",
+        default='media_generation',
+        required=True,
+        tracking=True,
+        help="Type of generation job"
+    )
+
     # Job tracking
     state = fields.Selection(
         [
@@ -203,7 +218,7 @@ class LLMGenerateJob(models.Model):
         if not self.external_job_id:
             raise UserError("No external job ID found")
         
-        self.provider_id.check_generation_job_status(self)
+        self.provider_id.fal_ai_check_generation_job_status(self)
         return True
 
     def _submit_to_provider(self):
@@ -276,16 +291,18 @@ class LLMGenerateJob(models.Model):
             _logger.error(f"No thread found for job {self.id}")
             return
         
-        try:
-            # Format the result for the thread
+        try:            # Format the result for the thread
             formatted_result = self._format_result_for_thread(payload)
             
             # Post message to thread
-            self.thread_id.message_post(
+            message = self.thread_id.message_post(
                 body=formatted_result.get('body', 'Generation completed'),
                 attachment_ids=formatted_result.get('attachment_ids', []),
                 subtype_xmlid='llm_mail_message_subtypes.llm_assistant'
             )
+            
+            # Send real-time notification to refresh the thread
+            self._send_realtime_notification(message)
             
         except Exception as e:
             _logger.error(f"Failed to send result to thread {self.thread_id.id}: {e}")
@@ -299,10 +316,13 @@ class LLMGenerateJob(models.Model):
         
         try:
             body = f"❌ Generation failed: {error_message}"
-            self.thread_id.message_post(
+            message = self.thread_id.message_post(
                 body=body,
                 subtype_xmlid='llm_mail_message_subtypes.llm_assistant'
             )
+            
+            # Send real-time notification to refresh the thread
+            self._send_realtime_notification(message)
         except Exception as e:
             _logger.error(f"Failed to send error to thread {self.thread_id.id}: {e}")
 
@@ -396,3 +416,57 @@ class LLMGenerateJob(models.Model):
         _logger.info(f"Hidden {len(jobs_to_hide)} old generation jobs from tree view")
         
         return len(jobs_to_hide)
+
+    def _auto_hide_completed_jobs(self):
+        """Automatically hide completed jobs from tree view"""
+        if self.state in ['completed', 'failed'] and self.visible_in_tree:
+            self.visible_in_tree = False
+            _logger.info(f"Auto-hiding completed job {self.id} from tree view")
+
+    def write(self, vals):
+        """Override write to auto-hide completed jobs"""
+        result = super().write(vals)
+        
+        # Auto-hide jobs when they complete
+        if 'state' in vals and vals['state'] in ['completed', 'failed']:
+            self._auto_hide_completed_jobs()
+        
+        return result
+
+    def _send_realtime_notification(self, message):
+        """Send real-time notification to update the thread interface"""
+        self.ensure_one()
+        
+        if not message or not self.thread_id:
+            return
+        
+        try:
+            # Send notification through Odoo's bus system
+            channel = f"llm_thread_{self.thread_id.id}"
+            
+            # Prepare notification payload
+            notification = {
+                'type': 'new_message',
+                'thread_id': self.thread_id.id,
+                'message_id': message.id,
+                'job_id': self.id,
+                'message': {
+                    'id': message.id,
+                    'body': message.body,
+                    'date': message.date.isoformat() if message.date else None,
+                    'author_id': [message.author_id.id, message.author_id.name] if message.author_id else None,
+                    'attachment_ids': message.attachment_ids.ids,
+                }
+            }
+            
+            # Send via bus using the Odoo 16 method
+            self.env['bus.bus']._sendone(
+                [self.env.user.partner_id], 
+                'llm_thread_update', 
+                notification
+            )
+            
+            _logger.info(f"Sent real-time notification for job {self.id} to channel {channel}")
+            
+        except Exception as e:
+            _logger.error(f"Failed to send real-time notification for job {self.id}: {e}")

@@ -17,7 +17,7 @@ class LLMProvider(models.Model):
     _inherit = "llm.provider"
 
     def fal_ai_supports_async_generation(self, default=None):
-        return False
+        return True
 
     @api.model
     def _get_available_services(self):

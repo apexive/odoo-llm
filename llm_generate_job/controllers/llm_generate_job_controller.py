@@ -4,12 +4,12 @@ import logging
 from odoo import http
 from odoo.http import Response, request
 
-from odoo.addons.llm_generate.controllers.llm_thread import LLMThreadControllerExtended
+from odoo.addons.llm_thread.controllers.llm_thread import LLMThreadController
 
 _logger = logging.getLogger(__name__)
 
 
-class LLMGenerateJobThreadController(LLMThreadControllerExtended):
+class LLMGenerateJobThreadController(LLMThreadController):
     
     @http.route("/llm/thread/generate-media-async", type="http", auth="user", csrf=True)
     def llm_thread_generate_media_async(
@@ -159,3 +159,75 @@ class LLMGenerateJobThreadController(LLMThreadControllerExtended):
         except Exception as e:
             _logger.error(f"Error retrying job: {e}")
             return {"error": str(e)}
+    
+    @http.route("/api/llm/provider/supports_async_generation", type="json", auth="user", methods=["GET", "POST"])
+    def check_async_generation_support(self, provider_id=None, **kwargs):
+        """Check if a provider supports async generation"""
+        try:
+            if not provider_id:
+                return {"error": "provider_id is required", "supports_async": False}
+            
+            provider = request.env["llm.provider"].browse(int(provider_id))
+            if not provider.exists():
+                return {"error": "Provider not found", "supports_async": False}
+            
+            # Check if provider supports async generation
+            supports_async = False
+            if hasattr(provider, 'supports_async_generation'):
+                supports_async = provider.supports_async_generation()
+            
+            return {
+                "supports_async": supports_async,
+                "provider_name": provider.name,
+                "provider_id": provider.id
+            }
+            
+        except Exception as e:
+            _logger.error(f"Error checking async generation support: {e}")
+            return {"error": str(e), "supports_async": False}
+
+    @http.route("/api/llm/thread/submit_async_generation", type="json", auth="user", methods=["POST"])
+    def submit_async_generation(self, thread_id=None, generation_inputs=None, model_id=None, **kwargs):
+        """Submit an async generation job"""
+        try:
+            if not thread_id:
+                return {"error": "thread_id is required", "success": False}
+            
+            # Get thread
+            thread = request.env["llm.thread"].browse(int(thread_id))
+            if not thread.exists():
+                return {"error": "Thread not found", "success": False}
+            
+            # Check if provider supports async generation
+            #TODO: Uncomment the following lines when the provider supports async generation check
+            # if not hasattr(thread.provider_id, 'supports_async_generation') or \
+            #    not thread.provider_id.supports_async_generation():
+            #     return {"error": "Provider does not support async generation", "success": False}
+            
+            # Create generation job
+            job_vals = {
+                'name': f"Media Generation - {thread.name}",
+                'provider_id': thread.provider_id.id,
+                'model_id': model_id or thread.model_id.id,
+                'thread_id': thread.id,
+                'state': 'draft',
+                'generation_inputs': json.dumps(generation_inputs) if generation_inputs else "{}",
+
+            }
+            
+            job = request.env['llm.generate.job'].sudo().create(job_vals)
+            
+            # Submit the job
+            job.action_submit()
+            
+            return {
+                "success": True,
+                "job_id": job.id,
+                "job_name": job.name,
+                "state": job.state,
+                "message": "Generation job submitted successfully"
+            }
+            
+        except Exception as e:
+            _logger.error(f"Error submitting async generation job: {e}")
+            return {"error": str(e), "success": False}

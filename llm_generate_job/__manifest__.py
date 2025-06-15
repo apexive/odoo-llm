@@ -21,7 +21,7 @@
         "llm_thread", 
         "llm_generate",
         "llm_mail_message_subtypes"
-    ],
+    ],    
     "data": [
         "security/llm_generate_job_security.xml",
         "security/ir.model.access.csv",
@@ -29,6 +29,12 @@
         "views/llm_generate_job_menu_views.xml",
         "data/llm_generate_job_data.xml",
     ],
+    "assets": {
+        "web.assets_backend": [
+            "llm_generate_job/static/src/js/notification_service.js",
+            "llm_generate_job/static/src/js/thread_patch.js",
+        ],
+    },
     "license": "LGPL-3",
     "installable": True,
     "auto_install": False,
