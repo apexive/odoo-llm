@@ -113,7 +113,7 @@
               t-if="state.isLoading"
               class="fa fa-spinner fa-spin me-1"
             />
-                        <t t-if="!isStreaming()">Generate</t>
+                        <t t-if="!isStreaming()">Image Generate</t>
                         <t t-else="">Processing...</t>
                     </button>
                 </div>

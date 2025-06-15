@@ -52,10 +52,9 @@
                                 <i class="fa fa-image me-2 text-primary" />
                                 <span>Media Generation</span>
                             </h6>
-                        </div>
-                        <div class="card-body p-0">
-                            <!-- Pass the llmModel from the thread to the LLMMediaForm -->
-                            <LLMMediaForm model="thread" />
+                        </div>                        <div class="card-body p-0">
+                            <!-- Pass the thread object to the LLMMediaForm -->
+                            <LLMMediaForm t-props="{ model: thread }" />
                         </div>
                     </div>
                 </div>
