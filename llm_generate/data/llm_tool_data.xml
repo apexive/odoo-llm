@@ -3,8 +3,8 @@
         <field name="name">odoo_generate</field>
         <field name="implementation">odoo_generate</field>
         <field
-      name="description"
-    ><![CDATA[
+                name="description"
+        ><![CDATA[
 Generate an image using a specified image generation model. This tool allows you to create images based on text prompts.
 
 Parameters:
@@ -17,8 +17,8 @@ Returns:
     - image_urls: List of URLs to the generated images
     - markdown: Ready-to-use markdown for displaying the images in chat
 ]]></field>
-        <field name="default" eval="True" />
-        <field name="active" eval="True" />
-        <field name="requires_user_consent" eval="False" />
+        <field name="default" eval="True"/>
+        <field name="active" eval="True"/>
+        <field name="requires_user_consent" eval="False"/>
     </record>
 </odoo>

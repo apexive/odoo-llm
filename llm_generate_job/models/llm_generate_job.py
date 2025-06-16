@@ -301,7 +301,7 @@ class LLMGenerateJob(models.Model):
                 attachment_ids=formatted_result.get('attachment_ids', []),
                 subtype_xmlid=LLM_ASSISTANT_SUBTYPE_XMLID
             )
-
+            self._send_realtime_notification(message)
             
         except Exception as e:
             _logger.error(f"Failed to send result to thread {self.thread_id.id}: {e}")

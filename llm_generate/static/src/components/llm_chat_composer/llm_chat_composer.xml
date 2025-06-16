@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <templates xml:space="preserve">
     <t
-    t-name="llm_generate.LLMChatComposer"
-    t-inherit="llm_thread.LLMChatComposer"
-    t-inherit-mode="extension"
-  >
+            t-name="llm_generate.LLMChatComposer"
+            t-inherit="llm_thread.LLMChatComposer"
+            t-inherit-mode="extension"
+    >
 
         <!-- Replace the composer container with our enhanced version -->
         <xpath
-      expr="//div[hasclass('o_LLMChatComposer_container')]"
-      position="replace"
-    >
+                expr="//div[hasclass('o_LLMChatComposer_container')]"
+                position="replace"
+        >
             <div
-        class="o_LLMChatComposer_container d-flex align-items-end gap-3 mx-auto"
-        style="max-width: 1200px;"
-      >
+                    class="o_LLMChatComposer_container d-flex align-items-end gap-3 mx-auto"
+                    style="max-width: 1200px;"
+            >
                 <!-- Standard Chat Composer -->
                 <t t-if="!isMediaGenerationModel">
-                    <LLMChatComposerTextInput record="composerView" />
+                    <LLMChatComposerTextInput record="composerView"/>
                     <t t-if="!isStreaming">
                         <button
-              class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary o-last o-composer-is-compact border-start-0"
-              t-on-click="_onClickSend"
-              t-att-disabled="isDisabled"
-            >
-                            <i class="fa fa-paper-plane-o" />
+                                class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary o-last o-composer-is-compact border-start-0"
+                                t-on-click="_onClickSend"
+                                t-att-disabled="isDisabled"
+                        >
+                            <i class="fa fa-paper-plane-o"/>
                         </button>
                     </t>
                     <t t-if="isStreaming">
                         <button
-              class="o_Composer_actionButton o_Composer_button o_Composer_buttonStop btn btn-danger o-last o-composer-is-compact border-start-0"
-              t-on-click="_onClickStop"
-            >
-                            <i class="fa fa-stop" />
+                                class="o_Composer_actionButton o_Composer_button o_Composer_buttonStop btn btn-danger o-last o-composer-is-compact border-start-0"
+                                t-on-click="_onClickStop"
+                        >
+                            <i class="fa fa-stop"/>
                         </button>
                     </t>
                 </t>
@@ -41,20 +41,21 @@
             <!-- Media Generation Form - Always visible for media generation models -->
             <t t-if="isMediaGenerationModel">
                 <div
-          class="o_LLMChatComposer_mediaFormContainer mx-auto mt-3"
-          style="max-width: 1200px;"
-        >
+                        class="o_LLMChatComposer_mediaFormContainer mx-auto mt-3"
+                        style="max-width: 1200px;"
+                >
                     <div class="card border shadow-sm">
                         <div
-              class="card-header bg-light d-flex justify-content-between align-items-center py-2"
-            >
+                                class="card-header bg-light d-flex justify-content-between align-items-center py-2"
+                        >
                             <h6 class="m-0 d-flex align-items-center">
-                                <i class="fa fa-image me-2 text-primary" />
+                                <i class="fa fa-image me-2 text-primary"/>
                                 <span>Media Generation</span>
                             </h6>
-                        </div>                        <div class="card-body p-0">
+                        </div>
+                        <div class="card-body p-0">
                             <!-- Pass the thread object to the LLMMediaForm -->
-                            <LLMMediaForm t-props="{ model: thread }" />
+                            <LLMMediaForm t-props="{ model: thread }"/>
                         </div>
                     </div>
                 </div>

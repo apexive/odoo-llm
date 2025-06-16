@@ -90,6 +90,21 @@ class LLMProvider(models.Model):
         if not job_record.external_job_id:
             raise UserError(_("No external job ID found"))
 
+        #TODO quitar
+        #########################################
+        webhook_data = {
+            'request_id': job_record.external_job_id,
+            'gateway_request_id': job_record.gateway_request_id,
+            'status': 'OK',
+            'logs':"logs",
+            'metrics': "",
+            'payload': "hola......."
+        }
+        job_record.process_webhook_result(webhook_data)
+        return {}
+
+        ################################
+
         try:
             # Check status with FAL AI
             status = fal_client.status(

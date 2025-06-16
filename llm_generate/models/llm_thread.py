@@ -2,11 +2,10 @@ import json
 import logging
 
 from odoo import _, api, models
-from odoo.exceptions import UserError
-
 from odoo.addons.llm_mail_message_subtypes.const import (
     LLM_ASSISTANT_SUBTYPE_XMLID,
 )
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -41,13 +40,13 @@ class LLMThread(models.Model):
 
     @api.model
     def build_update_vals(
-        self,
-        subtype_xmlid,
-        tool_call_id=None,
-        tool_calls=None,
-        tool_call_definition=None,
-        tool_call_result=None,
-        **kwargs,
+            self,
+            subtype_xmlid,
+            tool_call_id=None,
+            tool_calls=None,
+            tool_call_definition=None,
+            tool_call_result=None,
+            **kwargs,
     ):
         base_vals = super().build_update_vals(
             subtype_xmlid,

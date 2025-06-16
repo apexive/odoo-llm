@@ -4,25 +4,27 @@
         <div class="o_LLMMediaForm p-3 border rounded bg-light">
             <form t-on-submit.prevent="onSubmit">
                 <div
-          class="d-flex justify-content-between align-items-center mb-3"
-        >
+                        class="d-flex justify-content-between align-items-center mb-3"
+                >
                     <h5 class="mt-0 mb-0">Generate Media</h5>
                     <div class="btn-group btn-group-sm" role="group">
                         <button
-              type="button"
-              class="btn"
-              t-att-class="state.inputMode === 'form' ? 'btn-primary' : 'btn-outline-secondary'"
-              t-on-click="() => this.toggleInputMode()"
-            >
-                            <i class="fa fa-wpforms me-1" /> Form
+                                type="button"
+                                class="btn"
+                                t-att-class="state.inputMode === 'form' ? 'btn-primary' : 'btn-outline-secondary'"
+                                t-on-click="() => this.toggleInputMode()"
+                        >
+                            <i class="fa fa-wpforms me-1"/>
+                            Form
                         </button>
                         <button
-              type="button"
-              class="btn"
-              t-att-class="state.inputMode === 'json' ? 'btn-primary' : 'btn-outline-secondary'"
-              t-on-click="() => this.toggleInputMode()"
-            >
-                            <i class="fa fa-code me-1" /> JSON
+                                type="button"
+                                class="btn"
+                                t-att-class="state.inputMode === 'json' ? 'btn-primary' : 'btn-outline-secondary'"
+                                t-on-click="() => this.toggleInputMode()"
+                        >
+                            <i class="fa fa-code me-1"/>
+                            JSON
                         </button>
                     </div>
                 </div>
@@ -30,72 +32,76 @@
                 <t t-if="state.isLoading">
                     <div class="alert alert-info" role="alert">
                         <i
-              class="fa fa-spinner fa-spin me-1"
-            /> Loading configuration...
+                                class="fa fa-spinner fa-spin me-1"
+                        />
+                        Loading configuration...
                     </div>
                 </t>
 
                 <t t-if="state.error">
                     <div class="alert alert-danger" role="alert">
-                        <t t-esc="state.error" />
+                        <t t-esc="state.error"/>
                     </div>
                 </t>
 
                 <!-- Form View -->
                 <div t-if="state.inputMode === 'form'">
                     <LLMFormFieldsView
-            state="state"
-            inputSchema="inputSchema"
-            formFields="formFields"
-            requiredFields="requiredFields"
-            optionalFields="optionalFields"
-            onInputChange="(fieldName, event) => this.onInputChange(fieldName, event)"
-            toggleAdvancedSettings="() => this.toggleAdvancedSettings()"
-          />
+                            state="state"
+                            inputSchema="inputSchema"
+                            formFields="formFields"
+                            requiredFields="requiredFields"
+                            optionalFields="optionalFields"
+                            onInputChange="(fieldName, event) => this.onInputChange(fieldName, event)"
+                            toggleAdvancedSettings="() => this.toggleAdvancedSettings()"
+                    />
                 </div>
 
                 <!-- JSON Editor View -->
                 <div t-if="state.inputMode === 'json'">
                     <JsonEditorComponent
-            value="state.formValues"
-            onChange.bind="onJsonEditorChange"
-            onValidationError.bind="onJsonValidationError"
-            onError.bind="onJsonEditorError"
-            schema="inputSchema"
-            height="'300px'"
-            mode="'code'"
-            modes="['code']"
-            allowSchemaSuggestions="true"
-          />
+                            value="state.formValues"
+                            onChange.bind="onJsonEditorChange"
+                            onValidationError.bind="onJsonValidationError"
+                            onError.bind="onJsonEditorError"
+                            schema="inputSchema"
+                            height="'300px'"
+                            mode="'code'"
+                            modes="['code']"
+                            allowSchemaSuggestions="true"
+                    />
                     <div
-            t-if="state.jsonEditorError"
-            class="alert alert-danger mt-2 small p-2"
-            role="alert"
-          >
-                        <i class="fa fa-exclamation-triangle me-1" /> <t
-              t-esc="state.jsonEditorError"
-            />
+                            t-if="state.jsonEditorError"
+                            class="alert alert-danger mt-2 small p-2"
+                            role="alert"
+                    >
+                        <i class="fa fa-exclamation-triangle me-1"/>
+                        <t
+                                t-esc="state.jsonEditorError"
+                        />
                     </div>
-                     <div
-            t-if="!inputSchema and !state.isLoading"
-            class="alert alert-info mt-2 small p-2"
-            role="alert"
-          >
+                    <div
+                            t-if="!inputSchema and !state.isLoading"
+                            class="alert alert-info mt-2 small p-2"
+                            role="alert"
+                    >
                         <i
-              class="fa fa-info-circle me-1"
-            /> Autocomplete is not available as no schema is defined for this model.
+                                class="fa fa-info-circle me-1"
+                        />
+                        Autocomplete is not available as no schema is defined for this model.
                     </div>
-                </div>                <div class="d-flex justify-content-end mt-4 gap-2">
+                </div>
+                <div class="d-flex justify-content-end mt-4 gap-2">
 
                     <button
-            type="submit"
-            class="btn btn-primary"
-            t-att-disabled="(state.isLoading or isStreaming() or (state.inputMode === 'json' and !state.isJsonValid)) ? 'disabled' : null"
-          >
+                            type="submit"
+                            class="btn btn-primary"
+                            t-att-disabled="(state.isLoading or isStreaming() or (state.inputMode === 'json' and !state.isJsonValid)) ? 'disabled' : null"
+                    >
                         <i
-              t-if="state.isLoading"
-              class="fa fa-spinner fa-spin me-1"
-            />
+                                t-if="state.isLoading"
+                                class="fa fa-spinner fa-spin me-1"
+                        />
                         <t t-if="!isStreaming()">Image Generate</t>
                         <t t-else="">Processing...</t>
                     </button>

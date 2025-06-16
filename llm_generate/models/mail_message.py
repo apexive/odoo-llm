@@ -4,7 +4,6 @@ import os
 from urllib.parse import urlparse
 
 import requests
-
 from odoo import api, fields, models
 
 _logger = logging.getLogger(__name__)
@@ -28,7 +27,7 @@ class MailMessage(models.Model):
 
     @api.model
     def create_message_from_media_gen_stream(
-        self, thread, stream, subtype_xmlid, placeholder_text="Generated media:"
+            self, thread, stream, subtype_xmlid, placeholder_text="Generated media:"
     ):
         """
         thread: the llm.thread record

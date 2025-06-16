@@ -1,10 +1,8 @@
-import json
 import logging
 
 from odoo import http
-from odoo.http import Response, request
-
 from odoo.addons.llm_thread.controllers.llm_thread import LLMThreadController
+from odoo.http import Response, request
 
 _logger = logging.getLogger(__name__)
 
@@ -12,7 +10,7 @@ _logger = logging.getLogger(__name__)
 class LLMThreadControllerExtended(LLMThreadController):
     @http.route("/llm/thread/generate-media", type="http", auth="user", csrf=True)
     def llm_thread_generate_media(
-        self, thread_id, message=None, generation_inputs=None, **kwargs
+            self, thread_id, message=None, generation_inputs=None, **kwargs
     ):
         headers = {
             "Content-Type": "text/event-stream",

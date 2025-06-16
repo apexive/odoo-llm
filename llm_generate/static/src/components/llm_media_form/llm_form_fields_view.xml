@@ -3,9 +3,9 @@
     <t t-name="llm_thread.LLMFormFieldsView" owl="1">
         <div>
             <div
-        t-if="!props.state.isLoading and !props.inputSchema?.error and props.formFields.length === 0"
-        class="alert alert-warning"
-      >
+                    t-if="!props.state.isLoading and !props.inputSchema?.error and props.formFields.length === 0"
+                    class="alert alert-warning"
+            >
                 No input fields defined for this model, or schema is missing properties.
             </div>
 
@@ -13,101 +13,101 @@
             <t t-if="props.requiredFields.length > 0">
                 <div class="mb-4">
                     <t
-            t-foreach="props.requiredFields"
-            t-as="field"
-            t-key="field.name"
-          >
+                            t-foreach="props.requiredFields"
+                            t-as="field"
+                            t-key="field.name"
+                    >
                         <div class="mb-3">
                             <label
-                t-attf-for="media_form_field_{{field.name}}"
-                class="form-label"
-              >
-                                <t t-esc="field.label" />
+                                    t-attf-for="media_form_field_{{field.name}}"
+                                    class="form-label"
+                            >
+                                <t t-esc="field.label"/>
                                 <span class="text-danger">*</span>
                             </label>
 
                             <!-- Text Input -->
                             <input
-                t-if="field.type === 'string' and !field.choices"
-                t-attf-id="media_form_field_{{field.name}}"
-                type="text"
-                class="form-control"
-                t-att-name="field.name"
-                t-att-value="props.state.formValues[field.name] !== undefined ? props.state.formValues[field.name] : field.default"
-                t-on-input="(ev) => props.onInputChange(field.name, ev)"
-                required="required"
-              />
+                                    t-if="field.type === 'string' and !field.choices"
+                                    t-attf-id="media_form_field_{{field.name}}"
+                                    type="text"
+                                    class="form-control"
+                                    t-att-name="field.name"
+                                    t-att-value="props.state.formValues[field.name] !== undefined ? props.state.formValues[field.name] : field.default"
+                                    t-on-input="(ev) => props.onInputChange(field.name, ev)"
+                                    required="required"
+                            />
 
                             <!-- Number Input -->
                             <input
-                t-if="field.type === 'integer' or field.type === 'number'"
-                t-attf-id="media_form_field_{{field.name}}"
-                type="number"
-                class="form-control"
-                t-att-name="field.name"
-                t-att-value="props.state.formValues[field.name] || field.default"
-                t-on-input="(ev) => props.onInputChange(field.name, ev)"
-                required="required"
-                t-att-min="field.minimum"
-                t-att-max="field.maximum"
-                t-att-step="field.type === 'integer' ? 1 : 'any'"
-              />
+                                    t-if="field.type === 'integer' or field.type === 'number'"
+                                    t-attf-id="media_form_field_{{field.name}}"
+                                    type="number"
+                                    class="form-control"
+                                    t-att-name="field.name"
+                                    t-att-value="props.state.formValues[field.name] || field.default"
+                                    t-on-input="(ev) => props.onInputChange(field.name, ev)"
+                                    required="required"
+                                    t-att-min="field.minimum"
+                                    t-att-max="field.maximum"
+                                    t-att-step="field.type === 'integer' ? 1 : 'any'"
+                            />
 
                             <!-- Checkbox for Boolean -->
                             <div
-                t-if="field.type === 'boolean'"
-                class="form-check"
-              >
+                                    t-if="field.type === 'boolean'"
+                                    class="form-check"
+                            >
                                 <input
-                  t-attf-id="media_form_field_{{field.name}}"
-                  type="checkbox"
-                  class="form-check-input"
-                  t-att-name="field.name"
-                  t-att-checked="props.state.formValues[field.name] || field.default"
-                  t-on-change="(ev) => props.onInputChange(field.name, ev)"
-                  required="required"
-                />
+                                        t-attf-id="media_form_field_{{field.name}}"
+                                        type="checkbox"
+                                        class="form-check-input"
+                                        t-att-name="field.name"
+                                        t-att-checked="props.state.formValues[field.name] || field.default"
+                                        t-on-change="(ev) => props.onInputChange(field.name, ev)"
+                                        required="required"
+                                />
                                 <label
-                  t-attf-for="media_form_field_{{field.name}}"
-                  class="form-check-label"
-                >
+                                        t-attf-for="media_form_field_{{field.name}}"
+                                        class="form-check-label"
+                                >
                                     <t
-                    t-esc="field.description || 'Enable this option'"
-                  />
+                                            t-esc="field.description || 'Enable this option'"
+                                    />
                                 </label>
                             </div>
 
                             <!-- Select for Enum -->
                             <select
-                t-if="field.type === 'enum' and field.choices and field.choices.length > 0"
-                t-attf-id="media_form_field_{{field.name}}"
-                class="form-select"
-                t-att-name="field.name"
-                t-on-change="(ev) => props.onInputChange(field.name, ev)"
-                required="required"
-              >
+                                    t-if="field.type === 'enum' and field.choices and field.choices.length > 0"
+                                    t-attf-id="media_form_field_{{field.name}}"
+                                    class="form-select"
+                                    t-att-name="field.name"
+                                    t-on-change="(ev) => props.onInputChange(field.name, ev)"
+                                    required="required"
+                            >
                                 <option
-                  value=""
-                  t-if="!field.default"
-                >Select an option...</option>
+                                        value=""
+                                        t-if="!field.default"
+                                >Select an option...</option>
                                 <t
-                  t-foreach="field.choices"
-                  t-as="choice"
-                  t-key="choice_index"
-                >
+                                        t-foreach="field.choices"
+                                        t-as="choice"
+                                        t-key="choice_index"
+                                >
                                     <option
-                    t-att-value="choice.value"
-                    t-esc="choice.label || choice.value"
-                    t-att-selected="(props.state.formValues[field.name] || field.default) === choice.value ? 'selected' : null"
-                  />
+                                            t-att-value="choice.value"
+                                            t-esc="choice.label || choice.value"
+                                            t-att-selected="(props.state.formValues[field.name] || field.default) === choice.value ? 'selected' : null"
+                                    />
                                 </t>
                             </select>
 
                             <small
-                t-if="field.description and field.type !== 'boolean'"
-                class="form-text text-muted"
-              >
-                                <t t-out="field.description" />
+                                    t-if="field.description and field.type !== 'boolean'"
+                                    class="form-text text-muted"
+                            >
+                                <t t-out="field.description"/>
                             </small>
                         </div>
                     </t>
@@ -118,15 +118,15 @@
             <t t-if="props.optionalFields.length > 0">
                 <div class="d-flex align-items-center mb-3 mt-3">
                     <button
-            type="button"
-            class="btn btn-link p-0"
-            t-on-click="props.toggleAdvancedSettings"
-          >
+                            type="button"
+                            class="btn btn-link p-0"
+                            t-on-click="props.toggleAdvancedSettings"
+                    >
                         <i
-              t-if="!props.state.showAdvancedSettings"
-              class="fa fa-caret-right me-1"
-            />
-                        <i t-else="1" class="fa fa-caret-down me-1" />
+                                t-if="!props.state.showAdvancedSettings"
+                                class="fa fa-caret-right me-1"
+                        />
+                        <i t-else="1" class="fa fa-caret-down me-1"/>
                         Advanced Settings
                     </button>
                     <span class="text-muted ms-2 small">(Optional)</span>
@@ -134,73 +134,73 @@
 
                 <!-- Optional Fields Section - Conditionally Visible with Two-Column Layout and Max Height -->
                 <div
-          t-if="props.state.showAdvancedSettings"
-          class="mb-4 ps-2 border-start position-relative"
-        >
+                        t-if="props.state.showAdvancedSettings"
+                        class="mb-4 ps-2 border-start position-relative"
+                >
                     <!-- Bottom scroll indicator with gradient -->
                     <div
-            class="position-absolute w-100"
-            style="height: 20px; bottom: 0; left: 0; background: linear-gradient(to top, rgba(248,249,250,1) 0%, rgba(248,249,250,0.8) 40%, rgba(248,249,250,0) 100%); pointer-events: none; z-index: 1;"
-          />
+                            class="position-absolute w-100"
+                            style="height: 20px; bottom: 0; left: 0; background: linear-gradient(to top, rgba(248,249,250,1) 0%, rgba(248,249,250,0.8) 40%, rgba(248,249,250,0) 100%); pointer-events: none; z-index: 1;"
+                    />
 
                     <!-- Scrollable content -->
                     <div
-            class="row overflow-auto pe-2 max-height-gen-inputs"
-            style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;"
-          >
+                            class="row overflow-auto pe-2 max-height-gen-inputs"
+                            style="scrollbar-width: thin; -webkit-overflow-scrolling: touch;"
+                    >
                         <t
-              t-foreach="props.optionalFields"
-              t-as="field"
-              t-key="field.name"
-            >
+                                t-foreach="props.optionalFields"
+                                t-as="field"
+                                t-key="field.name"
+                        >
                             <div class="col-md-6 mb-3">
                                 <label
-                  t-attf-for="media_form_field_{{field.name}}"
-                  class="form-label d-flex justify-content-between"
-                >
+                                        t-attf-for="media_form_field_{{field.name}}"
+                                        class="form-label d-flex justify-content-between"
+                                >
                                     <span><t t-esc="field.label" /></span>
                                     <span
-                    t-if="(field.type === 'integer' or field.type === 'number') and field.minimum !== undefined and field.maximum !== undefined"
-                    class="text-muted small"
-                  >
+                                            t-if="(field.type === 'integer' or field.type === 'number') and field.minimum !== undefined and field.maximum !== undefined"
+                                            class="text-muted small"
+                                    >
                                         <t
-                      t-esc="props.state.formValues[field.name] || field.default || field.minimum"
-                    />
+                                                t-esc="props.state.formValues[field.name] || field.default || field.minimum"
+                                        />
                                     </span>
                                 </label>
 
                                 <!-- Text Input -->
                                 <input
-                  t-if="field.type === 'string' and !field.choices"
-                  t-attf-id="media_form_field_{{field.name}}"
-                  type="text"
-                  class="form-control"
-                  t-att-name="field.name"
-                  t-att-value="props.state.formValues[field.name] || field.default"
-                  t-on-input="(ev) => props.onInputChange(field.name, ev)"
-                />
+                                        t-if="field.type === 'string' and !field.choices"
+                                        t-attf-id="media_form_field_{{field.name}}"
+                                        type="text"
+                                        class="form-control"
+                                        t-att-name="field.name"
+                                        t-att-value="props.state.formValues[field.name] || field.default"
+                                        t-on-input="(ev) => props.onInputChange(field.name, ev)"
+                                />
 
                                 <!-- Number Input with Slider when min/max are defined -->
                                 <t
-                  t-if="field.type === 'integer' or field.type === 'number'"
-                >
+                                        t-if="field.type === 'integer' or field.type === 'number'"
+                                >
                                     <t
-                    t-if="field.minimum !== undefined and field.maximum !== undefined"
-                  >
+                                            t-if="field.minimum !== undefined and field.maximum !== undefined"
+                                    >
                                         <input
-                      t-attf-id="media_form_field_{{field.name}}"
-                      type="range"
-                      class="form-range"
-                      t-att-name="field.name"
-                      t-att-value="props.state.formValues[field.name] || field.default || field.minimum"
-                      t-on-input="(ev) => props.onInputChange(field.name, ev)"
-                      t-att-min="field.minimum"
-                      t-att-max="field.maximum"
-                      t-att-step="field.type === 'integer' ? 1 : (field.maximum - field.minimum) / 100"
-                    />
+                                                t-attf-id="media_form_field_{{field.name}}"
+                                                type="range"
+                                                class="form-range"
+                                                t-att-name="field.name"
+                                                t-att-value="props.state.formValues[field.name] || field.default || field.minimum"
+                                                t-on-input="(ev) => props.onInputChange(field.name, ev)"
+                                                t-att-min="field.minimum"
+                                                t-att-max="field.maximum"
+                                                t-att-step="field.type === 'integer' ? 1 : (field.maximum - field.minimum) / 100"
+                                        />
                                         <div
-                      class="d-flex justify-content-between small text-muted"
-                    >
+                                                class="d-flex justify-content-between small text-muted"
+                                        >
                                             <span><t
                           t-esc="field.minimum"
                         /></span>
@@ -211,73 +211,73 @@
                                     </t>
                                     <t t-else="">
                                         <input
-                      t-attf-id="media_form_field_{{field.name}}"
-                      type="number"
-                      class="form-control"
-                      t-att-name="field.name"
-                      t-att-value="props.state.formValues[field.name] || field.default"
-                      t-on-input="(ev) => props.onInputChange(field.name, ev)"
-                      t-att-min="field.minimum"
-                      t-att-max="field.maximum"
-                      t-att-step="field.type === 'integer' ? 1 : 'any'"
-                    />
+                                                t-attf-id="media_form_field_{{field.name}}"
+                                                type="number"
+                                                class="form-control"
+                                                t-att-name="field.name"
+                                                t-att-value="props.state.formValues[field.name] || field.default"
+                                                t-on-input="(ev) => props.onInputChange(field.name, ev)"
+                                                t-att-min="field.minimum"
+                                                t-att-max="field.maximum"
+                                                t-att-step="field.type === 'integer' ? 1 : 'any'"
+                                        />
                                     </t>
                                 </t>
 
                                 <!-- Checkbox for Boolean with Switch Style -->
                                 <div
-                  t-if="field.type === 'boolean'"
-                  class="form-check form-switch"
-                >
+                                        t-if="field.type === 'boolean'"
+                                        class="form-check form-switch"
+                                >
                                     <input
-                    t-attf-id="media_form_field_{{field.name}}"
-                    type="checkbox"
-                    class="form-check-input"
-                    t-att-name="field.name"
-                    t-att-checked="props.state.formValues[field.name] || field.default"
-                    t-on-change="(ev) => props.onInputChange(field.name, ev)"
-                    role="switch"
-                  />
+                                            t-attf-id="media_form_field_{{field.name}}"
+                                            type="checkbox"
+                                            class="form-check-input"
+                                            t-att-name="field.name"
+                                            t-att-checked="props.state.formValues[field.name] || field.default"
+                                            t-on-change="(ev) => props.onInputChange(field.name, ev)"
+                                            role="switch"
+                                    />
                                     <label
-                    t-attf-for="media_form_field_{{field.name}}"
-                    class="form-check-label"
-                  >
+                                            t-attf-for="media_form_field_{{field.name}}"
+                                            class="form-check-label"
+                                    >
                                         <t
-                      t-esc="field.description || 'Enable this option'"
-                    />
+                                                t-esc="field.description || 'Enable this option'"
+                                        />
                                     </label>
                                 </div>
 
                                 <!-- Select for Enum -->
                                 <select
-                  t-if="field.type === 'enum' and field.choices and field.choices.length > 0"
-                  t-attf-id="media_form_field_{{field.name}}"
-                  class="form-select"
-                  t-att-name="field.name"
-                  t-on-change="(ev) => props.onInputChange(field.name, ev)"
-                >
+                                        t-if="field.type === 'enum' and field.choices and field.choices.length > 0"
+                                        t-attf-id="media_form_field_{{field.name}}"
+                                        class="form-select"
+                                        t-att-name="field.name"
+                                        t-on-change="(ev) => props.onInputChange(field.name, ev)"
+                                >
                                     <option
-                    value=""
-                    t-if="!field.default"
-                  >Select an option...</option>
+                                            value=""
+                                            t-if="!field.default"
+                                    >Select an option...</option>
                                     <t
-                    t-foreach="field.choices"
-                    t-as="choice"
-                    t-key="choice_index"
-                  >
+                                            t-foreach="field.choices"
+                                            t-as="choice"
+                                            t-key="choice_index"
+                                    >
                                         <option
-                      t-att-value="choice.value"
-                      t-esc="choice.label || choice.value"
-                      t-att-selected="(props.state.formValues[field.name] || field.default) === choice.value ? 'selected' : null"
-                    />
+                                                t-att-value="choice.value"
+                                                t-esc="choice.label || choice.value"
+                                                t-att-selected="(props.state.formValues[field.name] || field.default) === choice.value ? 'selected' : null"
+                                        />
                                     </t>
                                 </select>
 
                                 <small
-                  t-if="field.description and field.type !== 'boolean'"
-                  class="form-text text-muted"
-                >
-                                    <t t-out="field.description" />
+                                        t-if="field.description and field.type !== 'boolean'"
+                                        class="form-text text-muted"
+                                >
+                                    <t t-out="field.description"/>
                                 </small>
                             </div>
                         </t>

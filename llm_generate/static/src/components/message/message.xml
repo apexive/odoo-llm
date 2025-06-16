@@ -2,17 +2,17 @@
 <templates xml:space="preserve">
     <!-- Extension of the main Message template to handle media generation messages -->
     <t
-    t-name="llm_generate.Message"
-    t-inherit="mail.Message"
-    t-inherit-mode="extension"
-    owl="1"
-  >
+            t-name="llm_generate.Message"
+            t-inherit="mail.Message"
+            t-inherit-mode="extension"
+            owl="1"
+    >
         <!-- We need to target the content area where message body is displayed -->
         <xpath expr="//div[hasclass('o_Message_content')]" position="inside">
             <!-- Add our media generation parameters display for user messages with generation inputs -->
             <t
-        t-if="messageView.message.messageSubtypeXmlid === 'llm_mail_message_subtypes.mt_llm_user' and messageView.message.generationInputsFormatted"
-      >
+                    t-if="messageView.message.messageSubtypeXmlid === 'llm_mail_message_subtypes.mt_llm_user' and messageView.message.generationInputsFormatted"
+            >
                 <!-- Media Generation Parameters Summary -->
                 <div class="o_llm_media_gen_params mt-2 small border-top pt-2">
                     <details>

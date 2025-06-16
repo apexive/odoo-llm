@@ -15,7 +15,7 @@ class LLMToolGenerate(models.Model):
         return implementations + [("odoo_generate", "Odoo Media Generator")]
 
     def odoo_generate_execute(
-        self, model_id: int, inputs: dict[str, Any]
+            self, model_id: int, inputs: dict[str, Any]
     ) -> dict[str, Any]:
         """Generate an image using the specified model and prompt.
 
@@ -45,7 +45,7 @@ class LLMToolGenerate(models.Model):
 
         markdown_images = []
         for i, url in enumerate(image_urls):
-            markdown_images.append(f"![Generated Image {i+1}]({url})")
+            markdown_images.append(f"![Generated Image {i + 1}]({url})")
 
         return {
             "success": True,
