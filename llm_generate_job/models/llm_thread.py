@@ -98,7 +98,7 @@ class LLMThread(models.Model):
             return {"supports_async": False, "error": "No provider found for this thread"}
 
         # Verificar soporte de generación asíncrona
-        supports_async = self.provider_id._dispatch("supports_async_generation")
+        supports_async = self.provider_id.supports_async_generation()
 
         return {
             "supports_async": supports_async,

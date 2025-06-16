@@ -10,7 +10,7 @@
     "website": "https://github.com/apexive/odoo-llm",
     "category": "Technical",
     "version": "16.0.1.1.3",
-    "depends": ["llm", "llm_generate"],
+    "depends": ["llm", "llm_generate","llm_generate_job"],
     "external_dependencies": {
         "python": ["fal_client"]
     },

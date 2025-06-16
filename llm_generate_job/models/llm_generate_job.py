@@ -222,7 +222,7 @@ class LLMGenerateJob(models.Model):
         if not self.external_job_id:
             raise UserError("No external job ID found")
 
-        return self.provider_id._dispatch("check_generation_job_status",self)
+        return self.provider_id.check_generation_job_status(self)
 
     def _submit_to_provider(self):
         """Submit the job to the provider"""
