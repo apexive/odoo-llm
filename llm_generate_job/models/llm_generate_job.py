@@ -6,7 +6,7 @@ from odoo import api, fields, models
 from odoo.exceptions import UserError
 
 from odoo.addons.llm_mail_message_subtypes.const import (
-    LLM_USER_SUBTYPE_XMLID,
+    LLM_ASSISTANT_SUBTYPE_XMLID,
 )
 
 _logger = logging.getLogger(__name__)

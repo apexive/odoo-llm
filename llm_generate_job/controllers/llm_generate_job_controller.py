@@ -252,9 +252,13 @@ class LLMGenerateJobThreadController(LLMThreadController):
 
             # Notificación de trabajo enviado
             thread._post_message(
-                body=f"🚀 **Generation job submitted**\n You will be notified when the generation is complete.",
+                body="🚀 **Generation job submitted**\n You will be notified when the generation is complete.",
                 subtype_xmlid=LLM_TOOL_RESULT_SUBTYPE_XMLID,
-                tool_call_result ="Job ID: {job.id}\nStatus: {job.state}\n"
+                tool_name = "llm_generate_job",
+                tool_call_result =json.dumps(
+                    {"message": f"Job ID: {job.id} Status: {job.state}"
+                    }
+                )
             )
 
             return {
