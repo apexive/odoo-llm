@@ -51,26 +51,23 @@ class LLMThread(models.Model):
         
         return self.env['llm.generate.job'].create(job_vals)
 
-    def submit_async_generation(self, generation_inputs, auto_submit=True):
+    def submit_async_generation(self, generation_inputs):
         """Submit an async generation job and return job ID"""
         self.ensure_one()
-        
+
         # Check if provider supports async generation
         if not self.provider_id.supports_async_generation():
             raise ValueError(f"Provider {self.provider_id.name} does not support async generation")
-        
+
         # Create and optionally submit job
         job = self.create_generation_job(generation_inputs)
-        
-        if auto_submit:
-            job.action_submit()
-            
+        job.action_submit()
             # Post notification to thread
-            self.message_post(
+        self.message_post(
                 body=f"🚀 **Generation job submitted**\n\nJob ID: {job.id}\nStatus: {job.state}\n\nYou will be notified when the generation is complete.",
                 subtype_xmlid='llm_mail_message_subtypes.llm_assistant'
-            )
-        
+        )
+
         return job
 
     def get_pending_jobs(self):
@@ -92,3 +89,19 @@ class LLMThread(models.Model):
                 _logger.warning(f"Failed to cancel job {job.id}: {e}")
         
         return len(pending_jobs)
+
+    def check_async_generation_support(self):
+        """Verifica si el proveedor de este thread soporta generación asíncrona"""
+        self.ensure_one()
+
+        if not self.provider_id:
+            return {"supports_async": False, "error": "No provider found for this thread"}
+
+        # Verificar soporte de generación asíncrona
+        supports_async = self.provider_id._dispatch("supports_async_generation")
+
+        return {
+            "supports_async": supports_async,
+            "provider_name": self.provider_id.name,
+            "provider_id": self.provider_id.id
+        }

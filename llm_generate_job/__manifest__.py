@@ -31,8 +31,8 @@
     ],
     "assets": {
         "web.assets_backend": [
-            "llm_generate_job/static/src/js/notification_service.js",
-            "llm_generate_job/static/src/js/thread_patch.js",
+            "llm_generate_job/static/src/components/llm_media_form/llm_media_form.xml",
+            "llm_generate_job/static/src/components/llm_media_form/llm_media_form.js",
         ],
     },
     "license": "LGPL-3",

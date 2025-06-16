@@ -5,6 +5,8 @@ from datetime import datetime, timedelta
 from odoo import api, fields, models
 from odoo.exceptions import UserError
 
+from llm_mail_message_subtypes.const import LLM_ASSISTANT_SUBTYPE_XMLID
+
 _logger = logging.getLogger(__name__)
 
 
@@ -217,9 +219,8 @@ class LLMGenerateJob(models.Model):
         self.ensure_one()
         if not self.external_job_id:
             raise UserError("No external job ID found")
-        
-        self.provider_id.fal_ai_check_generation_job_status(self)
-        return True
+
+        return self.provider_id._dispatch("check_generation_job_status",self)
 
     def _submit_to_provider(self):
         """Submit the job to the provider"""
@@ -295,14 +296,12 @@ class LLMGenerateJob(models.Model):
             formatted_result = self._format_result_for_thread(payload)
             
             # Post message to thread
-            message = self.thread_id.message_post(
+            message = self.thread_id._post_message(
                 body=formatted_result.get('body', 'Generation completed'),
                 attachment_ids=formatted_result.get('attachment_ids', []),
-                subtype_xmlid='llm_mail_message_subtypes.llm_assistant'
+                subtype_xmlid=LLM_ASSISTANT_SUBTYPE_XMLID
             )
-            
-            # Send real-time notification to refresh the thread
-            self._send_realtime_notification(message)
+
             
         except Exception as e:
             _logger.error(f"Failed to send result to thread {self.thread_id.id}: {e}")
@@ -320,7 +319,7 @@ class LLMGenerateJob(models.Model):
                 body=body,
                 subtype_xmlid='llm_mail_message_subtypes.llm_assistant'
             )
-            
+
             # Send real-time notification to refresh the thread
             self._send_realtime_notification(message)
         except Exception as e:

@@ -15,21 +15,17 @@ export class LLMMediaForm extends Component {
       inputMode: "form",
       isJsonValid: true,
       jsonEditorError: null,
-      supportsAsyncGeneration: false,
     });
 
     onWillStart(async () => {
       // Initialize form values with defaults after loading config
       this._initializeFormValues();
-      // Check if provider supports async generation
-      await this._checkAsyncGenerationSupport();
     });
 
     // Watch for changes in the model prop to reload config if necessary
     useEffect(
       () => {
         this._initializeFormValues();
-        this._checkAsyncGenerationSupport();
       },
       // Use thread.id and llmAssistant.id to ensure proper dependency tracking
       () => [this.effectiveInputSchema, this.thread?.id, this.llmAssistant?.id]
@@ -69,26 +65,6 @@ export class LLMMediaForm extends Component {
 
     // Update state with initial values
     this.state.formValues = initialValues;
-  }
-  // Check if provider supports async generation
-  async _checkAsyncGenerationSupport() {
-    if (!this.thread || !this.thread.provider_id) {
-      this.state.supportsAsyncGeneration = false;
-      return;
-    }
-
-    try {
-      const result = await this.env.services.rpc({
-        route: '/api/llm/provider/supports_async_generation',
-        params: {
-          provider_id: this.thread.provider_id,
-        },
-      });
-      this.state.supportsAsyncGeneration = result.supports_async;
-    } catch (error) {
-      console.warn("Async generation support check failed (llm_generate_job module may not be installed):", error);
-      this.state.supportsAsyncGeneration = false;
-    }
   }
 
   get llmModel() {
@@ -430,6 +406,7 @@ export class LLMMediaForm extends Component {
     // Return as safe markup that won't be escaped
     return markup(formattedDesc);
   }
+
   async onSubmit(event) {
     event.preventDefault();
 
@@ -460,65 +437,6 @@ export class LLMMediaForm extends Component {
       console.error("Error submitting media generation form:", error);
       this.state.error =
         error.message || "An unexpected error occurred during submission.";
-    } finally {
-      this.state.isLoading = false;
-    }
-  }
-  async onSendJob(event) {
-    event.preventDefault();
-
-    // Call the validation function
-    const validationResult = this._validateFormValues();
-
-    if (!validationResult.isValid) {
-      this.state.error = validationResult.errors.join("\n"); // Display multiple errors
-      return; // Stop submission
-    }
-
-    // If validation passes, proceed
-    this.state.isLoading = true;
-    this.state.error = null; // Clear any previous errors
-
-    if (!this.llmModel) {
-      this.state.error = "Model not available.";
-      this.state.isLoading = false;
-      return;
-    }
-
-    try {
-      // Call backend to create and submit generation job
-      const result = await this.env.services.rpc({
-        route: '/api/llm/thread/submit_async_generation',
-        params: {
-          thread_id: this.thread.id,
-          generation_inputs: validationResult.values,
-          model_id: this.llmModel.id,
-        },
-      });
-
-      if (result.success) {
-        // Show success notification
-        this.env.services.notification.add(
-          `🚀 Generation job submitted successfully! Job ID: ${result.job_id}`,
-          {
-            type: 'success',
-            sticky: false,
-          }
-        );
-        
-        // Clear form error
-        this.state.error = null;
-      } else {
-        this.state.error = result.error || "Failed to submit generation job.";
-      }
-    } catch (error) {
-      console.error("Error submitting generation job:", error);
-      
-      if (error.message && error.message.includes('404')) {
-        this.state.error = "Async generation is not available. The llm_generate_job module may not be installed.";
-      } else {
-        this.state.error = error.message || "An unexpected error occurred while submitting the job.";
-      }
     } finally {
       this.state.isLoading = false;
     }

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+   <t t-name="llm_generate_job.LLMMediaForm" t-inherit="llm_generate.llm_thread.LLMMediaForm" t-inherit-mode="extension">
+        <xpath expr="//button[@type='submit']" position="before">
+            <button
+                t-if="state.supportsAsyncGeneration"
+                type="button"
+                class="btn btn-info"
+                t-att-disabled="(state.isLoading or isStreaming() or (state.inputMode === 'json' and !state.isJsonValid)) ? 'disabled' : null"
+                t-on-click="onSendJob"
+            >
+                <i t-if="state.isLoading" class="fa fa-spinner fa-spin me-1" />
+                <i t-elif="!state.isLoading" class="fa fa-clock-o me-1" />
+                <t t-if="!state.isLoading">Send Job</t>
+                <t t-else="">Processing...</t>
+            </button>
+        </xpath>
+    </t>
+</templates>

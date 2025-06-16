@@ -161,30 +161,47 @@ class LLMGenerateJobThreadController(LLMThreadController):
             return {"error": str(e)}
     
     @http.route("/api/llm/provider/supports_async_generation", type="json", auth="user", methods=["GET", "POST"])
-    def check_async_generation_support(self, provider_id=None, **kwargs):
-        """Check if a provider supports async generation"""
-        try:
-            if not provider_id:
-                return {"error": "provider_id is required", "supports_async": False}
-            
-            provider = request.env["llm.provider"].browse(int(provider_id))
-            if not provider.exists():
-                return {"error": "Provider not found", "supports_async": False}
-            
-            # Check if provider supports async generation
-            supports_async = False
-            if hasattr(provider, 'supports_async_generation'):
-                supports_async = provider.supports_async_generation()
-            
-            return {
-                "supports_async": supports_async,
-                "provider_name": provider.name,
-                "provider_id": provider.id
-            }
-            
-        except Exception as e:
-            _logger.error(f"Error checking async generation support: {e}")
-            return {"error": str(e), "supports_async": False}
+    def check_async_generation_support(self, provider_id=None, thread_id=None, **kwargs):
+                """Check if a provider supports async generation"""
+                try:
+                    provider = None
+
+                    # Primero intentamos obtener el provider desde el thread_id
+                    if thread_id:
+                        thread = request.env["llm.thread"].browse(int(thread_id))
+                        if not thread.exists():
+                            return {"error": "Thread not found", "supports_async": False}
+
+                        # Obtener el provider desde el thread
+                        provider = thread.provider_id
+
+                        if not provider:
+                            return {"error": "No provider found for this thread", "supports_async": False}
+
+                    # Si no hay thread_id pero hay provider_id, usar el provider directamente
+                    elif provider_id:
+                        provider = request.env["llm.provider"].browse(int(provider_id))
+                        if not provider.exists():
+                            return {"error": "Provider not found", "supports_async": False}
+
+                    # Si no se proporciona ni thread_id ni provider_id, error
+                    else:
+                        return {"error": "Either thread_id or provider_id is required", "supports_async": False}
+
+                    # Verificar si el provider soporta generación asíncrona
+                    supports_async = False
+                    if hasattr(provider, 'supports_async_generation'):
+                        supports_async = provider.supports_async_generation()
+
+                    return {
+                        "supports_async": supports_async,
+                        "provider_name": provider.name,
+                        "provider_id": provider.id
+                    }
+
+                except Exception as e:
+                    _logger.error(f"Error checking async generation support: {e}")
+                    return {"error": str(e), "supports_async": False}
 
     @http.route("/api/llm/thread/submit_async_generation", type="json", auth="user", methods=["POST"])
     def submit_async_generation(self, thread_id=None, generation_inputs=None, model_id=None, **kwargs):

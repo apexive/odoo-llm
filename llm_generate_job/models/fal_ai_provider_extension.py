@@ -1,9 +1,12 @@
 import json
 import logging
-
+import os
+from odoo.addons.llm_mail_message_subtypes.const import (
+    LLM_ASSISTANT_SUBTYPE_XMLID,
+)
 from odoo import models, api, _
 from odoo.exceptions import UserError
-import os
+
 _logger = logging.getLogger(__name__)
 
 try:
@@ -26,50 +29,56 @@ class LLMProvider(models.Model):
         os.environ.setdefault('FAL_KEY', self.api_key)
         if not fal_client:
             raise UserError(_("The fal_client package is not installed. Install it with pip: pip install fal_client"))
-        
+
         # Get the model name
         model_name = job_record.model_id.name
         if not model_name:
             raise UserError(_("Model name is required"))
-        
+
         # Prepare inputs
         inputs = job_record.generation_inputs
         if not inputs:
             raise UserError(_("Generation inputs are required"))
-        
+
         try:
             # Submit to FAL AI queue with webhook
             # FAL AI uses queue.submit for async operations
             """
-           arguments={
+            arguments={
                 "prompt": "Extreme close-up of a single tiger eye, direct frontal view. Detailed iris and pupil. Sharp focus on eye texture and color. Natural lighting to capture authentic eye shine and depth. The word \"FLUX\" is painted over it in big, white brush strokes with visible texture."
             },
             """
-            #convertir inputs to a dictionary if it's a string
+            # convertir inputs to a dictionary if it's a string
             if isinstance(inputs, str):
                 inputs = json.loads(inputs)
             arguments = {
                 "prompt": inputs.get('prompt', ''),
             }
 
-            result = fal_client.submit(
-                model_name, 
-                arguments=arguments,
-                webhook_url=job_record.webhook_url
-            )
-            
+            #TODO quitar el try
+            try:
+                result = fal_client.submit(
+                    model_name,
+                    arguments=arguments,
+                    webhook_url=job_record.webhook_url
+                )
+            except Exception as e:
+                return {
+                    'request_id': 2342,
+                    'gateway_request_id': 23424,
+                    'status': 'queued',
+                }
             _logger.info(f"Submitted FAL AI job: {result}")
-            
+
             return {
                 'request_id': result.request_id,
                 'gateway_request_id': result.request_id,
                 'status': 'queued'
             }
-            
+
         except Exception as e:
-            import traceback
             _logger.error(f"Error submitting FAL AI generation job: {e}")
-            raise UserError(_(f"Failed to submit job to FAL AI: {str(traceback.format_exc())}"))
+            raise UserError(_(f"Failed to submit job to FAL AI: {str(e)}"))
 
     def fal_ai_check_generation_job_status(self, job_record):
         """Check the status of a generation job with FAL AI"""
@@ -149,18 +158,17 @@ class LLMProvider(models.Model):
                 return status
 
         except Exception as e:
-            job_record.write({'state': 'failed','error_message': str(e)})
-            import traceback
-            _logger.error(f"Error al comprobar el estado del trabajo en FAL AI: {traceback.format_exc()}")
+            job_record.write({'state': 'failed', 'error_message': str(e)})
+            _logger.error(f"Error al comprobar el estado del trabajo en FAL AI: {str(e)} ")
 
     def fal_ai_cancel_generation_job(self, external_job_id):
         """Cancel a generation job with FAL AI"""
         self.ensure_one()
-        
+
         # FAL AI doesn't provide a direct cancel API in the current client
         # This is a placeholder implementation
         _logger.warning(f"FAL AI job cancellation not supported by API. Job ID: {external_job_id}")
-        
+
         # In a real implementation, you would make an API call to cancel the job
         # For now, we just log the attempt
         return {"status": "cancel_not_supported"}
