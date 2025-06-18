@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LLM Generate Job for Odoo LLM Integration</title>
+  <meta name="description" content="Manage long-running LLM generation jobs in Odoo with webhooks, queueing, and media support. Automate and monitor AI-powered tasks in your ERP.">
+  <meta name="keywords" content="Odoo LLM, LLM Job Queue, Odoo AI, LLM Webhook, Odoo Media Generation, LLM Async, LLM Job Management">
+  <meta name="author" content="Apexive Solutions LLC" />
+</head>
+<body>
+  <div class="header-container">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-md-8">
+          <h1 class="fw-bold">LLM Generate Job for Odoo LLM</h1>
+          <p class="lead mb-4">Automate and manage long-running LLM generation jobs with queueing, webhooks, and media support in Odoo.</p>
+          <div class="d-flex mb-3 align-items-center">
+            <span class="badge bg-primary me-2">v16.0.1.0.0</span>
+            <span class="badge bg-secondary me-2">LGPL-3</span>
+            <a href="https://github.com/apexive/odoo-llm" class="github-link ms-auto">
+              <!-- GitHub SVG icon placeholder -->
+              GitHub Repository
+            </a>
+          </div>
+          <p>This module enables advanced job queue management for LLM tasks, including webhook notifications and support for image, video, and other media generation directly from Odoo.</p>
+        </div>
+        <div class="col-md-4 text-center">
+          <img src="icon.png" alt="LLM Generate Job Logo" class="img-fluid" style="max-width: 200px;" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <img src="banner.jpeg" alt="LLM Generate Job Banner" class="img-fluid mb-4" />
+
+    <section class="mb-5">
+      <h2 class="mb-4">Overview</h2>
+      <p>The LLM Generate Job module extends the Odoo LLM framework to manage asynchronous and long-running AI generation jobs. It provides a robust queue system, webhook integration for job completion, and supports various media types.</p>
+      <div class="highlight-box">
+        <h4>Key Capabilities</h4>
+        <ul class="mb-0">
+          <li><strong>Job queue management</strong> – Track, schedule, and monitor LLM generation jobs</li>
+          <li><strong>Webhook support</strong> – Receive notifications when jobs are completed</li>
+          <li><strong>Media generation</strong> – Queue and manage image, video, and other media jobs</li>
+          <li><strong>Thread integration</strong> – Deliver results into Odoo threads and conversations</li>
+          <li><strong>Visibility control</strong> – Manage job visibility in Odoo tree/list views</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="mb-5">
+      <h2 class="mb-4">Configuration</h2>
+      <p>To configure LLM Generate Job:</p>
+      <ol>
+        <li>Install this module and its dependencies</li>
+        <li>Go to <strong>LLM &gt; Jobs</strong> in Odoo</li>
+        <li>Create a new job, select the LLM model and type</li>
+        <li>Set webhook URL if you want asynchronous notifications</li>
+        <li>Monitor job status and results from the job list</li>
+      </ol>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="mb-5">
+      <h2 class="mb-4">Job Types & Features</h2>
+      <table class="endpoint-table">
+        <thead>
+          <tr>
+            <th>Job Type</th>
+            <th>Description</th>
+            <th>Media Support</th>
+            <th>Webhook</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Text Generation</td>
+            <td>LLM-powered text completions and chat</td>
+            <td>No</td>
+            <td>Yes</td>
+          </tr>
+          <tr>
+            <td>Image/Video Generation</td>
+            <td>Queue and manage media generation jobs</td>
+            <td>Yes</td>
+            <td>Yes</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="highlight-box mt-4">
+        <div class="d-flex align-items-center">
+          <!-- SVG icon placeholder -->
+          <div>
+            <h4 class="mb-2">Integration Note</h4>
+            <p class="mb-0">Works seamlessly with Odoo LLM, LLM Thread, and LLM Generate modules for advanced automation and delivery.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="section-divider"></div>
+
+    <section class="mb-5">
+      <h2 class="mb-4">Technical Details</h2>
+      <ul>
+        <li>Built on top of the Odoo LLM Integration framework</li>
+        <li>Supports asynchronous and scheduled job execution</li>
+        <li>Implements state management for job lifecycle</li>
+        <li>Webhook callback for job completion</li>
+        <li>Supports image, video, and other media types</li>
+      </ul>
+      <div class="row mt-4">
+        <div class="col-lg-6">
+          <h3 class="h5">Module Information</h3>
+          <table class="table table-sm">
+            <tbody>
+              <tr><th>Name</th><td>LLM Generate Job</td></tr>
+              <tr><th>Version</th><td>16.0.1.0.0</td></tr>
+              <tr><th>Category</th><td>Technical</td></tr>
+              <tr><th>License</th><td>LGPL-3</td></tr>
+              <tr><th>Dependencies</th><td>llm, llm_thread, llm_generate, llm_mail_message_subtypes</td></tr>
+              <tr><th>External Dependencies</th><td>requests (Python)</td></tr>
+              <tr><th>Author</th><td>Apexive Solutions LLC</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer class="bg-light py-4 border-top">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-6">
+          <h4>LLM Generate Job for Odoo LLM</h4>
+          <p>Developed by Apexive Solutions LLC</p>
+          <p>Licensed under <a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank">LGPL-3</a></p>
+        </div>
+        <div class="col-lg-6 text-lg-end">
+          <p>Visit our GitHub repository for updates and other LLM integrations:</p>
+          <a href="https://github.com/apexive/odoo-llm" class="btn btn-outline-primary">GitHub</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>
+
