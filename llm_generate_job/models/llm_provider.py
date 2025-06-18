@@ -9,6 +9,14 @@ _logger = logging.getLogger(__name__)
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
 
+    def is_webhook(self, request):
+        """Check if the request is a webhook call"""
+        return False
+
+    def verify_webhook(self, request, webhook_data):
+        """Verify the webhook data from the request"""
+        raise False
+
     def supports_async_generation(self):
         """Check if this provider supports async generation"""
         return self._dispatch("supports_async_generation")
