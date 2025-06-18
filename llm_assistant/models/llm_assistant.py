@@ -61,6 +61,24 @@ class LLMAssistant(models.Model):
         help="Prompt template to use for generating system prompts",
     )
 
+    # Related fields from prompt - for display and search
+    category_id = fields.Many2one(
+        "llm.prompt.category",
+        string="Category",
+        related="prompt_id.category_id",
+        store=True,
+        readonly=True,
+        help="Category inherited from the prompt template",
+    )
+
+    tag_ids = fields.Many2many(
+        "llm.prompt.tag",
+        string="Tags",
+        related="prompt_id.tag_ids",
+        readonly=True,
+        help="Tags inherited from the prompt template",
+    )
+
     # Default values for prompt variables as JSON
     default_values = fields.Text(
         string="Default Values",
@@ -112,6 +130,20 @@ class LLMAssistant(models.Model):
         tracking=True,
     )
 
+    # Template management fields
+    template_ids = fields.One2many(
+        "llm.prompt.template",
+        string="Templates",
+        related="prompt_id.template_ids",
+        help="Templates from the associated prompt",
+    )
+
+    template_count = fields.Integer(
+        string="Template Count",
+        related="prompt_id.template_count",
+        help="Number of templates in the prompt",
+    )
+
     @api.depends("prompt_id", "default_values")
     def _compute_system_prompt_preview(self):
         """Compute preview of the formatted system prompt"""
@@ -131,6 +163,21 @@ class LLMAssistant(models.Model):
             assistant.evaluated_default_values = (
                 assistant.get_evaluated_default_values()
             )
+
+    def action_view_prompt(self):
+        """Open the associated prompt for advanced template management"""
+        self.ensure_one()
+        if not self.prompt_id:
+            return False
+
+        return {
+            'name': 'Prompt Template',
+            'type': 'ir.actions.act_window',
+            'res_model': 'llm.prompt',
+            'view_mode': 'form',
+            'res_id': self.prompt_id.id,
+            'target': 'current',
+        }
 
     def action_view_threads(self):
         """Open the threads using this assistant"""
@@ -286,9 +333,9 @@ class LLMAssistant(models.Model):
                     if "${" in value and "}" in value:
                         # Handle the simple case where the entire string is a single expression
                         if (
-                            value.startswith("${")
-                            and value.endswith("}")
-                            and value.count("${") == 1
+                                value.startswith("${")
+                                and value.endswith("}")
+                                and value.count("${") == 1
                         ):
                             result = self._evaluate_single_expression(
                                 value, eval_context
@@ -430,15 +477,9 @@ class LLMAssistant(models.Model):
         if user.has_group("base.group_system"):
             return self.search([])
 
-        # Build domain for assistants the user can access
-        domain = ["|"]
-
-        # Public assistants
-        domain.append(("is_public", "=", True))
-
         # Assistants allowed for user's groups
         if user.groups_id:
-            domain.append(("allowed_group_ids", "in", user.groups_id.ids))
+            domain = ["|", ("is_public", "=", True), ("allowed_group_ids", "in", user.groups_id.ids)]
         else:
             # If user has no groups, only public assistants
             domain = [("is_public", "=", True)]

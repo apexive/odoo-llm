@@ -26,7 +26,8 @@ class LLMThreadController(http.Controller):
         except Exception as e:
             return {"status": "error", "error": str(e)}
 
-    def _safe_yield(self, data_to_yield):
+    @staticmethod
+    def _safe_yield(data_to_yield):
         """Helper generator to yield data safely, handling BrokenPipeError(Disconnected user)."""
         try:
             yield data_to_yield
@@ -36,13 +37,14 @@ class LLMThreadController(http.Controller):
         except Exception:
             return False
 
-    def _llm_thread_generate(self, dbname, env, thread_id, user_message_body, **kwargs):
+    @classmethod
+    def _llm_thread_generate(cls, dbname, env, thread_id, user_message_body, **kwargs):
         """Generate LLM responses with streaming and safe yielding."""
         with registry(dbname).cursor() as cr:
             env = api.Environment(cr, env.uid, env.context)
             llmThread = env["llm.thread"].browse(int(thread_id))
             if not llmThread.exists():
-                yield from self._safe_yield(
+                yield from cls._safe_yield(
                     f"data: {json.dumps({'type': 'error', 'error': 'LLM Thread not found.'})}\n\n".encode()
                 )
                 return
@@ -51,7 +53,7 @@ class LLMThreadController(http.Controller):
             try:
                 for response in llmThread.generate(user_message_body, **kwargs):
                     json_data = json.dumps(response, default=str)
-                    success = yield from self._safe_yield(
+                    success = yield from cls._safe_yield(
                         f"data: {json_data}\n\n".encode()
                     )
                     if not success:
@@ -73,7 +75,7 @@ class LLMThreadController(http.Controller):
                     llmThread._unlock()
 
                 if client_connected:
-                    success = yield from self._safe_yield(
+                    success = yield from cls._safe_yield(
                         f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n".encode()
                     )
                     if not success:
@@ -81,7 +83,7 @@ class LLMThreadController(http.Controller):
 
             finally:
                 if client_connected:
-                    yield from self._safe_yield(
+                    yield from cls._safe_yield(
                         f"data: {json.dumps({'type': 'done'})}\n\n".encode()
                     )
 

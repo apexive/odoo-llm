@@ -7,9 +7,11 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name" />
+                <field name="category_id" />
                 <field name="provider_id" />
                 <field name="model_id" />
                 <field name="prompt_id" />
+                <field name="tag_ids" widget="many2many_tags" />
                 <field name="is_public" />
                 <field name="thread_count" />
                 <field name="active" />
@@ -26,93 +28,164 @@
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button
-              name="action_view_threads"
-              type="object"
-              class="oe_stat_button"
-              icon="fa-comments"
-            >
+                                name="action_view_threads"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-comments"
+                        >
                             <field
-                name="thread_count"
-                widget="statinfo"
-                string="Threads"
-              />
+                                    name="thread_count"
+                                    widget="statinfo"
+                                    string="Threads"
+                            />
                         </button>
                         <button
-              name="toggle_active"
-              type="object"
-              class="oe_stat_button"
-              icon="fa-archive"
-            >
+                                name="action_view_prompt"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o"
+                                attrs="{'invisible': [('prompt_id', '=', False)]}"
+                        >
+                            <field
+                                    name="template_count"
+                                    widget="statinfo"
+                                    string="Templates"
+                            />
+                        </button>
+                        <button
+                                name="toggle_active"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-archive"
+                        >
                             <field name="active" widget="boolean_toggle" />
                         </button>
                     </div>
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only" />
                         <h1><field
-                name="name"
-                placeholder="Assistant Name"
-              /></h1>
+                                name="name"
+                                placeholder="Assistant Name"
+                        /></h1>
                     </div>
                     <group>
                         <group name="configuration">
                             <field name="provider_id" />
                             <field name="model_id" />
                             <field
-                name="prompt_id"
-                options="{'no_create': False, 'no_open': False}"
-              />
+                                    name="prompt_id"
+                                    options="{'no_create': False, 'no_open': False}"
+                            />
+                            <field name="category_id" readonly="1" />
+                            <field name="tag_ids" widget="many2many_tags" readonly="1" />
                         </group>
                         <group name="access_control">
                             <field name="is_public" />
                             <field
-                name="allowed_group_ids"
-                widget="many2many_tags"
-                attrs="{'invisible': [('is_public', '=', True)]}"
-                options="{'no_create': True}"
-              />
+                                    name="allowed_group_ids"
+                                    widget="many2many_tags"
+                                    attrs="{'invisible': [('is_public', '=', True)]}"
+                                    options="{'no_create': True}"
+                            />
                         </group>
                     </group>
                     <notebook>
                         <page string="Configuration" name="configuration">
                             <group>
                                 <field
-                  name="default_values"
-                  widget="json_editor"
-                />
+                                        name="default_values"
+                                        widget="json_editor"
+                                />
                                 <field
-                  name="has_dynamic_defaults"
-                  help="Enable if your default values contain Python expressions that should be evaluated"
-                />
+                                        name="has_dynamic_defaults"
+                                        help="Enable if your default values contain Python expressions that should be evaluated"
+                                />
                             </group>
                             <div
-                class="alert alert-info w-100 mt-3 mb-3"
-                role="alert"
-              >
+                                    class="alert alert-info w-100 mt-3 mb-3"
+                                    role="alert"
+                            >
                                 <p
-                  class="mb-0"
-                >Define default values for prompt variables in JSON format. These will be used as inputs to the prompt template.</p>
+                                        class="mb-0"
+                                >Define default values for prompt variables in JSON format. These will be used as inputs to the prompt template.</p>
                             </div>
                         </page>
                         <page string="Tools" name="tools">
                             <group>
                                 <field
-                  name="tool_ids"
-                  widget="many2many_tags"
-                  options="{'no_create': True}"
-                  placeholder="Select tools for this assistant..."
-                />
+                                        name="tool_ids"
+                                        widget="many2many_tags"
+                                        options="{'no_create': True}"
+                                        placeholder="Select tools for this assistant..."
+                                />
                             </group>
                             <div class="text-muted px-3 py-2">
                                 Select the tools this assistant may need. These tools will be auto selected when you assign this assistant on LLM Chat Thread
                             </div>
                         </page>
+                        <page string="Templates" name="templates">
+                            <div class="alert alert-info w-100 mb-3" role="alert">
+                                <p class="mb-0">
+                                    <strong>Template Management:</strong>
+                                    Edit the prompt templates that define how this assistant communicates.
+                                    Templates are ordered by sequence and can have different roles (system, user, assistant).
+                                </p>
+                            </div>
+                            <field name="template_ids" context="{'default_prompt_id': prompt_id}">
+                                <tree editable="bottom" decoration-muted="condition">
+                                    <field name="sequence" widget="handle" />
+                                    <field name="role" />
+                                    <field name="content" widget="text" />
+                                    <field name="condition" placeholder="Optional condition (e.g., debug == True)" />
+                                    <field name="used_arguments" />
+                                </tree>
+                                <form>
+                                    <sheet>
+                                        <group>
+                                            <group>
+                                                <field name="sequence" />
+                                                <field name="role" />
+                                                <field name="condition" placeholder="Optional Python expression" />
+                                            </group>
+                                            <group>
+                                                <field name="prompt_id" invisible="1" />
+                                                <field name="used_arguments" readonly="1" />
+                                            </group>
+                                        </group>
+                                        <separator string="Template Content" />
+                                        <field name="content" widget="ace" options="{'mode': 'text'}" />
+                                        <div class="text-muted mt-2">
+                                            <p><strong>Available placeholders:</strong></p>
+                                            <ul>
+                                                <li><code>{{argument_name}}</code> - Replace with argument values</li>
+                                                <li><code>{{get_related_record('field_name')}}</code> - Access related record fields</li>
+                                                <li><code>{{get_related_record('field_name', 'key')}}</code> - Access dictionary field keys</li>
+                                            </ul>
+                                        </div>
+                                    </sheet>
+                                </form>
+                            </field>
+                            <div class="mt-3">
+                                <button
+                                        name="action_view_prompt"
+                                        type="object"
+                                        string="Open Prompt for Advanced Management"
+                                        class="btn-link"
+                                        attrs="{'invisible': [('prompt_id', '=', False)]}"
+                                />
+                                <p class="text-muted">
+                                    <i class="fa fa-info-circle"></i>
+                                    Templates are managed through the prompt record. You can edit them directly above or click the button above for advanced template management.
+                                </p>
+                            </div>
+                        </page>
                         <page string="Preview" name="preview">
                             <field
-                name="system_prompt_preview"
-                widget="ace"
-                options="{'mode': 'markdown'}"
-                readonly="1"
-              />
+                                    name="system_prompt_preview"
+                                    widget="ace"
+                                    options="{'mode': 'markdown'}"
+                                    readonly="1"
+                            />
                         </page>
                         <page string="Related Threads" name="related_threads">
                             <field name="thread_ids" readonly="1">
@@ -121,11 +194,11 @@
                                     <field name="user_id" />
                                     <field name="write_date" />
                                     <button
-                    name="action_open_thread"
-                    string="Open"
-                    type="object"
-                    class="btn btn-primary btn-sm"
-                  />
+                                            name="action_open_thread"
+                                            string="Open"
+                                            type="object"
+                                            class="btn btn-primary btn-sm"
+                                    />
                                 </tree>
                             </field>
                         </page>
@@ -146,51 +219,59 @@
         <field name="arch" type="xml">
             <search string="Search Assistants">
                 <field name="name" />
+                <field name="category_id" />
+                <field name="tag_ids" />
                 <field name="provider_id" />
                 <field name="model_id" />
                 <field name="prompt_id" />
                 <field name="allowed_group_ids" />
                 <separator />
                 <filter
-          string="Public"
-          name="public"
-          domain="[('is_public', '=', True)]"
-        />
+                        string="Public"
+                        name="public"
+                        domain="[('is_public', '=', True)]"
+                />
                 <filter
-          string="Private"
-          name="private"
-          domain="[('is_public', '=', False)]"
-        />
+                        string="Private"
+                        name="private"
+                        domain="[('is_public', '=', False)]"
+                />
                 <filter
-          string="Archived"
-          name="inactive"
-          domain="[('active', '=', False)]"
-        />
+                        string="Archived"
+                        name="inactive"
+                        domain="[('active', '=', False)]"
+                />
                 <group expand="0" string="Group By">
                     <filter
-            string="Provider"
-            name="provider"
-            domain="[]"
-            context="{'group_by': 'provider_id'}"
-          />
+                            string="Category"
+                            name="category"
+                            domain="[]"
+                            context="{'group_by': 'category_id'}"
+                    />
                     <filter
-            string="Model"
-            name="model"
-            domain="[]"
-            context="{'group_by': 'model_id'}"
-          />
+                            string="Provider"
+                            name="provider"
+                            domain="[]"
+                            context="{'group_by': 'provider_id'}"
+                    />
                     <filter
-            string="Prompt Template"
-            name="prompt"
-            domain="[]"
-            context="{'group_by': 'prompt_id'}"
-          />
+                            string="Model"
+                            name="model"
+                            domain="[]"
+                            context="{'group_by': 'model_id'}"
+                    />
                     <filter
-            string="Access Level"
-            name="access_level"
-            domain="[]"
-            context="{'group_by': 'is_public'}"
-          />
+                            string="Prompt Template"
+                            name="prompt"
+                            domain="[]"
+                            context="{'group_by': 'prompt_id'}"
+                    />
+                    <filter
+                            string="Access Level"
+                            name="access_level"
+                            domain="[]"
+                            context="{'group_by': 'is_public'}"
+                    />
                 </group>
             </search>
         </field>
