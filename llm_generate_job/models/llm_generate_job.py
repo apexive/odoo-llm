@@ -477,3 +477,24 @@ class LLMGenerateJob(models.Model):
 
         except Exception as e:
             _logger.error(f"Failed to send real-time notification for job {self.id}: {e}")
+
+    @api.model
+    def cron_execute_pending_jobs(self):
+        """
+        Cron job to process pending LLM generation jobs.
+        This will pick jobs in 'queued' or 'submitted' state and attempt to process them.
+        """
+        domain = [('state', 'in', ['queued', 'submitted']), ('active', '=', True)]
+        jobs = self.search(domain, limit=20)
+        for job in jobs:
+            try:
+                # You may want to add more sophisticated logic here
+                if job.state == 'queued':
+                    job.write({'state': 'processing'})
+                    job._submit_to_provider()
+                elif job.state == 'submitted':
+                    # Optionally, check status with provider or re-submit
+                    job._submit_to_provider()
+            except Exception as e:
+                job.write({'state': 'failed', 'error_message': str(e)})
+                _logger.error(f"Failed to process job {job.id}: {e}")

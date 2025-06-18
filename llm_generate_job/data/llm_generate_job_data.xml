@@ -55,5 +55,17 @@ for record in records.filtered(lambda r: r.state == 'failed' and r.retry_count &
             </field>
         </record>
 
+
+         <record id="ir_cron_llm_generate_job_execute" model="ir.cron">
+            <field name="name">LLM Generate Job: Execute Pending Jobs</field>
+            <field name="model_id" ref="model_llm_generate_job"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_execute_pending_jobs()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="active">True</field>
+        </record>
+
     </data>
 </odoo>
