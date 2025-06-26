@@ -10,7 +10,6 @@
     "website": "https://github.com/apexive/odoo-llm",
     "depends": ['base', 'web', 'mail'],
     "data": [
-       # 'views/templates.xml',
     ],
     'assets': {
 
