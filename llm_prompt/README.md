@@ -2,6 +2,25 @@
 
 This Odoo module provides functionality for creating and managing reusable prompt templates for Large Language Model (LLM) interactions. It allows you to define structured prompts with dynamic arguments, organize them with categories and tags, and use them across your Odoo instance.
 
+## Version 16.0.1.3.0 - New Features
+
+### Enhanced Prompt Testing Wizard
+- **Universal Record Selection**: Test prompts with any record from any model in your Odoo instance
+- **Improved UI**: Cleaner, more compact interface with better organization
+- **Real-time Context Updates**: Automatic context population when selecting related records
+- **Multiple Output Formats**: View generated messages in JSON, YAML, or readable text format
+- **Sample Data Population**: Automatically populate test context with common fields from selected records
+
+### Chat Interface Integration
+- **Prompt Dropdown**: Select prompts directly from the chat interface
+- **Thread-Prompt Association**: Link specific prompts to chat threads for consistent workflows
+- **Related Record Context**: Automatic integration of related record data in chat prompts
+
+### Template Format Flexibility
+- **Multiple Formats**: Support for Text, YAML, and JSON template formats
+- **Auto-detection**: Automatic argument detection from template content
+- **Format Validation**: Built-in validation for YAML and JSON templates
+
 ## Features
 
 - **Reusable Prompt Templates**: Create and manage prompt templates that can be reused across your LLM interactions.

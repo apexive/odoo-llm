@@ -45,10 +45,14 @@ class LLMProvider(models.Model):
     def fal_ai_get_client(self):
         """Initializes and returns the fal.ai client."""
         if not fal_client:
-            raise UserError(_("The fal_client package is not installed. Install it with pip: pip install fal_client"))
+            raise UserError(
+                _(
+                    "The fal_client package is not installed. Install it with pip: pip install fal_client"
+                )
+            )
 
         # fal.ai uses environment variables for the API_KEY, but we can also set it programmatically
-        os.environ.setdefault('FAL_KEY', self.api_key)
+        os.environ.setdefault("FAL_KEY", self.api_key)
         return fal_client
 
     def fal_ai_chat(self, messages, model=None, stream=False):
@@ -65,10 +69,18 @@ class LLMProvider(models.Model):
         # Hardcoded known models
         # TODO : This should be replaced with a dynamic call to the fal.ai models, but I haven't found it in the documentation.
         models = [
-            {"id": "fal-ai/flux/dev", "name": "fal-ai/flux/dev", "description": "Image generation model",
-             "capabilities": "multimodal"},
-            {"id": "fal-ai/lcm", "name": "fal-ai/lcm", "description": "Latent Consistency Model",
-             "capabilities": "multimodal"}
+            {
+                "id": "fal-ai/flux/dev",
+                "name": "fal-ai/flux/dev",
+                "description": "Image generation model",
+                "capabilities": "multimodal",
+            },
+            {
+                "id": "fal-ai/lcm",
+                "name": "fal-ai/lcm",
+                "description": "Latent Consistency Model",
+                "capabilities": "multimodal",
+            },
             # Add more models as available on fal.ai
         ]
 
@@ -83,20 +95,26 @@ class LLMProvider(models.Model):
                 "prompt": {
                     "type": "string",
                     "description": "Description of the image to generate",
-                    "title": "Prompt"
+                    "title": "Prompt",
                 },
                 "negative_prompt": {
                     "type": "string",
                     "description": "Elements to avoid in the generated image",
                     "title": "Negative Prompt",
-                    "default": ""
+                    "default": "",
                 },
                 "image_size": {
                     "type": "string",
                     "description": "Size of the generated image",
-                    "enum": ["square", "portrait", "landscape", "landscape_16_9", "landscape_4_3"],
+                    "enum": [
+                        "square",
+                        "portrait",
+                        "landscape",
+                        "landscape_16_9",
+                        "landscape_4_3",
+                    ],
                     "default": "square",
-                    "title": "Image Size"
+                    "title": "Image Size",
                 },
                 "num_images": {
                     "type": "integer",
@@ -104,25 +122,22 @@ class LLMProvider(models.Model):
                     "minimum": 1,
                     "maximum": 4,
                     "default": 1,
-                    "title": "Image Quantity"
+                    "title": "Image Quantity",
                 },
                 "seed": {
                     "type": "integer",
                     "description": "Seed for reproducibility",
                     "default": 42,
-                    "title": "Seed"
-                }
+                    "title": "Seed",
+                },
             },
-            "required": ["prompt"]
+            "required": ["prompt"],
         }
 
         model_record.output_schema = {
             "type": "array",
-            "items": {
-                "type": "string",
-                "format": "uri"
-            },
-            "title": "Output"
+            "items": {"type": "string", "format": "uri"},
+            "title": "Output",
         }
 
     def fal_ai_generate_media(self, inputs, model_record=None, stream=False):

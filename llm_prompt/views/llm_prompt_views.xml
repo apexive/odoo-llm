@@ -8,164 +8,222 @@
             <form string="LLM Prompt">
                 <header>
                     <button
-            name="auto_detect_arguments"
-            string="Auto-detect Arguments"
-            type="object"
-            class="oe_highlight"
-          />
+                            name="auto_detect_arguments"
+                            string="Auto-detect Arguments"
+                            type="object"
+                            class="oe_highlight"
+                    />
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
                         <button
-              name="toggle_active"
-              type="object"
-              class="oe_stat_button"
-              icon="fa-archive"
-            >
+                                name="toggle_active"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-archive"
+                        >
                             <field
-                name="active"
-                widget="boolean_toggle"
-                options="{'terminology': 'archive'}"
-              />
+                                    name="active"
+                                    widget="boolean_toggle"
+                                    options="{'terminology': 'archive'}"
+                            />
+                        </button>
+                        <button
+                                name="action_test_prompt"
+                                string="Test Prompt"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-play"
+                        >
+                            <div class="o_field_widget o_stat_info">
+                                <span class="o_stat_text">Test</span>
+                                <span class="o_stat_text">Prompt</span>
+                            </div>
                         </button>
                     </div>
                     <div class="oe_title">
                         <h1>
                             <field
-                name="name"
-                placeholder="e.g. Data Analysis Prompt"
-              />
+                                    name="name"
+                                    placeholder="e.g. Data Analysis Prompt"
+                            />
                         </h1>
                     </div>
                     <group>
                         <group>
-                            <field name="category_id" />
+                            <field name="category_id"/>
                             <field
-                name="tag_ids"
-                widget="many2many_tags"
-                options="{'color_field': 'color'}"
-              />
+                                    name="tag_ids"
+                                    widget="many2many_tags"
+                                    options="{'color_field': 'color'}"
+                            />
+                            <field name="format"/>
                         </group>
                         <group>
-                            <field name="template_count" readonly="1" />
-                            <field name="argument_count" readonly="1" />
-                            <field name="usage_count" readonly="1" />
-                            <field name="last_used" readonly="1" />
+                            <field name="argument_count" readonly="1"/>
+                            <field name="usage_count" readonly="1"/>
+                            <field name="last_used" readonly="1"/>
                         </group>
                     </group>
+                    <field
+                            name="description"
+                            placeholder="Describe the purpose and usage of this prompt..."
+                    />
+
                     <notebook>
-                        <page string="Description" name="description">
+                        <page string="Template" name="template">
+                            <div
+                                    class="alert alert-warning"
+                                    role="alert"
+                                    attrs="{'invisible': [('undefined_arguments', '=', False)]}"
+                            >
+                                <strong
+                                >Warning:
+                                </strong>
+                                The following arguments are used in the template but not defined in the schema:
+                                <field
+                                        name="undefined_arguments"
+                                        readonly="1"
+                                        class="oe_inline"
+                                />
+                            </div>
                             <field
-                name="description"
-                placeholder="Describe the purpose and usage of this prompt..."
-              />
-                        </page>
-                        <page string="Templates" name="templates">
-                            <field
-                name="template_ids"
-                context="{'default_prompt_id': active_id}"
-              >
-                                <tree editable="bottom">
-                                    <field name="sequence" widget="handle" />
-                                    <field name="role" />
-                                    <field name="content" />
-                                    <field name="condition" />
-                                </tree>
-                            </field>
+                                    name="template"
+                                    widget="ace"
+                                    options="{'mode': 'text'}"
+                                    attrs="{'options': [('format', '=', 'text'), {'mode': 'text'}], 'options': [('format', '=', 'yaml'), {'mode': 'yaml'}], 'options': [('format', '=', 'json'), {'mode': 'json'}]}"
+                                    placeholder="Enter your prompt template here..."
+                            />
+                            <div class="alert alert-info" role="alert">
+                                <h5>Template Format Guide:</h5>
+                                <div
+                                        attrs="{'invisible': [('format', '!=', 'text')]}"
+                                >
+                                    <p>
+                                        <strong
+                                        >Text Format:
+                                        </strong>
+                                        Simple text with {{argument_name}} placeholders.
+                                    </p>
+                                    <pre
+                                    >Hello {{user_name}}, please analyze the following data: {{data_input}}
+                                    </pre>
+                                </div>
+                                <div
+                                        attrs="{'invisible': [('format', '!=', 'yaml')]}"
+                                >
+                                    <p>
+                                        <strong
+                                        >YAML Format:
+                                        </strong>
+                                        Structured messages in YAML format.
+                                    </p>
+                                    <pre>messages:
+                                        - type: system
+                                        content: |
+                                        You are a helpful assistant. The user's name is {{user_name}}.
+                                        - type: user
+                                        content: |
+                                        Please analyze: {{data_input}}
+                                    </pre>
+                                </div>
+                                <div
+                                        attrs="{'invisible': [('format', '!=', 'json')]}"
+                                >
+                                    <p>
+                                        <strong
+                                        >JSON Format:
+                                        </strong>
+                                        Structured messages in JSON format.
+                                    </p>
+                                    <pre>{
+                                        "messages": [
+                                        {
+                                        "type": "system",
+                                        "content": "You are a helpful assistant. The user's name is {{user_name}}."
+                                        },
+                                        {
+                                        "type": "user",
+                                        "content": "Please analyze: {{data_input}}"
+                                        }
+                                        ]
+                                        }
+                                    </pre>
+                                </div>
+                            </div>
                         </page>
                         <page string="Arguments" name="arguments">
-                            <div
-                class="alert alert-warning"
-                role="alert"
-                attrs="{'invisible': [('undefined_arguments', '=', False)]}"
-              >
-                                <strong
-                >Warning:</strong> The following arguments are used in templates but not defined in the schema:
-                                <field
-                  name="undefined_arguments"
-                  readonly="1"
-                  class="oe_inline"
-                />
-                            </div>
                             <group>
                                 <field
-                  name="arguments_json"
-                  widget="json_editor"
-                  placeholder="{
-  'system_prompt': {
+                                        name="arguments_json"
+                                        widget="json_editor"
+                                        placeholder="{
+  'user_name': {
     'type': 'string',
-    'description': 'The system instructions for the LLM',
+    'description': 'Name of the user',
     'required': true,
-    'default': 'You are a helpful assistant.'
+    'default': 'User'
   },
-  'user_input': {
+  'data_input': {
     'type': 'string',
-    'description': 'The user input to process',
+    'description': 'The data to analyze',
     'required': true
   }
 }"
-                />
-                <field
-                  name="input_schema_json"
-                  readonly="1"
-                  widget="json_editor"
-                />
+                                />
+                                <field
+                                        name="input_schema_json"
+                                        readonly="1"
+                                        widget="json_editor"
+                                />
                             </group>
                             <div class="alert alert-info" role="alert">
-                                <p><strong>Arguments Schema Format:</strong></p>
+                                <p>
+                                    <strong>Arguments Schema Format:</strong>
+                                </p>
                                 <p
-                >Define arguments as a JSON object where each key is the argument name and the value is its schema.</p>
+                                >Define arguments as a JSON object where each key is the argument name and the value is its schema.
+                                </p>
                                 <p>Each argument schema can include:</p>
                                 <ul>
                                     <li><strong
-                    >type</strong>: string, number, boolean, etc.</li>
+                                    >type</strong>: string, number, boolean, etc.
+                                    </li>
                                     <li><strong
-                    >description</strong>: Human-readable description</li>
+                                    >description</strong>: Human-readable description
+                                    </li>
                                     <li><strong
-                    >required</strong>: Whether the argument is required (boolean)</li>
+                                    >required</strong>: Whether the argument is required (boolean)
+                                    </li>
                                     <li><strong
-                    >default</strong>: Default value if not provided</li>
+                                    >default</strong>: Default value if not provided
+                                    </li>
                                     <li><strong
-                    >examples</strong>: Array of example values</li>
+                                    >examples</strong>: Array of example values
+                                    </li>
                                 </ul>
                                 <p>Referenced in templates using <strong
-                  >{{argument_name}}</strong> placeholders.</p>
+                                >{{argument_name}}
+                                </strong> placeholders.
+                                </p>
                             </div>
-                        </page>
-                        <page string="Testing" name="testing">
-                            <group>
-                                <field
-                  name="example_args"
-                  widget="json_editor"
-                />
-                            </group>
-                            <div class="alert alert-info" role="alert">
-                                <p
-                >Enter example arguments in JSON format to test this prompt.</p>
-                            </div>
-                            <button
-                name="action_test_prompt"
-                string="Test Prompt"
-                type="object"
-                class="oe_highlight"
-              />
                         </page>
                         <page string="Providers" name="providers">
                             <field
-                name="provider_ids"
-                widget="many2many_tags"
-              />
+                                    name="provider_ids"
+                                    widget="many2many_tags"
+                            />
                             <field
-                name="publisher_ids"
-                widget="many2many_tags"
-              />
+                                    name="publisher_ids"
+                                    widget="many2many_tags"
+                            />
                         </page>
                     </notebook>
                 </sheet>
                 <div class="oe_chatter">
-                    <field name="message_follower_ids" />
-                    <field name="activity_ids" />
-                    <field name="message_ids" />
+                    <field name="message_follower_ids"/>
+                    <field name="activity_ids"/>
+                    <field name="message_ids"/>
                 </div>
             </form>
         </field>
@@ -177,14 +235,14 @@
         <field name="model">llm.prompt</field>
         <field name="arch" type="xml">
             <tree>
-                <field name="name" />
-                <field name="category_id" />
-                <field name="tag_ids" widget="many2many_tags" />
-                <field name="template_count" />
-                <field name="argument_count" />
-                <field name="usage_count" />
-                <field name="last_used" />
-                <field name="active" invisible="1" />
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="format"/>
+                <field name="tag_ids" widget="many2many_tags"/>
+                <field name="argument_count"/>
+                <field name="usage_count"/>
+                <field name="last_used"/>
+                <field name="active" invisible="1"/>
             </tree>
         </field>
     </record>
@@ -195,32 +253,54 @@
         <field name="model">llm.prompt</field>
         <field name="arch" type="xml">
             <search string="Search Prompts">
-                <field name="name" />
-                <field name="description" />
-                <field name="category_id" />
-                <field name="tag_ids" />
+                <field name="name"/>
+                <field name="description"/>
+                <field name="category_id"/>
+                <field name="tag_ids"/>
                 <filter
-          string="Archived"
-          name="inactive"
-          domain="[('active', '=', False)]"
-        />
+                        string="Text Format"
+                        name="format_text"
+                        domain="[('format', '=', 'text')]"
+                />
+                <filter
+                        string="YAML Format"
+                        name="format_yaml"
+                        domain="[('format', '=', 'yaml')]"
+                />
+                <filter
+                        string="JSON Format"
+                        name="format_json"
+                        domain="[('format', '=', 'json')]"
+                />
+                <filter
+                        string="Archived"
+                        name="inactive"
+                        domain="[('active', '=', False)]"
+                />
                 <group expand="0" string="Group By">
                     <filter
-            string="Category"
-            name="group_by_category"
-            domain="[]"
-            context="{'group_by': 'category_id'}"
-          />
+                            string="Format"
+                            name="group_by_format"
+                            domain="[]"
+                            context="{'group_by': 'format'}"
+                    />
                     <filter
-            string="Last Used"
-            name="group_by_last_used"
-            domain="[]"
-            context="{'group_by': 'last_used'}"
-          />
+                            string="Category"
+                            name="group_by_category"
+                            domain="[]"
+                            context="{'group_by': 'category_id'}"
+                    />
+                    <filter
+                            string="Last Used"
+                            name="group_by_last_used"
+                            domain="[]"
+                            context="{'group_by': 'last_used'}"
+                    />
                 </group>
             </search>
         </field>
     </record>
+
     <!-- Prompts Menu -->
     <record id="llm_prompt_action" model="ir.actions.act_window">
         <field name="name">Prompts</field>
@@ -231,7 +311,7 @@
                 Create your first prompt template
             </p>
             <p>
-                Prompt templates help you create reusable messages for LLM interactions.
+                Prompt templates help you create reusable messages for LLM interactions with support for text, YAML, and JSON formats.
             </p>
         </field>
     </record>

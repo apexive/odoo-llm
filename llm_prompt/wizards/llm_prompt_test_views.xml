@@ -5,30 +5,199 @@
         <field name="name">llm.prompt.test.form</field>
         <field name="model">llm.prompt.test</field>
         <field name="arch" type="xml">
-            <form string="Prompt Test Result">
+            <form string="Prompt Evaluation">
+                <header>
+                    <button
+                            name="action_evaluate_prompt"
+                            string="Evaluate Prompt"
+                            type="object"
+                            class="oe_highlight"
+                    />
+                    <button
+                            name="action_reset_context"
+                            string="Reset Context"
+                            type="object"
+                            class="btn-secondary"
+                    />
+                </header>
                 <sheet>
+                    <div class="oe_title">
+                        <h1>
+                            <span>Test Prompt: </span>
+                            <field name="prompt_id" readonly="1" class="oe_inline"/>
+                        </h1>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div
+                            class="alert alert-danger"
+                            role="alert"
+                            attrs="{'invisible': [('has_error', '=', False)]}"
+                    >
+                        <strong>Evaluation Error:</strong>
+                        <field name="error_message" readonly="1" class="oe_inline"/>
+                    </div>
+
+                    <!-- Related Record Selection (compact) -->
                     <group>
-                        <field name="prompt_id" />
+                        <field name="related_record_ref"
+                               string="Test Record"
+                               placeholder="Choose any record..."
+                               options="{'no_create': True, 'no_open': True}"
+                               help="Select any record to test get_related_record() functions. Context will auto-populate and prompt will auto-evaluate."/>
+                        <div class="oe_button_box" name="related_record_buttons"
+                             attrs="{'invisible': [('related_record_ref', '=', False)]}">
+                            <button name="action_clear_related_record"
+                                    string="Clear Record"
+                                    type="object"
+                                    class="btn btn-sm btn-secondary"
+                                    icon="fa-times"/>
+                        </div>
                     </group>
+
                     <notebook>
-                        <page string="Generated Messages">
+                        <!-- Input Configuration Tab -->
+                        <page string="Input Configuration" name="input">
+                            <group>
+                                <group string="Test Context">
+                                    <field
+                                            name="test_context"
+                                            widget="ace"
+                                            options="{'mode': 'json'}"
+                                            placeholder='{\n  "argument1": "value1",\n  "argument2": "value2"\n}'
+                                    />
+                                </group>
+                            </group>
+
+                            <!-- Context Help -->
+                            <div class="alert alert-info" role="alert">
+                                <h5>Testing Instructions:</h5>
+                                <ul>
+                                    <li><strong>Test Context:</strong> Provide arguments in JSON format that match your prompt's schema</li>
+                                    <li><strong>Related Record:</strong> Select any record above - context will auto-populate and prompt will auto-evaluate</li>
+                                    <li><strong>Auto-population:</strong> Common fields are automatically added as "record_fieldname" when you select a record</li>
+                                    <li><strong>Related Record Access:</strong> Use {{ related_record.get_field('field_name') }} in templates for direct field access</li>
+                                    <li><strong>Manual Evaluation:</strong> Click "Evaluate Prompt" to re-run evaluation with modified context</li>
+                                </ul>
+                                <p><strong>Pro Tip:</strong> The context includes related_model_name, related_model_id, and related_res_id for debugging.</p>
+                            </div>
+                        </page>
+
+                        <!-- Rendered Template Tab -->
+                        <page string="Rendered Template" name="template">
                             <field
-                name="messages"
-                widget="ace"
-                options="{'mode': 'text'}"
-                readonly="1"
-              />
+                                    name="rendered_template"
+                                    widget="ace"
+                                    options="{'mode': 'text', 'showPrintMargin': false}"
+                                    readonly="1"
+                                    placeholder="Select a record or click 'Evaluate Prompt' to see the rendered template..."
+                            />
+                            <div class="alert alert-info mt-3" role="alert">
+                                <p><strong>Rendered Template:</strong> This shows your template after all {{argument}} placeholders have been replaced with actual values.</p>
+                            </div>
+                        </page>
+
+                        <!-- Messages Results Tab -->
+                        <page string="Generated Messages" name="messages">
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label for="result_format" class="form-label">Display Format:</label>
+                                    <field name="result_format" widget="radio" options="{'horizontal': true}"/>
+                                </div>
+                            </div>
+
+                            <!-- JSON Format -->
+                            <div attrs="{'invisible': [('result_format', '!=', 'json')]}">
+                                <field
+                                        name="messages_json"
+                                        widget="ace"
+                                        options="{'mode': 'json', 'showPrintMargin': false}"
+                                        readonly="1"
+                                        placeholder="Select a record or click 'Evaluate Prompt' to see the generated messages in JSON format..."
+                                />
+                            </div>
+
+                            <!-- YAML Format -->
+                            <div attrs="{'invisible': [('result_format', '!=', 'yaml')]}">
+                                <field
+                                        name="messages_yaml"
+                                        widget="ace"
+                                        options="{'mode': 'yaml', 'showPrintMargin': false}"
+                                        readonly="1"
+                                        placeholder="Select a record or click 'Evaluate Prompt' to see the generated messages in YAML format..."
+                                />
+                            </div>
+
+                            <!-- Text Format -->
+                            <div attrs="{'invisible': [('result_format', '!=', 'text')]}">
+                                <field
+                                        name="messages_text"
+                                        widget="text"
+                                        readonly="1"
+                                        placeholder="Select a record or click 'Evaluate Prompt' to see the generated messages in readable text format..."
+                                />
+                            </div>
+
+                            <div class="alert alert-info mt-3" role="alert">
+                                <p><strong>Generated Messages:</strong> These are the final messages that would be sent to the LLM, including system messages and all processed content.</p>
+                                <ul>
+                                    <li><strong>JSON:</strong> Raw message format as used by the LLM API</li>
+                                    <li><strong>YAML:</strong> Human-readable structured format</li>
+                                    <li><strong>Text:</strong> Plain text representation for easy reading</li>
+                                </ul>
+                            </div>
+                        </page>
+
+                        <!-- Debug Information Tab -->
+                        <page string="Debug Info" name="debug">
+                            <group>
+                                <group string="Prompt Information">
+                                    <field name="prompt_id" readonly="1"/>
+                                </group>
+                                <group string="Evaluation Status">
+                                    <field name="has_error" readonly="1"/>
+                                    <field name="error_message" readonly="1" attrs="{'invisible': [('has_error', '=', False)]}"/>
+                                </group>
+                            </group>
+
+                            <!-- Current Related Record Info -->
+                            <group string="Related Record Info" attrs="{'invisible': [('related_record_ref', '=', False)]}">
+                                <field name="related_record_ref" readonly="1" string="Selected Record"/>
+                            </group>
+
+                            <!-- Raw Template Display -->
+                            <group string="Original Template">
+                                <field name="original_template"
+                                       widget="ace"
+                                       options="{'mode': 'text', 'showPrintMargin': false}"
+                                       readonly="1"
+                                       nolabel="1"/>
+                            </group>
+
+                            <!-- Arguments Schema Display -->
+                            <group string="Arguments Schema">
+                                <field name="arguments_schema"
+                                       widget="ace"
+                                       options="{'mode': 'json', 'showPrintMargin': false}"
+                                       readonly="1"
+                                       nolabel="1"/>
+                            </group>
                         </page>
                     </notebook>
                 </sheet>
                 <footer>
-                    <button
-            string="Close"
-            class="btn-secondary"
-            special="cancel"
-          />
+                    <button string="Close" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
         </field>
+    </record>
+
+    <!-- Action for the enhanced test wizard -->
+    <record id="llm_prompt_test_action" model="ir.actions.act_window">
+        <field name="name">Test Prompt</field>
+        <field name="res_model">llm.prompt.test</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="llm_prompt_test_view_form"/>
     </record>
 </odoo>

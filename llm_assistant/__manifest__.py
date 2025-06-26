@@ -14,11 +14,12 @@ Key Features:
 - Automatically generate system prompts based on assistant configuration
 - Attach assistants to chat threads for consistent behavior
 - Full integration with the LLM chat system
+- Support for text, YAML, and JSON prompt templates
 
 Use cases include creating specialized assistants for customer support, data analysis, training assistance, and more.
     """,
     "category": "Productivity, Discuss",
-    "version": "16.0.1.0.1",
+    "version": "16.0.1.1.0",
     "depends": [
         "base",
         "mail",

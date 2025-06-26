@@ -15,6 +15,16 @@ patch(LLMChatComposer.prototype, "llm_generate.llm_chat_composer_patch", {
    * @returns {Boolean}
    */
   get isMediaGenerationModel() {
-    return this.thread?.llmModel?.isMediaGenerationModel === true;
+    if (!this.thread?.llmModel) {
+      return false;
+    }
+    return this.thread.llmModel.isMediaGenerationModel === true;
+  },
+
+  /**
+   * @returns {Boolean}
+   */
+  get isStreaming() {
+    return this.thread?.composer?.isStreaming || false;
   },
 });

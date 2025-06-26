@@ -24,23 +24,24 @@
                             <field name="provider_id" />
                             <field name="model_id" />
                             <field
-                name="tool_ids"
-                widget="many2many_tags"
-                options="{'no_create': True}"
-              />
+                                    name="tool_ids"
+                                    widget="many2many_tags"
+                                    options="{'no_create': True}"
+                            />
                         </group>
                         <group>
                             <field name="model" readonly="1" />
                             <field name="res_id" readonly="1" />
+                            <field name="related_record" readonly="1" />
                         </group>
                     </group>
                 </sheet>
                 <div class="oe_chatter">
                     <field name="message_follower_ids" />
                     <field
-            name="message_ids"
-            options="{'post_refresh': 'recipients'}"
-          />
+                            name="message_ids"
+                            options="{'post_refresh': 'recipients'}"
+                    />
                 </div>
             </form>
         </field>
@@ -56,6 +57,7 @@
                 <field name="user_id" />
                 <field name="provider_id" />
                 <field name="model_id" />
+                <field name="related_record" />
                 <field name="write_date" />
             </tree>
         </field>
@@ -71,6 +73,8 @@
                 <field name="user_id" />
                 <field name="provider_id" />
                 <field name="model_id" />
+                <field name="model" />
+                <field name="related_record" />
             </search>
         </field>
     </record>

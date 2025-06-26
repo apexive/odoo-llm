@@ -6,27 +6,27 @@
                 <div class="btn-group" role="group">
                     <!-- Open Record Button -->
                     <button
-                            class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2 py-1"
-                            t-on-click="onClickRelatedRecord"
-                            t-att-title="'Open ' + thread.relatedThreadModel + ' #' + thread.relatedThreadId"
-                            style="height: 32px;"
-                            t-att-disabled="state.isLoading"
-                    >
+            class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2 py-1"
+            t-on-click="onClickRelatedRecord"
+            t-att-title="'Open ' + thread.relatedThreadModel + ' #' + thread.relatedThreadId"
+            style="height: 32px;"
+            t-att-disabled="state.isLoading"
+          >
                         <i
-                                t-if="!state.isLoading"
-                                t-attf-class="fa {{ getRelatedRecordIcon() }} text-primary"
-                                aria-hidden="true"
-                        />
+              t-if="!state.isLoading"
+              t-attf-class="fa {{ getRelatedRecordIcon() }} text-primary"
+              aria-hidden="true"
+            />
                         <i
-                                t-if="state.isLoading"
-                                class="fa fa-spinner fa-spin text-muted"
-                                aria-hidden="true"
-                        />
+              t-if="state.isLoading"
+              class="fa fa-spinner fa-spin text-muted"
+              aria-hidden="true"
+            />
                         <span
-                                t-if="!isSmall"
-                                class="text-truncate small"
-                                style="max-width: 100px;"
-                        >
+              t-if="!isSmall"
+              class="text-truncate small"
+              style="max-width: 100px;"
+            >
                             <t t-if="relatedRecordDisplayName">
                                 <t t-esc="relatedRecordDisplayName" />
                             </t>
@@ -34,38 +34,44 @@
                                 Loading...
                             </t>
                             <t t-else="">
-                                <t t-esc="thread.relatedThreadModel" /> #<t t-esc="thread.relatedThreadId" />
+                                <t t-esc="thread.relatedThreadModel" /> #<t
+                  t-esc="thread.relatedThreadId"
+                />
                             </t>
                         </span>
                     </button>
 
                     <!-- Unlink Button (Desktop only) -->
                     <button
-                            t-if="!isSmall"
-                            class="btn btn-sm btn-outline-danger px-2 py-1"
-                            t-on-click="onClickUnlinkRecord"
-                            title="Unlink this record from the chat"
-                            style="height: 32px;"
-                    >
+            t-if="!isSmall"
+            class="btn btn-sm btn-outline-danger px-2 py-1"
+            t-on-click="onClickUnlinkRecord"
+            title="Unlink this record from the chat"
+            style="height: 32px;"
+          >
                         <i class="fa fa-unlink" aria-hidden="true" />
                     </button>
 
                     <!-- Mobile: Show unlink option in dropdown -->
                     <div t-if="isSmall" class="dropdown">
                         <button
-                                class="btn btn-sm btn-outline-secondary dropdown-toggle-split px-2 py-1"
-                                type="button"
-                                data-bs-toggle="dropdown"
-                                aria-expanded="false"
-                                style="height: 32px;"
-                                title="Record options"
-                        >
+              class="btn btn-sm btn-outline-secondary dropdown-toggle-split px-2 py-1"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              style="height: 32px;"
+              title="Record options"
+            >
                             <i class="fa fa-caret-down" aria-hidden="true" />
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
-                                <a class="dropdown-item" href="#" t-on-click.prevent="onClickUnlinkRecord">
-                                    <i class="fa fa-unlink me-2 text-warning"></i>
+                                <a
+                  class="dropdown-item"
+                  href="#"
+                  t-on-click.prevent="onClickUnlinkRecord"
+                >
+                                    <i class="fa fa-unlink me-2 text-warning" />
                                     Unlink Record
                                 </a>
                             </li>
@@ -75,11 +81,11 @@
             </t>
             <t t-else="">
                 <button
-                        class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2 py-1"
-                        t-on-click="onClickChooseRecord"
-                        title="Link to a record"
-                        style="height: 32px;"
-                >
+          class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2 py-1"
+          t-on-click="onClickChooseRecord"
+          title="Link to a record"
+          style="height: 32px;"
+        >
                     <i class="fa fa-plus text-muted" aria-hidden="true" />
                     <span t-if="!isSmall" class="text-muted small">Link</span>
                 </button>

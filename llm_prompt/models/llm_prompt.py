@@ -1,11 +1,14 @@
 import json
 import logging
 import re
+from collections.abc import Iterable
 
+import yaml
 from odoo import _, api, fields, models
 from odoo.exceptions import ValidationError
 
 from .arguments_schema import validate_arguments_schema
+from ..utils import render_template
 
 _logger = logging.getLogger(__name__)
 
@@ -67,16 +70,26 @@ class LLMPrompt(models.Model):
         help="LLM publishers whose models work well with this prompt",
     )
 
-    # Templates
-    template_ids = fields.One2many(
-        "llm.prompt.template",
-        "prompt_id",
-        string="Templates",
-        help="Sequence of templates in a multi-step prompt",
+    # Template field
+    template = fields.Text(
+        string="Template",
+        required=True,
+        help="Prompt template content in the selected format",
+        tracking=True,
     )
-    template_count = fields.Integer(
-        compute="_compute_template_count",
-        string="Template Count",
+
+    # Format selection
+    format = fields.Selection(
+        [
+            ("text", "Text"),
+            ("yaml", "YAML"),
+            ("json", "JSON"),
+        ],
+        string="Format",
+        default="text",
+        required=True,
+        tracking=True,
+        help="Format of the template content after rendering",
     )
 
     # Arguments JSON field
@@ -97,13 +110,6 @@ class LLMPrompt(models.Model):
         compute="_compute_argument_validation",
         string="Undefined Arguments",
         help="Arguments used in templates but not defined in schema",
-    )
-
-    # Example invocation
-    example_args = fields.Text(
-        string="Example Arguments",
-        help="Example arguments in JSON format to test this prompt",
-        default="""{}""",
     )
 
     # Usage tracking
@@ -130,11 +136,6 @@ class LLMPrompt(models.Model):
         ("name_unique", "UNIQUE(name)", "The prompt name must be unique."),
     ]
 
-    @api.depends("template_ids")
-    def _compute_template_count(self):
-        for prompt in self:
-            prompt.template_count = len(prompt.template_ids)
-
     @api.depends("arguments_json")
     def _compute_argument_count(self):
         for prompt in self:
@@ -144,7 +145,7 @@ class LLMPrompt(models.Model):
             except json.JSONDecodeError:
                 prompt.argument_count = 0
 
-    @api.depends("arguments_json", "template_ids.content")
+    @api.depends("arguments_json", "template")
     def _compute_argument_validation(self):
         for prompt in self:
             # Get defined arguments
@@ -154,16 +155,8 @@ class LLMPrompt(models.Model):
             except json.JSONDecodeError:
                 defined_args = set()
 
-            # Extract used arguments from templates
-            used_args = set()
-
-            # Check templates
-            for template in prompt.template_ids:
-                if template.content:
-                    template_args = self._extract_arguments_from_template(
-                        template.content
-                    )
-                    used_args.update(template_args)
+            # Extract used arguments from template
+            used_args = self._extract_arguments_from_template(prompt.template or "")
 
             # Find undefined arguments
             undefined_args = [name for name in used_args if name not in defined_args]
@@ -184,19 +177,31 @@ class LLMPrompt(models.Model):
             if not is_valid:
                 raise ValidationError(error)
 
-    @api.constrains("example_args")
-    def _validate_example_args_syntax(self):
-        """Validate that the example args JSON is syntactically valid"""
-        for prompt in self:
-            if not prompt.example_args:
-                continue
+    def _validate_rendered_format(self, rendered_content):
+        """
+        Validate rendered content matches the selected format
 
-            try:
-                json.loads(prompt.example_args)
-            except json.JSONDecodeError as e:
-                raise ValidationError(
-                    _("Invalid JSON in example arguments: %s") % str(e)
-                ) from e
+        Args:
+            rendered_content (str): The rendered template content
+
+        Raises:
+            ValidationError: If rendered content doesn't match format
+        """
+        if not rendered_content:
+            return
+
+        try:
+            if self.format == "json":
+                json.loads(rendered_content)
+            elif self.format == "yaml":
+                # For YAML, we need to handle multiple documents
+                list(yaml.safe_load_all(rendered_content))
+            # Text format doesn't need validation
+        except (json.JSONDecodeError, yaml.YAMLError) as e:
+            raise ValidationError(
+                _("Rendered template doesn't match %s format: %s")
+                % (self.format.upper(), str(e))
+            ) from e
 
     def get_prompt_data(self):
         """Returns the prompt data in the MCP format"""
@@ -225,6 +230,34 @@ class LLMPrompt(models.Model):
             "arguments": formatted_args,
         }
 
+    def get_default_test_context(self):
+        """
+        Get default test context based on prompt's arguments schema.
+
+        Returns:
+            dict: Default context for testing
+        """
+        try:
+            schema = json.loads(self.arguments_json or "{}")
+            defaults = {}
+            for arg_name, arg_schema in schema.items():
+                if 'default' in arg_schema:
+                    defaults[arg_name] = arg_schema['default']
+                elif arg_schema.get('type') == 'string':
+                    defaults[arg_name] = f"sample_{arg_name}"
+                elif arg_schema.get('type') == 'number':
+                    defaults[arg_name] = 42
+                elif arg_schema.get('type') == 'boolean':
+                    defaults[arg_name] = True
+                elif arg_schema.get('type') == 'array':
+                    defaults[arg_name] = ["item1", "item2"]
+                else:
+                    defaults[arg_name] = f"sample_{arg_name}"
+
+            return defaults
+        except (json.JSONDecodeError, Exception):
+            return {}
+
     def get_messages(self, arguments=None):
         """
         Generate messages for this prompt with the given arguments
@@ -239,24 +272,91 @@ class LLMPrompt(models.Model):
         arguments = arguments or {}
 
         # Fill default values for missing arguments
-        arguments = self._fill_default_values(arguments)
+        arguments = self.sudo()._fill_default_values(arguments)
 
         # Validate arguments against schema
         self._validate_arguments(arguments)
 
-        messages = []
+        # Render the template with arguments
+        rendered_content = render_template(template=self.template, context=arguments)
 
-        # Add template messages
-        for template in self.template_ids.sorted(key=lambda t: t.sequence):
-            template_message = template.get_template_message(arguments)
-            if template_message:
-                messages.append(template_message)
+        # Validate the rendered content matches the expected format
+        self._validate_rendered_format(rendered_content)
 
-        # Update usage statistics
-        self.usage_count += 1
-        self.last_used = fields.Datetime.now()
+        # Parse template based on format
+        try:
+            if self.format == "text":
+                messages = self._parse_text_messages(rendered_content)
+            elif self.format == "yaml":
+                messages = list(self._parse_dict_messages(yaml.safe_load_all(rendered_content)))
+            elif self.format == "json":
+                messages = list(self._parse_dict_messages(json.loads(rendered_content)))
+            else:
+                raise ValidationError(
+                    _("Unsupported template format: %s") % self.format
+                )
+        except Exception as e:
+            _logger.error("Error parsing %s rendered content for prompt %s: %s", self.format, self.name, str(e))
+            raise ValidationError(_("Error parsing %s rendered content: %s") % (self.format, str(e)))
+
+        # Update usage statistics (only for non-test contexts)
+        if not arguments.get('is_test', False):
+            self.sudo().write({
+                'usage_count': self.usage_count + 1,
+                'last_used': fields.Datetime.now()
+            })
 
         return messages
+
+    def _parse_text_messages(self, content):
+        """Parse a simple text template"""
+        return [
+            {
+                "role": "system",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": content,
+                    }
+                ],
+            }
+        ]
+
+    def _parse_dict_messages(self, data):
+        """Parse messages from dict, list, or iterator of dicts recursively"""
+
+        # Handle single dict or iterable of items
+        items = data if isinstance(data, Iterable) and not isinstance(data, (str, dict)) else [data]
+
+        for item in items:
+            if isinstance(item, dict):
+                # Check if this dict has a 'content' key - if so, it's a message
+                if "content" in item:
+                    msg_type = item.get("type", "user")
+                    content = item["content"]
+
+                    # Handle multi-line content
+                    if isinstance(content, list):
+                        content = "\n".join(str(line) for line in content)
+
+                    yield {
+                        "role": msg_type,
+                        "content": [
+                            {
+                                "type": "text",
+                                "text": str(content),
+                            }
+                        ],
+                    }
+                else:
+                    # If no 'content' key, recursively check all values in the dict
+                    for value in item.values():
+                        if isinstance(value, (dict, list)) or (isinstance(value, Iterable) and not isinstance(value, str)):
+                            yield from self._parse_dict_messages(value)
+
+            elif isinstance(item, (list, tuple)) or (isinstance(item, Iterable) and not isinstance(item, str)):
+                # If item is iterable (but not string), recurse into it
+                yield from self._parse_dict_messages(item)
 
     def _fill_default_values(self, arguments):
         """
@@ -300,23 +400,12 @@ class LLMPrompt(models.Model):
             _logger.warning(
                 "Skipping: Invalid JSON in arguments schema: %s", self.arguments_json
             )
-            # If schema is invalid, skip validation
             return
 
         # Check for required arguments
         for arg_name, arg_schema in schema.items():
             if arg_schema.get("required", False) and arg_name not in arguments:
                 raise ValidationError(_("Missing required argument: %s") % arg_name)
-
-        # Handle special types like context and resource
-        for arg_name, value in arguments.items():
-            if arg_name in schema:
-                arg_type = schema[arg_name].get("type")
-
-                # Handle context type (automatically filled from Odoo context)
-                if arg_type == "context" and not value:
-                    # This would be filled in runtime
-                    pass
 
     @api.model
     def _extract_arguments_from_template(self, template_content):
@@ -333,14 +422,15 @@ class LLMPrompt(models.Model):
             return set()
 
         # Find all {{argument}} placeholders
-        pattern = r"\{\{\s*([a-zA-Z0-9_]+)\s*\}\}"
-        matches = re.findall(pattern, template_content)
+        # Match simple variables: {{variable_name}}
+        simple_pattern = r"\{\{\s*([a-zA-Z0-9_]+)\s*\}\}"
+        simple_matches = re.findall(simple_pattern, template_content)
 
-        return set(matches)
+        return set(simple_matches)
 
     def auto_detect_arguments(self):
         """
-        Auto-detect arguments from templates and add them to schema
+        Auto-detect arguments from template and add them to schema
 
         Returns:
             bool: True if successful
@@ -353,14 +443,8 @@ class LLMPrompt(models.Model):
         except json.JSONDecodeError:
             arguments = {}
 
-        # Extract used arguments from templates
-        used_args = set()
-
-        # Check templates
-        for template in self.template_ids:
-            if template.content:
-                template_args = self._extract_arguments_from_template(template.content)
-                used_args.update(template_args)
+        # Extract used arguments from template
+        used_args = self._extract_arguments_from_template(self.template or "")
 
         # Add any missing arguments to schema
         updated = False
@@ -380,79 +464,35 @@ class LLMPrompt(models.Model):
 
     def action_test_prompt(self):
         """
-        Test the prompt with example arguments
+        Test the prompt with the enhanced evaluation wizard
 
         Returns:
-            dict: Action to show test result
+            dict: Action to show enhanced test wizard
         """
         self.ensure_one()
 
-        try:
-            example_args = json.loads(self.example_args or "{}")
-        except json.JSONDecodeError as e:
-            raise ValidationError(_("Invalid example arguments JSON")) from e
-
-        messages = self.get_messages(example_args)
-
-        # Create a wizard to show the result
-        wizard = self.env["llm.prompt.test"].create(
-            {
-                "prompt_id": self.id,
-                "messages": json.dumps(messages, indent=2),
-            }
-        )
+        # Create a wizard record with the prompt pre-filled
+        wizard = self.env["llm.prompt.test"].create({
+            "prompt_id": self.id,
+        })
 
         return {
-            "name": _("Prompt Test Result"),
+            "name": _("Test Prompt: %s") % self.name,
             "type": "ir.actions.act_window",
             "res_model": "llm.prompt.test",
             "view_mode": "form",
             "res_id": wizard.id,
             "target": "new",
+            "view_id": self.env.ref("llm_prompt.llm_prompt_test_view_form").id,
+            "context": {
+                "default_prompt_id": self.id,
+            },
         }
 
-    def get_formatted_system_prompt(self, default_values=None):
-        """Generate a formatted system prompt based on the prompt template"""
-        self.ensure_one()
-
-        try:
-            # Get the argument values from default_values
-            arg_values = json.loads(default_values or "{}")
-
-            # Get messages from the prompt template
-            messages = self.get_messages(arg_values)
-
-            # Find the system message
-            system_message = next(
-                (msg for msg in messages if msg.get("role") == "system"), None
-            )
-            if system_message and "content" in system_message:
-                if (
-                    isinstance(system_message["content"], dict)
-                    and "text" in system_message["content"]
-                ):
-                    return system_message["content"]["text"]
-                elif isinstance(system_message["content"], str):
-                    return system_message["content"]
-
-            # If no system message found, return the first message content
-            if messages and "content" in messages[0]:
-                if (
-                    isinstance(messages[0]["content"], dict)
-                    and "text" in messages[0]["content"]
-                ):
-                    return messages[0]["content"]["text"]
-                elif isinstance(messages[0]["content"], str):
-                    return messages[0]["content"]
-
-        except Exception as e:
-            _logger.error("Error generating system prompt from template: %s", str(e))
-            return _("Error generating system prompt preview: %s") % str(e)
-
-    @api.depends("template_ids", "arguments_json")
+    @api.depends("template", "arguments_json")
     def _compute_input_schema_json(self):
         """
-        Compute a proper JSON schema for input fields based on the first template and arguments_json.
+        Compute a proper JSON schema for input fields based on the template and arguments_json.
         This is used for media generation models to provide a customized input form.
         """
         for prompt in self:

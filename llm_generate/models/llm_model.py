@@ -7,13 +7,11 @@ class LLMModel(models.Model):
     input_schema = fields.Json(
         string="Input Schema",
         help="JSON Schema defining the input parameters for this generation task",
-        compute="_compute_io_schema",
         store=True,
     )
     output_schema = fields.Json(
         string="Output Schema",
         help="JSON Schema defining the output parameters for this generation task",
-        compute="_compute_io_schema",
         store=True,
     )
 

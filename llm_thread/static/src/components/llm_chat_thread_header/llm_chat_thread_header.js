@@ -3,7 +3,7 @@ import { registerMessagingComponent } from "@mail/utils/messaging_component";
 import { useRefToModel } from "@mail/component_hooks/use_ref_to_model";
 
 const { Component, useState, useRef, onMounted, onWillUnmount, onPatched } =
-    owl;
+  owl;
 
 export class LLMChatThreadHeader extends Component {
   /**
@@ -40,12 +40,12 @@ export class LLMChatThreadHeader extends Component {
     onMounted(() => {
       if (this.modelDropdownRef.el) {
         this.modelDropdownRef.el.addEventListener(
-            "shown.bs.dropdown",
-            this._onModelDropdownShown
+          "shown.bs.dropdown",
+          this._onModelDropdownShown
         );
         this.modelDropdownRef.el.addEventListener(
-            "hidden.bs.dropdown",
-            this._onModelDropdownHidden
+          "hidden.bs.dropdown",
+          this._onModelDropdownHidden
         );
       }
     });
@@ -53,12 +53,12 @@ export class LLMChatThreadHeader extends Component {
     onWillUnmount(() => {
       if (this.modelDropdownRef.el) {
         this.modelDropdownRef.el.removeEventListener(
-            "shown.bs.dropdown",
-            this._onModelDropdownShown
+          "shown.bs.dropdown",
+          this._onModelDropdownShown
         );
         this.modelDropdownRef.el.removeEventListener(
-            "hidden.bs.dropdown",
-            this._onModelDropdownHidden
+          "hidden.bs.dropdown",
+          this._onModelDropdownHidden
         );
       }
     });
@@ -68,7 +68,7 @@ export class LLMChatThreadHeader extends Component {
         const dropdownContainer = this.modelDropdownRef.el;
         if (dropdownContainer) {
           const dropdownTrigger = $(dropdownContainer).find(
-              '[data-bs-toggle="dropdown"]'
+            '[data-bs-toggle="dropdown"]'
           );
           if (dropdownTrigger.length) {
             dropdownTrigger.dropdown("show");
@@ -130,7 +130,7 @@ export class LLMChatThreadHeader extends Component {
       return this.llmModels;
     }
     return this.llmModels.filter((model) =>
-        model.name.toLowerCase().includes(query)
+      model.name.toLowerCase().includes(query)
     );
   }
 
@@ -161,9 +161,9 @@ export class LLMChatThreadHeader extends Component {
   getDefaultModelForProvider(providerId) {
     // Note: Use llmChat.llmModels here to check *all* models, not just those already filtered
     const availableModels =
-        this.llmChat.llmModels?.filter(
-            (model) => model.llmProvider?.id === providerId
-        ) || [];
+      this.llmChat.llmModels?.filter(
+        (model) => model.llmProvider?.id === providerId
+      ) || [];
     const defaultModel = availableModels.find((model) => model.default);
 
     if (defaultModel) {
@@ -263,8 +263,8 @@ export class LLMChatThreadHeader extends Component {
 
     const currentSelectedIds = this.thread.selectedToolIds || [];
     const newSelectedToolIds = checked
-        ? [...currentSelectedIds, tool.id]
-        : currentSelectedIds.filter((id) => id !== tool.id);
+      ? [...currentSelectedIds, tool.id]
+      : currentSelectedIds.filter((id) => id !== tool.id);
 
     // Update the thread settings with the new tool IDs
     await this.thread.updateLLMChatThreadSettings({

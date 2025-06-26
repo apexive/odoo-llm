@@ -4,6 +4,7 @@ import re
 
 from odoo import api, fields, models
 from odoo.tools.safe_eval import safe_eval
+from odoo.addons.llm_prompt.utils import render_template
 
 _logger = logging.getLogger(__name__)
 
@@ -82,7 +83,7 @@ class LLMAssistant(models.Model):
     # Default values for prompt variables as JSON
     default_values = fields.Text(
         string="Default Values",
-        help="JSON object with default values for prompt variables. Can include Python expressions that will be evaluated using safe_eval.",
+        help="JSON object with default values for prompt variables. Can include template expressions that will be evaluated.",
         default="{}",
         tracking=True,
     )
@@ -91,15 +92,8 @@ class LLMAssistant(models.Model):
     has_dynamic_defaults = fields.Boolean(
         string="Has Dynamic Defaults",
         default=False,
-        help="Enable if your default values contain Python expressions that should be evaluated",
+        help="Enable if your default values contain template expressions that should be evaluated",
         tracking=True,
-    )
-
-    # Evaluated default values (for API)
-    evaluated_default_values = fields.Text(
-        string="Evaluated Default Values",
-        compute="_compute_evaluated_default_values",
-        help="Default values with any expressions evaluated",
     )
 
     # Tools configuration
@@ -127,42 +121,69 @@ class LLMAssistant(models.Model):
         string="System Prompt Preview",
         compute="_compute_system_prompt_preview",
         help="Preview of the formatted system prompt based on the prompt template",
-        tracking=True,
     )
 
-    # Template management fields
-    template_ids = fields.One2many(
-        "llm.prompt.template",
-        string="Templates",
-        related="prompt_id.template_ids",
-        help="Templates from the associated prompt",
+    # Template fields - computed from prompt
+    template = fields.Text(
+        string="Template",
+        related="prompt_id.template",
+        readonly=True,
+        help="Template content from the associated prompt",
     )
 
-    template_count = fields.Integer(
-        string="Template Count",
-        related="prompt_id.template_count",
-        help="Number of templates in the prompt",
+    template_format = fields.Selection(
+        string="Template Format",
+        related="prompt_id.format",
+        readonly=True,
+        help="Format of the template (text, yaml, json)",
     )
 
     @api.depends("prompt_id", "default_values")
     def _compute_system_prompt_preview(self):
         """Compute preview of the formatted system prompt"""
         for assistant in self:
-            assistant.system_prompt_preview = assistant.get_messages()
+            try:
+                if assistant.prompt_id:
+                    # Get evaluated default values for preview
+                    default_values = assistant.get_evaluated_default_values({})
+                    messages = assistant.prompt_id.get_messages(default_values)
+                    if messages:
+                        # Find system message or use first message
+                        system_msg = next(
+                            (msg for msg in messages if msg.get("role") == "system"),
+                            messages[0] if messages else None,
+                        )
+                        if system_msg and system_msg.get("content"):
+                            content = system_msg["content"]
+                            if isinstance(content, list) and content:
+                                assistant.system_prompt_preview = content[0].get(
+                                    "text", ""
+                                )
+                            elif isinstance(content, str):
+                                assistant.system_prompt_preview = content
+                            else:
+                                assistant.system_prompt_preview = str(content)
+                        else:
+                            assistant.system_prompt_preview = (
+                                "No system prompt generated"
+                            )
+                    else:
+                        assistant.system_prompt_preview = "No messages generated"
+                else:
+                    assistant.system_prompt_preview = "No prompt template selected"
+            except Exception as e:
+                _logger.error(
+                    "Error computing system prompt preview for assistant %s: %s",
+                    assistant.name,
+                    str(e),
+                )
+                assistant.system_prompt_preview = f"Error: {str(e)}"
 
     @api.depends("thread_ids")
     def _compute_thread_count(self):
         """Compute the number of threads using this assistant"""
         for assistant in self:
             assistant.thread_count = len(assistant.thread_ids)
-
-    @api.depends("default_values", "has_dynamic_defaults")
-    def _compute_evaluated_default_values(self):
-        """Compute the evaluated default values for API use"""
-        for assistant in self:
-            assistant.evaluated_default_values = (
-                assistant.get_evaluated_default_values()
-            )
 
     def action_view_prompt(self):
         """Open the associated prompt for advanced template management"""
@@ -171,12 +192,12 @@ class LLMAssistant(models.Model):
             return False
 
         return {
-            'name': 'Prompt Template',
-            'type': 'ir.actions.act_window',
-            'res_model': 'llm.prompt',
-            'view_mode': 'form',
-            'res_id': self.prompt_id.id,
-            'target': 'current',
+            "name": "Prompt Template",
+            "type": "ir.actions.act_window",
+            "res_model": "llm.prompt",
+            "view_mode": "form",
+            "res_id": self.prompt_id.id,
+            "target": "current",
         }
 
     def action_view_threads(self):
@@ -188,6 +209,170 @@ class LLMAssistant(models.Model):
         action["domain"] = [("assistant_id", "=", self.id)]
         action["context"] = {"default_assistant_id": self.id}
         return action
+
+    def _generate_template_json_from_schema(self, args_schema):
+        """
+        Generate a template JSON structure from the prompt's argument schema.
+        Creates placeholders for all arguments, using defaults when available.
+
+        Args:
+            args_schema (dict): The arguments schema from the prompt
+
+        Returns:
+            dict: Template values with placeholders or defaults
+        """
+        template_values = {}
+
+        for arg_name, arg_schema in args_schema.items():
+            # If there's a default value, use it
+            if "default" in arg_schema:
+                template_values[arg_name] = arg_schema["default"]
+            else:
+                # Generate appropriate placeholder based on type
+                arg_type = arg_schema.get("type", "string")
+                description = arg_schema.get("description", f"Value for {arg_name}")
+
+                if arg_type == "string":
+                    # Create a descriptive placeholder
+                    template_values[arg_name] = f"<Enter {description.lower()}>"
+                elif arg_type == "boolean":
+                    template_values[arg_name] = False
+                elif arg_type in ["integer", "number"]:
+                    template_values[arg_name] = 0
+                elif arg_type == "array":
+                    template_values[arg_name] = []
+                elif arg_type == "object":
+                    template_values[arg_name] = {}
+                else:
+                    # Default to descriptive string placeholder
+                    template_values[arg_name] = f"<Enter {description.lower()}>"
+
+        return template_values
+
+    def action_reset_defaults(self):
+        """Reset default values to create template JSON from prompt's arguments schema"""
+        self.ensure_one()
+
+        if not self.prompt_id:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'No Prompt Template',
+                    'message': 'Please select a prompt template first.',
+                    'type': 'warning',
+                }
+            }
+
+        try:
+            # Get the prompt arguments schema
+            args_schema = json.loads(self.prompt_id.arguments_json or "{}")
+
+            if not args_schema:
+                return {
+                    'type': 'ir.actions.client',
+                    'tag': 'display_notification',
+                    'params': {
+                        'title': 'No Arguments Schema',
+                        'message': 'The selected prompt template has no arguments schema defined.',
+                        'type': 'info',
+                    }
+                }
+
+            # Generate template JSON from schema
+            template_values = self._generate_template_json_from_schema(args_schema)
+
+            # Update default_values field with pretty-formatted JSON
+            self.default_values = json.dumps(template_values, indent=2)
+
+            # Count how many were defaults vs placeholders
+            defaults_count = sum(1 for arg_schema in args_schema.values() if "default" in arg_schema)
+            placeholders_count = len(template_values) - defaults_count
+
+            message_parts = []
+            if defaults_count > 0:
+                message_parts.append(f"{defaults_count} default values")
+            if placeholders_count > 0:
+                message_parts.append(f"{placeholders_count} placeholder values")
+
+            message = f"Template JSON created with {' and '.join(message_parts)}."
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Template JSON Generated',
+                    'message': message,
+                    'type': 'success',
+                    'next': {
+                        'type': 'ir.actions.client',
+                        'tag': 'reload',
+                    }
+                }
+            }
+
+        except json.JSONDecodeError:
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Error',
+                    'message': 'Invalid JSON in prompt arguments schema.',
+                    'type': 'danger',
+                }
+            }
+        except Exception as e:
+            _logger.error("Error resetting defaults for assistant %s: %s", self.name, str(e))
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'display_notification',
+                'params': {
+                    'title': 'Error',
+                    'message': f'Error generating template JSON: {str(e)}',
+                    'type': 'danger',
+                }
+            }
+
+    def get_evaluated_default_values(self, context):
+        """
+        Evaluate default values using the provided context.
+        This is used by llm.thread to get assistant's default values with thread context.
+
+        Args:
+            context (dict): Context for template rendering
+
+        Returns:
+            dict: Evaluated default values
+        """
+        self.ensure_one()
+
+        # Parse the default values JSON
+        try:
+            default_values = json.loads(self.default_values or "{}")
+        except json.JSONDecodeError:
+            _logger.warning("Invalid JSON in default_values for assistant %s", self.name)
+            return {}
+
+        if not default_values:
+            return {}
+
+        # If we don't have dynamic defaults, return as-is
+        if not self.has_dynamic_defaults:
+            return default_values
+
+        # Render each default value as a template
+        evaluated_values = {}
+        for key, value in default_values.items():
+            if isinstance(value, str) and "{{" in value and "}}" in value:
+                try:
+                    evaluated_values[key] = render_template(template=value, context=context)
+                except Exception as e:
+                    _logger.warning("Error evaluating default value '%s' for assistant %s: %s", key, self.name, str(e))
+                    evaluated_values[key] = value  # Keep original on error
+            else:
+                evaluated_values[key] = value
+
+        return evaluated_values
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -202,163 +387,38 @@ class LLMAssistant(models.Model):
 
     @api.onchange("prompt_id")
     def _onchange_prompt_id(self):
-        """Update default_values when prompt_id changes"""
-        if self.prompt_id:
-            # Get the prompt arguments schema
-            try:
-                args_schema = json.loads(self.prompt_id.arguments_json or "{}")
-                default_values = {}
+        """Update default_values when prompt_id changes to create template JSON
 
-                # Extract default values from schema
-                for arg_name, arg_schema in args_schema.items():
-                    if "default" in arg_schema:
-                        default_values[arg_name] = arg_schema["default"]
-
-                # If we have any defaults, update default_values
-                if default_values:
-                    self.default_values = json.dumps(default_values, indent=2)
-            except json.JSONDecodeError:
-                pass
-
-    def get_formatted_system_prompt(self, thread=None):
-        """Generate a formatted system prompt based on the prompt template
-
-        Args:
-            thread (llm.thread): Optional thread that is requesting the prompt
-                                If provided, it will be added to the context
-
-        Returns:
-            str: Formatted system prompt
+        ONLY triggers when prompt_id actually changes, not on every field change.
         """
-        self.ensure_one()
-
+        # Only proceed if we have a prompt_id and this is actually a change in prompt_id
         if not self.prompt_id:
-            return ""
+            return
 
-        # If we have a thread, add it to the context so our enhanced
-        # _substitute_placeholders method can access it
-        if thread:
-            # Create a context with the thread_id
-            context = dict(self.env.context, thread_id=thread.id)
-            # Use the prompt with the new context
-            return self.with_context(context).prompt_id.get_formatted_system_prompt(
-                self.get_evaluated_default_values(thread) or "{}"
-            )
+        # Check if this is a new record or if prompt_id actually changed
+        if self._origin.prompt_id == self.prompt_id:
+            # No change in prompt_id, don't regenerate defaults
+            return
 
-        return self.prompt_id.get_formatted_system_prompt(
-            self.get_evaluated_default_values() or "{}"
-        )
-
-    def get_messages(self, thread=None):
-        """Get a list of messages from the prompt template
-
-        This method is the message-based equivalent of get_formatted_system_prompt.
-        It uses the prompt's get_messages method to get a list of messages instead
-        of a single system prompt string.
-
-        Args:
-            thread (llm.thread): Optional thread that is requesting the messages
-                               If provided, it will be added to the context
-
-        Returns:
-            list: List of message dictionaries in the format:
-                [{"role": "system", "content": "..."},
-                 {"role": "user", "content": "..."},
-                 ...]
-        """
-        self.ensure_one()
-
-        if not self.prompt_id:
-            return []
-
-        # Get the evaluated default values
-        default_values = self.get_evaluated_default_values(thread) or "{}"
-
-        # If we have a thread, add it to the context
-        if thread:
-            # Create a context with the thread_id
-            context = dict(self.env.context, thread_id=thread.id)
-            # Use the prompt with the new context to get messages
-            return self.with_context(context).prompt_id.get_messages(
-                json.loads(default_values)
-            )
-
-        # No thread, just get messages with default values
-        return self.prompt_id.get_messages(json.loads(default_values))
-
-    def get_evaluated_default_values(self, thread=None):
-        """Evaluate default values, processing any Python expressions if has_dynamic_defaults is enabled
-
-        Args:
-            thread (llm.thread): Optional thread to provide context for evaluation
-
-        Returns:
-            str: JSON string with evaluated default values
-        """
-        self.ensure_one()
-
-        if not self.default_values:
-            return "{}"
-
+        # Get the prompt arguments schema
         try:
-            # Parse the default values JSON
-            default_values_dict = json.loads(self.default_values)
+            args_schema = json.loads(self.prompt_id.arguments_json or "{}")
 
-            # If dynamic defaults are enabled, evaluate expressions
-            if self.has_dynamic_defaults:
-                # Prepare evaluation context
-                eval_context = {
-                    "env": self.env,
-                    "user": self.env.user,
-                    "thread": None,
-                    "related_record": None,
-                }
+            # If there are arguments defined, generate template JSON
+            if args_schema:
+                template_values = self._generate_template_json_from_schema(args_schema)
+                self.default_values = json.dumps(template_values, indent=2)
+            else:
+                # No arguments schema, keep empty JSON
+                self.default_values = "{}"
 
-                # Add thread-related context if available
-                if thread:
-                    related_record = thread.get_related_record()
-                    eval_context.update(
-                        {
-                            "thread": thread,
-                            "related_record": related_record,
-                        }
-                    )
-
-                # Process each value that might contain expressions
-                for key, value in default_values_dict.items():
-                    if not isinstance(value, str):
-                        continue
-
-                    # Check if the value contains any ${...} expressions
-                    if "${" in value and "}" in value:
-                        # Handle the simple case where the entire string is a single expression
-                        if (
-                                value.startswith("${")
-                                and value.endswith("}")
-                                and value.count("${") == 1
-                        ):
-                            result = self._evaluate_single_expression(
-                                value, eval_context
-                            )
-                            if result is not None:  # None indicates evaluation error
-                                default_values_dict[key] = result
-                        else:
-                            # Handle the case with multiple embedded expressions
-                            result_str = self._evaluate_embedded_expressions(
-                                value, eval_context
-                            )
-                            default_values_dict[key] = result_str
-
-            # Return the processed values as JSON
-            return json.dumps(default_values_dict)
-
-        except Exception as e:
-            _logger.error(f"Error processing default_values: {e}")
-            return "{}"
+        except json.JSONDecodeError:
+            # Invalid JSON in arguments_json, keep empty
+            self.default_values = "{}"
 
     def _get_json_fields(self):
         """Return fields that should be serialized as JSON in the API"""
-        return ["default_values", "evaluated_default_values"]
+        return ["default_values"]
 
     @api.model
     def get_assistant_by_id(self, assistant_id):
@@ -392,15 +452,16 @@ class LLMAssistant(models.Model):
         """
         self.ensure_one()
 
-        # Get thread-specific evaluated default values
-        evaluated_values = self.get_evaluated_default_values(thread)
+        # Get thread context and use it to evaluate default values
+        thread_context = thread.get_context() if hasattr(thread, 'get_context') else {}
+        evaluated_values = self.get_evaluated_default_values(thread_context)
 
         result = {
             "success": True,
             "thread_id": thread.id,
             "assistant_id": self.id,
             "default_values": self.default_values,
-            "evaluated_default_values": evaluated_values,
+            "evaluated_default_values": json.dumps(evaluated_values, indent=2) if evaluated_values else "{}",
         }
 
         # Get the prompt details if requested
@@ -414,60 +475,6 @@ class LLMAssistant(models.Model):
 
         return result
 
-    def _evaluate_single_expression(self, value, eval_context):
-        """Evaluate a single expression in the format ${expression}
-
-        Args:
-            value (str): String containing a single expression
-            eval_context (dict): Context for safe_eval
-
-        Returns:
-            Any: Evaluated result or None if evaluation failed
-        """
-        # Extract the expression from ${...}
-        expr = value[2:-1].strip()
-        try:
-            # Evaluate the expression using safe_eval
-            result = safe_eval(expr, eval_context)
-            return result
-        except Exception as e:
-            _logger.warning(f"Error evaluating expression '{expr}': {e}")
-            # Return None to indicate evaluation error
-            return None
-
-    def _evaluate_embedded_expressions(self, value, eval_context):
-        """Evaluate multiple embedded expressions in a string
-
-        Args:
-            value (str): String containing one or more ${expression} patterns
-            eval_context (dict): Context for safe_eval
-
-        Returns:
-            str: String with all expressions evaluated
-        """
-        # Find all ${...} patterns
-        pattern = r"\${([^}]*)}"
-        matches = re.finditer(pattern, value)
-
-        # Start with the original string
-        result_str = value
-
-        # Process each match
-        for match in matches:
-            full_match = match.group(0)  # The entire ${...} expression
-            expr = match.group(1).strip()  # Just the expression inside
-
-            try:
-                # Evaluate the expression using safe_eval
-                eval_result = safe_eval(expr, eval_context)
-                # Replace the expression with its evaluated result
-                result_str = result_str.replace(full_match, str(eval_result))
-            except Exception as e:
-                _logger.warning(f"Error evaluating embedded expression '{expr}': {e}")
-                # Keep the original expression on error
-
-        return result_str
-
     def _get_allowed_assistants_for_user(self, user=None):
         """Get assistants that the current user can access"""
         if not user:
@@ -479,7 +486,11 @@ class LLMAssistant(models.Model):
 
         # Assistants allowed for user's groups
         if user.groups_id:
-            domain = ["|", ("is_public", "=", True), ("allowed_group_ids", "in", user.groups_id.ids)]
+            domain = [
+                "|",
+                ("is_public", "=", True),
+                ("allowed_group_ids", "in", user.groups_id.ids),
+            ]
         else:
             # If user has no groups, only public assistants
             domain = [("is_public", "=", True)]

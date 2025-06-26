@@ -17,7 +17,7 @@ function safeJsonParse(jsonString, defaultValue = undefined) {
   try {
     return JSON.parse(jsonString);
   } catch (e) {
-    // Console.warn("Failed to parse JSON string:", jsonString, e); // Optional logging
+    console.warn("Failed to parse JSON string:", jsonString, e);
     return defaultValue;
   }
 }
@@ -37,23 +37,47 @@ registerPatch({
     },
   },
   fields: {
-    generationInputs: attr({}),
+    generationInputs: attr({
+      default: null,
+    }),
+
     generationInputsFormatted: attr({
       compute() {
         const jsonVal = safeJsonParse(this.generationInputs);
         if (jsonVal === undefined || jsonVal === null) {
-          return {};
+          return "{}";
         }
 
         try {
           // Only pretty print if it's likely an object/array
           return typeof jsonVal === "object"
-            ? JSON.stringify(jsonVal, null, 2)
-            : String(jsonVal);
+              ? JSON.stringify(jsonVal, null, 2)
+              : String(jsonVal);
         } catch (e) {
-          console.error("Error formatting tool call result:", e);
+          console.error("Error formatting generation inputs:", e);
           return String(jsonVal);
         }
+      },
+    }),
+
+    /**
+     * Check if this message is a user media generation message
+     */
+    isLLMUserMediaGenMessage: attr({
+      compute() {
+        return (
+            this.messageSubtypeXmlid === 'llm_mail_message_subtypes.mt_llm_user' &&
+            Boolean(this.generationInputs)
+        );
+      },
+    }),
+
+    /**
+     * Get parsed generation inputs as object
+     */
+    generationInputsParsed: attr({
+      compute() {
+        return safeJsonParse(this.generationInputs, {});
       },
     }),
   },

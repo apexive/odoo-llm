@@ -72,9 +72,27 @@ class LLMThread(models.Model):
         string="Messages",
         domain=lambda self: [("model", "=", self._name)],
     )
-    # same field names from mail.message model
-    model = fields.Char("Related Document Model")
-    res_id = fields.Many2oneReference("Related Document ID", model_field="model")
+
+    # Updated fields for related record reference
+    model = fields.Char(
+        string="Related Document Model",
+        help="Technical name of the related model"
+    )
+    res_id = fields.Many2oneReference(
+        string="Related Document ID",
+        model_field="model",
+        help="ID of the related record"
+    )
+
+    # Computed Reference field for related record
+    # TODO: the selection should be removed - ti is computed every time we access the model
+    related_record = fields.Reference(
+        selection='_get_related_record_selection',
+        string='Related Record',
+        compute='_compute_related_record',
+        readonly=True,
+        help="The record this chat thread is related to"
+    )
 
     is_locked = fields.Boolean(
         string="Locked, Preventing Concurrent Generation",
@@ -89,6 +107,36 @@ class LLMThread(models.Model):
         string="Available Tools",
         help="Tools that can be used by the LLM in this thread",
     )
+
+    @api.model
+    def _get_related_record_selection(self):
+        """Get the selection options for the Reference field dynamically.
+
+        Returns all available models in the system.
+        """
+        models = self.env['ir.model'].sudo().search([])
+        return [(model.model, model.name) for model in models]
+
+    @api.depends('model', 'res_id')
+    def _compute_related_record(self):
+        """Compute the related record reference."""
+        for record in self:
+            if record.model and record.res_id:
+                # Validate that the model exists and the record exists
+                try:
+                    if record.model in self.env:
+                        related_record = self.env[record.model].browse(record.res_id)
+                        if related_record.exists():
+                            record.related_record = f"{record.model},{record.res_id}"
+                        else:
+                            record.related_record = False
+                    else:
+                        record.related_record = False
+                except Exception as e:
+                    _logger.warning(f"Error computing related record for thread {record.id}: {e}")
+                    record.related_record = False
+            else:
+                record.related_record = False
 
     @api.model_create_multi
     def create(self, vals_list):
@@ -106,8 +154,8 @@ class LLMThread(models.Model):
         author_id = kwargs.get("author_id")
         body = kwargs.get("body", "")
         email_from = self.get_email_from(
-            self.provider_id.name,
-            self.model_id.name,
+            self.sudo().provider_id.name,
+            self.sudo().model_id.name,
             subtype_xmlid,
             author_id,
             kwargs.get("tool_name"),
@@ -123,6 +171,7 @@ class LLMThread(models.Model):
         """Get messages from the thread
 
         Args:
+            order: Optional order for messages ('ASC' or 'DESC')
             limit: Optional limit on number of messages to retrieve
 
         Returns:
@@ -135,16 +184,24 @@ class LLMThread(models.Model):
             self.env.ref(LLM_TOOL_RESULT_SUBTYPE_XMLID, raise_if_not_found=False),
         ]
         subtype_ids = [st.id for st in subtypes_to_fetch if st]
-        order_clause = f"create_date {order}, id {order}"
+
+        # Default to descending order to get the most recent messages
+        order_clause = "create_date DESC, write_date DESC, id DESC"
         domain = [
             ("model", "=", self._name),
             ("res_id", "=", self.id),
             ("message_type", "=", "comment"),
             ("subtype_id", "in", subtype_ids),
         ]
+
+        # Fetch messages (most recent first)
         messages = self.env["mail.message"].search(
             domain, order=order_clause, limit=limit
         )
+
+        if order == "ASC":
+            messages = messages[::-1]
+
         return messages
 
     def _get_last_message_from_history(self):
@@ -174,8 +231,8 @@ class LLMThread(models.Model):
         if not last_message:
             return False
         if (
-            last_message.is_llm_user_message()
-            or last_message.is_llm_tool_result_message()
+                last_message.is_llm_user_message()
+                or last_message.is_llm_tool_result_message()
         ):
             return True
         if last_message.is_llm_assistant_message() and last_message.tool_calls:
@@ -185,8 +242,8 @@ class LLMThread(models.Model):
     def _next_step(self, last_message):
         """Dispatch to the next generator based on message type."""
         if (
-            last_message.is_llm_user_message()
-            or last_message.is_llm_tool_result_message()
+                last_message.is_llm_user_message()
+                or last_message.is_llm_tool_result_message()
         ):
             return self._get_assistant_response()
         if last_message.is_llm_assistant_message() and last_message.tool_calls:
@@ -223,7 +280,7 @@ class LLMThread(models.Model):
             )
         return last_tool_msg
 
-    def _get_prepend_messages(self):
+    def get_prepend_messages(self):
         """Hook: return a list of formatted messages to prepend to the conversation.
         Override in other modules if needed.
 
@@ -233,22 +290,7 @@ class LLMThread(models.Model):
                  {"role": "user", "content": "..."},
                  ...]
         """
-        self.ensure_one()
         return []
-
-    def get_related_record(self):
-        """Get the related record if this thread is connected to a model.
-
-        Returns:
-            recordset: The related record if it exists, otherwise False
-        """
-        self.ensure_one()
-        if self.model and self.res_id:
-            try:
-                return self.env[self.model].browse(self.res_id).exists()
-            except Exception as e:
-                _logger.error("Error getting related record: %s", str(e))
-        return False
 
     def _get_assistant_response(self):
         self.ensure_one()
@@ -258,9 +300,9 @@ class LLMThread(models.Model):
             "messages": message_history_rs,
             "tools": tool_rs,
             "stream": True,
-            "prepend_messages": self._get_prepend_messages(),
+            "prepend_messages": self.get_prepend_messages(),
         }
-        stream_response = self.model_id.chat(**chat_kwargs)
+        stream_response = self.sudo().model_id.chat(**chat_kwargs)
         assistant_msg = yield from self.env["mail.message"].create_message_from_stream(
             self,
             stream_response,
@@ -312,14 +354,17 @@ class LLMThread(models.Model):
             self.env.user.partner_id, "llm.thread/delete", {"ids": unlink_ids}
         )
 
+    def get_context(self, base_context=None):
+        return base_context or {}
+
     @api.model
     def get_email_from(
-        self,
-        provider_name,
-        provider_model_name,
-        subtype_xmlid,
-        author_id,
-        tool_name=None,
+            self,
+            provider_name,
+            provider_model_name,
+            subtype_xmlid,
+            author_id,
+            tool_name=None,
     ):
         if not author_id:
             if subtype_xmlid == LLM_TOOL_RESULT_SUBTYPE_XMLID:
@@ -344,13 +389,13 @@ class LLMThread(models.Model):
 
     @api.model
     def build_update_vals(
-        self,
-        subtype_xmlid,
-        tool_call_id=None,
-        tool_calls=None,
-        tool_call_definition=None,
-        tool_call_result=None,
-        **kwargs,
+            self,
+            subtype_xmlid,
+            tool_call_id=None,
+            tool_calls=None,
+            tool_call_definition=None,
+            tool_call_result=None,
+            **kwargs,
     ):
         if subtype_xmlid == LLM_ASSISTANT_SUBTYPE_XMLID and tool_calls:
             return {"tool_calls": tool_calls}

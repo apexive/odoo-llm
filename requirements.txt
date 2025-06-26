@@ -3,6 +3,7 @@ PyMuPDF
 anthropic
 chromadb-client
 emoji
+fal_client
 jinja2
 llama_index
 markdown2
@@ -14,6 +15,7 @@ ollama
 openai
 pgvector
 pydantic>=2.0.0
+pyyaml
 qdrant-client
 replicate
 requests

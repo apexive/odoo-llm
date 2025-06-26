@@ -182,7 +182,8 @@
     font-size: 0.95rem;
   }
 
-  .form-select, .form-control {
+  .form-select,
+  .form-control {
     border: 1.5px solid $border-color;
 
     &:focus {

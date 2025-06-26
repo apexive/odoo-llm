@@ -1,6 +1,7 @@
 import base64
 import logging
 import os
+from datetime import datetime
 from urllib.parse import urlparse
 
 import requests
@@ -53,6 +54,9 @@ class MailMessage(models.Model):
                     author_id=False,
                     attachment_ids=attachment_ids,
                 )
+
+                self.env["ir.attachment"].browse(attachment_ids).write({'res_id': msg.id})
+
                 yield {"type": "message_create", "message": msg.message_format()[0]}
                 return
 
@@ -114,7 +118,6 @@ class MailMessage(models.Model):
                 filename = os.path.basename(urlparse(url).path)
 
                 # Add timestamp to ensure uniqueness
-                from datetime import datetime
 
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
 
@@ -132,6 +135,7 @@ class MailMessage(models.Model):
                     {
                         "name": filename,
                         "type": "binary",
+                        "mimetype": response.headers.get('Content-Type', None),
                         "datas": base64.b64encode(response.content),
                         "res_model": self._name,
                         "res_id": self.id,

@@ -1,8 +1,84 @@
+import json
 import logging
 
 from odoo import fields, models
 
 _logger = logging.getLogger(__name__)
+
+
+class RelatedRecordProxy:
+    """
+    A proxy object that provides clean access to related record fields in Jinja templates.
+    Usage in templates: {{ related_record.get_field('field_name', 'default_value') }}
+    When called directly, returns JSON with model name, id, and display name.
+    """
+
+    def __init__(self, record):
+        self._record = record
+
+    def get_field(self, field_name, default=""):
+        """
+        Get a field value from the related record.
+
+        Args:
+            field_name (str): The field name to access
+            default: Default value if field doesn't exist or is empty
+
+        Returns:
+            The field value, or default if not available
+        """
+        if not self._record:
+            return default
+
+        try:
+            if hasattr(self._record, field_name):
+                value = getattr(self._record, field_name)
+
+                # Handle different field types
+                if value is None:
+                    return default
+                elif isinstance(value, bool):
+                    return value  # Keep as boolean for Jinja
+                elif hasattr(value, 'name'):  # Many2one field
+                    return value.name
+                elif hasattr(value, 'mapped'):  # Many2many/One2many field
+                    return value.mapped('name')
+                else:
+                    return value
+            else:
+                _logger.debug("Field '%s' not found on record %s", field_name, self._record)
+                return default
+
+        except Exception as e:
+            _logger.error("Error getting field '%s' from record: %s", field_name, str(e))
+            return default
+
+    def __getattr__(self, name):
+        """Allow direct attribute access as fallback"""
+        return self.get_field(name)
+
+    def __bool__(self):
+        """Return True if we have a record"""
+        return bool(self._record)
+
+    def __str__(self):
+        """When called by itself, return JSON of model name, id, and display name"""
+        if not self._record:
+            return json.dumps({
+                "model": None,
+                "id": None,
+                "display_name": None
+            })
+
+        return json.dumps({
+            "model": self._record._name,
+            "id": self._record.id,
+            "display_name": getattr(self._record, 'display_name', str(self._record))
+        })
+
+    def __repr__(self):
+        """Same as __str__ for consistency"""
+        return self.__str__()
 
 
 class LLMThreadPrompt(models.Model):
@@ -17,27 +93,13 @@ class LLMThreadPrompt(models.Model):
     )
 
     def merge_message_lists(self, source_messages, target_messages):
-        """Merge two lists of messages, handling system messages appropriately
-
-        This helper method merges two lists of messages, ensuring that system messages
-        are properly combined without duplication.
-
-        Args:
-            source_messages (list): The source list of messages to merge from
-            target_messages (list): The target list of messages to merge into
-
-        Returns:
-            list: The merged list of messages
-        """
+        """Merge two lists of messages, handling system messages appropriately"""
         if not source_messages:
             return target_messages
 
         if not target_messages:
-            return (
-                source_messages.copy()
-            )  # Return a copy to avoid modifying the original
+            return source_messages.copy()
 
-        # Make a copy of source messages to avoid modifying the original
         source_messages_copy = source_messages.copy()
 
         # Check for system messages to avoid duplicates
@@ -52,38 +114,84 @@ class LLMThreadPrompt(models.Model):
             # Both have system messages, merge them
             for source_msg in system_messages_in_source:
                 for target_msg in system_messages_in_target:
-                    target_msg["content"] = (
-                        f"{source_msg['content']}\n\n{target_msg['content']}"
-                    )
+                    source_content = self._extract_message_content(source_msg)
+                    target_content = self._extract_message_content(target_msg)
+
+                    # Merge the content
+                    merged_content = f"{source_content}\n\n{target_content}"
+
+                    # Update target message with merged content
+                    if isinstance(target_msg.get("content"), list):
+                        target_msg["content"][0]["text"] = merged_content
+                    else:
+                        target_msg["content"] = merged_content
+
                 # Remove the source system message as we've merged it
                 source_messages_copy.remove(source_msg)
 
         # Now add any remaining source messages at the beginning
         return source_messages_copy + target_messages
 
-    # override to include prompt messages
-    def _get_prepend_messages(self):
-        """Hook: return a list of formatted messages to prepend to the conversation.
-        Override in other modules if needed.
+    def _extract_message_content(self, message):
+        """Extract text content from a message regardless of format"""
+        content = message.get("content", "")
+
+        if isinstance(content, list) and len(content) > 0:
+            return content[0].get("text", "")
+        elif isinstance(content, str):
+            return content
+        else:
+            return ""
+
+    def get_context(self, base_context=None):
+        """
+        Get the context to pass to prompt rendering with thread-specific enhancements.
+        This is the canonical method for creating prompt context in both production and testing.
+
+        Args:
+            base_context (dict): Additional context from caller (optional)
 
         Returns:
-            list: List of message dictionaries in the format:
-                [{"role": "system", "content": "..."},
-                 {"role": "user", "content": "..."},
-                 ...]
+            dict: Context ready for prompt rendering
         """
-        self.ensure_one()
-        # Get base messages from parent class
-        messages = super()._get_prepend_messages()
+        context = {
+            **super().get_context(base_context or {}),
+            'thread_id': self.id,
+        }
 
-        # Get messages from the prompt if available
+        if self.related_record:
+            context['related_record'] = RelatedRecordProxy(self.related_record)
+            context['related_model_name'] = self.related_record._name
+            context['related_model_id'] = self.related_record._name
+            context['related_res_id'] = self.related_record.id
+        else:
+            context['related_record'] = None
+            context['related_model_name'] = None
+            context['related_model_id'] = None
+            context['related_res_id'] = None
+
+        return context
+
+    def get_prepend_messages(self):
+        """Hook: return a list of formatted messages to prepend to the conversation."""
+        self.ensure_one()
+        messages = super().get_prepend_messages()
+
         if self.prompt_id:
-            # Create a context with the thread_id
-            context = dict(self.env.context, thread_id=self.id)
-            # Use the prompt to get messages with the new context
-            prompt_messages = self.with_context(context).prompt_id.get_messages({})
-            if prompt_messages:
-                messages = self.merge_message_lists(prompt_messages, messages)
-                _logger.info("Added %d messages from prompt", len(prompt_messages))
+            try:
+
+                # Get messages from the prompt with enhanced context
+                prompt_messages = self.prompt_id.get_messages(self.get_context())
+
+                if prompt_messages:
+                    messages = self.merge_message_lists(prompt_messages, messages)
+                    _logger.info("Added %d messages from prompt '%s'", len(prompt_messages), self.prompt_id.name)
+
+            except Exception as e:
+                _logger.error("Error getting messages from prompt '%s': %s", self.prompt_id.name, str(e))
+                # Continue without prompt messages rather than failing completely
+                self.message_post(
+                    body=f"Warning: Could not load prompt messages from '{self.prompt_id.name}': {str(e)}"
+                )
 
         return messages

@@ -27,7 +27,7 @@ registerPatch({
      * Load assistants from the server
      */
     async loadAssistants() {
-      // First, load assistants with their basic data and prompt_id
+      // Load assistants with their basic data and prompt_id (only actual model fields)
       const assistantResult = await this.messaging.rpc({
         model: "llm.assistant",
         method: "search_read",
@@ -36,7 +36,6 @@ registerPatch({
           fields: [
             "name",
             "default_values",
-            "evaluated_default_values",
             "prompt_id",
           ],
         },
@@ -44,8 +43,8 @@ registerPatch({
 
       // Extract all prompt IDs to fetch their details
       const promptIds = assistantResult
-        .map((assistant) => assistant.prompt_id && assistant.prompt_id[0])
-        .filter((id) => id); // Filter out falsy values
+          .map((assistant) => assistant.prompt_id && assistant.prompt_id[0])
+          .filter((id) => id); // Filter out falsy values
 
       // If we have prompt IDs, fetch their details
       let promptsById = {};
@@ -76,7 +75,7 @@ registerPatch({
           id: assistant.id,
           name: assistant.name,
           defaultValues: assistant.default_values,
-          evaluatedDefaultValues: assistant.evaluated_default_values,
+          // Don't set evaluatedDefaultValues here - it will be fetched dynamically when needed
         };
 
         // If this assistant has a prompt, include its ID and create the relationship
@@ -115,9 +114,9 @@ registerPatch({
      * @override
      */
     async initializeLLMChat(
-      action,
-      initActiveId,
-      postInitializationPromises = []
+        action,
+        initActiveId,
+        postInitializationPromises = []
     ) {
       // Pass our loadAssistants promise to the original method
       return this._super(action, initActiveId, [
@@ -183,12 +182,12 @@ registerPatch({
         return;
       }
       const [model, id] =
-        typeof this.activeId === "number"
-          ? ["llm.thread", this.activeId]
-          : this.activeId.split("_");
+          typeof this.activeId === "number"
+              ? ["llm.thread", this.activeId]
+              : this.activeId.split("_");
       // Get the active thread
       const activeThread = this.messaging.models.Thread.findFromIdentifyingData(
-        { id: Number(id), model }
+          { id: Number(id), model }
       );
       if (!activeThread || !activeThread.llmAssistant) {
         return;
@@ -196,8 +195,8 @@ registerPatch({
 
       // Fetch thread-specific evaluated default values for the active thread's assistant
       this._fetchAssistantValuesForThread(
-        activeThread.id,
-        activeThread.llmAssistant.id
+          activeThread.id,
+          activeThread.llmAssistant.id
       );
     },
 
@@ -226,7 +225,7 @@ registerPatch({
           if (thread) {
             // Find the assistant in our registry
             const assistant = this.llmAssistants.find(
-              (a) => a.id === assistantId
+                (a) => a.id === assistantId
             );
             if (assistant) {
               // Update the assistant with thread-specific evaluated values
@@ -248,9 +247,9 @@ registerPatch({
               if (result.prompt) {
                 const promptData = result.prompt;
                 const prompt =
-                  this.messaging.models.LLMPrompt.findFromIdentifyingData({
-                    id: promptData.id,
-                  });
+                    this.messaging.models.LLMPrompt.findFromIdentifyingData({
+                      id: promptData.id,
+                    });
 
                 if (prompt) {
                   // Update existing prompt

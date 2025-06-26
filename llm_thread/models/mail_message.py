@@ -158,7 +158,7 @@ class MailMessage(models.Model):
             # to isolate tool call, otherwise transaction error can cause the transaction to fail
             # and the transaction will be rolled back(aborted state)
             with self.env.cr.savepoint():
-                result = thread._execute_tool(name, args)
+                result = thread.with_context({'message': msg})._execute_tool(name, args)
                 if not result:
                     raise UserError(f"No result returned from tool '{name}'")
                 body = f"Result for {name}"

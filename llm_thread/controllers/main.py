@@ -42,8 +42,8 @@ class LLMThreadController(http.Controller):
         """Generate LLM responses with streaming and safe yielding."""
         with registry(dbname).cursor() as cr:
             env = api.Environment(cr, env.uid, env.context)
-            llmThread = env["llm.thread"].browse(int(thread_id))
-            if not llmThread.exists():
+            llm_thread = env["llm.thread"].browse(int(thread_id))
+            if not llm_thread.exists():
                 yield from cls._safe_yield(
                     f"data: {json.dumps({'type': 'error', 'error': 'LLM Thread not found.'})}\n\n".encode()
                 )
@@ -51,7 +51,7 @@ class LLMThreadController(http.Controller):
 
             client_connected = True
             try:
-                for response in llmThread.generate(user_message_body, **kwargs):
+                for response in llm_thread.generate(user_message_body, **kwargs):
                     json_data = json.dumps(response, default=str)
                     success = yield from cls._safe_yield(
                         f"data: {json_data}\n\n".encode()
@@ -63,16 +63,16 @@ class LLMThreadController(http.Controller):
             except GeneratorExit:
                 # Client disconnected explicitly
                 client_connected = False
-                if llmThread.exists() and llmThread._read_is_locked_decorated():
-                    llmThread._unlock()
+                if llm_thread.exists() and llm_thread._read_is_locked_decorated():
+                    llm_thread._unlock()
                 return
 
             except Exception as e:
                 _logger.exception(
                     f"Error in llm_thread_generate for thread {thread_id}: {e}"
                 )
-                if llmThread.exists() and llmThread._read_is_locked_decorated():
-                    llmThread._unlock()
+                if llm_thread.exists() and llm_thread._read_is_locked_decorated():
+                    llm_thread._unlock()
 
                 if client_connected:
                     success = yield from cls._safe_yield(
@@ -97,7 +97,7 @@ class LLMThreadController(http.Controller):
         user_message_body = message
         return Response(
             self._llm_thread_generate(
-                request.cr.dbname, request.env, thread_id, user_message_body
+                request.cr.dbname, request.env, thread_id, user_message_body, **kwargs
             ),
             direct_passthrough=True,
             headers=headers,

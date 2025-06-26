@@ -3,9 +3,7 @@
     <t t-name="llm_thread.LLMMediaForm" owl="1">
         <div class="o_LLMMediaForm p-3 border rounded bg-light">
             <form t-on-submit.prevent="onSubmit">
-                <div
-                        class="d-flex justify-content-between align-items-center mb-3"
-                >
+                <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mt-0 mb-0">Generate Media</h5>
                     <div class="btn-group btn-group-sm" role="group">
                         <button
@@ -14,8 +12,7 @@
                                 t-att-class="state.inputMode === 'form' ? 'btn-primary' : 'btn-outline-secondary'"
                                 t-on-click="() => this.toggleInputMode()"
                         >
-                            <i class="fa fa-wpforms me-1"/>
-                            Form
+                            <i class="fa fa-wpforms me-1" /> Form
                         </button>
                         <button
                                 type="button"
@@ -23,29 +20,68 @@
                                 t-att-class="state.inputMode === 'json' ? 'btn-primary' : 'btn-outline-secondary'"
                                 t-on-click="() => this.toggleInputMode()"
                         >
-                            <i class="fa fa-code me-1"/>
-                            JSON
+                            <i class="fa fa-code me-1" /> JSON
                         </button>
                     </div>
                 </div>
 
                 <t t-if="state.isLoading">
                     <div class="alert alert-info" role="alert">
-                        <i
-                                class="fa fa-spinner fa-spin me-1"
-                        />
-                        Loading configuration...
+                        <i class="fa fa-spinner fa-spin me-1" /> Loading configuration...
                     </div>
                 </t>
 
                 <t t-if="state.error">
                     <div class="alert alert-danger" role="alert">
-                        <t t-esc="state.error"/>
+                        <t t-esc="state.error" />
                     </div>
                 </t>
 
+                <!-- Template Preview Section -->
+                <div class="mb-3">
+                    <button
+                            type="button"
+                            class="btn btn-outline-info btn-sm"
+                            t-on-click="() => this.toggleTemplatePreview()"
+                            t-att-disabled="state.isLoadingPreview ? 'disabled' : null"
+                    >
+                        <i t-if="state.isLoadingPreview" class="fa fa-spinner fa-spin me-1" />
+                        <i t-else="" class="fa fa-eye me-1" />
+                        <t t-if="!state.showTemplatePreview">Show Rendered Template</t>
+                        <t t-else="">Hide Rendered Template</t>
+                    </button>
+                </div>
+
+                <div t-if="state.showTemplatePreview" class="mb-3">
+                    <div class="card border-info">
+                        <div class="card-header bg-info text-white">
+                            <small><i class="fa fa-info-circle me-1" />This shows the final rendered template/prompt that will be sent to the model</small>
+                        </div>
+                        <div class="card-body p-2">
+                            <t t-if="state.isLoadingPreview">
+                                <div class="text-center text-muted">
+                                    <i class="fa fa-spinner fa-spin me-1" /> Loading template preview...
+                                </div>
+                            </t>
+                            <t t-elif="state.templatePreviewContent">
+                                <pre class="bg-light p-2 rounded small mb-0" style="max-height: 400px; overflow-y: auto;"><t t-esc="formattedTemplatePreview" /></pre>
+                            </t>
+                            <t t-else="">
+                                <div class="text-muted small">No template preview available</div>
+                            </t>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Form View -->
                 <div t-if="state.inputMode === 'form'">
+                    <!-- Show assistant defaults info if available -->
+                    <div t-if="state.assistantDefaults and Object.keys(state.assistantDefaults || {}).length > 0" class="alert alert-info small mb-3">
+                        <i class="fa fa-robot me-1" />
+                        <strong>Assistant defaults applied:</strong>
+                        <span t-esc="Object.keys(state.assistantDefaults || {}).join(', ')" />
+                    </div>
+
                     <LLMFormFieldsView
                             state="state"
                             inputSchema="inputSchema"
@@ -75,34 +111,25 @@
                             class="alert alert-danger mt-2 small p-2"
                             role="alert"
                     >
-                        <i class="fa fa-exclamation-triangle me-1"/>
-                        <t
-                                t-esc="state.jsonEditorError"
-                        />
+                        <i class="fa fa-exclamation-triangle me-1" /> <t t-esc="state.jsonEditorError" />
                     </div>
                     <div
                             t-if="!inputSchema and !state.isLoading"
                             class="alert alert-info mt-2 small p-2"
                             role="alert"
                     >
-                        <i
-                                class="fa fa-info-circle me-1"
-                        />
-                        Autocomplete is not available as no schema is defined for this model.
+                        <i class="fa fa-info-circle me-1" /> Autocomplete is not available as no schema is defined for this model.
                     </div>
                 </div>
-                <div class="d-flex justify-content-end mt-4 gap-2">
 
+                <div class="d-flex justify-content-end mt-4">
                     <button
                             type="submit"
                             class="btn btn-primary"
                             t-att-disabled="(state.isLoading or isStreaming() or (state.inputMode === 'json' and !state.isJsonValid)) ? 'disabled' : null"
                     >
-                        <i
-                                t-if="state.isLoading"
-                                class="fa fa-spinner fa-spin me-1"
-                        />
-                        <t t-if="!isStreaming()">Image Generate</t>
+                        <i t-if="state.isLoading" class="fa fa-spinner fa-spin me-1" />
+                        <t t-if="!isStreaming()">Generate</t>
                         <t t-else="">Processing...</t>
                     </button>
                 </div>
