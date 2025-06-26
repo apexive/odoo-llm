@@ -1,0 +1,41 @@
+
+// = Home Menu & Datepickers
+// ============================================================================
+// No CSS hacks, variables overrides only
+
+.o_web_client {
+    // Ya que el diseño del componente se define en assets_common, encapsulamos
+    // la declaración de variables dentro del selector `o_web_client`.
+
+    // -- Datepicker General
+    .o_datepicker, .datepicker, .bootstrap-datetimepicker-widget {
+        // El fondo del hover para los botones del datepicker usa un gris ligeramente más claro
+        // que el fondo del componente para una clara respuesta visual.
+        --bs-datetimepicker-btn-hover-bg: #{$o-gray-400};
+    }
+
+    // -- Daterange Picker specific
+    .daterangepicker {
+        // El fondo de la flecha del pop-up debe coincidir con el fondo de la vista.
+        --daterangerpicker__arrow-background-color: #{$o-view-background-color};
+        // El borde debe usar el color de borde estándar del tema oscuro.
+        --daterangerpicker__arrow-border-color: #{$o-border-color};
+    }
+
+    // -- Bootstrap Datetimepicker specific
+    .bootstrap-datetimepicker-widget {
+        // Los bordes internos del widget usan un gris oscuro pero visible.
+        --bs-datetimepicker-secondary-border-color-rgba: #{$o-gray-300};
+        --bs-datetimepicker-primary-border-color: #{$o-gray-300};
+        // El borde principal del widget usa el color de borde estándar.
+        --datepicker-border-color: #{$o-border-color};
+    }
+
+    // -- Estilos de la tabla del Datepicker
+    .bootstrap-datetimepicker-widget .datepicker table {
+        // El color del texto (los números de los días) debe ser el color principal de texto claro.
+        --datepicker-color: #{$o-main-text-color};
+        // El fondo de la cabecera (días de la semana) usa un gris oscuro para contrastar con la vista.
+        --datepicker__thead-bg: #{$o-gray-300};
+    }
+}

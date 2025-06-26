@@ -1,0 +1,3100 @@
+/* =========================================
+   FLEEK DESIGN SYSTEM - ODOO DARK THEME
+   ========================================= */
+
+:root {
+  /* === NEUTRAL PALETTE (Inverted for dark theme) === */
+  --fleek-neutral-1: #000000;
+  --fleek-neutral-2: #171717;
+  --fleek-neutral-3: #202124;
+  --fleek-neutral-4: #3c4043;
+  --fleek-neutral-5: #5f6368;
+  --fleek-neutral-6: #9aa0a6;
+  --fleek-neutral-7: #bdc1c6;
+  --fleek-neutral-8: #dadce0;
+  --fleek-neutral-9: #e8eaed;
+  --fleek-neutral-10: #f1f3f4;
+  --fleek-neutral-11: #f8f9fa;
+  --fleek-neutral-12: #ffffff;
+
+  /* === ACCENT PALETTE (Yellow/Gold) === */
+  --fleek-accent-1: #1c0701;
+  --fleek-accent-2: #451a03;
+  --fleek-accent-3: #78350f;
+  --fleek-accent-4: #92400e;
+  --fleek-accent-5: #b45309;
+  --fleek-accent-6: #d97706;
+  --fleek-accent-7: #f59e0b;
+  --fleek-accent-8: #fbbf24;
+  --fleek-accent-9: #fcd34d;
+  --fleek-accent-10: #fde68a;
+  --fleek-accent-11: #fef3c7;
+  --fleek-accent-12: #fffbeb;
+
+  /* === SUCCESS PALETTE (Green) === */
+  --fleek-success-1: #011716;
+  --fleek-success-2: #022c22;
+  --fleek-success-3: #064e3b;
+  --fleek-success-4: #065f46;
+  --fleek-success-5: #047857;
+  --fleek-success-6: #059669;
+  --fleek-success-7: #10b981;
+  --fleek-success-8: #34d399;
+  --fleek-success-9: #6ee7b7;
+  --fleek-success-10: #a7f3d0;
+  --fleek-success-11: #d1fae5;
+  --fleek-success-12: #ecfdf5;
+
+  /* === WARNING PALETTE (Orange) === */
+  --fleek-warning-1: #1c0a05;
+  --fleek-warning-2: #431407;
+  --fleek-warning-3: #7c2d12;
+  --fleek-warning-4: #9a3412;
+  --fleek-warning-5: #c2410c;
+  --fleek-warning-6: #ea580c;
+  --fleek-warning-7: #f97316;
+  --fleek-warning-8: #fb923c;
+  --fleek-warning-9: #fdba74;
+  --fleek-warning-10: #fed7aa;
+  --fleek-warning-11: #fef3c7;
+  --fleek-warning-12: #fffbeb;
+
+  /* === DANGER PALETTE (Red) === */
+  --fleek-danger-1: #1f1415;
+  --fleek-danger-2: #451a1a;
+  --fleek-danger-3: #701a1a;
+  --fleek-danger-4: #7f1d1d;
+  --fleek-danger-5: #991b1b;
+  --fleek-danger-6: #b91c1c;
+  --fleek-danger-7: #dc2626;
+  --fleek-danger-8: #ef4444;
+  --fleek-danger-9: #f87171;
+  --fleek-danger-10: #fca5a5;
+  --fleek-danger-11: #fecaca;
+  --fleek-danger-12: #fef2f2;
+}
+
+/* ===========================
+   ODOO MAIN INTERFACE STYLES
+   =========================== */
+///
+/// Fleek Dark Theme - Variables Odoo
+///
+///
+
+// = Colores Base
+// ============================================================================
+
+// Inversión de colores básicos para el tema oscuro
+$o-white: var(--fleek-neutral-1) !default;
+$o-black: var(--fleek-neutral-12) !default;
+
+// Nueva escala de grises basada en la paleta neutra Fleek
+$o-gray-100: var(--fleek-neutral-2) !default;
+$o-gray-200: var(--fleek-neutral-3) !default;
+$o-gray-300: var(--fleek-neutral-4) !default;
+$o-gray-400: var(--fleek-neutral-5) !default;
+$o-gray-500: var(--fleek-neutral-6) !default;
+$o-gray-600: var(--fleek-neutral-7) !default;
+$o-gray-700: var(--fleek-neutral-8) !default;
+$o-gray-800: var(--fleek-neutral-9) !default;
+$o-gray-900: var(--fleek-neutral-10) !default;
+
+// Colores de marca alineados con la paleta Fleek
+$o-enterprise-color: var(--fleek-accent-7) !default;
+$o-brand-primary: var(--fleek-accent-7) !default;
+$o-brand-secondary: var(--fleek-neutral-6) !default;
+$o-brand-odoo: var(--fleek-accent-5) !default;
+
+// Colores de estado integrados con la paleta Fleek
+$o-success: var(--fleek-success-7) !default;
+$o-info: var(--fleek-accent-8) !default;
+$o-warning: var(--fleek-warning-7) !default;
+$o-danger: var(--fleek-danger-7) !default;
+
+
+// = Texto
+// ============================================================================
+
+$o-main-text-color: var(--fleek-neutral-9) !default;
+$o-main-link-color: var(--fleek-accent-7) !default;
+$o-enterprise-color: var(--fleek-accent-5) !default;
+$o-main-favorite-color: var(--fleek-accent-9) !default;
+$o-main-code-color: var(--fleek-accent-8) !default;
+
+// Ajuste fino de colores contextuales para texto
+$o-theme-text-colors: (
+    "success": var(--fleek-success-8),
+    "info": var(--fleek-accent-8),
+    "warning": var(--fleek-warning-8),
+    "danger": var(--fleek-danger-8),
+    "odoo": var(--fleek-accent-7),
+) !default;
+
+
+// = Webclient
+// ============================================================================
+$o-webclient-color-scheme: dark !default;
+$o-webclient-background-color: var(--fleek-neutral-1) !default;
+$o-view-background-color: var(--fleek-neutral-2) !default;
+
+// = Entradas de formulario
+$o-input-border-required: var(--fleek-accent-6) !default;
+
+// = Botón Secundario
+$o-btn-secondary-bg: var(--fleek-neutral-4) !default;
+$o-btn-secondary-hover-bg: var(--fleek-neutral-5) !default;
+$o-btn-secondary-hover-border: var(--fleek-neutral-6) !default;
+
+// = Botón Light
+$o-btn-light-bg: var(--fleek-neutral-3) !default;
+$o-btn-light-background-hover: var(--fleek-neutral-4) !default;
+
+
+// = Componentes
+// ============================================================================
+
+// = Lista de grupos
+$o-list-group-active-color: var(--fleek-neutral-10) !default;
+$o-list-group-active-bg: var(--fleek-accent-3) !default;
+
+// = Barra de navegación
+$o-navbar-bg: var(--fleek-neutral-2) !default;
+$-backend-entry-hover-bg: var(--fleek-accent-2) !default;
+
+// = Modal
+$modal-content-bg: var(--fleek-neutral-2) !default;
+$modal-backdrop-bg: var(--fleek-neutral-1) !default;
+$modal-header-bg: var(--fleek-neutral-3) !default;
+$modal-footer-bg: var(--fleek-neutral-3) !default;
+
+// = Bordes
+$o-border-color: var(--fleek-neutral-4) !default;
+$o-border-light-color: var(--fleek-neutral-3) !default;
+
+// = Pestañas
+$o-tab-bg: var(--fleek-neutral-3) !default;
+$o-tab-active-bg: var(--fleek-neutral-2) !default;
+$o-tab-active-text: var(--fleek-accent-7) !default;
+/* Body and main background */
+body {
+  background-color: var(--fleek-neutral-1) !important;
+  color: var(--fleek-neutral-10) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Top navigation bar */
+.o_main_navbar {
+  background-color: var(--fleek-neutral-2) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.o_main_navbar .navbar-nav .nav-link {
+  color: var(--fleek-neutral-8) !important;
+}
+
+.o_main_navbar .navbar-nav .nav-link:hover {
+  color: var(--fleek-accent-9) !important;
+  background-color: var(--fleek-accent-2) !important;
+}
+
+.o_main_navbar .navbar-nav .nav-link.active {
+  color: var(--fleek-accent-9) !important;
+  background-color: var(--fleek-accent-3) !important;
+}
+
+/* Left sidebar/menu */
+.o_menu_sections {
+  background-color: var(--fleek-neutral-2) !important;
+  border-right: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.o_menu_sections .o_nav_entry {
+  color: var(--fleek-neutral-8) !important;
+  border-bottom: 1px solid var(--fleek-neutral-3) !important;
+}
+
+.o_menu_sections .o_nav_entry:hover {
+  background-color: var(--fleek-accent-2) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+.o_menu_sections .o_nav_entry.active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-10) !important;
+  border-left: 3px solid var(--fleek-accent-7) !important;
+}
+
+/* Main content area */
+.o_content {
+  background-color: var(--fleek-neutral-1) !important;
+}
+
+.o_control_panel {
+  background-color: var(--fleek-neutral-2) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+}
+
+/* ==================
+   BUTTONS & CONTROLS
+   ================== */
+
+/* Primary buttons */
+.btn-primary {
+  background-color: var(--fleek-accent-7) !important;
+  border-color: var(--fleek-accent-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--fleek-accent-8) !important;
+  border-color: var(--fleek-accent-8) !important;
+}
+
+.btn-primary:focus, .btn-primary.focus {
+  box-shadow: 0 0 0 0.2rem rgba(249, 158, 11, 0.25) !important;
+}
+
+/* Secondary buttons */
+.btn-secondary {
+  background-color: var(--fleek-neutral-5) !important;
+  border-color: var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+.btn-secondary:hover {
+  background-color: var(--fleek-neutral-6) !important;
+  border-color: var(--fleek-neutral-6) !important;
+}
+
+
+// === DARK THEME STYLES FOR STATUSBAR ===
+.o_statusbar_status {
+  background-color: var(--fleek-neutral-2);
+  border-radius: 8px;
+  padding: 4px;
+  display: flex;
+  gap: 2px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--fleek-neutral-4);
+
+  .btn.o_arrow_button {
+    background-color: var(--fleek-neutral-3);
+    color: var(--fleek-neutral-8);
+    border: 1px solid var(--fleek-neutral-4);
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    position: relative;
+
+    &:not(:last-child):after {
+      content: '';
+      position: absolute;
+      right: -6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid var(--fleek-neutral-3);
+      border-top: 12px solid transparent;
+      border-bottom: 12px solid transparent;
+      z-index: 2;
+    }
+
+    &:not(.o_arrow_button_current) {
+      &:hover:not(.disabled) {
+        background-color: var(--fleek-neutral-4);
+        color: var(--fleek-neutral-9);
+        border-color: var(--fleek-neutral-5);
+        cursor: pointer;
+      }
+
+      &:active:not(.disabled) {
+        background-color: var(--fleek-neutral-5);
+        transform: translateY(1px);
+      }
+    }
+
+    &.o_arrow_button_current {
+      background-color: var(--fleek-accent-7);
+      color: var(--fleek-neutral-1);
+      border-color: var(--fleek-accent-6);
+      font-weight: 600;
+
+      &:after {
+        border-left-color: var(--fleek-accent-7);
+      }
+
+      // Eliminado efecto de glow
+      &:before {
+        content: none;
+      }
+    }
+
+    &.disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+
+      &:hover {
+        background-color: var(--fleek-neutral-3);
+        color: var(--fleek-neutral-8);
+        border-color: var(--fleek-neutral-4);
+      }
+    }
+
+    &.text-uppercase {
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--fleek-accent-8);
+      outline-offset: 2px;
+    }
+  }
+}
+
+// === VARIANTES PARA DIFERENTES ESTADOS ===
+
+.o_statusbar_status[data-status="success"] {
+  .btn.o_arrow_button_current {
+    background-color: var(--fleek-success-7);
+    border-color: var(--fleek-success-6);
+    color: var(--fleek-neutral-1);
+
+    &:after {
+      border-left-color: var(--fleek-success-7);
+    }
+
+    &:before {
+      content: none;
+    }
+  }
+}
+
+.o_statusbar_status[data-status="warning"] {
+  .btn.o_arrow_button_current {
+    background-color: var(--fleek-warning-7);
+    border-color: var(--fleek-warning-6);
+    color: var(--fleek-neutral-1);
+
+    &:after {
+      border-left-color: var(--fleek-warning-7);
+    }
+
+    &:before {
+      content: none;
+    }
+  }
+}
+
+.o_statusbar_status[data-status="danger"] {
+  .btn.o_arrow_button_current {
+    background-color: var(--fleek-danger-7);
+    border-color: var(--fleek-danger-6);
+    color: var(--fleek-neutral-1);
+
+    &:after {
+      border-left-color: var(--fleek-danger-7);
+    }
+
+    &:before {
+      content: none;
+    }
+  }
+}
+
+
+/* Success buttons */
+.btn-success {
+  background-color: var(--fleek-success-7) !important;
+  border-color: var(--fleek-success-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+.btn-success:hover {
+  background-color: var(--fleek-success-8) !important;
+  border-color: var(--fleek-success-8) !important;
+}
+
+/* Warning buttons */
+.btn-warning {
+  background-color: var(--fleek-warning-7) !important;
+  border-color: var(--fleek-warning-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+.btn-warning:hover {
+  background-color: var(--fleek-warning-8) !important;
+  border-color: var(--fleek-warning-8) !important;
+}
+
+/* Danger buttons */
+.btn-danger {
+  background-color: var(--fleek-danger-7) !important;
+  border-color: var(--fleek-danger-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+.btn-danger:hover {
+  background-color: var(--fleek-danger-8) !important;
+  border-color: var(--fleek-danger-8) !important;
+}
+
+/* =============
+   FORM ELEMENTS
+   ============= */
+
+.form-control {
+  border-color: var(--fleek-neutral-5) !important;
+  background-color: var(--fleek-neutral-2) !important;
+  color: var(--fleek-neutral-10) !important;
+}
+
+.form-control:focus {
+  border-color: var(--fleek-accent-7) !important;
+  box-shadow: 0 0 0 0.2rem rgba(249, 158, 11, 0.25) !important;
+  background-color: var(--fleek-neutral-1) !important;
+}
+
+.form-control:disabled, .form-control[readonly] {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-6) !important;
+}
+
+/* ===========
+   TABLES
+   =========== */
+
+.table {
+  background-color: var(--fleek-neutral-1) !important;
+  color: var(--fleek-neutral-10) !important;
+}
+
+.table thead th {
+  background-color: var(--fleek-neutral-3) !important;
+  border-bottom: 2px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-9) !important;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid var(--fleek-neutral-3) !important;
+}
+
+.table tbody tr:hover {
+  background-color: var(--fleek-accent-2) !important;
+}
+
+.table tbody tr.table-active {
+  background-color: var(--fleek-accent-3) !important;
+}
+
+/* ===========
+   MODALS
+   =========== */
+
+.modal-content {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.modal-header {
+  background-color: var(--fleek-neutral-3) !important;
+  border-bottom: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-10) !important;
+}
+
+.modal-footer {
+  background-color: var(--fleek-neutral-3) !important;
+  border-top: 1px solid var(--fleek-neutral-5) !important;
+}
+
+.modal-title {
+  color: var(--fleek-neutral-10) !important;
+}
+
+/* =================
+   ALERTS & MESSAGES
+   ================= */
+
+.alert-success {
+  background-color: var(--fleek-success-2) !important;
+  border-color: var(--fleek-success-4) !important;
+  color: var(--fleek-success-9) !important;
+}
+
+.alert-warning {
+  background-color: var(--fleek-warning-2) !important;
+  border-color: var(--fleek-warning-4) !important;
+  color: var(--fleek-warning-9) !important;
+}
+
+.alert-danger {
+  background-color: var(--fleek-danger-2) !important;
+  border-color: var(--fleek-danger-4) !important;
+  color: var(--fleek-danger-9) !important;
+}
+
+.alert-info {
+  background-color: var(--fleek-accent-2) !important;
+  border-color: var(--fleek-accent-4) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+/* ===============
+   CARDS & PANELS
+   =============== */
+
+.card {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+
+.card-header {
+  background-color: var(--fleek-neutral-3) !important;
+  border-bottom: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-9) !important;
+}
+
+.card-body {
+  color: var(--fleek-neutral-10) !important;
+}
+
+/* ===============
+   DROPDOWNS
+   =============== */
+
+.dropdown-menu {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.dropdown-item {
+  color: var(--fleek-neutral-9) !important;
+}
+
+.dropdown-item:hover {
+  background-color: var(--fleek-accent-2) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+.dropdown-item:active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-10) !important;
+}
+
+/* ===================
+   KANBAN & LIST VIEWS
+   =================== */
+
+.o_kanban_view {
+  background-color: var(--fleek-neutral-1) !important;
+}
+
+.o_kanban_record {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+  color: var(--fleek-neutral-10) !important;
+}
+
+.o_kanban_record:hover {
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
+  background-color: var(--fleek-neutral-3) !important;
+}
+
+/* ==================
+   STATUS INDICATORS
+   ================== */
+
+.badge-success {
+  background-color: var(--fleek-success-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+.badge-warning {
+  background-color: var(--fleek-warning-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+.badge-danger {
+  background-color: var(--fleek-danger-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+.badge-info {
+  background-color: var(--fleek-accent-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+/* ===================
+   PAGINATION
+   =================== */
+
+.page-link {
+  color: var(--fleek-accent-8) !important;
+  border-color: var(--fleek-neutral-4) !important;
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+.page-link:hover {
+  color: var(--fleek-accent-9) !important;
+  background-color: var(--fleek-accent-2) !important;
+  border-color: var(--fleek-accent-4) !important;
+}
+
+.page-item.active .page-link {
+  background-color: var(--fleek-accent-7) !important;
+  border-color: var(--fleek-accent-7) !important;
+  color: var(--fleek-neutral-1) !important;
+}
+
+/* ===================
+   TEXT & TYPOGRAPHY
+   =================== */
+
+h1, h2, h3, h4, h5, h6 {
+  color: var(--fleek-neutral-11) !important;
+}
+
+.text-muted {
+  color: var(--fleek-neutral-7) !important;
+}
+
+.text-primary {
+  color: var(--fleek-accent-8) !important;
+}
+
+.text-success {
+  color: var(--fleek-success-8) !important;
+}
+
+.text-warning {
+  color: var(--fleek-warning-8) !important;
+}
+
+.text-danger {
+  color: var(--fleek-danger-8) !important;
+}
+
+/* =================
+   SCROLLBARS
+   ================= */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--fleek-neutral-2);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--fleek-neutral-5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fleek-neutral-6);
+}
+
+/* ===================
+   TABS
+   =================== */
+
+.nav-tabs {
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.nav-tabs .nav-link {
+  color: var(--fleek-neutral-8) !important;
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.nav-tabs .nav-link:hover {
+  border-color: var(--fleek-accent-4) !important;
+  background-color: var(--fleek-accent-2) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+.nav-tabs .nav-link.active {
+  background-color: var(--fleek-neutral-1) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-accent-8) !important;
+  border-bottom-color: var(--fleek-neutral-1) !important;
+}
+
+/* ===================
+   PROGRESS BARS
+   =================== */
+
+.progress {
+  background-color: var(--fleek-neutral-3) !important;
+}
+
+.progress-bar {
+  background-color: var(--fleek-accent-7) !important;
+}
+
+.progress-bar-success {
+  background-color: var(--fleek-success-7) !important;
+}
+
+.progress-bar-warning {
+  background-color: var(--fleek-warning-7) !important;
+}
+
+.progress-bar-danger {
+  background-color: var(--fleek-danger-7) !important;
+}
+
+.o_form_sheet_bg {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+}
+/* ===================
+   FORMULARIOS
+   =================== */
+
+/* Sheet principal con borde dorado */
+.o_form_sheet {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-accent-6) !important;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3), 0 0 2px var(--fleek-accent-5) !important;
+  color: var(--fleek-neutral-10) !important;
+  border-radius: 4px !important;
+}
+
+/* Sheet en modo edición */
+.o_form_editable .o_form_sheet {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-accent-7) !important;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.4), 0 0 3px var(--fleek-accent-7) !important;
+}
+
+/* Títulos y encabezados */
+.o_form_sheet .oe_title {
+  color: var(--fleek-neutral-11) !important;
+  border-bottom: 1px solid var(--fleek-accent-6) !important;
+  padding-bottom: 8px !important;
+  margin-bottom: 16px !important;
+}
+
+.o_form_sheet .oe_title h1,
+.o_form_sheet .oe_title h2,
+.o_form_sheet .oe_title h3 {
+  color: var(--fleek-accent-8) !important;
+  font-weight: 600 !important;
+}
+
+/* ===================
+   TABS MEJORADOS
+   =================== */
+
+/* Navegación por pestañas */
+.nav.nav-tabs {
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+  background-color: var(--fleek-neutral-2) !important;
+  padding: 0 4px !important;
+}
+
+/* Enlaces de pestañas */
+.nav.nav-tabs .nav-link {
+  color: var(--fleek-neutral-8) !important;
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  margin-right: 4px !important;
+  border-radius: 4px 4px 0 0 !important;
+  transition: all 0.2s ease !important;
+}
+
+.nav.nav-tabs .nav-link:hover {
+  background-color: var(--fleek-accent-2) !important;
+  color: var(--fleek-accent-9) !important;
+  border-color: var(--fleek-accent-5) !important;
+}
+
+/* Pestaña activa */
+.nav.nav-tabs .nav-link.active {
+  background-color: var(--fleek-neutral-1) !important;
+  border-color: var(--fleek-accent-7) var(--fleek-accent-7) var(--fleek-neutral-1) var(--fleek-accent-7) !important;
+  color: var(--fleek-accent-8) !important;
+  font-weight: 500 !important;
+  position: relative !important;
+}
+
+.nav.nav-tabs .nav-link.active::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: -1px !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 2px !important;
+  background-color: var(--fleek-neutral-1) !important;
+}
+
+/* Contenido de pestañas */
+.tab-content {
+  background-color: var(--fleek-neutral-2) !important;
+  color: var(--fleek-neutral-10) !important;
+}
+/* ======================
+   BARRA DE ESTADO FORMULARIOS
+   ====================== */
+
+.o_form_statusbar {
+  background-color: var(--fleek-neutral-3) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+  padding: 8px 16px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Botones de estado */
+.o_form_statusbar .o_statusbar_buttons .btn {
+  margin-right: 5px !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_form_statusbar .o_statusbar_buttons .btn:hover {
+  background-color: var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+/* Estados del formulario */
+.o_form_statusbar .o_statusbar_status {
+  margin-left: 8px !important;
+}
+
+.o_form_statusbar .o_statusbar_status .o_arrow_button {
+  background-color: var(--fleek-neutral-2) !important;
+  color: var(--fleek-neutral-8) !important;
+  border-radius: 0 !important;
+  position: relative !important;
+  padding: 6px 12px 6px 20px !important;
+  margin-right: 0 !important;
+  border: none !important;
+}
+
+.o_form_statusbar .o_statusbar_status .o_arrow_button::before,
+.o_form_statusbar .o_statusbar_status .o_arrow_button::after {
+  content: '' !important;
+  position: absolute !important;
+  border-style: solid !important;
+  border-width: 15px 0 15px 10px !important;
+  display: block !important;
+  top: 0 !important;
+}
+
+.o_form_statusbar .o_statusbar_status .o_arrow_button::before {
+  right: -10px !important;
+  border-color: transparent transparent transparent var(--fleek-neutral-2) !important;
+  z-index: 2 !important;
+}
+
+.o_form_statusbar .o_statusbar_status .o_arrow_button::after {
+  left: 0 !important;
+  border-color: transparent transparent transparent var(--fleek-neutral-3) !important;
+}
+
+/* Estado actual/activo */
+.o_form_statusbar .o_statusbar_status .o_arrow_button.btn-primary {
+  background-color: var(--fleek-accent-5) !important;
+  color: var(--fleek-neutral-11) !important;
+  font-weight: bold !important;
+}
+
+.o_form_statusbar .o_statusbar_status .o_arrow_button.btn-primary::before {
+  border-color: transparent transparent transparent var(--fleek-accent-5) !important;
+}
+
+/* Efectos hover */
+.o_form_statusbar .o_statusbar_status .o_arrow_button:hover {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+.o_form_statusbar .o_statusbar_status .o_arrow_button:hover::before {
+  border-color: transparent transparent transparent var(--fleek-accent-3) !important;
+}
+
+/* ===================
+   BOTONES ESPECIALES
+   =================== */
+
+/* Botón de creación con contorno */
+.btn.btn-outline-primary.o_form_button_create {
+  background-color: transparent !important;
+  border: 2px solid var(--fleek-accent-7) !important;
+  color: var(--fleek-accent-8) !important;
+  font-weight: 500 !important;
+  padding: 7px 16px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.15) !important;
+}
+
+.btn.btn-outline-primary.o_form_button_create:hover {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-8) !important;
+  color: var(--fleek-accent-10) !important;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.btn.btn-outline-primary.o_form_button_create:active,
+.btn.btn-outline-primary.o_form_button_create:focus {
+  background-color: var(--fleek-accent-4) !important;
+  border-color: var(--fleek-accent-9) !important;
+  color: var(--fleek-accent-11) !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+  transform: translateY(0) !important;
+}
+
+.btn.btn-outline-primary.o_form_button_create i {
+  margin-right: 5px !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+
+/* ====================
+   CHATTER - TEMA OSCURO
+   ==================== */
+
+/* Contenedor principal del Chatter */
+.o_Chatter {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Barra superior del Chatter */
+.o_ChatterTopbar {
+  background-color: var(--fleek-neutral-3) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+  padding: 8px !important;
+}
+.bg-view {
+    --bg-opacity: 1;
+   background-color: var(--fleek-neutral-3) !important;
+}
+/* Botones en la barra superior */
+.o_ChatterTopbar_button {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-9) !important;
+  transition: all 0.2s ease !important;
+}
+
+.o_ChatterTopbar_button:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-accent-8) !important;
+}
+
+.o_ChatterTopbar_button.btn-odoo {
+  background-color: var(--fleek-accent-5) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+.o_ChatterTopbar_button.btn-odoo:hover {
+  background-color: var(--fleek-accent-6) !important;
+  box-shadow: 0 0 5px rgba(245, 158, 11, 0.3) !important;
+}
+
+.o_ChatterTopbar_button.btn-primary {
+  background-color: var(--fleek-neutral-4) !important;
+  border-color: var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-8) !important;
+}
+
+/* Separadores en la barra superior */
+.o_ChatterTopbar_borderLeft {
+  border-left: 1px solid var(--fleek-neutral-4) !important;
+}
+
+/* Panel de actividades */
+.o_ActivityBox {
+  background-color: var(--fleek-neutral-2) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.o_ActivityBox_title {
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_ActivityBox_titleLine {
+  border-color: var(--fleek-neutral-5) !important;
+}
+
+/* Actividad individual */
+.o_Activity {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  border-radius: 4px !important;
+  margin-bottom: 8px !important;
+}
+
+.o_Activity_iconContainer {
+  background-color: var(--fleek-danger-7) !important;
+  box-shadow: 0 0 0 2px var(--fleek-neutral-2) !important;
+}
+
+.o_Activity_dueDateText {
+  color: var(--fleek-danger-8) !important;
+}
+
+.o_Activity_type {
+  color: var(--fleek-neutral-10) !important;
+}
+
+.o_Activity_toolButton {
+  color: var(--fleek-accent-7) !important;
+}
+
+.o_Activity_toolButton:hover {
+  color: var(--fleek-accent-8) !important;
+}
+
+/* Lista de mensajes */
+.o_MessageList {
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+.o_MessageList_separatorLine {
+  border-color: var(--fleek-neutral-4) !important;
+}
+
+.o_MessageList_separatorLabel {
+  color: var(--fleek-neutral-7) !important;
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+/* Mensaje individual */
+.o_Message {
+  border-bottom: 1px solid var(--fleek-neutral-3) !important;
+}
+
+.o_Message_authorName {
+  color: var(--fleek-accent-8) !important;
+}
+
+.o_Message_date {
+  color: var(--fleek-neutral-7) !important;
+}
+
+/* Burbuja de mensaje */
+.o_Message_bubble {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  border-radius: 8px !important;
+}
+
+.o_Message_content {
+  color: var(--fleek-neutral-10) !important;
+}
+
+/* Notificaciones del sistema */
+.o_Message.o-notification .o_Message_bubble {
+  background-color: var(--fleek-neutral-3) !important;
+  border-left: 3px solid var(--fleek-accent-6) !important;
+}
+
+/* Acciones sobre mensajes */
+.o_MessageActionList {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.o_MessageActionView {
+  color: var(--fleek-neutral-8) !important;
+}
+
+.o_MessageActionView:hover {
+  color: var(--fleek-accent-7) !important;
+  background-color: var(--fleek-accent-2) !important;
+}
+
+/* Estado de usuario en avatar */
+.o_PersonaImStatusIcon_outerBackground {
+  color: var(--fleek-neutral-2) !important;
+}
+
+.o_PersonaImStatusIcon_innerBackground {
+  color: var(--fleek-neutral-1) !important;
+}
+
+.o_PersonaImStatusIcon_icon.o-bot.text-primary {
+  color: var(--fleek-accent-7) !important;
+}
+
+/* Botón de seguimiento */
+.o_FollowButton_unfollow.o-following {
+  color: var(--fleek-success-7) !important;
+}
+
+
+
+/* ======================
+   MENÚS DE ACCIÓN
+   ====================== */
+
+/* Contenedor principal de menús de acción */
+.o_cp_action_menus {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+
+/* Botones desplegables */
+.o_cp_action_menus .o-dropdown .dropdown-toggle {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-9) !important;
+  padding: 6px 12px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.o_cp_action_menus .o-dropdown .dropdown-toggle:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  border-color: var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-8) !important;
+  box-shadow: 0 0 4px rgba(245, 158, 11, 0.2) !important;
+}
+
+.o_cp_action_menus .o-dropdown .dropdown-toggle:active,
+.o_cp_action_menus .o-dropdown .dropdown-toggle[aria-expanded="true"] {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-accent-9) !important;
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.3) !important;
+}
+
+/* Iconos en los botones */
+.o_cp_action_menus .o-dropdown .dropdown-toggle i {
+  color: var(--fleek-accent-7) !important;
+  margin-right: 5px !important;
+}
+
+/* Texto de los botones */
+.o_cp_action_menus .o_dropdown_title {
+  color: var(--fleek-neutral-9) !important;
+  font-weight: 500 !important;
+}
+
+.o_cp_action_menus .dropdown-toggle:hover .o_dropdown_title {
+  color: var(--fleek-accent-8) !important;
+}
+
+/* Menús desplegables */
+.o_cp_action_menus .dropdown-menu {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+  padding: 6px !important;
+  margin-top: 4px !important;
+}
+
+.o_cp_action_menus .dropdown-menu .dropdown-item {
+  color: var(--fleek-neutral-9) !important;
+  border-radius: 3px !important;
+  padding: 8px 12px !important;
+  margin-bottom: 2px !important;
+}
+
+.o_cp_action_menus .dropdown-menu .dropdown-item:hover {
+  background-color: var(--fleek-accent-2) !important;
+  color: var(--fleek-accent-8) !important;
+}
+
+.o_cp_action_menus .dropdown-menu .dropdown-item:active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+/* ======================
+   INDICADOR DE ESTADO CON FLEXBOX
+   ====================== */
+
+.o_form_status_indicator.d-md-flex.ms-md-1 {
+  display: inline-flex !important;
+  align-items: center !important;
+  padding: 4px 10px !important;
+  margin-left: 8px !important;
+  font-size: 0.9em !important;
+  font-weight: 500 !important;
+}
+
+/* Estados con colores específicos */
+.o_form_status_indicator.d-md-flex.ms-md-1.text-success {
+  background-color: var(--fleek-success-2) !important;
+  border-color: var(--fleek-success-5) !important;
+  color: var(--fleek-success-8) !important;
+}
+
+.o_form_status_indicator.d-md-flex.ms-md-1.text-warning {
+  background-color: var(--fleek-warning-2) !important;
+  border-color: var(--fleek-warning-5) !important;
+  color: var(--fleek-warning-8) !important;
+}
+
+.o_form_status_indicator.d-md-flex.ms-md-1.text-danger {
+  background-color: var(--fleek-danger-2) !important;
+  border-color: var(--fleek-danger-5) !important;
+  color: var(--fleek-danger-8) !important;
+}
+
+.o_form_status_indicator.d-md-flex.ms-md-1.text-primary {
+  background-color: var(--fleek-accent-2) !important;
+  border-color: var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-8) !important;
+}
+
+/* Iconos dentro del indicador */
+.o_form_status_indicator.d-md-flex.ms-md-1 i {
+  margin-right: 5px !important;
+}
+
+/* ======================
+   ETIQUETAS DE FORMULARIO
+   ====================== */
+
+/* Etiqueta estándar */
+.o_form_label {
+  color: var(--fleek-neutral-9) !important;
+  font-weight: 500 !important;
+  margin-bottom: 4px !important;
+}
+
+/* Etiquetas en campos requeridos */
+.o_form_label.o_required_modifier {
+  color: var(--fleek-accent-8) !important;
+}
+
+.o_form_label.o_required_modifier::after {
+  content: '*' !important;
+  color: var(--fleek-accent-7) !important;
+  margin-left: 3px !important;
+  font-weight: bold !important;
+}
+
+/* Etiqueta en modo solo lectura */
+.o_form_label_readonly {
+  color: var(--fleek-neutral-8) !important;
+  font-weight: normal !important;
+  font-style: italic !important;
+}
+
+/* Etiquetas con campo enfocado */
+.o_focused .o_form_label {
+  color: var(--fleek-accent-7) !important;
+  font-weight: 600 !important;
+}
+
+/* Etiquetas en campos inválidos */
+.o_field_invalid .o_form_label {
+  color: var(--fleek-danger-8) !important;
+}
+/* ======================
+   MIGAS DE PAN (BREADCRUMB)
+   ====================== */
+
+/* Contenedor de migas de pan */
+.breadcrumb {
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+/* Elementos individuales de la miga de pan */
+.breadcrumb-item {
+  color: var(--fleek-neutral-8) !important;
+}
+
+/* Enlace dentro del elemento de miga de pan */
+.breadcrumb-item a {
+  color: var(--fleek-accent-7) !important;
+  transition: all 0.2s ease !important;
+  text-decoration: none !important;
+}
+
+.breadcrumb-item a:hover {
+  color: var(--fleek-accent-9) !important;
+  text-decoration: underline !important;
+}
+
+/* Separador entre elementos de miga de pan */
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--fleek-neutral-6) !important;
+  content: '/' !important;
+}
+
+/* Botón de retroceso */
+.o_back_button {
+  font-weight: 500 !important;
+}
+
+.o_back_button a {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+.o_back_button a::before {
+  content: '\f060' !important; /* ícono de flecha hacia atrás */
+  font-family: FontAwesome !important;
+  margin-right: 4px !important;
+  font-size: 0.85em !important;
+  color: var(--fleek-accent-6) !important;
+}
+
+/* Elemento activo/actual */
+.breadcrumb-item.active {
+  color: var(--fleek-neutral-10) !important;
+  font-weight: 500 !important;
+}
+
+/* Texto truncado dentro del elemento activo */
+.breadcrumb-item .text-truncate {
+  max-width: 200px !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
+}
+
+/* Indicador de estado del formulario dentro de la miga de pan */
+.breadcrumb-item .o_form_status_indicator {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  margin-left: 6px !important;
+}
+/* ======================
+   BOTONES DE GUARDAR/CANCELAR EN MODO OSCURO
+   ====================== */
+
+/* Botones de estado del formulario */
+.o_form_status_indicator_buttons {
+  display: flex !important;
+  gap: 4px !important;
+}
+
+/* Hacer visibles los botones cuando el formulario está en modo edición */
+.o_form_editable .o_form_status_indicator_buttons.invisible {
+  visibility: visible !important;
+  display: flex !important;
+}
+
+/* Estilo para el botón Guardar */
+.o_form_button_save {
+  background-color: var(--fleek-accent-4) !important;
+  color: var(--fleek-neutral-12) !important;
+  border: 1px solid var(--fleek-accent-5) !important;
+  padding: 6px 10px !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+.o_form_button_save:hover {
+  background-color: var(--fleek-accent-5) !important;
+  border-color: var(--fleek-accent-6) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+  transform: translateY(-1px) !important;
+}
+
+.o_form_button_save i {
+  color: var(--fleek-accent-9) !important;
+  margin-right: 4px !important;
+}
+
+/* Estilo para el botón Cancelar */
+.o_form_button_cancel {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-10) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  padding: 6px 10px !important;
+  border-radius: 4px !important;
+}
+
+.o_form_button_cancel:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-danger-8) !important;
+  border-color: var(--fleek-danger-6) !important;
+}
+
+.o_form_button_cancel i {
+  color: var(--fleek-danger-7) !important;
+  margin-right: 4px !important;
+}
+
+/* ======================
+   BOTONES ESTADÍSTICOS (BUTTONBOX)
+   ====================== */
+
+/* Contenedor de botones estadísticos */
+.o-form-buttonbox.oe_button_box {
+  background-color: var(--fleek-neutral-2) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+  padding: 8px 4px !important;
+}
+
+/* Botones estadísticos individuales */
+.oe_stat_button {
+  background-color: var(--fleek-neutral-3) !important;
+  border-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-9) !important;
+  transition: all 0.2s ease !important;
+}
+
+.oe_stat_button:hover {
+  background-color: var(--fleek-accent-2) !important;
+  color: var(--fleek-accent-8) !important;
+}
+
+.oe_stat_button:active,
+.oe_stat_button.active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-9) !important;
+  border-color: var(--fleek-accent-6) !important;
+}
+
+/* Iconos dentro de botones estadísticos */
+.oe_stat_button .o_button_icon {
+  color: var(--fleek-accent-7) !important;
+  margin-right: 8px !important;
+}
+
+/* Información estadística */
+.oe_stat_button .o_stat_info {
+  color: var(--fleek-neutral-8) !important;
+}
+
+/* Texto estadístico */
+.oe_stat_button .o_stat_text {
+  color: var(--fleek-neutral-8) !important;
+  font-size: 0.9em !important;
+}
+
+.oe_stat_button:hover .o_stat_text {
+  color: var(--fleek-accent-8) !important;
+}
+
+/* Valor estadístico */
+.oe_stat_button .o_stat_value {
+  color: var(--fleek-accent-8) !important;
+  font-weight: 600 !important;
+}
+
+/* Bordes del buttonbox */
+.oe_button_box.o_not_full .oe_stat_button {
+  border-left: 1px solid var(--fleek-neutral-4) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+}
+
+/* Estilos para botones deshabilitados */
+.oe_stat_button.disabled,
+.oe_stat_button[disabled] {
+  opacity: 0.6 !important;
+  background-color: var(--fleek-neutral-2) !important;
+  cursor: not-allowed !important;
+}
+
+
+/* ======================
+   DIÁLOGOS DE ADVERTENCIA
+   ====================== */
+
+/* Alerta de advertencia */
+.o_dialog_warning {
+  background-color: var(--fleek-warning-3) !important;
+  border: 2px solid var(--fleek-warning-6) !important;
+  border-radius: 6px !important;
+  padding: 12px 16px !important;
+  margin: 10px 0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  position: relative !important;
+  color: var(--fleek-warning-12) !important;
+}
+
+/* Icono de advertencia */
+.o_dialog_warning::before {
+  content: '\f071' !important; /* Ícono de advertencia */
+  font-family: FontAwesome !important;
+  position: absolute !important;
+  left: 16px !important;
+  top: 12px !important;
+  font-size: 18px !important;
+  color: var(--fleek-warning-9) !important;
+}
+
+/* Contenido del mensaje */
+.o_dialog_warning p {
+  margin-left: 28px !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  line-height: 1.5 !important;
+  color: var(--fleek-warning-12) !important;
+}
+
+/* Estilo para mensajes críticos con mejor visibilidad */
+.o_dialog_warning[data-critical="true"] {
+  background-color: var(--fleek-danger-3) !important;
+  border-color: var(--fleek-danger-6) !important;
+  color: var(--fleek-danger-11) !important;
+}
+
+/* Estilo para mensajes de información */
+.o_dialog_warning.o_dialog_info {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-accent-11) !important;
+}
+
+/* Botones dentro de las alertas */
+.o_dialog_warning .btn {
+  margin-top: 8px !important;
+  background-color: var(--fleek-neutral-11) !important;
+  color: var(--fleek-warning-3) !important;
+  border: none !important;
+  padding: 5px 12px !important;
+  font-weight: 500 !important;
+  border-radius: 4px !important;
+  transition: all 0.2s !important;
+}
+
+.o_dialog_warning .btn:hover {
+  background-color: var(--fleek-neutral-12) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2) !important;
+}
+
+
+/* ======================
+   ELEMENTOS PÁRRAFO
+   ====================== */
+
+/* Todos los párrafos en color blanco */
+p {
+  color: var(--fleek-neutral-12) !important;
+}
+
+/* Párrafos en diferentes contextos para asegurar consistencia */
+.o_form_sheet p,
+.tab-content p,
+.modal-body p,
+.o_notebook p,
+.o_kanban_record p,
+.o_Message_content p,
+.o_field_widget p,
+div p {
+  color: var(--fleek-neutral-12) !important;
+}
+
+/* Mejora la legibilidad del texto blanco sobre fondos oscuros */
+p {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Mantener advertencias visibles pero con mejor contraste */
+.o_dialog_warning p {
+  color: var(--fleek-neutral-12) !important;
+  font-weight: 600 !important;
+}
+
+/* ======================
+   BOTONES "AGREGAR" EN LISTAS X2MANY
+   ====================== */
+
+/* Celda contenedora de botones "agregar" */
+.o_field_x2many_list_row_add {
+  background-color: var(--fleek-neutral-2) !important;
+  border-top: 1px solid var(--fleek-neutral-4) !important;
+
+}
+
+/* Enlaces de acción "agregar" */
+.o_field_x2many_list_row_add a {
+  color: var(--fleek-accent-7) !important;
+  background-color: transparent !important;
+}
+
+/* Efecto hover */
+.o_field_x2many_list_row_add a:hover {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+/* Efecto active/focus */
+.o_field_x2many_list_row_add a:active,
+.o_field_x2many_list_row_add a:focus {
+  background-color: var(--fleek-accent-4) !important;
+  color: var(--fleek-accent-10) !important;
+  outline: none !important;
+}
+
+/* ======================
+   CELDAS DE ETIQUETAS MÚLTIPLES
+   ====================== */
+
+/* Celda base con etiquetas múltiples */
+.o_data_cell.o_many2many_tags_cell {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  padding: 4px 8px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+/* Efecto hover en la celda */
+.o_data_cell.o_many2many_tags_cell:hover {
+  background-color: var(--fleek-neutral-4) !important;
+}
+
+/* Celda cuando está seleccionada/clickeada */
+.o_data_cell.o_many2many_tags_cell:focus,
+.o_data_cell.o_many2many_tags_cell.o_selected_cell {
+  background-color: var(--fleek-neutral-5) !important;
+  border-color: var(--fleek-accent-6) !important;
+  box-shadow: inset 0 0 0 1px var(--fleek-accent-5) !important;
+  outline: none !important;
+}
+
+/* Campo de entrada dentro de la celda */
+.o_many2many_tags_cell .o_input {
+  background-color: var(--fleek-neutral-2) !important;
+  color: var(--fleek-neutral-12) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+}
+
+/* Campo de entrada con foco */
+.o_many2many_tags_cell .o_input:focus {
+  background-color: var(--fleek-neutral-1) !important;
+  border-color: var(--fleek-accent-6) !important;
+  box-shadow: 0 0 0 1px var(--fleek-accent-6) !important;
+}
+
+/* Botón desplegable */
+.o_many2many_tags_cell .o_dropdown_button {
+  color: var(--fleek-neutral-8) !important;
+}
+
+/* Etiquetas dentro de la celda (ajustes específicos) */
+.o_many2many_tags_cell .o_tag {
+  margin: 2px !important;
+  background-color: var(--fleek-accent-5) !important;
+  border: 1px solid var(--fleek-accent-6) !important;
+}
+
+/* Texto de la etiqueta dentro de la celda */
+.o_many2many_tags_cell .o_tag .o_tag_badge_text {
+  color: var(--fleek-neutral-12) !important;
+  font-weight: 500 !important;
+}
+
+/* Contenedor de selección */
+.o_many2many_tags_cell .o_field_many2many_selection {
+  margin-top: 2px !important;
+}
+
+/* ======================
+   DATEPICKER EN MODO OSCURO - DÍAS BLANCOS
+   ====================== */
+
+/* Contenedor general del datepicker */
+.datepicker {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
+  padding: 8px !important;
+}
+
+/* Tabla del calendario */
+.datepicker table {
+  background-color: var(--fleek-neutral-2) !important;
+  border-collapse: separate !important;
+  border-spacing: 2px !important;
+}
+
+/* Cabecera con navegación y título */
+.datepicker thead tr th {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-11) !important;
+  border-radius: 4px !important;
+  padding: 8px 4px !important;
+}
+
+/* Botones de navegación (prev/next) */
+.datepicker .prev,
+.datepicker .next {
+  color: var(--fleek-accent-7) !important;
+  border-radius: 4px !important;
+}
+
+/* Selector de mes/año */
+.datepicker .picker-switch {
+  color: var(--fleek-accent-8) !important;
+  font-weight: 600 !important;
+}
+
+/* Días de la semana */
+.datepicker .dow {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-11) !important;
+  font-size: 0.85em !important;
+  font-weight: 600 !important;
+}
+
+/* Número de semana */
+.datepicker .cw {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-10) !important;
+  font-size: 0.8em !important;
+}
+
+/* DÍAS - COLOR BLANCO */
+.datepicker .day {
+  color: var(--fleek-neutral-12) !important; /* BLANCO PURO */
+  background-color: var(--fleek-neutral-3) !important;
+  border-radius: 4px !important;
+  font-weight: 500 !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important; /* Mejora legibilidad */
+  padding: 6px !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Hover sobre días */
+.datepicker .day:hover {
+  background-color: var(--fleek-accent-4) !important;
+  color: var(--fleek-neutral-12) !important; /* Mantiene texto blanco */
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Día actual */
+.datepicker .day.today {
+  background-color: var(--fleek-accent-7) !important;
+  color: var(--fleek-neutral-12) !important; /* Blanco */
+  font-weight: bold !important;
+  box-shadow: 0 0 0 1px var(--fleek-accent-8), 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Días del mes anterior/siguiente */
+.datepicker .day.old,
+.datepicker .day.new {
+  color: var(--fleek-neutral-8) !important; /* Gris más claro que antes */
+  background-color: var(--fleek-neutral-2) !important;
+  opacity: 0.8 !important;
+}
+
+/* Días de fin de semana */
+.datepicker .day.weekend {
+  color: var(--fleek-accent-8) !important; /* Dorado para fines de semana */
+  font-weight: 500 !important;
+}
+
+/* Día seleccionado */
+.datepicker .day.active {
+  background-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-neutral-12) !important; /* Blanco */
+  box-shadow: 0 0 0 2px var(--fleek-accent-7), 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+  font-weight: bold !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Vista de meses */
+.datepicker .month {
+  color: var(--fleek-neutral-12) !important; /* Blanco */
+  background-color: var(--fleek-neutral-3) !important;
+  padding: 10px 8px !important;
+}
+
+/* Vista de años */
+.datepicker .year {
+  color: var(--fleek-neutral-12) !important; /* Blanco */
+  background-color: var(--fleek-neutral-3) !important;
+  padding: 8px 6px !important;
+}
+
+/* Vista de décadas */
+.datepicker .decade {
+  color: var(--fleek-neutral-12) !important; /* Blanco */
+  background-color: var(--fleek-neutral-3) !important;
+  padding: 8px 6px !important;
+}
+
+/* Componentes de tiempo */
+.timepicker-picker span.timepicker-hour,
+.timepicker-picker span.timepicker-minute,
+.timepicker-picker span.timepicker-second {
+  color: var(--fleek-neutral-12) !important; /* Blanco */
+  background-color: var(--fleek-neutral-3) !important;
+  font-weight: bold !important;
+}
+
+/* Horas, minutos y segundos en sus vistas respectivas */
+.timepicker-hours .hour,
+.timepicker-minutes .minute,
+.timepicker-seconds .second {
+  color: var(--fleek-neutral-12) !important; /* Blanco */
+  background-color: var(--fleek-neutral-3) !important;
+}
+
+
+/* ======================
+   CONTROL PANEL - COMPONENTES DERECHOS (MODO OSCURO)
+   ====================== */
+
+/* Contenedor principal derecho */
+.o_cp_bottom_right {
+  background-color: var(--fleek-neutral-2) !important;
+  padding: 6px 8px !important;
+  border-radius: 4px !important;
+}
+
+/* ===== OPCIONES DE BÚSQUEDA ===== */
+.o_search_options .btn-group {
+  margin-right: 6px !important;
+}
+
+/* Botones de menú (Filtros, Agrupar por, Favoritos) */
+.o_search_options .dropdown-toggle,
+.o_search_options .btn-light {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-9) !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  padding: 6px 10px !important;
+  border-radius: 4px !important;
+  transition: all 0.15s ease !important;
+}
+
+.o_search_options .dropdown-toggle:hover,
+.o_search_options .btn-light:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  border-color: var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-8) !important;
+}
+
+.o_search_options .dropdown-toggle:focus,
+.o_search_options .dropdown-toggle[aria-expanded="true"] {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+/* Iconos en los botones de menú */
+.o_search_options .dropdown-toggle i {
+  color: var(--fleek-accent-7) !important;
+}
+
+/* Títulos en los botones */
+.o_search_options .o_dropdown_title {
+  font-weight: 500 !important;
+}
+
+/* ===== PAGINADOR ===== */
+.o_cp_pager {
+  background-color: var(--fleek-neutral-2) !important;
+  border-radius: 4px !important;
+  margin-left: 6px !important;
+}
+
+/* Contador de página */
+.o_pager_counter {
+  color: var(--fleek-neutral-8) !important;
+  padding: 0 8px !important;
+}
+
+.o_pager_value {
+  color: var(--fleek-accent-8) !important;
+  font-weight: 600 !important;
+}
+
+.o_pager_limit {
+  color: var(--fleek-neutral-7) !important;
+}
+
+/* Botones de navegación */
+.o_pager_previous,
+.o_pager_next {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-8) !important;
+}
+
+.o_pager_previous:not(:disabled):hover,
+.o_pager_next:not(:disabled):hover {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-8) !important;
+}
+
+.o_pager_previous:disabled,
+.o_pager_next:disabled {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-5) !important;
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+}
+
+/* ===== BOTONES DE VISTAS ===== */
+.o_cp_switch_buttons {
+  margin-left: 6px !important;
+}
+
+.o_cp_switch_buttons .btn {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-7) !important;
+  margin-right: 1px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+.o_cp_switch_buttons .btn:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-9) !important;
+}
+
+/* Vista activa */
+.o_cp_switch_buttons .btn.active {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-8) !important;
+  box-shadow: 0 0 0 1px var(--fleek-accent-6) inset !important;
+}
+
+/* Efecto de transición suave */
+.o_cp_switch_buttons .btn {
+  transition: all 0.15s ease-in-out !important;
+}
+
+
+/* ======================
+   COMPONENTES DE BÚSQUEDA (SEARCHVIEW) EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal de búsqueda */
+.o_searchview_input_container {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Facetas de búsqueda (filtros aplicados) */
+.o_searchview_facet {
+  background-color: var(--fleek-neutral-4) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Etiqueta de faceta (icono) */
+.o_searchview_facet_label {
+  background-color: var(--fleek-accent-4) !important;
+  color: var(--fleek-accent-8) !important;
+  border-radius: 4px 0 0 4px !important;
+}
+
+/* Valores de faceta */
+.o_facet_values {
+  color: var(--fleek-neutral-10) !important;
+  background-color: var(--fleek-neutral-4) !important;
+}
+
+/* Texto de valor de faceta */
+.o_facet_value {
+  color: var(--fleek-neutral-11) !important;
+  font-weight: 500 !important;
+}
+
+/* Botón para eliminar faceta */
+.o_facet_remove {
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_facet_remove:hover {
+  color: var(--fleek-danger-8) !important;
+  background-color: transparent !important;
+}
+
+/* Campo de entrada de búsqueda */
+.o_searchview_input {
+  background-color: transparent !important;
+  color: var(--fleek-neutral-12) !important;
+  border: none !important;
+}
+
+.o_searchview_input::placeholder {
+  color: var(--fleek-neutral-7) !important;
+  opacity: 0.7 !important;
+}
+
+.o_searchview_input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+/* ======================
+   PIE DE TABLA (TOTALES) EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal del pie de tabla */
+.o_list_footer {
+  background-color: var(--fleek-neutral-2) !important;
+  border-top: 2px solid var(--fleek-neutral-4) !important;
+  font-weight: 500 !important;
+}
+
+/* Celdas estándar en el pie de tabla */
+.o_list_footer td {
+  color: var(--fleek-neutral-10) !important;
+  padding: 8px !important;
+  border-bottom: none !important;
+}
+
+/* Celda con valor numérico/total */
+.o_list_footer .o_list_number {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-accent-8) !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--fleek-accent-5) !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Texto del tooltip */
+.o_list_footer [data-tooltip]:hover::after {
+  background-color: var(--fleek-neutral-1) !important;
+  color: var(--fleek-accent-9) !important;
+  border: 1px solid var(--fleek-accent-5) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
+}
+
+/* Estilo para text-700 en modo oscuro */
+.text-700 {
+  color: var(--fleek-neutral-11) !important; /* Color gris-blanco */
+  font-weight: 700 !important; /* Mantiene el peso de fuente bold */
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2) !important; /* Mejora legibilidad */
+}
+
+/* Asegura consistencia en diferentes contextos */
+.o_form_sheet .text-700,
+.tab-content .text-700,
+.modal-body .text-700,
+.o_notebook .text-700,
+.o_kanban_record .text-700 {
+  color: var(--fleek-neutral-11) !important;
+}
+
+/* Mejora el contraste cuando está sobre fondos más claros */
+.bg-view .text-700,
+.o_form_sheet_bg .text-700 {
+  color: var(--fleek-neutral-12) !important;
+}
+
+
+
+
+/* Tarjetas Kanban de productos en modo oscuro */
+.o_kanban_view .o_kanban_record.d-flex {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25) !important;
+}
+
+/* Tarjeta con hover */
+.o_kanban_view .o_kanban_record.d-flex:hover {
+  background-color: var(--fleek-neutral-3) !important;
+  border-color: var(--fleek-accent-5) !important;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.35) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Contenedor de imagen */
+.o_kanban_image {
+  background-color: var(--fleek-neutral-1) !important;
+  border-right: 1px solid var(--fleek-neutral-4) !important;
+  padding: 4px !important;
+}
+
+/* Imagen del producto */
+.o_kanban_image img.o_image_64_contain {
+  background-color: var(--fleek-neutral-1) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  border-radius: 4px !important;
+}
+
+/* Detalles del producto */
+.oe_kanban_details {
+  color: var(--fleek-neutral-10) !important;
+  padding: 8px 4px !important;
+}
+
+/* Título del producto */
+.o_kanban_record_title span {
+  color: var(--fleek-accent-8) !important;
+  font-weight: 600 !important;
+  font-size: 1.05em !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Información de variantes */
+.oe_kanban_details > div strong {
+  color: var(--fleek-neutral-11) !important;
+}
+
+/* Etiqueta de precio */
+.oe_kanban_details .mt-1 {
+  color: var(--fleek-neutral-9) !important;
+  font-size: 0.95em !important;
+}
+
+/* Valor del precio */
+.o_field_monetary span {
+  color: var(--fleek-accent-9) !important;
+  font-weight: 600 !important;
+}
+
+/* Estrella de favorito - inactiva */
+.o_priority_star.fa-star-o {
+  color: var(--fleek-neutral-6) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Estrella de favorito - hover */
+.o_priority_star.fa-star-o:hover {
+  color: var(--fleek-accent-7) !important;
+}
+
+/* Estrella de favorito - activa */
+.o_priority_star.fa-star {
+  color: var(--fleek-accent-7) !important;
+}
+
+
+/* Estilos para el renderizador de Kanban en modo oscuro */
+.o_kanban_renderer .o_kanban_record > div,
+.o_kanban_renderer .o_kanban_quick_create {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Efecto hover en las tarjetas */
+.o_kanban_renderer .o_kanban_record > div:hover {
+  background-color: var(--fleek-neutral-3) !important;
+  border-color: var(--fleek-accent-5) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Kanban Quick Create (formulario para crear rápidamente) */
+.o_kanban_renderer .o_kanban_quick_create {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-accent-5) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+/* Kanban seleccionado o activo */
+.o_kanban_renderer .o_kanban_record.o_kanban_record_active > div {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-6) !important;
+  box-shadow: 0 0 0 1px var(--fleek-accent-6) !important;
+}
+
+
+/* ======================
+   TOOLTIPS EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal del tooltip */
+.tooltip {
+  opacity: 1 !important;
+}
+
+/* Contenido interno del tooltip */
+.tooltip-inner {
+  background-color: var(--fleek-neutral-2) !important;
+  color: var(--fleek-neutral-11) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
+  padding: 6px 10px !important;
+  font-size: 0.9rem !important;
+}
+
+/* Flecha del tooltip - arriba */
+.tooltip.bs-tooltip-top .arrow::before {
+  border-top-color: var(--fleek-neutral-2) !important;
+}
+
+/* Flecha del tooltip - derecha */
+.tooltip.bs-tooltip-right .arrow::before {
+  border-right-color: var(--fleek-neutral-2) !important;
+}
+
+/* Flecha del tooltip - abajo */
+.tooltip.bs-tooltip-bottom .arrow::before {
+  border-bottom-color: var(--fleek-neutral-2) !important;
+}
+
+/* Flecha del tooltip - izquierda */
+.tooltip.bs-tooltip-left .arrow::before {
+  border-left-color: var(--fleek-neutral-2) !important;
+}
+
+/* Tooltips con información específica - más destacados */
+.tooltip.o-tooltip-technical,
+.tooltip.o-tooltip-help {
+  opacity: 1 !important;
+}
+
+.tooltip.o-tooltip-technical .tooltip-inner,
+.tooltip.o-tooltip-help .tooltip-inner {
+  background-color: var(--fleek-accent-3) !important;
+  border: 1px solid var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-10) !important;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4) !important;
+}
+
+.tooltip.o-tooltip-technical.bs-tooltip-top .arrow::before,
+.tooltip.o-tooltip-help.bs-tooltip-top .arrow::before {
+  border-top-color: var(--fleek-accent-3) !important;
+}
+
+
+/* ======================
+   GRÁFICOS EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal del gráfico */
+.o_graph_renderer {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  border-radius: 4px !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Área del canvas donde se dibuja el gráfico */
+.o_graph_canvas_container {
+  background-color: var(--fleek-neutral-2) !important;
+  padding: 8px !important;
+}
+
+/* Estilos para los ejes y leyendas (aplicados vía JavaScript) */
+.o_graph_renderer canvas {
+  filter: invert(0.1) !important; /* Sutil ajuste para mejorar visibilidad */
+}
+
+/* Tooltips de gráficos */
+.chartjs-tooltip {
+  background-color: var(--fleek-neutral-1) !important;
+  border: 1px solid var(--fleek-accent-5) !important;
+  color: var(--fleek-neutral-11) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4) !important;
+  padding: 6px 10px !important;
+  border-radius: 4px !important;
+}
+
+/* Leyendas de gráficos */
+.chartjs-legend ul {
+  background-color: var(--fleek-neutral-2) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+.chartjs-legend li {
+  color: var(--fleek-neutral-10) !important;
+  border-color: var(--fleek-neutral-4) !important;
+}
+
+/* Elementos sin datos */
+.o_nocontent_help {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-9) !important;
+  border: 1px dashed var(--fleek-neutral-5) !important;
+}
+
+/* ======================
+   CONTROLES DE GRÁFICOS EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal de herramientas de gráficos */
+.o_cp_bottom_left {
+  background-color: var(--fleek-neutral-2) !important;
+  padding: 6px 8px !important;
+  border-radius: 4px !important;
+  margin-bottom: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Botón principal de medidas (dropdown) */
+.o_cp_bottom_left .btn-primary {
+  background-color: var(--fleek-accent-4) !important;
+  border: 1px solid var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-10) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+  font-weight: 500 !important;
+}
+
+.o_cp_bottom_left .btn-primary:hover {
+  background-color: var(--fleek-accent-5) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-accent-11) !important;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Icono desplegable */
+.o_cp_bottom_left .dropdown-toggle i.fa-caret-down {
+  color: var(--fleek-accent-8) !important;
+}
+
+/* Botones de tipo de gráfico y controles */
+.o_cp_bottom_left .btn-light {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-8) !important;
+  margin-right: 1px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+  transition: all 0.15s ease !important;
+}
+
+.o_cp_bottom_left .btn-light:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-accent-8) !important;
+  border-color: var(--fleek-accent-5) !important;
+}
+
+/* Botón actualmente seleccionado */
+.o_cp_bottom_left .btn-light.active {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-accent-8) !important;
+  box-shadow: 0 0 0 1px var(--fleek-accent-5) inset !important;
+}
+
+/* Separación entre grupos de botones */
+.o_cp_bottom_left .btn-group {
+  margin-right: 6px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Tooltips para los botones de gráfico */
+.o_cp_bottom_left [data-tooltip]:hover::after {
+  background-color: var(--fleek-neutral-1) !important;
+  color: var(--fleek-accent-9) !important;
+  border: 1px solid var(--fleek-accent-5) !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4) !important;
+  border-radius: 4px !important;
+  padding: 5px 8px !important;
+  font-size: 0.8rem !important;
+}
+
+/* Espacio entre iconos y texto */
+.o_cp_bottom_left .btn i {
+  margin-right: 4px !important;
+}
+
+/* Ajustes para versiones móviles */
+@media (max-width: 767px) {
+  .o_cp_bottom_left {
+    padding: 4px !important;
+    flex-wrap: wrap !important;
+  }
+
+  .o_cp_bottom_left .btn-group {
+    margin-bottom: 4px !important;
+  }
+}
+
+/* ======================
+   PANEL DE BÚSQUEDA DE DASHBOARD EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal del panel de búsqueda */
+.o_spreadsheet_dashboard_search_panel {
+  background-color: var(--fleek-neutral-2) !important;
+  border-right: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 1px 0 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Secciones del panel */
+.o_search_panel_section {
+  margin-bottom: 8px !important;
+}
+
+/* Encabezados de sección */
+.o_search_panel_section_header {
+  color: var(--fleek-accent-8) !important;
+  font-size: 0.85rem !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.o_search_panel_section_header b {
+  font-weight: 600 !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Grupo de lista */
+.o_search_panel_field.list-group {
+  padding-left: 4px !important;
+}
+
+/* Elementos de la lista */
+.o_search_panel_category_value.list-group-item {
+  background-color: transparent !important;
+  color: var(--fleek-neutral-9) !important;
+  padding: 8px 12px !important;
+  margin-bottom: 2px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Efecto hover */
+.o_search_panel_category_value.list-group-item:hover {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+/* Elemento activo/seleccionado */
+.o_search_panel_category_value.list-group-item.active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-9) !important;
+  font-weight: 500 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Clase bg-view en este contexto */
+.bg-view {
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+/* Contadores de elementos (si existen) */
+.o_search_panel_counter {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-9) !important;
+  padding: 2px 6px !important;
+  border-radius: 10px !important;
+  font-size: 0.8rem !important;
+}
+
+/* Contadores en elemento activo */
+.o_search_panel_category_value.active .o_search_panel_counter {
+  background-color: var(--fleek-accent-5) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+/* Estilos para scrollbar cuando sea necesario */
+.o_search_panel_field::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.o_search_panel_field::-webkit-scrollbar-track {
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+.o_search_panel_field::-webkit-scrollbar-thumb {
+  background-color: var(--fleek-neutral-5) !important;
+  border-radius: 3px !important;
+}
+
+
+
+/* ======================
+   CHAT LLM EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal del chat */
+.o_LLMChat {
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+/* Barra lateral del chat */
+.o_LLMChatSidebar {
+  background-color: var(--fleek-neutral-3) !important;
+  border-right: 1px solid var(--fleek-neutral-4) !important;
+}
+
+/* Botón de nueva conversación */
+.o_DiscussSidebar_startAMeetingButton {
+  background-color: var(--fleek-accent-5) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-neutral-11) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+.o_DiscussSidebar_startAMeetingButton:hover {
+  background-color: var(--fleek-accent-6) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Lista de conversaciones */
+.o_LLMChatThreadList {
+  background-color: var(--fleek-neutral-3) !important;
+}
+
+/* Elemento de la lista de conversaciones */
+.o_DiscussSidebarCategoryItem {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-9) !important;
+  border-radius: 4px !important;
+  margin: 2px 8px !important;
+  transition: all 0.15s ease !important;
+}
+
+.o_DiscussSidebarCategoryItem:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+.o_DiscussSidebarCategoryItem.o-active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-9) !important;
+  font-weight: 500 !important;
+}
+
+/* Barra superior del chat */
+.o_ThreadViewTopbar {
+  background-color: var(--fleek-neutral-2) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+}
+
+/* Título editable del chat */
+.o_ThreadViewTopbar_threadName {
+  background-color: transparent !important;
+  color: var(--fleek-neutral-11) !important;
+  border-color: var(--fleek-neutral-4) !important;
+}
+
+/* Botones de la barra superior */
+.o_ThreadViewTopbar .btn-outline-secondary {
+  background-color: transparent !important;
+  border-color: var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_ThreadViewTopbar .btn-outline-secondary:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+/* Botones dropdown */
+.o_ThreadDropdowns .btn-light {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_ThreadDropdowns .btn-light:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-10) !important;
+}
+
+/* Menús desplegables */
+.o_ThreadDropdowns .dropdown-menu {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+}
+
+.o_ThreadDropdowns .dropdown-item {
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_ThreadDropdowns .dropdown-item:hover {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+.o_ThreadDropdowns .dropdown-item.active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-8) !important;
+}
+
+.o_ThreadDropdowns .dropdown-divider {
+  border-top: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.o_ThreadDropdowns .dropdown-header {
+  color: var(--fleek-accent-8) !important;
+  background-color: var(--fleek-neutral-3) !important;
+}
+
+/* Input de búsqueda en dropdown */
+.o_ThreadDropdowns .form-control {
+  background-color: var(--fleek-neutral-3) !important;
+  border-color: var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+/* Área de contenido del chat */
+.o_LLMChatThread_content {
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+.o_MessageList.bg-view {
+  background-color: var(--fleek-neutral-2) !important;
+}
+
+/* Separador de fecha */
+.o_MessageList_separator {
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_MessageList_separatorLine {
+  border-color: var(--fleek-neutral-5) !important;
+}
+
+/* Mensajes */
+.o_Message {
+  background-color: transparent !important;
+}
+
+/* Avatar */
+.o_Message_authorAvatar {
+  border: 2px solid var(--fleek-neutral-4) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Nombre del autor */
+.o_Message_authorName {
+  color: var(--fleek-accent-8) !important;
+}
+
+/* Fecha del mensaje */
+.o_Message_date {
+  color: var(--fleek-neutral-7) !important;
+}
+
+/* Burbuja de mensaje */
+.o_Message_bubble {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Contenido del mensaje */
+.o_Message_content {
+  color: var(--fleek-neutral-10) !important;
+}
+
+/* Mensaje de notificación */
+.o_Message.o-notification .o_Message_bubble {
+  background-color: var(--fleek-accent-3) !important;
+  border-color: var(--fleek-accent-4) !important;
+}
+
+/* Acciones de mensaje */
+.o_MessageActionList {
+  background-color: var(--fleek-neutral-2) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+}
+
+.o_MessageActionView {
+  color: var(--fleek-neutral-8) !important;
+}
+
+.o_MessageActionView:hover {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-accent-7) !important;
+}
+
+/* Indicador de estado del usuario */
+.o_PersonaImStatusIcon_outerBackground {
+  color: var(--fleek-neutral-2) !important;
+}
+
+.o_PersonaImStatusIcon_innerBackground {
+  color: var(--fleek-neutral-4) !important;
+}
+
+/* Área del compositor */
+.o_LLMChatThread_composer {
+  background-color: var(--fleek-neutral-2) !important;
+  border-top: 1px solid var(--fleek-neutral-4) !important;
+}
+
+/* Input del compositor */
+.o_LLMChatComposerTextInput {
+  background-color: transparent !important;
+}
+
+.o_LLMChatComposerTextInput_textarea {
+  background-color: var(--fleek-neutral-3) !important;
+  border: 1px solid var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-11) !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15) !important;
+}
+
+.o_LLMChatComposerTextInput_textarea:focus {
+  border-color: var(--fleek-accent-5) !important;
+  box-shadow: 0 0 0 1px var(--fleek-accent-5) !important;
+}
+
+.o_LLMChatComposerTextInput_textarea::placeholder {
+  color: var(--fleek-neutral-7) !important;
+}
+
+/* Botón de enviar */
+.o_Composer_buttonSend {
+  background-color: var(--fleek-accent-5) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+.o_Composer_buttonSend:hover:not(:disabled) {
+  background-color: var(--fleek-accent-6) !important;
+  border-color: var(--fleek-accent-7) !important;
+}
+
+.o_Composer_buttonSend:disabled {
+  background-color: var(--fleek-neutral-4) !important;
+  border-color: var(--fleek-neutral-5) !important;
+  color: var(--fleek-neutral-7) !important;
+  opacity: 0.7 !important;
+}
+
+
+/* ======================
+   BARRA LATERAL DISCUSS EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal de la barra lateral */
+.o_DiscussSidebar {
+  background-color: var(--fleek-neutral-3) !important;
+  border-right: 1px solid var(--fleek-neutral-4) !important;
+}
+
+/* Botón de iniciar reunión */
+.o_DiscussSidebar_startAMeetingButton {
+  background-color: var(--fleek-accent-5) !important;
+  border-color: var(--fleek-accent-6) !important;
+  color: var(--fleek-neutral-11) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+  transition: all 0.2s ease !important;
+}
+
+.o_DiscussSidebar_startAMeetingButton:hover {
+  background-color: var(--fleek-accent-6) !important;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Separadores */
+.o_DiscussSidebar_separator {
+  border-top-color: var(--fleek-neutral-4) !important;
+  opacity: 0.7 !important;
+}
+
+/* Buzones de correo (Inbox, Starred, History) */
+.o_DiscussSidebarMailbox {
+  color: var(--fleek-neutral-9) !important;
+  background-color: var(--fleek-neutral-3) !important;
+  transition: all 0.15s ease !important;
+}
+
+.o_DiscussSidebarMailbox:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+.o_DiscussSidebarMailbox.o-active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-9) !important;
+  font-weight: 500 !important;
+}
+
+/* Iconos de buzones */
+.o_ThreadIcon_mailboxInbox,
+.o_ThreadIcon_mailboxStarred,
+.o_ThreadIcon_mailboxHistory {
+  color: var(--fleek-neutral-8) !important;
+}
+
+.o-active .o_ThreadIcon_mailboxInbox,
+.o-active .o_ThreadIcon_mailboxStarred,
+.o-active .o_ThreadIcon_mailboxHistory {
+  color: var(--fleek-accent-8) !important;
+}
+
+/* Encabezados de categorías */
+.o_DiscussSidebarCategory_header {
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_DiscussSidebarCategory_titleText {
+  color: var(--fleek-neutral-9) !important;
+  font-weight: 600 !important;
+}
+
+/* Comandos de categoría (iconos de configuración y añadir) */
+.o_DiscussSidebarCategory_command {
+  color: var(--fleek-neutral-7) !important;
+}
+
+.o_DiscussSidebarCategory_command:hover {
+  color: var(--fleek-accent-7) !important;
+}
+
+/* Items de categorías (canales y chats) */
+.o_DiscussSidebarCategoryItem {
+  background-color: var(--fleek-neutral-3) !important;
+  color: var(--fleek-neutral-9) !important;
+  transition: all 0.15s ease !important;
+}
+
+.o_DiscussSidebarCategoryItem:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-11) !important;
+}
+
+.o_DiscussSidebarCategoryItem.o-active {
+  background-color: var(--fleek-accent-3) !important;
+  color: var(--fleek-accent-9) !important;
+}
+
+/* Avatares de canales y usuarios */
+.o_DiscussSidebarCategoryItem_imageContainer {
+  border: 1px solid var(--fleek-neutral-4) !important;
+  background-color: var(--fleek-neutral-2) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+/* Texto en clases text-dark */
+.text-dark {
+  color: var(--fleek-neutral-9) !important;
+}
+
+/* Clases de fondo específicas */
+.bg-100 {
+  background-color: var(--fleek-neutral-3) !important;
+}
+
+.bg-200 {
+  background-color: var(--fleek-accent-3) !important;
+}
+
+/* Estilos para texto en bold con clase text-700 */
+.text-700 {
+  color: var(--fleek-neutral-9) !important;
+}
+
+.text-700.opacity-75 {
+  opacity: 0.85 !important;
+}
+
+.text-700.opacity-100-hover:hover {
+  color: var(--fleek-accent-8) !important;
+  opacity: 1 !important;
+}
+
+/* Ajustes para elementos activos */
+.o_DiscussSidebarCategoryItem.o-active .o_DiscussSidebarCategoryItem_name,
+.o_DiscussSidebarMailbox.o-active .o_DiscussSidebarMailbox_name {
+  color: var(--fleek-accent-8) !important;
+  font-weight: 500 !important;
+}
+
+/* Elementos con estado destacado */
+.o-starred-box {
+  position: relative;
+}
+
+.o-starred-box:after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 30%;
+  bottom: 30%;
+  width: 3px;
+  background-color: var(--fleek-accent-5);
+  opacity: 0.6;
+  border-radius: 0 2px 2px 0;
+}
+
+/* ======================
+   BARRA SUPERIOR DE CONVERSACIÓN EN MODO OSCURO
+   ====================== */
+
+/* Contenedor principal de la barra */
+.o_ThreadViewTopbar {
+  background-color: var(--fleek-neutral-3) !important;
+  border-bottom: 1px solid var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-9) !important;
+}
+
+/* Icono de la conversación */
+.o_ThreadIcon_groupRestrictedChannel {
+  color: var(--fleek-accent-7) !important;
+}
+
+/* Título de la conversación */
+.o_ThreadViewTopbar_threadName {
+  background-color: var(--fleek-neutral-3) !important;
+  border-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-11) !important;
+  font-weight: 500 !important;
+}
+
+.o_ThreadViewTopbar_threadName:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  border-color: var(--fleek-accent-5) !important;
+}
+
+/* Separador entre título y descripción */
+.o_ThreadViewTopbar_threadDescriptionSeparator {
+  border-left-color: var(--fleek-neutral-5) !important;
+  opacity: 0.6 !important;
+}
+
+/* Descripción de la conversación */
+.o_ThreadViewTopbar_threadDescription {
+  background-color: var(--fleek-neutral-3) !important;
+  border-color: var(--fleek-neutral-4) !important;
+  color: var(--fleek-neutral-9) !important;
+}
+
+.o_ThreadViewTopbar_threadDescription:hover {
+  background-color: var(--fleek-neutral-4) !important;
+  border-color: var(--fleek-accent-5) !important;
+}
+
+/* Botones de acción */
+.o_ThreadViewTopbar_button {
+  background-color: transparent !important;
+  border: none !important;
+  transition: all 0.2s ease !important;
+}
+
+.o_ThreadViewTopbar_button:hover {
+  background-color: var(--fleek-neutral-4) !important;
+}
+
+.o_ThreadViewTopbar_button:active {
+  background-color: var(--fleek-accent-3) !important;
+}
+
+/* Iconos dentro de los botones */
+.o_ThreadViewTopbar_button i.text-700 {
+  color: var(--fleek-neutral-8) !important;
+}
+
+.o_ThreadViewTopbar_button:hover i.text-700 {
+  color: var(--fleek-accent-7) !important;
+}
+
+/* Elementos editables */
+.o_ThreadViewTopbar_editableItem {
+  transition: all 0.15s ease !important;
+}
+
+/* Clases específicas para corregir colores en este contexto */
+.o_ThreadViewTopbar .border-light {
+  border-color: var(--fleek-neutral-4) !important;
+}
+
+.o_ThreadViewTopbar .text-truncate {
+  max-width: 300px !important;
+}
+
+.o_ThreadViewTopbar .lead {
+  font-size: 1rem !important;
+  color: var(--fleek-accent-7) !important;
+}
+
+/* ======================
+   CELDAS DE DATOS EN MODO OSCURO
+   ====================== */
+
+/* Estilo base para celdas de datos */
+.o_data_cell {
+  background-color: var(--fleek-neutral-2) !important;
+  color: var(--fleek-neutral-10) !important;
+  border-color: var(--fleek-neutral-4) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Efecto hover para celdas con cursor pointer */
+.o_data_cell.cursor-pointer:hover {
+  background-color: var(--fleek-neutral-3) !important;
+}
+
+/* Celdas de tipo many2one con código de barras */
+.o_many2one_barcode_cell {
+  background-color: var(--fleek-neutral-2) !important;
+  border-color: var(--fleek-neutral-4) !important;
+}
+
+/* Enlaces dentro de celdas */
+.o_data_cell .o_form_uri {
+  color: var(--fleek-accent-8) !important;
+  text-decoration: none !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Efecto hover para enlaces */
+.o_data_cell .o_form_uri:hover {
+  color: var(--fleek-accent-9) !important;
+  text-decoration: underline !important;
+}
+
+/* Contenido dentro de celdas many2one */
+.o_field_many2one_barcode span {
+  color: var(--fleek-neutral-11) !important;
+}
+
+/* Mejora legibilidad de códigos de producto entre corchetes */
+.o_field_many2one_barcode span {
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+
+/* ======================
+   ENLACES DE DIRECCIÓN EN MODO OSCURO
+   ====================== */
+
+/* Estilo base para enlaces de formulario */
+.o_form_uri {
+  background-color: var(--fleek-neutral-2) !important;
+  color: var(--fleek-accent-8) !important;
+  border: 1px solid var(--fleek-neutral-4) !important;
+
+}
+
+/* Efecto hover para enlaces */
+.o_form_uri:hover {
+  background-color: var(--fleek-neutral-3) !important;
+  border-color: var(--fleek-accent-5) !important;
+}
+
+/* Primera línea (nombre) con más énfasis */
+.o_form_uri span:first-child {
+  color: var(--fleek-accent-8) !important;
+  text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Líneas de dirección */
+.o_form_uri span:not(:first-child) {
+  color: var(--fleek-neutral-9) !important;
+}
+
+/* Última línea (país) */
+.o_form_uri span:last-child {
+  color: var(--fleek-neutral-8) !important;
+}
+
+/* Efecto hover para los spans */
+.o_form_uri:hover span {
+  color: var(--fleek-neutral-11) !important;
+}
+
+.o_form_uri:hover span:first-child {
+  color: var(--fleek-accent-9) !important;
+}

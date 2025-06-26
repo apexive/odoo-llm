@@ -1,0 +1,179 @@
+///
+/// This file is a copy of the bootstrap _variables.scss file where all the
+/// left-untouched variables definition have been removed.
+///
+
+// 1. Fleek Color Palette
+//==============================================================================
+
+// Neutral Scale
+$fleek-neutral-1: #FCFCFC;
+$fleek-neutral-2: #F9F9F9;
+$fleek-neutral-3: #F0F0F0;
+$fleek-neutral-4: #E8E8E8;
+$fleek-neutral-5: #E0E0E0;
+$fleek-neutral-6: #D9D9D9;
+$fleek-neutral-7: #CECECE;
+$fleek-neutral-8: #BBB;
+$fleek-neutral-9: #8D8D8D;
+$fleek-neutral-10: #838383;
+$fleek-neutral-11: #646464;
+$fleek-neutral-12: #646464;
+
+// Accent Scale (Used for Primary)
+$fleek-accent-9: #FFE629;
+
+// Success Scale
+$fleek-success-9: #30A46C;
+
+// Warning Scale
+$fleek-warning-9: #FFC53D;
+
+// Danger Scale
+$fleek-danger-9: #E5484D;
+
+// 2. Bootstrap Color System Mapping
+//==============================================================================
+// We redefine the color system using the Fleek palette.
+
+$primary:       $fleek-accent-9 !default;
+$secondary:     $fleek-neutral-7 !default;
+$success:       $fleek-success-9 !default;
+$warning:       $fleek-warning-9 !default;
+$danger:        $fleek-danger-9 !default;
+$light:         $fleek-neutral-2 !default;
+$dark:          $fleek-neutral-12 !default;
+
+// Mapping for custom variables (prefixed with $o- in original file)
+$o-brand-primary:       $primary !default;
+$o-gray-200:            $fleek-neutral-2 !default;
+$o-gray-300:            $fleek-neutral-3 !default;
+$o-gray-700:            $secondary !default;
+$o-gray-900:            $dark !default;
+$o-main-text-color:     $fleek-neutral-9 !default;
+$o-main-headings-color: $fleek-neutral-11 !default;
+$o-main-color-muted:    $fleek-neutral-7 !default;
+$o-border-radius:       0 !default; // From original settings
+$o-font-size-base:      1rem !default; // Assuming a base font size
+
+
+// Options
+//==============================================================================
+// Enable predefined decorative box-shadow styles on various components.
+// Does not affect box-shadows used for focus states.
+
+$enable-shadows: true !default;
+
+// Components
+//==============================================================================
+// Define common padding and border radius sizes and more.
+
+$btn-border-radius: 0 !default;
+$btn-border-radius-sm: 0 !default;
+$btn-border-radius-lg: 0 !default;
+$input-border-radius: 0 !default;
+$input-border-radius-sm: 0 !default;
+$input-border-radius-lg: 0 !default;
+$nav-tabs-border-radius: 0 !default;
+$nav-pills-border-radius: 0 !default;
+$dropdown-border-radius: 0 !default;
+$pagination-border-radius: 0 !default;
+$pagination-border-radius-sm: 0 !default;
+$pagination-border-radius-lg: 0 !default;
+$card-border-radius: 0 !default;
+$accordion-border-radius: 0 !default;
+$tooltip-border-radius: 0 !default;
+$popover-border-radius: 0 !default;
+$toast-border-radius: 0 !default;
+$badge-border-radius: 0 !default;
+$modal-content-border-radius: 0 !default;
+$alert-border-radius: 0 !default;
+$progress-border-radius: 0 !default;
+$list-group-border-radius: 0 !default;
+$thumbnail-border-radius: 0 !default;
+$form-check-input-border-radius: 0 !default;
+
+// Typography
+//==============================================================================
+// Font, line-height, and color for body text, headings, and more.
+
+$h1-font-size: $o-font-size-base * 2.4 !default;
+$h2-font-size: $o-font-size-base * 1.5 !default;
+$h3-font-size: $o-font-size-base * 1.3 !default;
+$h4-font-size: $o-font-size-base * 1.2 !default;
+$h5-font-size: $o-font-size-base * 1.1 !default;
+
+// Tables
+//==============================================================================
+// Customizes the `.table` component with basic values, each used across all table variations.
+
+$table-striped-bg-factor: 0.01 !default;
+$table-striped-order: odd !default;
+
+// Buttons
+//==============================================================================
+// For each of Bootstrap's buttons, define text, background, and border color.
+
+$btn-transition: none !default;
+
+$btn-box-shadow: 0 !default;
+$btn-active-box-shadow: 0 !default;
+
+// Dropdowns
+//==============================================================================
+// Dropdown menu container and contents.
+
+$dropdown-divider-bg: $o-gray-200 !default;
+
+// Forms
+//==============================================================================
+$input-box-shadow: 0 !default;
+
+// Will affect bootstrap default forms only (eg. popover textarea)
+$input-focus-box-shadow: 0 !default;
+$input-focus-border-color: mix($o-brand-primary, $o-gray-300) !default;
+
+$form-select-focus-box-shadow: 0 !default;
+
+$form-range-track-box-shadow: 0 !default;
+
+$custom-checkbox-indicator-border-radius: 1px !default; // Just a slight smoothing.
+
+// Z-index master list
+//==============================================================================
+// (Original comment retained)
+// TODO the following code was disabled because it is saas-incompatible
+//
+// $zindex-modal-backdrop: $zindex-modal;
+
+// Navs
+//==============================================================================
+$nav-link-color: $o-main-text-color !default;
+$nav-tabs-link-active-color: $o-main-headings-color !default;
+$nav-tabs-link-active-bg: transparent !default;
+
+
+// Badges
+//==============================================================================
+$badge-border-radius: $o-border-radius !default;
+
+// Alerts
+//==============================================================================
+// Define alert colors, border radius, and padding.
+
+$alert-border-width: 0 !default;
+
+// Progress bars
+//==============================================================================
+$progress-box-shadow: 0 !default;
+
+
+// Image thumbnails
+//==============================================================================
+$thumbnail-box-shadow: 0 !default;
+
+
+// Breadcrumbs
+//==============================================================================
+$breadcrumb-active-color: $o-main-text-color !default;
+$breadcrumb-divider-color: $o-main-color-muted !default;

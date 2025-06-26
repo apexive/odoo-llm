@@ -1,0 +1,54 @@
+///
+/// This file regroups the variables that style odoo components.
+/// They are available in every asset bundle.
+///
+/// COLORS UPDATED ACCORDING TO THE FLEEK DESIGN SYSTEM (06/12/24)
+///
+
+// Colors
+$o-white: #FFFFFF !default;
+$o-black: #000000 !default;
+
+// Neutral Scale from the palette
+// Note: Mapping the 12-step palette to the 9 available gray variables.
+$o-gray-100: #F9F9F9 !default; // Palette position: 2
+$o-gray-200: #F0F0F0 !default; // Palette position: 3
+$o-gray-300: #E8E8E8 !default; // Palette position: 4
+$o-gray-400: #E0E0E0 !default; // Palette position: 5
+$o-gray-500: #D9D9D9 !default; // Palette position: 6
+$o-gray-600: #CECECE !default; // Palette position: 7
+$o-gray-700: #BBB !default; // Palette position: 8
+$o-gray-800: #838383 !default; // Palette position: 10
+$o-gray-900: #646464 !default; // Palette position: 11
+
+// Accent/Brand Colors from the "Accent" palette
+$o-enterprise-color: #836A21 !default;          // A darker accent color, ~position 11
+$o-enterprise-primary-color: #665417 !default; // Main accent color, ~position 9
+$o-enterprise-primary-color-light: scale-color($o-enterprise-primary-color, $lightness: 6%) !default;
+
+// State-based colors from the palette
+$success: #30A46C !default; // "Success" palette, ~position 10
+$warning: #FFC53D !default; // "Warning" palette, ~position 9
+$danger: #E5484D !default;  // "Danger" palette, ~position 10
+
+$o-brand-odoo: $o-enterprise-color !default;
+$o-brand-primary: $o-enterprise-primary-color !default;
+$o-brand-secondary: $o-gray-700 !default; // Using a neutral gray for secondary text/elements
+$o-brand-lightsecondary: $o-gray-100 !default;
+
+// Component-specific variables
+$o-list-group-header-color: $o-gray-900 !default;
+$o-list-footer-color: $o-gray-900 !default;
+$o-list-footer-bg-color: $o-white !default;
+$o-list-footer-font-weight: 500 !default;
+
+$o-dropdown-box-shadow: 0 12px 14px -10px rgba($o-black, 0.25) !default;
+
+// o-inputs
+$o-input-padding-y: 1px !default;
+$o-input-padding-x: 0 !default;
+
+$o-input-border-required: $o-gray-900 !default;
+
+// Badges
+$o-badge-min-width: 2.7ch !default !default;

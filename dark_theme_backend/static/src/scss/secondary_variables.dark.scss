@@ -1,0 +1,58 @@
+// ============================================================================
+// Definición de la Paleta para Tema Oscuro (Basada en la imagen)
+// ============================================================================
+
+// -- Paleta Neutral
+$dark-neutral-1: #2E2E2E !default; // Fondo principal oscuro
+$dark-neutral-2: #424242 !default; // Fondo para paneles y elementos elevados
+$dark-neutral-text-primary: #E0E0E0 !default; // Texto principal
+$dark-neutral-text-secondary: #A0A0A0 !default; // Texto secundario
+
+// -- Paleta de Acento
+$dark-accent-primary: #F7E74F !default;
+$dark-accent-secondary: #B9AD39 !default;
+$dark-accent-tertiary: #8C7F27 !default;
+
+// -- Paleta de Éxito
+$dark-success-primary: #30C381 !default;
+$dark-success-secondary: #249261 !default;
+$dark-success-tertiary: #1A6A45 !default;
+
+// -- Paleta de Advertencia
+$dark-warning-primary: #F7B52C !default;
+$dark-warning-secondary: #B98821 !default;
+$dark-warning-tertiary: #8C6719 !default;
+
+// -- Paleta de Peligro
+$dark-danger-primary: #E85C5C !default;
+$dark-danger-secondary: #AD4545 !default;
+$dark-danger-tertiary: #813333 !default;
+
+
+// ============================================================================
+// Aplicación de la Paleta de Tema Oscuro
+// ============================================================================
+
+// Lista principal de colores para la UI (ej. gráficos, etiquetas primarias)
+// Se utilizan los colores más vibrantes de la paleta.
+$o-colors: $dark-danger-primary, $dark-warning-primary, $dark-accent-primary,
+            $dark-success-primary, #6CC1ED, #9365B8, $dark-danger-secondary,
+            $dark-accent-secondary, #475577, $dark-success-secondary,
+            $dark-warning-secondary, $dark-accent-tertiary !default;
+
+// Lista secundaria de colores (ej. variaciones, elementos menos importantes)
+// Se utilizan los matices más oscuros o alternativos de la paleta.
+$o-colors-secondary: $dark-danger-tertiary, $dark-success-tertiary, $dark-warning-tertiary,
+                     $dark-accent-tertiary, #4285F4, #8E24AA, $dark-danger-secondary,
+                     #173e43, $dark-success-secondary, $dark-danger-primary,
+                     #795548, $dark-warning-secondary, $dark-success-primary,
+                     $dark-neutral-text-secondary, $dark-accent-secondary, #b56969,
+                     $dark-neutral-text-secondary, #649173 !default;
+
+// = ControlPanel
+// ============================================================================
+// en modo oscuro
+$o-control-panel-background-color: $dark-neutral-2 !default;
+
+// Nota: Las variables originales ($o-colors-original, $o-colors-secondary-original)
+// y los bucles @each ya no son necesarios con esta implementación de tema oscuro.

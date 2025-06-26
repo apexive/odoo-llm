@@ -1,0 +1,160 @@
+///
+/// This file is a copy of the bootstrap _variables.scss file where all the
+/// left-untouched variables definition have been removed.
+///
+
+
+// == Color system
+
+
+// == Characters which are escaped by the escape-svg function
+
+
+// == Options
+
+
+// == Prefix for :root CSS variables
+
+
+// == Gradient
+
+
+// == Spacing
+
+
+// == Position
+
+
+// == Body
+
+
+// == Links
+$link-shade-percentage: 40% !default; // Keep as is, relative to link color
+
+// == Paragraphs
+
+
+// == Grid breakpoints
+
+
+// == Grid containers
+
+
+// == Grid columns
+
+
+// == Components
+$box-shadow: 0 .5rem 1rem rgba($o-black, .5) !default; // Darker shadow for dark mode
+$box-shadow-sm: 0 .125rem .25rem rgba($o-black, .3) !default; // Darker shadow for dark mode
+$box-shadow-lg: 0 1rem 3rem rgba($o-black, .5) !default; // Darker shadow for dark mode
+$box-shadow-inset: inset 0 1px 2px rgba($o-black, .2) !default; // Darker inset shadow for dark mode
+
+$component-active-bg: $o-gray-300 !default;
+
+
+// == Typography
+
+
+// == Tables
+$table-bg: $o-view-background-color !default;
+$table-border-color: $o-gray-300 !default;
+$table-group-separator-color: $o-gray-300 !default;
+$table-bg-scale: 5% !default; // Adjust scale for dark mode tables to be slightly lighter
+
+// == Buttons + Forms
+
+
+// == Buttons
+
+
+// == Forms
+$input-placeholder-color: $o-gray-600 !default; // Slightly lighter placeholder for dark mode
+
+$form-switch-color: rgba($o-white, .5) !default !default; // Lighter switch color for dark mode
+
+// == Form validation
+
+
+// == Z-index master list
+
+
+// == Navs
+
+
+// == Navbar
+
+
+// == Dropdowns
+$dropdown-bg: $o-gray-300 !default;
+
+
+// == Pagination
+
+
+// == Placeholders
+
+
+// == Cards
+$card-cap-bg: $o-view-background-color !default;
+$card-bg: $card-cap-bg !default;
+
+// == Accordion
+
+
+// == Tooltips
+
+
+// == Form tooltips must come after regular tooltips
+
+
+// == Popovers
+$popover-bg: $o-gray-300 !default;
+
+// == Toasts
+
+
+// == Badges
+
+
+// == Modals
+
+
+// == Alerts
+$alert-bg-scale: 5% !default; // Adjust scale for dark mode alerts to be slightly lighter
+$alert-border-scale: 20% !default; // Adjust scale for dark mode alert borders to be more visible
+$alert-color-scale: 90% !default; // Keep as is for text color
+
+// == Progress bars
+
+
+// == List group
+$list-group-bg: $o-view-background-color !default;
+
+
+// == Image thumbnails
+
+
+// == Figures
+
+
+// == Breadcrumbs
+
+
+// == Carousel
+
+
+// == Spinners
+
+
+// == Close
+
+
+// == Offcanvas
+
+
+// == Code
+
+// == Keyboard Input
+$kbd-color: $o-gray-900 !default; // Lighter text color for keyboard input
+$kbd-bg: $o-gray-300 !default; // Darker background for keyboard input
+$kbd-box-shadow: 0px 1px 1px rgba($o-black, 0.4), inset 0px -1px 1px 1px rgba($o-gray-200, 0.8), inset 0px 2px 0px 0px rgba($o-gray-100, 0.8) !default; // Adjusted shadows for dark mode

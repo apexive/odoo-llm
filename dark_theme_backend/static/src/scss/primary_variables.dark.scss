@@ -1,0 +1,120 @@
+///
+/// Odoo Dark-Mode (Refined based on provided palette)
+///
+
+// ============================================================================
+// 1. Core Palette Definition
+// Abstracting the image palette into core variables for maintainability.
+// ============================================================================
+
+// -- Neutral Scale (From Image)
+$palette-neutral-1: #111;; // Darkest background
+$palette-neutral-2: #191919;
+$palette-neutral-3: #222222; // Main component background
+$palette-neutral-4: #2A2A2A;
+$palette-neutral-5: #313131;
+$palette-neutral-6: #3A3A3A;;
+$palette-neutral-7: #484848;
+$palette-neutral-8: #606060;
+$palette-neutral-9: #6E6E6E;
+$palette-neutral-10: #7B7B7B; // Main text color
+$palette-neutral-11: #B4B4B4; // Brighter text / Headings
+$palette-neutral-12: #EEEEEE;
+
+
+$palette-accent: #362B00;
+$palette-accent-dark: #8C7F27;
+$palette-success: #30C381;
+$palette-success-dark: #30A46C;
+$palette-warning: #F7B52C;
+$palette-warning-dark: #FFC53D;
+$palette-danger: #E85C5C;
+$palette-danger-dark: #E5484D;
+
+
+// ============================================================================
+// 2. Odoo Variable Mapping
+// ============================================================================
+
+// = Base Colors
+// ============================================================================
+
+$o-white: $palette-neutral-12 !default;
+$o-black: $palette-neutral-1 !default;
+
+$o-gray-100: $palette-neutral-1 !default;
+$o-gray-200: $palette-neutral-2 !default;
+$o-gray-300: $palette-neutral-3 !default;
+$o-gray-400: $palette-neutral-4 !default;
+$o-gray-500: $palette-neutral-5 !default;
+$o-gray-600: $palette-neutral-6 !default;
+$o-gray-700: $palette-neutral-7 !default;
+$o-gray-800: $palette-neutral-8 !default;
+$o-gray-900: $palette-neutral-10 !default; // Adjusted to D6D6D6 for better contrast
+
+// -- Brand & Semantic Colors
+// Using darker shades for backgrounds/UI elements and brighter ones for text/highlights
+$o-brand-primary: $palette-success-dark !default;     // A distinct, dark primary color
+$o-enterprise-color: $palette-accent !default;        // The BRIGHT accent color for highlights, text, etc.
+$o-enterprise-color-dark: $palette-accent-dark !default;  // The DARK accent color for backgrounds or states
+
+$o-success: $palette-success-dark !default;
+$o-info: $palette-success-dark !default;            // Using success for info is a common practice
+$o-warning: $palette-warning-dark !default;
+$o-danger: $palette-danger-dark !default;
+
+
+// = Text
+// ============================================================================
+
+$o-main-text-color: $o-gray-900 !default;
+$o-main-link-color: $palette-success !default;       // Using the bright success color for links makes them stand out
+$o-main-favorite-color: $palette-accent !default;    // The bright accent is perfect for "favorite" stars
+$o-main-code-color: $palette-danger !default;        // The bright danger color provides a great highlight for code
+
+// Fine-tune contextual text colors for high visibility against dark backgrounds.
+$o-theme-text-colors: (
+    "primary": $o-main-link-color,
+    "success": $palette-success,
+    "info": $palette-success,
+    "warning": $palette-warning,
+    "danger": $palette-danger,
+    "enterprise": $o-enterprise-color,
+) !default;
+
+
+// = Webclient
+// ============================================================================
+$o-webclient-color-scheme: dark !default;
+$o-webclient-background-color: $o-black !default;     // The darkest neutral for the overall background
+$o-view-background-color: $o-gray-200 !default;       // A slightly lighter neutral for the main view/content area
+
+// = Inputs
+$o-input-border-required: $palette-warning !default;  // Warning color is often better for "required" than success
+
+// = Buttons
+$o-btn-secondary-bg: transparent !default;
+$o-btn-secondary-border-color: $o-gray-500 !default;
+$o-btn-secondary-hover-bg: $o-gray-300 !default;
+$o-btn-secondary-hover-border-color: $o-gray-300 !default;
+
+$o-btn-light-bg: $o-gray-300 !default;
+$o-btn-light-hover-bg: $o-gray-400 !default;
+
+
+// = Components
+// ============================================================================
+
+// = List-group
+$o-list-group-active-color: $o-white !default;
+$o-list-group-active-bg: rgba($palette-success, 0.2) !default; // Transparent success is great for selection
+
+// = Navbar
+$o-navbar-bg: $o-view-background-color !default;
+$o-navbar-apps-menu-bg: $o-gray-100 !default; // The darkest color for the main apps menu
+$o-backend-entry-hover-bg: $o-gray-300 !default; // Hover for app icons
+
+// = Modal
+$modal-content-bg: $o-view-background-color !default;
+$modal-header-bg: $o-gray-300 !default;
+$modal-backdrop-bg: rgba($o-black, 0.8) !default;

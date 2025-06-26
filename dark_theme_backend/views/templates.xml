@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <template id="theme_switcher_button_systray" inherit_id="web.SystrayMenu">
+    <xpath expr="//ul[contains(@class, 'o_menu_systray')]" position="inside">
+      <li class="o_night_mode">
+        <a href="#" class="nav-link" id="theme_switcher_button"
+           title="Cambiar Tema" role="button" aria-label="Cambiar Tema">
+          <i class="fa fa-moon-o" aria-hidden="true"/>
+        </a>
+      </li>
+    </xpath>
+  </template>
+</odoo>
