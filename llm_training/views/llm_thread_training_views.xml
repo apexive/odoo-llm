@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <record id="llm_thread_training_view_form" model="ir.ui.view">
+        <field name="name">llm.thread.training.form</field>
+        <field name="model">llm.thread</field>
+        <field name="inherit_id" ref="llm_thread.llm_thread_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="trigger_avatar_training" type="object" 
+                        string="Training Avatar"
+                        class="btn-primary"
+                        attrs="{'invisible': [('assistant_id', '=', False)]}"
+                        help="Training a LoRA avatar based on images from user messages"/>
+            </xpath>
+        </field>
+    </record>
+</data>

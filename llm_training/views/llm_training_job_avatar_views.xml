@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+    <record id="llm_training_job_avatar_view_form" model="ir.ui.view">
+        <field name="name">llm.training.job.avatar.form</field>
+        <field name="model">llm.training.job</field>
+        <field name="inherit_id" ref="llm_training.llm_training_job_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='hyperparameters']" position="after">
+                <field name="trained_model_name" readonly="1"/>
+            </xpath>
+            <xpath expr="//field[@name='training_metrics']" position="after">
+                <group string="Avatar Training Info" attrs="{'invisible': [('name', 'not ilike', 'Avatar Training')]}">
+                    <field name="description" readonly="1"/>
+                </group>
+            </xpath>
+        </field>
+    </record>
+</data>

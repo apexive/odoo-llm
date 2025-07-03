@@ -1,5 +1,10 @@
 import json
 import logging
+import base64
+import requests
+import tempfile
+import zipfile
+import os
 
 from odoo import api, fields, models
 from odoo.exceptions import UserError
@@ -187,3 +192,240 @@ class LLMTrainingJob(models.Model):
 
         self.write({"training_metrics": metrics_str})
         return True
+
+    # Avatar training specific methods
+    def start_avatar_training(self, thread, assistant):
+        """Start avatar training workflow for a thread"""
+        try:
+            # Set job state to preparing
+            self.write({'state': 'preparing'})
+            
+            # Get the zip URL for user image attachments
+            zip_url = thread._get_user_image_attachments_zip_url()
+            
+            if not zip_url:
+                raise UserError("No se encontraron imágenes en los mensajes del usuario")
+            
+            # Prepare training parameters using the prompt template
+            training_params = self._prepare_avatar_training_params(assistant, zip_url)
+            
+            # Start the training job
+            self._submit_avatar_training_job(training_params, thread)
+            
+        except Exception as e:
+            _logger.error(f"Error starting avatar training for job {self.id}: {e}")
+            self.write({'state': 'failed'})
+            # Post error message to thread
+            thread._post_training_error_message(
+                f"Error al iniciar el entrenamiento de avatar: {str(e)}"
+            )
+            raise
+
+    def _prepare_avatar_training_params(self, assistant, zip_url):
+        """Prepare training parameters from assistant prompt template"""
+        try:
+            # Get the prompt template
+            prompt_template = assistant.prompt_id.template
+            
+            # Parse the template to extract parameters
+            # The template should contain the JSON structure with placeholders
+            import json
+            
+            # Replace the placeholder with actual zip URL
+            prepared_template = prompt_template.replace(
+                "{{ related_record.all_user_image_attachments_zip }}", 
+                f'"{zip_url}"'
+            )
+            
+            # Parse JSON to validate structure
+            try:
+                training_params = json.loads(prepared_template)
+            except json.JSONDecodeError:
+                # If not valid JSON, create default structure
+                training_params = {
+                    "images_data_url": zip_url,
+                    "create_masks": True,
+                    "steps": 1000,
+                    "trigger_word": ""
+                }
+            
+            # Ensure required fields are present
+            if 'images_data_url' not in training_params:
+                training_params['images_data_url'] = zip_url
+            
+            if 'create_masks' not in training_params:
+                training_params['create_masks'] = True
+                
+            if 'steps' not in training_params:
+                training_params['steps'] = 1000
+                
+            if 'trigger_word' not in training_params:
+                training_params['trigger_word'] = ""
+            
+            return training_params
+            
+        except Exception as e:
+            _logger.error(f"Error preparing avatar training params: {e}")
+            raise UserError(f"Error preparando parámetros de entrenamiento: {str(e)}")
+
+    def _submit_avatar_training_job(self, training_params, thread):
+        """Submit avatar training job to fal.ai"""
+        try:
+            # Get fal.ai provider
+            fal_ai_provider = self.env['llm.provider'].search([
+                ('service', '=', 'fal_ai')
+            ], limit=1)
+            
+            if not fal_ai_provider:
+                raise UserError("No se encontró un proveedor fal.ai configurado")
+            
+            # Get fal.ai client
+            fal_client = fal_ai_provider.fal_ai_get_client()
+            
+            # Set job state to queued
+            self.write({'state': 'queued'})
+            
+            # Submit training job to fal.ai asynchronously
+            # Use commit_asynchronously to run in background
+            self.env.cr.commit()
+            
+            # Run training in a separate method that can be called asynchronously
+            try:
+                self._run_avatar_training_sync(fal_client, training_params, thread.id)
+            except Exception as e:
+                _logger.error(f"Error in synchronous training: {e}")
+                # Try to continue with async processing
+                self.with_context(async_mode=True)._run_avatar_training_async(fal_client, training_params, thread.id)
+            
+            _logger.info(f"Avatar training job {self.id} submitted successfully")
+            
+        except Exception as e:
+            _logger.error(f"Error submitting avatar training job {self.id}: {e}")
+            self.write({'state': 'failed'})
+            raise
+
+    def _run_avatar_training_sync(self, fal_client, training_params, thread_id):
+        """Run avatar training synchronously"""
+        try:
+            # Set job state to training
+            self.write({'state': 'training'})
+            
+            # Submit training job to fal.ai
+            result = fal_client.subscribe(
+                "fal-ai/flux-lora-fast-training",
+                arguments=training_params,
+                with_logs=True,
+            )
+            
+            if not result:
+                raise UserError("No se recibió respuesta del entrenamiento")
+            
+            # Process training result
+            self._process_avatar_training_result(result, thread_id)
+            
+        except Exception as e:
+            _logger.error(f"Error running avatar training sync for job {self.id}: {e}")
+            self.write({'state': 'failed'})
+            
+            # Post error message to thread
+            thread = self.env['llm.thread'].browse(thread_id)
+            if thread.exists():
+                thread._post_training_error_message(
+                    f"Error durante el entrenamiento: {str(e)}"
+                )
+            raise
+
+    @api.model
+    def _run_avatar_training_async(self, fal_client, training_params, thread_id):
+        """Run avatar training asynchronously"""
+        try:
+            # Set job state to training
+            self.write({'state': 'training'})
+            
+            # Submit training job to fal.ai
+            result = fal_client.subscribe(
+                "fal-ai/flux-lora-fast-training",
+                arguments=training_params,
+                with_logs=True,
+            )
+            
+            if not result:
+                raise UserError("No se recibió respuesta del entrenamiento")
+            
+            # Process training result
+            self._process_avatar_training_result(result, thread_id)
+            
+        except Exception as e:
+            _logger.error(f"Error running avatar training async for job {self.id}: {e}")
+            self.write({'state': 'failed'})
+            
+            # Post error message to thread
+            thread = self.env['llm.thread'].browse(thread_id)
+            if thread.exists():
+                thread._post_training_error_message(
+                    f"Error durante el entrenamiento: {str(e)}"
+                )
+
+    def _process_avatar_training_result(self, result, thread_id):
+        """Process the training result and post to thread"""
+        try:
+            # Get thread
+            thread = self.env['llm.thread'].browse(thread_id)
+            if not thread.exists():
+                raise UserError(f"Thread {thread_id} no encontrado")
+            
+            # Extract model file from result
+            if not result.get('diffusers_lora_file'):
+                raise UserError("No se encontró el archivo del modelo LoRA en el resultado")
+            
+            model_file_info = result['diffusers_lora_file']
+            model_url = model_file_info.get('url')
+            model_filename = model_file_info.get('file_name', 'lora_model.safetensors')
+            
+            if not model_url:
+                raise UserError("No se encontró la URL del modelo LoRA")
+            
+            # Download and attach model to thread
+            self._download_and_attach_model(model_url, model_filename, thread)
+            
+            # Update job state
+            self.write({
+                'state': 'completed',
+                'trained_model_name': model_filename
+            })
+            _logger.info(f"Avatar training job {self.id} completed successfully")
+        except Exception as e:
+            _logger.error(f"Error processing avatar training result for job {self.id}: {e}")
+            self.write({'state': 'failed'})
+            raise
+
+    def _download_and_attach_model(self, model_url, model_filename, thread):
+        """Download LoRA model and attach to thread"""
+        try:
+            # Download model file
+            response = requests.get(model_url, stream=True)
+            response.raise_for_status()
+            
+            # Create attachment
+            attachment = self.env['ir.attachment'].create({
+                'name': model_filename,
+                'datas': base64.b64encode(response.content),
+                'res_model': 'llm.thread',
+                'res_id': thread.id,
+                'mimetype': 'application/octet-stream',
+                'description': f'Modelo LoRA entrenado para avatar - Job {self.id}'
+            })
+            
+            # Post message with attachment
+            thread._post_message(
+                subtype_xmlid="llm_mail_message_subtypes.mt_llm_assistant",
+                body=f"Modelo LoRA descargado: {model_filename}",
+                author_id=False,
+                attachment_ids=[attachment.id]
+            )
+            
+            _logger.info(f"Model {model_filename} downloaded and attached to thread {thread.id}")
+            
+        except Exception as e:
+            _logger.error(f"Error downloading and attaching model: {e}")
+            raise UserError(f"Error descargando modelo: {str(e)}")
