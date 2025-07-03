@@ -224,25 +224,7 @@ class LLMTrainingJob(models.Model):
     def _prepare_avatar_training_params(self, assistant, zip_url):
         """Prepare training parameters from assistant prompt template"""
         try:
-            # Get the prompt template
-            prompt_template = assistant.prompt_id.template
-            
-            # Parse the template to extract parameters
-            # The template should contain the JSON structure with placeholders
-            import json
-            
-            # Replace the placeholder with actual zip URL
-            prepared_template = prompt_template.replace(
-                "{{ related_record.all_user_image_attachments_zip }}", 
-                f'"{zip_url}"'
-            )
-            
-            # Parse JSON to validate structure
-            try:
-                training_params = json.loads(prepared_template)
-            except json.JSONDecodeError:
-                # If not valid JSON, create default structure
-                training_params = {
+            training_params = {
                     "images_data_url": zip_url,
                     "create_masks": True,
                     "steps": 1000,
@@ -291,7 +273,7 @@ class LLMTrainingJob(models.Model):
             
             # Run training in a separate method that can be called asynchronously
             try:
-                self._run_avatar_training_sync(fal_client, training_params, thread.id)
+                self._run_avatar_training_sync(fal_client, training_params, thread)
             except Exception as e:
                 _logger.error(f"Error in synchronous training: {e}")
                 # Try to continue with async processing
@@ -304,7 +286,7 @@ class LLMTrainingJob(models.Model):
             self.write({'state': 'failed'})
             raise
 
-    def _run_avatar_training_sync(self, fal_client, training_params, thread_id):
+    def _run_avatar_training_sync(self, fal_client, training_params, thread):
         """Run avatar training synchronously"""
         try:
             # Set job state to training
@@ -312,7 +294,7 @@ class LLMTrainingJob(models.Model):
             
             # Submit training job to fal.ai
             result = fal_client.subscribe(
-                "fal-ai/flux-lora-fast-training",
+                thread.model_id.name,
                 arguments=training_params,
                 with_logs=True,
             )
@@ -321,14 +303,11 @@ class LLMTrainingJob(models.Model):
                 raise UserError("No se recibió respuesta del entrenamiento")
             
             # Process training result
-            self._process_avatar_training_result(result, thread_id)
+            self._process_avatar_training_result(result, thread)
             
         except Exception as e:
             _logger.error(f"Error running avatar training sync for job {self.id}: {e}")
             self.write({'state': 'failed'})
-            
-            # Post error message to thread
-            thread = self.env['llm.thread'].browse(thread_id)
             if thread.exists():
                 thread._post_training_error_message(
                     f"Error durante el entrenamiento: {str(e)}"
@@ -366,14 +345,9 @@ class LLMTrainingJob(models.Model):
                     f"Error durante el entrenamiento: {str(e)}"
                 )
 
-    def _process_avatar_training_result(self, result, thread_id):
+    def _process_avatar_training_result(self, result, thread):
         """Process the training result and post to thread"""
         try:
-            # Get thread
-            thread = self.env['llm.thread'].browse(thread_id)
-            if not thread.exists():
-                raise UserError(f"Thread {thread_id} no encontrado")
-            
             # Extract model file from result
             if not result.get('diffusers_lora_file'):
                 raise UserError("No se encontró el archivo del modelo LoRA en el resultado")
