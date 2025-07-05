@@ -56,8 +56,8 @@ class LLMThread(models.Model):
                 # Only post error if force is True (user explicitly requested training)
                 if force:
                     self._post_training_error_message(
-                        "Error: El modelo seleccionado no es compatible con generación de imágenes. "
-                        "Por favor selecciona un modelo con model_use = 'image_generation' para entrenar avatares."
+                        "Error: The selected model does not support image generation. "
+                        "Please select a model with model_use = 'image_generation' to train avatars."
                     )
                 return
             
@@ -70,8 +70,8 @@ class LLMThread(models.Model):
             if not user_messages:
                 if force:
                     self._post_training_error_message(
-                        "Error: No se encontraron mensajes de usuario con imágenes. "
-                        "Por favor agrega algunas imágenes a los mensajes antes de entrenar el avatar."
+                        "Error: No user messages with images found. "
+                        "Please add some images to the messages before training the avatar."
                     )
                 return
             
