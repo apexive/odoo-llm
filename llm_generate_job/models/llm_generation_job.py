@@ -160,6 +160,11 @@ class LLMGenerationJob(models.Model):
         help="True if job can be cancelled"
     )
 
+    webhook_url = fields.Char(
+        string="Webhook URL",
+        help="URL where the provider will send completion notification"
+    )
+
     @api.depends('thread_id', 'model_id', 'create_date')
     def _compute_name(self):
         for job in self:
@@ -252,7 +257,7 @@ class LLMGenerationJob(models.Model):
         })
         
         # Trigger queue processing
-        self.env['llm.generation.queue']._process_provider_queue(self.provider_id)
+        self.env['llm.generation.queue']._process_model_queue(self.model_id)
         
         return True
 
@@ -269,6 +274,10 @@ class LLMGenerationJob(models.Model):
         
         # Call provider to start generation
         try:
+            if not self.webhook_url:
+                base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+                self.webhook_url = f"{base_url}/llm/generate_job/webhook/{self.id}"
+
             external_job_id = self.provider_id.create_generation_job(self)
             self.write({'external_job_id': external_job_id})
         except Exception as e:
@@ -314,7 +323,7 @@ class LLMGenerationJob(models.Model):
         })
         
         # Trigger queue processing
-        self.env['llm.generation.queue']._process_provider_queue(self.provider_id)
+        self.env['llm.generation.queue']._process_model_queue(self.model_id)
         
         return True
 

@@ -30,6 +30,7 @@ Key Changes:
     "depends": [
         "llm_thread",
         "llm_tool",
+        "llm_generate"
     ],
     "data": [
         "security/ir.model.access.csv",
