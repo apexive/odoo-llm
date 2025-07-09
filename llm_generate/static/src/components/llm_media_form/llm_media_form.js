@@ -26,8 +26,13 @@ export class LLMMediaForm extends Component {
     });
 
     onWillStart(async () => {
-      await this._loadThreadConfiguration();
-      this._initializeFormValues();
+      this.state.isLoading = true;
+      try {
+        await this._loadThreadConfiguration();
+        this._initializeFormValues();
+      } finally {
+        this.state.isLoading = false;
+      }
     });
 
     // Watch for changes in the model/thread context
@@ -89,11 +94,21 @@ export class LLMMediaForm extends Component {
    */
   async _handleContextChange() {
     console.log("Media form context changed, reloading...");
-    await this._loadThreadConfiguration();
-    this._initializeFormValues();
+    this.state.isLoading = true;
+    try {
+      await this._loadThreadConfiguration();
+      this._initializeFormValues();
+    } finally {
+      this.state.isLoading = false;
+    }
   }
 
   get inputSchema() {
+    // Return empty schema during loading to prevent race conditions
+    if (this.state.isLoading) {
+      return {};
+    }
+
     // First try to get from thread config (includes prompt and assistant processing)
     let schema = this.state.threadConfig.input_schema;
 
@@ -175,6 +190,11 @@ export class LLMMediaForm extends Component {
   }
 
   get formFields() {
+    // Return empty array during loading to prevent race conditions
+    if (this.state.isLoading) {
+      return [];
+    }
+
     const inputSchema = this.inputSchema;
 
     if (!inputSchema?.properties) {
@@ -238,9 +258,41 @@ export class LLMMediaForm extends Component {
   }
 
   /**
+   * Get information about the schema source for transparency
+   */
+  get schemaSource() {
+    if (this.state.isLoading) {
+      return { type: 'loading', name: 'Loading...' };
+    }
+
+    if (this.state.threadConfig.input_schema && 
+        Object.keys(this.state.threadConfig.input_schema).length > 0) {
+      return {
+        type: 'prompt',
+        name: this.thread?.prompt_id?.name || this.llmAssistant?.prompt_id?.name || 'Selected Prompt'
+      };
+    }
+    
+    if (this.llmModel?.inputSchema && 
+        Object.keys(this.llmModel.inputSchema).length > 0) {
+      return {
+        type: 'model',
+        name: this.llmModel?.name || 'Model Default'
+      };
+    }
+
+    return { type: 'none', name: 'No Schema Available' };
+  }
+
+  /**
    * Initialize form values with defaults from thread configuration
    */
   _initializeFormValues() {
+    // Don't initialize during loading to prevent race conditions
+    if (this.state.isLoading) {
+      return;
+    }
+
     const defaults = this.state.threadConfig.form_defaults || {};
 
     // Start with schema defaults
@@ -259,6 +311,7 @@ export class LLMMediaForm extends Component {
 
     this.state.formValues = initialValues;
     console.log("Initialized form values:", initialValues);
+    console.log("Schema source:", this.schemaSource);
   }
 
   /**

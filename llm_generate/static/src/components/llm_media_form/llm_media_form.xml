@@ -6,7 +6,16 @@
                 <div
           class="d-flex justify-content-between align-items-center mb-3"
         >
-                    <h5 class="mt-0 mb-0">Generate Media</h5>
+                    <div>
+                        <h5 class="mt-0 mb-0">Generate Media</h5>
+                        <small class="text-muted" t-if="!state.isLoading">
+                            <i class="fa fa-info-circle me-1" />
+                            Schema source: <t t-esc="schemaSource.name" />
+                            <span t-if="schemaSource.type === 'prompt'" class="badge badge-primary ms-1">Prompt</span>
+                            <span t-elif="schemaSource.type === 'model'" class="badge badge-secondary ms-1">Model</span>
+                            <span t-elif="schemaSource.type === 'none'" class="badge badge-warning ms-1">None</span>
+                        </small>
+                    </div>
                     <div class="btn-group btn-group-sm" role="group">
                         <button
               type="button"
@@ -31,7 +40,7 @@
                     <div class="alert alert-info" role="alert">
                         <i
               class="fa fa-spinner fa-spin me-1"
-            /> Loading configuration...
+            /> Loading configuration and schema...
                     </div>
                 </t>
 
@@ -92,7 +101,7 @@
                 </div>
 
                 <!-- Form View -->
-                <div t-if="state.inputMode === 'form'">
+                <div t-if="state.inputMode === 'form' and !state.isLoading">
                     <!-- Show assistant defaults info if available -->
                     <div
             t-if="state.assistantDefaults and Object.keys(state.assistantDefaults || {}).length > 0"
@@ -103,6 +112,16 @@
                         <span
               t-esc="Object.keys(state.assistantDefaults || {}).join(', ')"
             />
+                    </div>
+
+                    <!-- Show warning if no schema is available -->
+                    <div
+            t-if="schemaSource.type === 'none'"
+            class="alert alert-warning small mb-3"
+          >
+                        <i class="fa fa-exclamation-triangle me-1" />
+                        <strong>No input schema available.</strong> 
+                        Please select a prompt with defined arguments or ensure your model has an input schema configured.
                     </div>
 
                     <LLMFormFieldsView
@@ -117,7 +136,7 @@
                 </div>
 
                 <!-- JSON Editor View -->
-                <div t-if="state.inputMode === 'json'">
+                <div t-if="state.inputMode === 'json' and !state.isLoading">
                     <JsonEditorComponent
             value="state.formValues"
             onChange.bind="onJsonEditorChange"
@@ -139,7 +158,7 @@
             />
                     </div>
                     <div
-            t-if="!inputSchema and !state.isLoading"
+            t-if="schemaSource.type === 'none'"
             class="alert alert-info mt-2 small p-2"
             role="alert"
           >

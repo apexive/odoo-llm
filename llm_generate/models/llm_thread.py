@@ -15,12 +15,27 @@ class LLMThread(models.Model):
         """Get input schema for generation forms."""
         self.ensure_one()
 
-        # Try prompt schema first, then model schema
-        # TODO(david) this seems to fail
+        # Priority order:
+        # 1. Assistant's prompt schema (if assistant selected)
+        # 2. Thread's direct prompt schema (if prompt directly selected)
+        # 3. Model's default schema
+        
+        # Check assistant's prompt first
+        if hasattr(self, 'assistant_id') and self.assistant_id and self.assistant_id.prompt_id:
+            prompt_schema = self._ensure_dict(self.assistant_id.prompt_id.input_schema_json)
+            if prompt_schema and prompt_schema.get('properties'):
+                return prompt_schema
+        
+        # Check thread's direct prompt
         if self.prompt_id and hasattr(self.prompt_id, "input_schema_json"):
-            return self._ensure_dict(self.prompt_id.input_schema_json)
-        elif self.model_id and self.model_id.details:
+            prompt_schema = self._ensure_dict(self.prompt_id.input_schema_json)
+            if prompt_schema and prompt_schema.get('properties'):
+                return prompt_schema
+        
+        # Fall back to model schema
+        if self.model_id and self.model_id.details:
             return self._ensure_dict(self.model_id.details.get("input_schema", {}))
+        
         return {}
 
     def _ensure_dict(self, value):
@@ -40,15 +55,23 @@ class LLMThread(models.Model):
         context = self.get_context()
         schema = self.get_input_schema()
 
-        # Filter context to only include schema properties
-        if not schema.get("properties"):
-            return context
+        # Start with context values
+        defaults = dict(context)
+        
+        # Add schema defaults for any missing properties
+        if schema.get("properties"):
+            for prop_name, prop_def in schema["properties"].items():
+                if prop_name not in defaults and "default" in prop_def:
+                    defaults[prop_name] = prop_def["default"]
+            
+            # Filter to only include schema properties
+            defaults = {
+                k: v
+                for k, v in defaults.items()
+                if k in schema["properties"] and v is not None
+            }
 
-        return {
-            k: v
-            for k, v in context.items()
-            if k in schema["properties"] and v is not None
-        }
+        return defaults
 
     def prepare_generation_inputs(self, inputs, attachment_ids=None):
         """Prepare final inputs for generation.
@@ -79,47 +102,41 @@ class LLMThread(models.Model):
             return merged_inputs
 
     def _generate_response(self, message):
-        """Handle a user message with generation data in body_json."""
+        """Handle a user message with generation data in body_json.
+        
+        If anything goes wrong, this method will fail cleanly without
+        creating an assistant message or committing the cursor.
+        """
         self.ensure_one()
 
-        try:
-            # Prepare final inputs
-            final_inputs = self.prepare_generation_inputs(message.body_json or {}, attachment_ids=message.attachment_ids)
+        # Prepare final inputs
+        final_inputs = self.prepare_generation_inputs(
+            message.body_json or {}, 
+            attachment_ids=message.attachment_ids
+        )
 
-            _logger.info(final_inputs)
-            # Generate using model - now returns tuple (output_data, urls)
-            output_data, urls = self.model_id.generate(final_inputs)
-            
-            # Create assistant message first (without attachments)
-            generated_message = self.message_post(
-                body="",  # Will be updated with markdown content
-                llm_role="assistant",
-                body_json=output_data,
-            )
-            
-            # Use message method to process URLs and create attachments
-            markdown_content, attachments = generated_message.process_generation_urls(urls)
-            
-            # Update message with final markdown content
-            generated_message.write({'body': markdown_content})
-            
-            message_data = generated_message.message_format()[0]
-
-        except Exception as e:
-            _logger.error(f"Error in generation: {e}")
-            # Create error message instead
-            error_message = self.message_post(
-                body=f"Generation failed: {str(e)}", 
-                llm_role="assistant"
-            )
-            message_data = error_message.message_format()[0]
+        _logger.info(final_inputs)
+        # Generate using model - now returns tuple (output_data, urls)
+        output_data, urls = self.model_id.generate(final_inputs)
         
-        # Single yield point for both success and error cases
-        if message_data:
-            yield {
-                "type": "message_create",
-                "message": message_data,
-            }
+        # Create assistant message first (without attachments)
+        generated_message = self.message_post(
+            body="",  # Will be updated with markdown content
+            llm_role="assistant",
+            body_json=output_data,
+        )
+        
+        # Use message method to process URLs and create attachments
+        markdown_content, attachments = generated_message.process_generation_urls(urls)
+        
+        # Update message with final markdown content
+        generated_message.write({'body': markdown_content})
+        
+        # Yield the successful result
+        yield {
+            "type": "message_create",
+            "message": generated_message.message_format()[0],
+        }
 
     @api.model
     def get_model_generation_io_by_id(self, model_id):

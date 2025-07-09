@@ -294,18 +294,34 @@ class LLMProvider(models.Model):
         if result is None:
             return urls
 
-        # Example of fal_ai result:
-        # {'has_nsfw_concepts': [False], 'images': [{'content_type': 'image/png', 'height': 768, 'url': 'https://v3.fal.media/files/zebra/3Sa_l4tFKlX4-bai5Z0ST.png', 'width': 1024}], 'prompt': 'a blue cat', 'seed': 6252023, 'timings': {'inference': 2.1407407799270004}}
-        if isinstance(result, list):
-            # If result is a list, extract URLs from each item
-            for item in result:
-                url_data = self._fal_ai_extract_single_url_with_metadata(item)
-                if url_data:
-                    urls.append(url_data)
-
-        elif isinstance(result, dict):
-            # If result is a dictionary, check for 'images' key or other URL fields
-            if "images" in result:
+        # Handle both training outputs and standard image generation
+        if isinstance(result, dict):
+            # First, check if this looks like a training output
+            training_file_keys = [key for key in result.keys() if key.endswith('_file')]
+            
+            if training_file_keys:
+                # This is a training output, extract file URLs
+                for key, value in result.items():
+                    if isinstance(value, dict) and 'url' in value:
+                        url_data = {
+                            'url': value['url'],
+                            'filename': key,  # Use the key as filename for attachment identification
+                            'content_type': value.get('content_type', 'application/octet-stream'),
+                            'original_filename': value.get('file_name', 'unknown'),
+                            'file_type': key,
+                        }
+                        
+                        # Add file size if available
+                        if 'file_size' in value:
+                            url_data['file_size'] = value['file_size']
+                        
+                        urls.append(url_data)
+                
+                return urls
+            
+            # If not training output, check for standard image generation patterns
+            elif "images" in result:
+                # Standard image generation with 'images' key
                 for item in result["images"]:
                     url_data = self._fal_ai_extract_single_url_with_metadata(item)
                     if url_data:
@@ -313,6 +329,13 @@ class LLMProvider(models.Model):
             else:
                 # Check for other potential URL fields in the dictionary
                 url_data = self._fal_ai_extract_single_url_with_metadata(result)
+                if url_data:
+                    urls.append(url_data)
+
+        elif isinstance(result, list):
+            # If result is a list, extract URLs from each item
+            for item in result:
+                url_data = self._fal_ai_extract_single_url_with_metadata(item)
                 if url_data:
                     urls.append(url_data)
 

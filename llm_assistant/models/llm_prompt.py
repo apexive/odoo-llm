@@ -137,6 +137,21 @@ class LLMPrompt(models.Model):
         ("name_unique", "UNIQUE(name)", "The prompt name must be unique."),
     ]
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        prompts = super().create(vals_list)
+        for prompt in prompts:
+            if prompt.template:
+                prompt.auto_detect_arguments()  # Auto-detect on creation
+        return prompts
+
+    def write(self, vals):
+        result = super().write(vals)
+        if 'template' in vals:
+            for prompt in self:
+                prompt.auto_detect_arguments()  # Auto-detect on template changes
+        return result
+
     @api.depends("arguments_json")
     def _compute_argument_count(self):
         for prompt in self:
@@ -473,7 +488,7 @@ class LLMPrompt(models.Model):
                 arguments[arg_name] = {
                     "type": "string",
                     "description": f"Auto-detected argument: {arg_name}",
-                    "required": False,
+                    "required": True,  # Default new arguments as required
                 }
                 updated = True
 
@@ -481,6 +496,28 @@ class LLMPrompt(models.Model):
             self.arguments_json = json.dumps(arguments, indent=2)
 
         return True
+
+    def _ensure_arguments_sync(self):
+        """Ensure arguments schema matches template usage"""
+        used_args = self._extract_arguments_from_template(self.template or "")
+        try:
+            defined_args = json.loads(self.arguments_json or "{}")
+        except json.JSONDecodeError:
+            defined_args = {}
+        
+        # Auto-add missing arguments
+        updated = False
+        for arg_name in used_args:
+            if arg_name not in defined_args:
+                defined_args[arg_name] = {
+                    "type": "string",
+                    "description": f"Auto-detected argument: {arg_name}",
+                    "required": True  # Default new arguments as required
+                }
+                updated = True
+        
+        if updated:
+            self.arguments_json = json.dumps(defined_args, indent=2)
 
     def action_test_prompt(self):
         """
@@ -519,6 +556,10 @@ class LLMPrompt(models.Model):
         """
         for prompt in self:
             try:
+                # Auto-sync template arguments with schema before computing
+                if prompt.template:
+                    prompt._ensure_arguments_sync()
+                
                 # Get arguments from arguments_json
                 arguments = json.loads(prompt.arguments_json or "{}")
 
