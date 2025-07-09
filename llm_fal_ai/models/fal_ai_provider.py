@@ -4,9 +4,9 @@ import json
 import logging
 import os
 import time
-
+import traceback
 import requests
-from odoo import _, api, models
+from odoo import api, fields, models,_
 from odoo.exceptions import UserError
 
 try:
@@ -38,6 +38,11 @@ except ImportError:
 
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
+
+    webhook_url = fields.Char(
+        string="Webhook URL",
+        help="URL where the provider will send completion notification"
+    )
 
     @api.model
     def _get_available_services(self):
@@ -354,6 +359,9 @@ class LLMProvider(models.Model):
     def fal_ai_create_generation_job(self, job_record):
         """Submit a generation job to FAL AI with webhook support"""
         self.ensure_one()
+        if not self.webhook_url:
+            base_url = self.env['ir.config_parameter'].sudo().get_param('web.base.url')
+            self.webhook_url = f"{base_url}/llm/generate_job/webhook/{job_record.id}"
 
         fal_client = self.fal_ai_get_client()
 
@@ -385,7 +393,7 @@ class LLMProvider(models.Model):
             result = fal_client.submit(
                 model_name,
                 arguments=arguments,
-                webhook_url=job_record.webhook_url
+                webhook_url=self.webhook_url
             )
             _logger.info(f"Submitted FAL AI job: {result}")
 
@@ -402,16 +410,20 @@ class LLMProvider(models.Model):
     def fal_ai_check_generation_job_status(self, job_record):
         """Check the status of a generation job with FAL AI"""
         self.ensure_one()
+        data_json_compatible = job_record.external_job_id.replace("'", '"')  # cambiar comillas simples a dobles
+        data_dict = json.loads(data_json_compatible)
+
+        request_id = data_dict["request_id"]
         fal_client = self.fal_ai_get_client()
 
         if not job_record.external_job_id:
             raise UserError(_("No external job ID found"))
 
         try:
-            # Check status with FAL AI
+
             status = fal_client.status(
                 job_record.model_id.name,
-                request_id=job_record.external_job_id,
+                request_id=request_id,
                 with_logs=True
             )
 
@@ -422,8 +434,7 @@ class LLMProvider(models.Model):
             if class_name == "Queued":
                 # Trabajo en cola
                 webhook_data = {
-                    'request_id': job_record.external_job_id,
-                    'gateway_request_id': job_record.gateway_request_id,
+                    'request_id': request_id,
                     'status': 'QUEUED',
                     'position': status.position,
                     'payload': None
@@ -434,39 +445,36 @@ class LLMProvider(models.Model):
             elif class_name == "InProgress":
                 # Trabajo en procesamiento
                 webhook_data = {
-                    'request_id': job_record.external_job_id,
-                    'gateway_request_id': job_record.gateway_request_id,
+                    'request_id': request_id,
                     'status': 'PROCESSING',
                     'logs': status.logs if hasattr(status, 'logs') and status.logs else [],
                     'payload': None
                 }
-                job_record.write({'state': 'processing'})
+                job_record.write({'state': 'running'})
                 return status
 
             elif class_name == "Completed":
                 # Trabajo completado, obtener resultado
                 result = fal_client.result(
                     job_record.model_id.name,
-                    request_id=job_record.external_job_id,
+                    request_id=request_id,
                 )
 
                 webhook_data = {
-                    'request_id': job_record.external_job_id,
-                    'gateway_request_id': job_record.gateway_request_id,
+                    'request_id': request_id,
                     'status': 'OK',
                     'logs': status.logs if hasattr(status, 'logs') and status.logs else [],
                     'metrics': status.metrics if hasattr(status, 'metrics') else {},
                     'payload': result
                 }
-                job_record.process_webhook_result(webhook_data)
+                self.process_webhook_result(webhook_data,job_record)
                 return status
 
             else:
                 # Estado desconocido o error
                 _logger.error(f"Tipo de estado desconocido devuelto por FAL AI: {class_name}")
                 webhook_data = {
-                    'request_id': job_record.external_job_id,
-                    'gateway_request_id': job_record.gateway_request_id,
+                    'request_id': request_id,
                     'status': 'ERROR',
                     'error': f"Tipo de estado desconocido: {class_name}",
                     'payload': None
@@ -475,7 +483,8 @@ class LLMProvider(models.Model):
                 return status
 
         except Exception as e:
-            job_record.write({'state': 'failed', 'error_message': str(e)})
+
+            job_record.write({'state': 'failed', 'error_message': str(traceback.format_exc())})
             _logger.error(f"Error al comprobar el estado del trabajo en FAL AI: {str(e)} ")
 
     def fal_ai_cancel_generation_job(self, external_job_id):
@@ -489,6 +498,46 @@ class LLMProvider(models.Model):
         # In a real implementation, you would make an API call to cancel the job
         # For now, we just log the attempt
         return {"status": "cancel_not_supported"}
+
+    def process_webhook_result(self, webhook_data,job_record):
+            """Process webhook result from provider"""
+            status = webhook_data.get('status')
+            if status == 'OK':
+                job_record.write({
+                    'state': 'completed',
+                    'completed_at': fields.Datetime.now(),
+                    'result_payload': str(webhook_data.get('payload')),
+                })
+
+                # Send result to output message
+                if webhook_data.get('payload'):
+                    #webhook_data.get('payload')["images"][0].get("url")
+                    job_record.thread_id.message_post(
+                        body=str(webhook_data.get('payload')),
+                        llm_role='assistant',
+                        message_type='notification',
+                    )
+
+                    job_record.output_message_id = job_record.thread_id.message_ids[-1]
+
+            elif status == 'ERROR':
+                # Error
+                job_record.write({
+                    'state': 'failed',
+                    'completed_at': fields.Datetime.now(),
+                    'error_message': webhook_data.get('error', 'Unknown error'),
+                    'result_payload': webhook_data.get('payload'),  # May contain error details
+                })
+
+                # notify thread of failure to output message
+                job_record.thread_id.message_post(
+                    body=_("Generation job failed: %s") % webhook_data.get('error', 'Unknown error'),
+                    llm_role='assistant',
+                    message_type='notification',
+                )
+
+            else:
+                _logger.warning(f"Unknown webhook status '{status}' for job {job_record.id}")
 
         ###############WEBHOOKS####################
 
@@ -614,3 +663,6 @@ class LLMProvider(models.Model):
                 return _jwks_cache or []
 
         return _jwks_cache
+
+
+

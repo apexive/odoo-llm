@@ -110,6 +110,7 @@ class LLMProvider(models.Model):
             return f"direct_generation_{job_record.id}"
             
         except Exception as e:
+            _logger.error("Error during direct generation: %s", e, exc_info=True)
             job_record.action_fail(str(e))
             raise
 

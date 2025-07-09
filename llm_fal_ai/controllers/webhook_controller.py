@@ -15,6 +15,7 @@ class WebhookController(http.Controller):
         try:
             # Get the job record
             job = request.env['llm.generate.job'].sudo().browse(job_id)
+            provider=request.env['llm.provider']
             if not job.exists():
                 _logger.error(f"Job {job_id} not found for webhook")
                 return {"status": "error", "message": "Job not found"}
@@ -26,7 +27,7 @@ class WebhookController(http.Controller):
                 return {"status": "error", "message": "No data received"}
 
             # Process the webhook
-            job.process_webhook_result(request, webhook_data)
+            provider.process_webhook_result(webhook_data, job)
 
             _logger.info(f"Successfully processed webhook for job {job_id}")
             return {"status": "success"}
