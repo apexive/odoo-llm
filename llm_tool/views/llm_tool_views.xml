@@ -5,7 +5,7 @@
         <field name="name">llm.tool.tree</field>
         <field name="model">llm.tool</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="implementation" />
                 <field name="title" optional="show" />
@@ -14,7 +14,7 @@
                 <field name="requires_user_consent" />
                 <field name="read_only_hint" optional="hide" />
                 <field name="destructive_hint" optional="hide" />
-            </list>
+            </tree>
         </field>
     </record>
 
