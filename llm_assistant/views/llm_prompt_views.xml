@@ -219,7 +219,7 @@
         <field name="name">llm.prompt.tree</field>
         <field name="model">llm.prompt</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="category_id" />
                 <field name="format" />
@@ -228,7 +228,7 @@
                 <field name="usage_count" />
                 <field name="last_used" />
                 <field name="active" invisible="1" />
-            </list>
+            </tree>
         </field>
     </record>
 

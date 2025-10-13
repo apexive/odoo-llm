@@ -7,7 +7,7 @@ import { LLMChatContainer } from "@llm_thread/components/llm_chat_container/llm_
 
 /**
  * LLM Chat Client Action - Main entry point for LLM chat functionality
- * Follows Odoo 18.0 client action pattern similar to DiscussClientAction
+ * Follows Odoo 17.0 client action pattern similar to DiscussClientAction
  */
 export class LLMChatClientAction extends Component {
   static components = { LLMChatContainer };

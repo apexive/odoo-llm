@@ -10,9 +10,9 @@
     t-inherit-mode="extension"
   >
         <!-- Add AI button to the topbar left buttons section -->
-        <xpath expr="//t[@name='chatter-topbar-left-buttons']" position="after">
+        <!-- <xpath expr="//t[@name='chatter-topbar-left-buttons']" position="after"> -->
             <!-- Only show AI button when appropriate -->
-            <button
+            <!-- <button
         t-if="shouldShowAIButton"
         class="o-mail-Chatter-aiChat btn btn-link text-action"
         type="button"
@@ -22,6 +22,6 @@
                 <i class="fa fa-robot me-1" role="img" aria-label="AI Chat" />
                 <span class="d-none d-sm-inline">AI Chat</span>
             </button>
-        </xpath>
+        </xpath> -->
     </t>
 </templates>

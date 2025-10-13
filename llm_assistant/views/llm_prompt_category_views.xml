@@ -5,12 +5,12 @@
         <field name="name">llm.prompt.category.tree</field>
         <field name="model">llm.prompt.category</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="sequence" widget="handle" />
                 <field name="complete_name" />
                 <field name="code" />
                 <field name="prompt_count" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -64,12 +64,12 @@
                         </page>
                         <page string="Child Categories">
                             <field name="child_ids">
-                                <list editable="bottom">
+                                <tree editable="bottom">
                                     <field name="sequence" widget="handle" />
                                     <field name="name" />
                                     <field name="code" />
                                     <field name="prompt_count" />
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
