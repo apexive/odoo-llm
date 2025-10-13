@@ -61,13 +61,13 @@
         <field name="name">llm.model.view.tree</field>
         <field name="model">llm.model</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="provider_id" />
                 <field name="model_use" />
                 <field name="default" />
                 <field name="active" invisible="1" />
-            </list>
+            </tree>
         </field>
     </record>
 

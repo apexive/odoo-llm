@@ -101,7 +101,7 @@ class MailMessage(models.Model):
         return {message: message.llm_role == role for message in self}
 
     def to_store_format(self):
-        """Convert message to store format compatible with Odoo 18.0. Used by frontend js components"""
+        """Convert message to store format compatible with Odoo 17.0. Used by frontend js components"""
         self.ensure_one()
         from odoo.addons.mail.tools.discuss import Store
 

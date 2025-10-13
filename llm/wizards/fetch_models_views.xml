@@ -24,7 +24,7 @@
             name="line_ids"
             options="{'reload_on_button': false}"
           >
-                        <list editable="bottom" create="0" delete="0">
+                        <tree editable="bottom" create="0" delete="0">
                             <!-- Selection -->
                             <field name="selected" widget="boolean_toggle" />
 
@@ -46,7 +46,7 @@
                 decoration-warning="status=='modified'"
               />
                             <field name="existing_model_id" invisible="1" />
-                        </list>
+                        </tree>
                     </field>
 
                     <!-- Helpful Note -->
