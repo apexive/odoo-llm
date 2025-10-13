@@ -5,13 +5,13 @@
         <field name="name">llm.mcp.session.view.list</field>
         <field name="model">llm.mcp.session</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="session_id" />
                 <field name="state" />
                 <field name="user_id" />
                 <field name="create_date" />
                 <field name="write_date" />
-            </list>
+            </tree>
         </field>
     </record>
 

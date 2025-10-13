@@ -56,14 +56,14 @@
         <field name="name">llm.mcp.server.config.view.list</field>
         <field name="model">llm.mcp.server.config</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="version" />
                 <field name="latest_protocol_version" />
                 <field name="all_supported_protocol_versions" />
                 <field name="active" />
                 <field name="write_date" />
-            </list>
+            </tree>
         </field>
     </record>
 

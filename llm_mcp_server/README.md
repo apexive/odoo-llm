@@ -35,7 +35,7 @@ Production-ready Model Context Protocol (MCP) server that exposes Odoo LLM tools
    ```
 
 2. **Get your API key** from Odoo:
-   - Follow -> https://www.odoo.com/documentation/18.0/developer/reference/external_api.html#api-keys
+   - Follow -> https://www.odoo.com/documentation/17.0/developer/reference/external_api.html#api-keys
 
 ### Claude Desktop Configuration
 

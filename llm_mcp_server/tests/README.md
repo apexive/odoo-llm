@@ -73,7 +73,7 @@ export MCP_API_KEY="your_actual_api_key"
 
 1. Go to **LLM → Configuration → MCP Server** in Odoo
 2. Copy the API key value
-3. Or follow: https://www.odoo.com/documentation/18.0/developer/reference/external_api.html#api-keys
+3. Or follow: https://www.odoo.com/documentation/17.0/developer/reference/external_api.html#api-keys
 
 ## Expected Results
 

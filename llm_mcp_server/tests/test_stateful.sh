@@ -98,7 +98,7 @@ if [ -n "$MCP_API_KEY" ]; then
 else
     echo -e "${YELLOW}🔑 Enter your Odoo API key:${NC}"
     echo -e "${CYAN}💡 Get it from: LLM → Configuration → MCP Server${NC}"
-    echo -e "${CYAN}💡 Or follow: https://www.odoo.com/documentation/18.0/developer/reference/external_api.html#api-keys${NC}"
+    echo -e "${CYAN}💡 Or follow: https://www.odoo.com/documentation/17.0/developer/reference/external_api.html#api-keys${NC}"
     echo -n "API Key: "
     read -r API_KEY
 
