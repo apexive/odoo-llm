@@ -47,6 +47,8 @@ Contact: support@apexive.com
         "web.assets_backend": [
             # Services - LLM store service for integration with mail.store
             "llm_thread/static/src/services/llm_store_service.js",
+            # Patches - Critical patch to handle llm_threads from init_messaging
+            "llm_thread/static/src/patches/messaging_service_patch.js",
             # Components - LLM Chat Container using existing mail components
             "llm_thread/static/src/components/llm_chat_container/llm_chat_container.js",
             "llm_thread/static/src/components/llm_chat_container/llm_chat_container.xml",
@@ -58,7 +60,7 @@ Contact: support@apexive.com
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.js",
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.xml",
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.scss",
-            # Patches - Safe extensions of mail components with conditional LLM logic
+            # Other Patches - Safe extensions of mail components with conditional LLM logic
             # "llm_thread/static/src/patches/composer_patch.js",
             # "llm_thread/static/src/patches/thread_patch.js",
             # "llm_thread/static/src/patches/thread_model_patch.js",

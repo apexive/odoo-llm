@@ -9,9 +9,9 @@ import { Deferred } from "@web/core/utils/concurrency";
  * Provides LLM-specific functionality without breaking mail components
  */
 export const llmStoreService = {
-  dependencies: ["orm", "mail.store", "notification"],
+  dependencies: ["orm", "mail.store", "mail.thread", "notification", "mail.messaging"],
 
-  start(env, { orm, "mail.store": mailStore, notification }) {
+  start(env, { orm, "mail.store": mailStore, "mail.thread": threadService, notification, "mail.messaging": messaging }) {
     const llmStore = reactive({
       // NOTE: Threads are now loaded via standard mail.store, no need for separate Map
       llmModels: new Map(), // Map<id, LLMModel>
@@ -34,7 +34,12 @@ export const llmStoreService = {
 
       get llmThreadList() {
         // Get all LLM threads from mailStore
-        const allThreads = Object.values(mailStore.Thread.records || {});
+        // Add defensive checks for mailStore.Thread and records
+        if (!mailStore.Thread || !mailStore.Thread.records) {
+          console.warn("mailStore.Thread.records is not available yet");
+          return [];
+        }
+        const allThreads = Object.values(mailStore.Thread.records);
         return allThreads
           .filter((thread) => thread.model === "llm.thread")
           .sort(
@@ -44,6 +49,12 @@ export const llmStoreService = {
 
       // LLM-specific methods using standard fetchData approach
       async ensureThreadLoaded(threadId) {
+        // Check if mailStore.Thread is available
+        if (!mailStore.Thread) {
+          console.error("mailStore.Thread is not available");
+          return null;
+        }
+
         // Check if thread already exists in mailStore
         const thread = mailStore.Thread.get({
           model: "llm.thread",
@@ -222,20 +233,34 @@ export const llmStoreService = {
         });
       },
 
-      // Thread selection using standard Odoo patterns
+      // Thread selection using standard Odoo 17 patterns
       async selectThread(threadId) {
         try {
           // Ensure thread is loaded using standard fetchData
           const thread = await this.ensureThreadLoaded(threadId);
           if (!thread) {
-            throw new Error("Thread not found or failed to load");
+            throw new Error(`Thread ${threadId} not found or failed to load`);
           }
 
-          // Set as active thread in discuss - this is all we need!
-          thread.setAsDiscussThread();
+          // Use Odoo 17's threadService.setDiscussThread() method
+          threadService.setDiscussThread(thread);
         } catch (error) {
           console.error("Error selecting thread:", error);
-          notification.add("Failed to load chat thread", { type: "danger" });
+          // Log detailed error information
+          console.error("Error details:", {
+            threadId: threadId,
+            message: error.message,
+            stack: error.stack,
+            error: error,
+          });
+          notification.add(
+            `Failed to load chat thread: ${error.message || "Unknown error"}`,
+            {
+              type: "danger",
+              sticky: true, // Make notification persistent
+            }
+          );
+          throw error; // Re-throw so caller can handle
         }
       },
 
@@ -330,6 +355,19 @@ export const llmStoreService = {
           this.isReady.resolve();
         } catch (error) {
           console.error("Error initializing LLM store:", error);
+          // Log detailed error information
+          console.error("LLM store initialization error details:", {
+            message: error.message,
+            stack: error.stack,
+            error: error,
+          });
+          notification.add(
+            `Failed to initialize LLM store: ${error.message || "Unknown error"}`,
+            {
+              type: "danger",
+              sticky: true,
+            }
+          );
           this.isReady.reject(error);
         }
       },
@@ -343,8 +381,9 @@ export const llmStoreService = {
       },
     });
 
-    // Initialize LLM data after mailStore is ready (which calls init_messaging)
-    mailStore.isReady.then(() => {
+    // Initialize LLM data after messaging is ready (which calls init_messaging)
+    // The messaging service has the isReady promise, not mail.store
+    messaging.isReady.then(() => {
       llmStore.initialize();
     });
 
