@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm_thread.LLMChatSidebar" owl="1">
+        <!-- Backdrop -->
+        <t t-if="messaging.device.isSmall">
+            <div
+        class="o_LLMChatSidebar_backdrop"
+        t-att-class="{ 'o-visible': llmChatView.isThreadListVisible }"
+        t-on-click="_onBackdropClick"
+      />
+        </t>
+
+        <!-- Sidebar -->
+        <div
+      class="o_LLMChatSidebar o_DiscussSidebar d-flex flex-column overflow-auto o_Discuss_sidebar flex-shrink-0 h-100 pt-3 border-end bg-light"
+      t-att-class="{
+                'o-mobile': messaging.device.isSmall,
+                'o-visible': !messaging.device.isSmall || llmChatView.isThreadListVisible
+            }"
+    >
+            <!-- New Chat Button -->
+            <div class="d-flex justify-content-center">
+                    <button
+          class="o_DiscussSidebar_startAMeetingButton btn btn-primary rounded"
+          t-on-click="_onClickNewChat"
+        >
+                        <i class="fa fa-plus me-2" />
+                        <span>New Chat</span>
+                    </button>
+            </div>
+
+            <!-- Thread List -->
+            <div class="o_LLMChatSidebar_threadList flex-grow-1 overflow-auto">
+                <LLMChatThreadList record="llmChatView" />
+            </div>
+        </div>
+    </t>
+</templates>

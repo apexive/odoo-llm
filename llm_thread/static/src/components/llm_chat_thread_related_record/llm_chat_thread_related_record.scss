@@ -1,0 +1,277 @@
+.o_LLMChatThreadRelatedRecord {
+  .btn {
+    transition: all 0.2s ease;
+    border: 1px solid rgba(0, 0, 0, 0.125);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      border-color: rgba(0, 0, 0, 0.25);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+
+    // Icon styling
+    i {
+      font-size: 14px;
+
+      &.text-primary {
+        color: $primary !important;
+      }
+
+      &.text-muted {
+        color: $text-muted !important;
+      }
+    }
+
+    // Text styling
+    .text-truncate {
+      font-weight: 500;
+    }
+
+    // Special styling for "no record" state
+    &:has(.text-muted) {
+      border-style: dashed;
+      opacity: 0.8;
+
+      &:hover {
+        opacity: 1;
+        border-style: solid;
+      }
+    }
+  }
+
+  // Button group styling for linked records
+  .btn-group {
+    .btn {
+      &:first-child {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      &:last-child:not(:first-child) {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+      }
+
+      &.btn-outline-danger {
+        &:hover {
+          background-color: $danger;
+          border-color: $danger;
+          color: $white;
+        }
+      }
+    }
+  }
+
+  // Dropdown for mobile unlink
+  .dropdown-menu {
+    min-width: 150px;
+
+    .dropdown-item {
+      padding: 0.5rem 1rem;
+
+      &:hover {
+        background-color: rgba($warning, 0.1);
+      }
+
+      i.text-warning {
+        color: $warning !important;
+      }
+    }
+  }
+
+  // Mobile adjustments
+  @include media-breakpoint-down(sm) {
+    .btn {
+      min-width: 32px;
+      padding: 4px 6px !important;
+    }
+
+    .btn-group .btn {
+      padding: 4px 6px !important;
+    }
+  }
+}
+
+// Record Picker Modal Styles
+.record-item {
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba($primary, 0.1);
+    border-color: rgba($primary, 0.2);
+    transform: translateY(-1px);
+  }
+
+  &.active {
+    background-color: rgba($primary, 0.15);
+    border-color: rgba($primary, 0.3);
+    box-shadow: 0 2px 4px rgba($primary, 0.2);
+  }
+
+  .fw-medium {
+    font-weight: 500;
+  }
+}
+
+.step-2 {
+  border-top: 1px solid $border-color;
+  padding-top: 1rem;
+  margin-top: 1rem;
+}
+
+.no-results {
+  color: $text-muted;
+
+  i {
+    opacity: 0.5;
+  }
+}
+
+.record-search {
+  &:focus {
+    box-shadow: 0 0 0 0.2rem rgba($primary, 0.25);
+    border-color: $primary;
+  }
+}
+
+.selected-record {
+  border-left: 4px solid $primary;
+  background-color: rgba($primary, 0.1);
+  border-color: rgba($primary, 0.2);
+
+  .alert-heading {
+    color: $primary;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.loading-state {
+  color: $text-muted;
+
+  .spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+// Record picker modal specific styles
+.modal[id*="recordPickerModal"] {
+  .modal-header {
+    background-color: rgba($primary, 0.05);
+    border-bottom: 1px solid rgba($primary, 0.2);
+
+    .modal-title {
+      color: $primary;
+      font-weight: 600;
+
+      i {
+        color: $primary;
+      }
+    }
+  }
+
+  .form-label.fw-bold {
+    color: $dark;
+    font-size: 0.95rem;
+  }
+
+  .form-select,
+  .form-control {
+    border: 1.5px solid $border-color;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 0.2rem rgba($primary, 0.15);
+    }
+  }
+
+  .list-group-item-action {
+    padding: 0.75rem 1rem;
+
+    &:first-child {
+      border-top-left-radius: 0.375rem;
+      border-top-right-radius: 0.375rem;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 0.375rem;
+      border-bottom-right-radius: 0.375rem;
+    }
+  }
+
+  .btn-primary .fa {
+    margin-right: 0.5rem;
+  }
+}
+
+// Unlink confirmation modal styles
+.modal[id*="unlinkConfirmModal"] {
+  .modal-header {
+    background-color: rgba($warning, 0.1);
+    border-bottom: 1px solid rgba($warning, 0.2);
+
+    .modal-title {
+      color: $warning;
+      font-weight: 600;
+
+      i {
+        color: $warning;
+      }
+    }
+  }
+
+  .modal-body {
+    .fa-exclamation-triangle {
+      color: $warning;
+    }
+
+    h6 {
+      color: $dark;
+      font-weight: 600;
+    }
+
+    .text-muted {
+      font-size: 0.875rem;
+    }
+  }
+
+  .btn-warning {
+    &:hover {
+      background-color: darken($warning, 10%);
+      border-color: darken($warning, 10%);
+    }
+  }
+}
+
+// Mobile responsive adjustments for record picker
+@include media-breakpoint-down(md) {
+  .modal[id*="recordPickerModal"] {
+    .modal-dialog {
+      margin: 1rem;
+      max-width: calc(100% - 2rem);
+    }
+
+    .record-results {
+      max-height: 200px;
+    }
+
+    .record-item {
+      padding: 0.5rem 0.75rem;
+
+      .fw-medium {
+        font-size: 0.9rem;
+      }
+
+      small {
+        font-size: 0.75rem;
+      }
+    }
+  }
+}

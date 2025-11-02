@@ -1,0 +1,23 @@
+.o_LLMChatComposerTextInput {
+  flex: 1 1 auto;
+
+  &_textarea {
+    resize: none;
+    min-height: 112px !important;
+    max-height: 200px;
+    line-height: 1.5;
+    border-width: 1.5px;
+
+    &::placeholder {
+      color: rgba($gray-600, 0.8);
+    }
+
+    &:hover {
+      border-color: rgba($primary, 0.3);
+    }
+
+    &:focus {
+      border-color: $primary;
+    }
+  }
+}

@@ -1,0 +1,13 @@
+.o_LLMChatComposer {
+  padding: 16px;
+  background-color: rgba($white, 0.95);
+  border-top: 1px solid rgba($border-color, 1);
+
+  &_container {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}

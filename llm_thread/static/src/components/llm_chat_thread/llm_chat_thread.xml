@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm_thread.LLMChatThread" owl="1">
+        <div class="o_LLMChatThread d-flex flex-column h-100">
+            <!-- Header -->
+            <LLMChatThreadHeader record="threadView.llmChatThreadHeaderView" />
+
+            <!-- Messages -->
+            <div class="o_LLMChatThread_content flex-grow-1 overflow-auto">
+                <t t-if="thread.cache?.isLoading">
+                    <div
+            class="d-flex justify-content-center align-items-center h-100"
+          >
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <!-- Message List -->
+                    <LLMChatMessageList
+            record="threadView.messageListView"
+            composerView="threadView.composerView"
+          />
+                </t>
+            </div>
+
+            <!-- Chat Composer - Moved outside scrollable area -->
+            <div class="o_LLMChatThread_composer p-3">
+                <LLMChatComposer record="threadView.composerView" />
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,33 @@
+// Styles specifically for the final tool result display
+.o_llm_tool_result {
+  .o_llm_tool_result_header {
+    font-weight: bold;
+  }
+  .o_llm_tool_result_args {
+    pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 150px; // Allow more space for args display
+      overflow-y: auto;
+    }
+  }
+  .o_llm_tool_result_content {
+    pre {
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 300px; // Allow decent space for results
+      overflow-y: auto;
+    }
+    .bg-danger-light {
+      // Custom class for error background
+      background-color: lighten($danger, 35%);
+    }
+  }
+}
+
+// Styles for the requested tool call badges on assistant messages
+.o_llm_tool_calls {
+  .badge {
+    cursor: default; // Indicate it's not clickable unless you add functionality
+  }
+}

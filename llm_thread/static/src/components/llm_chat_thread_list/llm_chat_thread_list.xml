@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm_thread.LLMChatThreadList" owl="1">
+        <div
+      class="o_LLMChatThreadList d-flex flex-column flex-grow-1 overflow-auto"
+    >
+            <t t-if="llmChatView.llmChat.threads.length === 0">
+                <div
+          class="d-flex flex-column align-items-center justify-content-center flex-grow-1 text-muted p-3"
+        >
+                    <i class="fa fa-comments fa-3x mb-3 text-300" />
+                    <span class="fs-6">No chats yet</span>
+                </div>
+            </t>
+            <t t-else="">
+                <div class="o_LLMChatThreadList_items d-flex flex-column">
+                    <t
+            t-foreach="llmChatView.llmChat.orderedThreads"
+            t-as="thread"
+            t-key="thread.id"
+          >
+                        <button
+              class="o_DiscussSidebarCategoryItem btn d-flex align-items-center w-100 px-0 py-2 border-0 rounded-0 fw-normal text-reset bg-100"
+              t-att-class="{'o-active bg-200': thread.id === activeThread?.id}"
+              t-on-click="() => this._onThreadClick(thread)"
+            >
+                            <span
+                class="o_DiscussSidebarCategoryItem_item o_DiscussSidebarCategoryItem_name ms-3 me-2 text-truncate"
+                t-esc="thread.name"
+              />
+                            <div
+                class="o_DiscussSidebarCategoryItem_item flex-grow-1"
+              />
+                        </button>
+                    </t>
+                </div>
+            </t>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm_thread.LLMChatComposer" owl="1">
+        <div class="o_LLMChatComposer">
+            <div
+        class="o_LLMChatComposer_container d-flex align-items-end gap-3 mx-auto"
+        style="max-width: 1200px;"
+      >
+                <LLMChatComposerTextInput record="composerView" />
+                <t t-if="!isStreaming">
+                    <button
+            class="o_Composer_actionButton o_Composer_button o_Composer_buttonSend btn btn-primary o-last o-composer-is-compact border-start-0"
+            t-on-click="_onClickSend"
+            t-att-disabled="isDisabled"
+          >
+                        <i class="fa fa-paper-plane-o" />
+                    </button>
+                </t>
+                <t t-if="isStreaming">
+                    <button
+            class="o_Composer_actionButton o_Composer_button o_Composer_buttonStop btn btn-danger o-last o-composer-is-compact border-start-0"
+            t-on-click="_onClickStop"
+          >
+                        <i class="fa fa-stop" />
+                    </button>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

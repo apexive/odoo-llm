@@ -14,8 +14,8 @@ export class LLMThreadHeader extends Component {
   static components = { Dropdown, DropdownItem };
 
   setup() {
-    this.llmStore = useService("llm.store");
-    this.mailStore = useService("mail.store");
+    this.llmStore = useState(useService("llm.store"));
+    this.mailStore = useState(useService("mail.store"));
     this.orm = useService("orm");
     this.notification = useService("notification");
 

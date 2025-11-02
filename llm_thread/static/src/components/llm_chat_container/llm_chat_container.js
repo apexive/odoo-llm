@@ -15,8 +15,8 @@ export class LLMChatContainer extends Component {
   static template = "llm_thread.LLMChatContainer";
 
   setup() {
-    this.llmStore = useService("llm.store");
-    this.mailStore = useService("mail.store");
+    this.llmStore = useState(useService("llm.store"));
+    this.mailStore = useState(useService("mail.store"));
     this.action = useService("action");
 
     // No need for local thread tracking - use mail.store.discuss.thread

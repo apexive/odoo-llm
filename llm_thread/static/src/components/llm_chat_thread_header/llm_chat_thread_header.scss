@@ -1,0 +1,86 @@
+.o_ThreadViewTopbar {
+  // Only keep styles that are specific to our use case and not covered by Odoo's classes
+  .o_ThreadViewTopbar_threadName {
+    max-width: 180px; // Limit thread name width on mobile
+
+    @include media-breakpoint-up(sm) {
+      max-width: none;
+    }
+  }
+
+  .o_ThreadViewTopbar_threadDescription {
+    display: inline-flex;
+    align-items: center;
+    font-size: 13px;
+    max-width: 200px; // Limit description width
+
+    @include media-breakpoint-down(sm) {
+      font-size: 12px;
+      max-width: 150px; // More constrained on mobile
+    }
+  }
+
+  .o_ThreadViewTopbar_providerName {
+    color: $info;
+  }
+
+  .o_ThreadViewTopbar_modelName {
+    color: $primary;
+    min-width: 0; // Enable truncation
+  }
+
+  // Related record styles
+  .o_ThreadViewTopbar_relatedRecord {
+    .btn {
+      transition: all 0.2s ease;
+      border: 1px solid rgba(0, 0, 0, 0.125);
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        border-color: rgba(0, 0, 0, 0.25);
+      }
+
+      &:active {
+        transform: translateY(0);
+      }
+
+      // Icon styling
+      i {
+        font-size: 14px;
+
+        &.text-primary {
+          color: $primary !important;
+        }
+
+        &.text-muted {
+          color: $text-muted !important;
+        }
+      }
+
+      // Text styling
+      .text-truncate {
+        font-weight: 500;
+      }
+
+      // Special styling for "no record" state
+      &:has(.text-muted) {
+        border-style: dashed;
+        opacity: 0.8;
+
+        &:hover {
+          opacity: 1;
+          border-style: solid;
+        }
+      }
+    }
+
+    // Mobile adjustments
+    @include media-breakpoint-down(sm) {
+      .btn {
+        min-width: 32px;
+        padding: 4px 6px !important;
+      }
+    }
+  }
+}

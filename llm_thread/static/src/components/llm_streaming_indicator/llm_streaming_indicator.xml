@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+  <t t-name="llm_thread.LLMStreamingIndicator" owl="1">
+    <div
+      class="o_MessageList_item o_MessageList_generating text-start ps-4 pt-4 pb-0 small text-muted"
+    >
+      Generating, please wait<t t-esc="state.dots" />
+    </div>
+  </t>
+</templates>

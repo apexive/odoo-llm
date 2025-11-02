@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t
+    t-name="llm_thread.ChatterTopbar"
+    t-inherit="mail.ChatterTopbar"
+    t-inherit-mode="extension"
+    owl="1"
+  >
+        <!-- Insert AI button after the Schedule Activity button -->
+        <xpath
+      expr="//button[hasclass('o_ChatterTopbar_buttonScheduleActivity')]"
+      position="after"
+    >
+            <!-- AI Chat Button inserted next to Activities -->
+            <div class="o_ChatterTopbar_borderLeft ms-2" />
+            <button
+        t-attf-class="o_ChatterTopbar_button btn text-nowrap ms-2 {{ chatterTopbar.chatter.is_chatting_with_llm ? 'btn-primary o-active' : 'btn-light' }}"
+        type="button"
+        t-on-click="chatterTopbar.chatter.toggleLLMChat"
+      >
+                <span>AI</span>
+            </button>
+        </xpath>
+    </t>
+</templates>

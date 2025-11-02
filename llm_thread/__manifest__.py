@@ -47,8 +47,6 @@ Contact: support@apexive.com
         "web.assets_backend": [
             # Services - LLM store service for integration with mail.store
             "llm_thread/static/src/services/llm_store_service.js",
-            # Patches - Critical patch to handle llm_threads from init_messaging
-            "llm_thread/static/src/patches/messaging_service_patch.js",
             # Components - LLM Chat Container using existing mail components
             "llm_thread/static/src/components/llm_chat_container/llm_chat_container.js",
             "llm_thread/static/src/components/llm_chat_container/llm_chat_container.xml",
@@ -60,17 +58,17 @@ Contact: support@apexive.com
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.js",
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.xml",
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.scss",
-            # Other Patches - Safe extensions of mail components with conditional LLM logic
-            # "llm_thread/static/src/patches/composer_patch.js",
-            # "llm_thread/static/src/patches/thread_patch.js",
-            # "llm_thread/static/src/patches/thread_model_patch.js",
-            # "llm_thread/static/src/patches/chatter_patch.js",
-            # "llm_thread/static/src/patches/message_patch.js",
-            # "llm_thread/static/src/patches/message_patch.xml",
+            # Patches - Safe extensions of mail components with conditional LLM logic
+            "llm_thread/static/src/patches/composer_patch.js",
+            "llm_thread/static/src/patches/thread_patch.js",
+            "llm_thread/static/src/patches/thread_model_patch.js",
+            "llm_thread/static/src/patches/chatter_patch.js",
+            "llm_thread/static/src/patches/message_patch.js",
+            "llm_thread/static/src/patches/message_patch.xml",
             # Templates - Extensions of existing mail templates
             "llm_thread/static/src/templates/chatter_ai_button.xml",
             "llm_thread/static/src/templates/llm_chat_client_action.xml",
-            # Client Actions - Following Odoo 17.0 patterns
+            # Client Actions - Following Odoo 18.0 patterns
             "llm_thread/static/src/client_actions/llm_chat_client_action.js",
         ],
     },

@@ -7,7 +7,7 @@ import { LLMChatContainer } from "@llm_thread/components/llm_chat_container/llm_
 
 /**
  * LLM Chat Client Action - Main entry point for LLM chat functionality
- * Follows Odoo 17.0 client action pattern similar to DiscussClientAction
+ * Follows Odoo 18.0 client action pattern similar to DiscussClientAction
  */
 export class LLMChatClientAction extends Component {
   static components = { LLMChatContainer };
@@ -15,12 +15,10 @@ export class LLMChatClientAction extends Component {
   static template = "llm_thread.LLMChatClientAction";
 
   setup() {
-    this.llmStore = useService("llm.store");
-    this.mailStore = useService("mail.store");
-    this.messaging = useService("mail.messaging");
+    this.llmStore = useState(useService("llm.store"));
+    this.mailStore = useState(useService("mail.store"));
     this.orm = useService("orm");
     this.notification = useService("notification");
-    this.action = useService("action");
 
     onWillStart(() => {
       return this.initializeLLMChat(this.props);
@@ -37,10 +35,10 @@ export class LLMChatClientAction extends Component {
    */
   async initializeLLMChat(props) {
     try {
-      // Wait for both messaging and llmStore to be ready
-      // messaging.isReady ensures threads are loaded via init_messaging
+      // Wait for both mailStore and llmStore to be ready
+      // mailStore.isReady ensures threads are loaded via init_messaging
       // llmStore.isReady ensures providers, models, tools are loaded
-      await Promise.all([this.messaging.isReady, this.llmStore.isReady]);
+      await Promise.all([this.mailStore.isReady, this.llmStore.isReady]);
 
       const activeId = this.getActiveId(props);
 
@@ -88,19 +86,7 @@ export class LLMChatClientAction extends Component {
       }
     } catch (error) {
       console.error("Error initializing LLM chat:", error);
-      // Log detailed error information
-      console.error("Error details:", {
-        message: error.message,
-        stack: error.stack,
-        error: error,
-      });
-      this.notification.add(
-        `Failed to initialize AI chat: ${error.message || "Unknown error"}`,
-        {
-          type: "danger",
-          sticky: true, // Make notification persistent
-        }
-      );
+      this.notification.add("Failed to initialize AI chat", { type: "danger" });
     }
   }
 
@@ -163,29 +149,13 @@ export class LLMChatClientAction extends Component {
       // Just get the most recent one from mailStore
       const threads = this.llmStore.llmThreadList;
 
-      console.log("this", this);
-      console.log("this.llmStore", this.llmStore);
-      console.log("threads", threads);
-
       if (threads.length > 0) {
         await this.selectLLMThread(threads[0].id);
       }
       // No auto-creation - let user create threads via form
     } catch (error) {
       console.error("Error loading user threads:", error);
-      // Log detailed error information
-      console.error("Error details:", {
-        message: error.message,
-        stack: error.stack,
-        error: error,
-      });
-      this.notification.add(
-        `Failed to load chat threads: ${error.message || "Unknown error"}`,
-        {
-          type: "danger",
-          sticky: true, // Make notification persistent
-        }
-      );
+      this.notification.add("Failed to load chat threads", { type: "danger" });
     }
   }
 

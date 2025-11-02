@@ -1,0 +1,13 @@
+.o_LLMChat {
+  background-color: $white;
+}
+
+.o_LLMChat_content {
+  overflow: auto; /* Allow scrolling */
+  height: 100%;
+}
+
+.o_LLMChat_noThread {
+  color: $o-main-color-muted;
+  font-style: italic;
+}

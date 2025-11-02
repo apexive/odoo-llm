@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t
+    t-name="llm_thread.Chatter"
+    t-inherit="mail.Chatter"
+    t-inherit-mode="extension"
+    owl="1"
+  >
+        <!-- Replace the entire content of the Chatter div -->
+        <xpath expr="//div[hasclass('o_Chatter')]" position="replace">
+            <t t-if="chatter">
+                <div
+          class="o_Chatter position-relative flex-grow-1 flex-column d-flex w-100 bg-view"
+          t-attf-class="{{ className }}"
+          t-ref="root"
+        >
+                    <!-- Always keep the topbar -->
+                    <ChatterTopbar
+            t-if="chatter.topbar"
+            className="'o_Chatter_topbar'"
+            record="chatter.topbar"
+          />
+                    <!-- Conditional content based on is_chatting_with_llm -->
+                    <t
+            t-if="chatter.is_chatting_with_llm and chatter.llmChatThread"
+          >
+                        <!-- AI Chat Mode: Only show LLMChatThread -->
+                        <LLMChatThread
+              className="'o_Chatter_thread flex-grow-1'"
+              record="chatter.llmChatThread"
+              threadView="chatter.llmChatThreadView"
+            />
+                    </t>
+                    <t t-else="">
+                        <!-- Normal Mode: Show full original content minus topbar -->
+                        <t t-if="chatter.dropZoneView">
+                            <DropZone
+                className="'o_Chatter_dropZone'"
+                record="chatter.dropZoneView"
+              />
+                        </t>
+                        <div class="o_Chatter_fixedPanel">
+                            <t t-if="chatter.composerView">
+                                <Composer
+                  className="'o_Chatter_composer border-bottom'"
+                  classNameObj="{ 'o-bordered': chatter.hasExternalBorder }"
+                  record="chatter.composerView"
+                />
+                            </t>
+                        </div>
+                        <div
+              class="o_Chatter_scrollPanel overflow-auto flex-grow-1"
+              t-on-scroll="chatter.onScrollScrollPanel"
+              t-ref="scrollPanel"
+            >
+                            <t t-if="chatter.attachmentBoxView">
+                                <AttachmentBox
+                  className="'o_Chatter_attachmentBox'"
+                  record="chatter.attachmentBoxView"
+                />
+                            </t>
+                            <t t-if="chatter.activityBoxView">
+                                <ActivityBox
+                  className="'o_Chatter_activityBox'"
+                  record="chatter.activityBoxView"
+                />
+                            </t>
+                            <t t-if="chatter.threadView">
+                                <ThreadView
+                  className="'o_Chatter_thread'"
+                  record="chatter.threadView"
+                />
+                            </t>
+                        </div>
+                    </t>
+                </div>
+            </t>
+        </xpath>
+    </t>
+</templates>
