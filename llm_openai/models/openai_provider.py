@@ -33,6 +33,11 @@ class LLMProvider(models.Model):
 
     def openai_get_client(self):
         """Get OpenAI client instance"""
+        # Check if API key is configured
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
         return OpenAI(api_key=self.api_key, base_url=self.api_base or None)
 
     def openai_normalize_prepend_messages(self, prepend_messages):
@@ -169,6 +174,12 @@ class LLMProvider(models.Model):
         Returns:
             Generator yielding response chunks if streaming, else complete response
         """
+        # Check if API key is configured before making any API calls
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
+
         model = self.get_model(model, "chat")
 
         # Format mail.message records for OpenAI
@@ -350,6 +361,12 @@ class LLMProvider(models.Model):
 
     def openai_embedding(self, texts, model=None):
         """Generate embeddings using OpenAI"""
+        # Check if API key is configured before making any API calls
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
+
         model = self.get_model(model, "embedding")
 
         response = self.client.embeddings.create(model=model.name, input=texts)
@@ -357,13 +374,41 @@ class LLMProvider(models.Model):
 
     def openai_models(self, model_id=None):
         """List available OpenAI models"""
-        if model_id:
-            model = self.client.models.retrieve(model_id)
-            yield self._openai_parse_model(model)
-        else:
-            models = self.client.models.list()
-            for model in models.data:
+        # Check if API key is configured before making any API calls
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
+
+        try:
+            if model_id:
+                model = self.client.models.retrieve(model_id)
                 yield self._openai_parse_model(model)
+            else:
+                models = self.client.models.list()
+                for model in models.data:
+                    yield self._openai_parse_model(model)
+        except Exception as e:
+            # Check for authentication errors (incorrect API key)
+            error_msg = str(e)
+            if any(
+                keyword in error_msg.lower()
+                for keyword in [
+                    "incorrect api key",
+                    "invalid_api_key",
+                    "authentication",
+                    "401",
+                    "unauthorized",
+                    "invalid api key",
+                ]
+            ):
+                raise UserError(
+                    "Authentication failed. The provided OpenAI API key appears to be incorrect. "
+                    "Please verify your API key and try again.\n\n"
+                    "You can find your API key at https://platform.openai.com/account/api-keys."
+                )
+            # Re-raise other exceptions
+            raise
 
     def _openai_parse_model(self, model):
         capabilities = ["chat"]  # default
@@ -413,6 +458,12 @@ class LLMProvider(models.Model):
         Returns:
             List of formatted messages in OpenAI-compatible format
         """
+        # Check if API key is configured
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
+
         # Format the messages
         formatted_messages = []
 
@@ -433,6 +484,12 @@ class LLMProvider(models.Model):
 
     def openai_upload_file(self, file_tuple, purpose="fine-tune"):
         """Upload a file to OpenAI"""
+        # Check if API key is configured before making any API calls
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
+
         response = self.client.files.create(file=file_tuple, purpose=purpose)
         return response
 
@@ -441,6 +498,12 @@ class LLMProvider(models.Model):
     ):
         """Create an OpenAI fine-tuning job."""
         self.ensure_one()
+
+        # Check if API key is configured before making any API calls
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
 
         hyperparameters = hyperparameters or {}
         hyperparams_cleaned = {
@@ -461,12 +524,26 @@ class LLMProvider(models.Model):
     def openai_retrieve_training_job(self, job_id):
         """Retrieve an OpenAI fine-tuning job."""
         self.ensure_one()
+
+        # Check if API key is configured before making any API calls
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
+
         response = self.client.fine_tuning.jobs.retrieve(job_id)
         return response
 
     def openai_cancel_training_job(self, job_id):
         """Cancel an OpenAI fine-tuning job."""
         self.ensure_one()
+
+        # Check if API key is configured before making any API calls
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
+
         response = self.client.fine_tuning.jobs.cancel(job_id)
         return response
 
@@ -556,6 +633,13 @@ class LLMProvider(models.Model):
     def openai_check_training_job_status(self, job):
         """Check the status of a training job with the provider."""
         self.ensure_one()
+
+        # Check if API key is configured before making any API calls
+        if not self.api_key:
+            raise UserError(
+                "API key is required for OpenAI. Please configure the API key for this provider."
+            )
+
         response = job.provider_id.retrieve_training_job(job_id=job.external_job_id)
         state_to_return = OPENAI_TO_ODOO_STATE_MAPPING.get(response.status)
         model_dump = response.model_dump()
