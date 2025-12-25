@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- List View -->
+    <record id="llm_a2a_agent_view_list" model="ir.ui.view">
+        <field name="name">llm.a2a.agent.view.list</field>
+        <field name="model">llm.a2a.agent</field>
+        <field name="arch" type="xml">
+            <list string="A2A Agents">
+                <field name="name"/>
+                <field name="url"/>
+                <field name="state" widget="badge" decoration-success="state == 'connected'" decoration-danger="state == 'error'" decoration-muted="state == 'draft'"/>
+                <field name="agent_description"/>
+                <field name="agent_skills"/>
+                <field name="last_connected"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="llm_a2a_agent_view_form" model="ir.ui.view">
+        <field name="name">llm.a2a.agent.view.form</field>
+        <field name="model">llm.a2a.agent</field>
+        <field name="arch" type="xml">
+            <form string="A2A Agent">
+                <header>
+                    <button name="action_test_connection" type="object" string="Test Connection" class="btn-primary" icon="fa-plug"/>
+                    <button name="action_fetch_agent_card" type="object" string="Refresh Agent Card" icon="fa-refresh"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,connected"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                            <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                        </button>
+                    </div>
+                    <widget name="web_ribbon" title="Error" bg_color="text-bg-danger" invisible="state != 'error'"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1>
+                            <field name="name" placeholder="Agent Name"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Connection">
+                            <field name="url" placeholder="http://localhost:9999" widget="url"/>
+                            <field name="endpoint_type" invisible="not endpoint_type"/>
+                            <field name="auth_type"/>
+                            <field name="api_key" password="True" invisible="auth_type == 'none'"/>
+                        </group>
+                        <group string="Status">
+                            <field name="last_connected"/>
+                            <field name="last_error" invisible="not last_error"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Agent Card" name="agent_card">
+                            <group>
+                                <field name="agent_description" readonly="1"/>
+                                <field name="agent_version" readonly="1"/>
+                                <field name="agent_skills" readonly="1"/>
+                            </group>
+                            <group string="Raw Agent Card (JSON)">
+                                <field name="agent_card" widget="ace" options="{'mode': 'json'}" readonly="1" nolabel="1"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="llm_a2a_agent_view_search" model="ir.ui.view">
+        <field name="name">llm.a2a.agent.view.search</field>
+        <field name="model">llm.a2a.agent</field>
+        <field name="arch" type="xml">
+            <search string="Search A2A Agents">
+                <field name="name"/>
+                <field name="url"/>
+                <field name="agent_description"/>
+                <field name="agent_skills"/>
+                <separator/>
+                <filter string="Connected" name="connected" domain="[('state', '=', 'connected')]"/>
+                <filter string="Error" name="error" domain="[('state', '=', 'error')]"/>
+                <filter string="Not Connected" name="draft" domain="[('state', '=', 'draft')]"/>
+                <separator/>
+                <filter string="Archived" name="archived" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Kanban View -->
+    <record id="llm_a2a_agent_view_kanban" model="ir.ui.view">
+        <field name="name">llm.a2a.agent.view.kanban</field>
+        <field name="model">llm.a2a.agent</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <templates>
+                    <t t-name="kanban-card">
+                        <div class="d-flex flex-column p-2">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <field name="state" widget="label_selection" options="{'classes': {'draft': 'secondary', 'connected': 'success', 'error': 'danger'}}"/>
+                            </div>
+                            <div class="text-muted small mb-1">
+                                <i class="fa fa-link me-1"/>
+                                <field name="url"/>
+                            </div>
+                            <div t-if="record.agent_description.value" class="text-muted small mb-1">
+                                <field name="agent_description"/>
+                            </div>
+                            <div t-if="record.agent_skills.value" class="small">
+                                <span class="badge bg-primary">
+                                    <i class="fa fa-tags me-1"/>
+                                    <field name="agent_skills"/>
+                                </span>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="llm_a2a_agent_action" model="ir.actions.act_window">
+        <field name="name">A2A Agents</field>
+        <field name="res_model">llm.a2a.agent</field>
+        <field name="view_mode">list,kanban,form</field>
+        <field name="search_view_id" ref="llm_a2a_agent_view_search"/>
+        <field name="context">{'search_default_connected': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Add your first A2A Agent
+            </p>
+            <p>
+                Connect to external AI agents using the Agent-to-Agent (A2A) protocol.
+                <br/>
+                A2A agents can handle specialized tasks and collaborate with your LLM chat.
+            </p>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Record Rules for llm.a2a.agent -->
+
+    <!-- User can read all A2A agents -->
+    <record id="llm_a2a_agent_rule_read_all" model="ir.rule">
+        <field name="name">A2A Agent: Read All</field>
+        <field name="model_id" ref="model_llm_a2a_agent"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read">1</field>
+        <field name="perm_write">0</field>
+        <field name="perm_create">0</field>
+        <field name="perm_unlink">0</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- User can create/write/delete only their own A2A agents -->
+    <record id="llm_a2a_agent_rule_own" model="ir.rule">
+        <field name="name">A2A Agent: Own Records</field>
+        <field name="model_id" ref="model_llm_a2a_agent"/>
+        <field name="domain_force">[('create_uid', '=', user.id)]</field>
+        <field name="perm_read">0</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">1</field>
+        <field name="perm_unlink">1</field>
+        <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+    </record>
+
+    <!-- LLM Manager has full access -->
+    <record id="llm_a2a_agent_rule_manager" model="ir.rule">
+        <field name="name">A2A Agent: Manager Full Access</field>
+        <field name="model_id" ref="model_llm_a2a_agent"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read">1</field>
+        <field name="perm_write">1</field>
+        <field name="perm_create">1</field>
+        <field name="perm_unlink">1</field>
+        <field name="groups" eval="[(4, ref('llm.group_llm_manager'))]"/>
+    </record>
+</odoo>

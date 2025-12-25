@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- A2A Agents menu under LLM Configuration -->
+    <menuitem
+        id="llm_a2a_agent_menu"
+        name="A2A Agents"
+        parent="llm.menu_llm_config"
+        action="llm_a2a_agent_action"
+        sequence="50"
+    />
+</odoo>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!--
+    A2A delegation tools are created dynamically when agents are added to threads.
+    This file provides a sample/demo tool for reference.
+    -->
+</odoo>
