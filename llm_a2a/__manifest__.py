@@ -16,12 +16,13 @@
         This module allows your Odoo LLM chat to communicate with any A2A-compatible
         agent running anywhere (local, cloud, different frameworks like LangChain, CrewAI, etc.)
     """,
-    "author": "Apexive Solutions LLC",
-    "website": "https://github.com/apexive/odoo-llm",
+    "author": "Hung Pham Quang (HungUBQN)",
     "license": "LGPL-3",
     # Note: llm_knowledge is optional but if installed, A2A should load after it
     # for proper get_prepend_messages() MRO
-    "depends": ["llm_thread", "llm_tool", "llm_assistant", "llm_knowledge"],
+    # Note: llm_openai dependency ensures A2A's openai_chat override takes precedence
+    # in the MRO (A2A loads after llm_openai, so its methods are called first)
+    "depends": ["llm_thread", "llm_tool", "llm_assistant", "llm_knowledge", "llm_openai"],
     "external_dependencies": {
         "python": ["httpx"],
     },

@@ -1,8 +1,4 @@
-import logging
-
 from odoo import models
-
-_logger = logging.getLogger(__name__)
 
 # Module-level storage for A2A tools (thread-safe via Odoo's request handling)
 _current_a2a_tools = {}
@@ -31,7 +27,6 @@ class LlmProviderA2a(models.Model):
         a2a_tools = kwargs.pop("a2a_tools", None)
 
         if a2a_tools:
-            _logger.info("Storing %d A2A tools for provider %s", len(a2a_tools), self.id)
             # Store in module-level dict keyed by provider id
             _current_a2a_tools[self.id] = a2a_tools
 
@@ -80,6 +75,7 @@ class LlmProviderA2a(models.Model):
         }
 
         # ALWAYS call format_tools to include A2A tools (even if tools is empty)
+        # This is the key fix: original openai_chat only calls format_tools when tools is not empty
         formatted_tools = self.format_tools(tools)
         if formatted_tools:
             params["tools"] = formatted_tools
@@ -118,13 +114,6 @@ class LlmProviderA2a(models.Model):
                 formatted_a2a = self._format_a2a_tool_for_service(a2a_tool)
                 if formatted_a2a:
                     formatted.append(formatted_a2a)
-                    _logger.info("Added A2A tool to formatted list: %s", a2a_tool.get("name"))
-
-            _logger.info(
-                "Total formatted tools: %d (including %d A2A tools)",
-                len(formatted),
-                len(a2a_tools),
-            )
 
         return formatted
 
