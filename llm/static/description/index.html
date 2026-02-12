@@ -69,123 +69,103 @@
             <div class="col-lg-11">
                 <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem 1.5rem">
 
-                    <!-- ROW 1: Top labels + client boxes -->
-                    <div style="display:flex; justify-content:space-between; align-items:flex-start">
-                        <!-- Left group: External AI Clients -->
-                        <div style="width:38%">
+                    <!-- Top row: External AI Clients + Odoo AI Chat -->
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-5">
                             <p style="font-weight:700; color:#6c757d; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem">External AI Clients</p>
-                            <div style="display:flex; gap:0.5rem">
-                                <div style="flex:1; border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem; text-align:center">
-                                    <i class="fa fa-desktop" style="font-size:1.1rem; color:#71639e; display:block; margin-bottom:0.25rem"></i>
-                                    <strong style="font-size:0.8rem; color:#212529; display:block">Claude Desktop</strong>
-                                    <span style="font-size:0.7rem; color:#868e96">Cursor &middot; Windsurf</span>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="text-center" style="border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem">
+                                        <i class="fa fa-desktop" style="font-size:1.1rem; color:#71639e; display:block; margin-bottom:0.25rem"></i>
+                                        <strong style="font-size:0.8rem; color:#212529; display:block">Claude Desktop</strong>
+                                        <span style="font-size:0.7rem; color:#868e96">Cursor &middot; Windsurf</span>
+                                    </div>
                                 </div>
-                                <div style="flex:1; border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem; text-align:center">
-                                    <i class="fa fa-terminal" style="font-size:1.1rem; color:#71639e; display:block; margin-bottom:0.25rem"></i>
-                                    <strong style="font-size:0.8rem; color:#212529; display:block">Claude Code</strong>
-                                    <span style="font-size:0.7rem; color:#868e96">Codex CLI</span>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Right group: Odoo AI Chat -->
-                        <div style="width:38%">
-                            <p style="font-weight:700; color:#6c757d; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem; text-align:right">Odoo AI Chat</p>
-                            <div style="display:flex; gap:0.5rem">
-                                <div style="flex:1; border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem; text-align:center">
-                                    <strong style="font-size:0.8rem; color:#212529">llm_assistant</strong>
-                                </div>
-                                <div style="flex:1; border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem; text-align:center">
-                                    <strong style="font-size:0.8rem; color:#212529">llm_thread</strong>
+                                <div class="col-6">
+                                    <div class="text-center" style="border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem">
+                                        <i class="fa fa-terminal" style="font-size:1.1rem; color:#71639e; display:block; margin-bottom:0.25rem"></i>
+                                        <strong style="font-size:0.8rem; color:#212529; display:block">Claude Code</strong>
+                                        <span style="font-size:0.7rem; color:#868e96">Codex CLI</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- CONNECTORS: vertical lines down + MCP label -->
-                    <div style="display:flex; justify-content:space-between; align-items:stretch; height:3rem">
-                        <!-- Left: line + MCP label -->
-                        <div style="width:38%; display:flex; flex-direction:column; align-items:center">
-                            <div style="width:2px; flex:1; background-color:#71639e"></div>
-                            <span style="font-size:0.7rem; font-weight:700; color:#71639e; background-color:#f0ecf7; padding:0.1rem 0.5rem; border-radius:4px; white-space:nowrap">MCP Protocol</span>
-                        </div>
-                        <!-- Right: line -->
-                        <div style="width:38%; display:flex; flex-direction:column; align-items:center">
-                            <div style="width:2px; flex:1; background-color:#adb5bd"></div>
-                        </div>
-                    </div>
-
-                    <!-- Arrow tips -->
-                    <div style="display:flex; justify-content:space-between; height:0.75rem">
-                        <div style="width:38%; text-align:center">
-                            <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #71639e; display:inline-block"></div>
-                        </div>
-                        <div style="width:38%; text-align:center">
-                            <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #adb5bd; display:inline-block"></div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-5">
+                            <p class="text-end" style="font-weight:700; color:#6c757d; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem">Odoo AI Chat</p>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="text-center" style="border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem">
+                                        <strong style="font-size:0.8rem; color:#212529">llm_assistant</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center" style="border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem">
+                                        <strong style="font-size:0.8rem; color:#212529">llm_thread</strong>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- ROW 2: MCP Server ----> LLM Core -->
-                    <div style="display:flex; align-items:stretch; gap:0; margin-bottom:0">
-                        <!-- MCP Server box -->
-                        <div style="width:38%; flex-shrink:0">
-                            <div style="border:2px solid #71639e; border-radius:12px; padding:1.25rem 1rem; text-align:center; height:100%; display:flex; flex-direction:column; justify-content:center">
+                    <!-- Vertical lines down + MCP Protocol label -->
+                    <div class="row">
+                        <div class="col-md-5 text-center">
+                            <div style="width:2px; height:1.5rem; background-color:#71639e; margin:0 auto"></div>
+                            <span style="font-size:0.75rem; font-weight:700; color:#71639e; background-color:#f0ecf7; padding:0.2rem 0.75rem; border-radius:4px; display:inline-block">MCP Protocol</span>
+                            <div style="width:2px; height:1rem; background-color:#71639e; margin:0 auto"></div>
+                            <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #71639e; margin:0 auto"></div>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-5 text-center">
+                            <div style="width:2px; height:3rem; background-color:#adb5bd; margin:0 auto"></div>
+                            <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #adb5bd; margin:0 auto"></div>
+                        </div>
+                    </div>
+
+                    <!-- Middle row: MCP Server + arrow + LLM Core -->
+                    <div class="row g-0 align-items-stretch mb-3">
+                        <div class="col-md-4">
+                            <div style="border:2px solid #71639e; border-radius:12px; padding:1.25rem 1rem; text-align:center; height:100%">
                                 <strong style="font-size:1.05rem; color:#71639e; display:block; margin-bottom:0.25rem">llm_mcp_server</strong>
                                 <span style="font-size:0.85rem; color:#6c757d">MCP Server for Odoo</span>
                             </div>
                         </div>
-                        <!-- Horizontal arrow -->
-                        <div style="flex:1; display:flex; align-items:center; padding:0 0.25rem; min-width:40px">
-                            <div style="flex:1; height:2px; background-color:#71639e"></div>
-                            <div style="width:0; height:0; border-top:6px solid transparent; border-bottom:6px solid transparent; border-left:10px solid #71639e; flex-shrink:0"></div>
+                        <div class="col-md-1 d-flex align-items-center justify-content-center" style="padding:0">
+                            <div style="height:2px; background-color:#71639e; flex:1"></div>
+                            <div style="width:0; height:0; border-top:7px solid transparent; border-bottom:7px solid transparent; border-left:10px solid #71639e"></div>
                         </div>
-                        <!-- LLM Core box -->
-                        <div style="width:48%; flex-shrink:0">
+                        <div class="col-md-7">
                             <div style="border:3px solid #71639e; border-radius:12px; padding:1.25rem 1rem; text-align:center; background-color:#f9f8fc">
-                                <span style="font-size:1.15rem; color:#71639e; font-weight:800; display:block; margin-bottom:0.4rem">&#9733; llm &#9733;</span>
+                                <span style="font-size:1.15rem; color:#71639e; font-weight:800; display:block; margin-bottom:0.4rem">&#9733; llm (This Module) &#9733;</span>
                                 <span style="font-size:0.8rem; color:#495057; display:block; line-height:1.6">Provider Abstraction &middot; Model Management<br>Enhanced mail.message &middot; Security Framework</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- CONNECTOR: vertical line from llm down, then horizontal bar branching to 3 children -->
-                    <!-- Vertical stub -->
-                    <div style="display:flex; justify-content:flex-end; height:1.25rem">
-                        <div style="width:48%; display:flex; justify-content:center">
-                            <div style="width:2px; height:100%; background-color:#adb5bd"></div>
-                        </div>
-                    </div>
-                    <!-- Horizontal bar spanning all 3 columns -->
-                    <div style="height:2px; background-color:#adb5bd; margin:0 calc(100% / 6)"></div>
-                    <!-- 3 vertical stubs down into child boxes -->
-                    <div style="display:flex; height:1rem">
-                        <div style="flex:1; display:flex; justify-content:center">
-                            <div style="width:2px; height:100%; background-color:#adb5bd"></div>
-                        </div>
-                        <div style="flex:1; display:flex; justify-content:center">
-                            <div style="width:2px; height:100%; background-color:#adb5bd"></div>
-                        </div>
-                        <div style="flex:1; display:flex; justify-content:center">
-                            <div style="width:2px; height:100%; background-color:#adb5bd"></div>
-                        </div>
+                    <!-- Down arrow from llm -->
+                    <div class="text-center" style="margin:0">
+                        <div style="width:2px; height:2rem; background-color:#adb5bd; margin:0 auto"></div>
+                        <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #adb5bd; margin:0 auto"></div>
                     </div>
 
-                    <!-- ROW 3: llm_tool + Providers + Infrastructure -->
-                    <div style="display:flex; gap:0.75rem">
-                        <div style="flex:1">
+                    <!-- Child modules row -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
                             <div style="border:2px solid #71639e; border-radius:10px; padding:1rem; text-align:center; height:100%">
                                 <strong style="font-size:0.95rem; color:#71639e; display:block; margin-bottom:0.35rem">llm_tool</strong>
                                 <span style="font-size:0.8rem; color:#6c757d; display:block">Tool Framework</span>
                                 <span style="font-size:0.8rem; color:#6c757d; display:block">+ Generic CRUD Tools</span>
                             </div>
                         </div>
-                        <div style="flex:1">
+                        <div class="col-md-4">
                             <div style="border:2px solid #dee2e6; border-radius:10px; padding:1rem; text-align:center; height:100%">
                                 <strong style="font-size:0.95rem; color:#495057; display:block; margin-bottom:0.35rem">AI Providers</strong>
                                 <span style="font-size:0.8rem; color:#6c757d; display:block">llm_openai, llm_ollama</span>
                                 <span style="font-size:0.8rem; color:#6c757d; display:block">llm_mistral, ...</span>
                             </div>
                         </div>
-                        <div style="flex:1">
+                        <div class="col-md-4">
                             <div style="border:2px solid #dee2e6; border-radius:10px; padding:1rem; text-align:center; height:100%">
                                 <strong style="font-size:0.95rem; color:#495057; display:block; margin-bottom:0.35rem">Infrastructure</strong>
                                 <span style="font-size:0.8rem; color:#6c757d; display:block">llm_store</span>
@@ -194,25 +174,26 @@
                         </div>
                     </div>
 
-                    <!-- CONNECTOR: vertical line from llm_tool to tool packs -->
-                    <div style="display:flex; height:1.5rem">
-                        <div style="flex:1; display:flex; justify-content:center">
-                            <div style="width:2px; height:100%; background-color:#71639e"></div>
+                    <!-- Down arrow from llm_tool -->
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div style="width:2px; height:1.5rem; background-color:#71639e; margin:0 auto"></div>
+                            <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #71639e; margin:0 auto"></div>
                         </div>
-                        <div style="flex:2"></div>
+                        <div class="col-md-8"></div>
                     </div>
 
-                    <!-- ROW 4: Domain-Specific Tool Packs -->
-                    <div style="display:flex">
-                        <div style="width:70%">
+                    <!-- Domain-Specific Tool Packs -->
+                    <div class="row">
+                        <div class="col-lg-9 col-md-10">
                             <div style="border:2px solid #71639e; border-radius:12px; padding:1.25rem; background-color:#f9f8fc">
                                 <strong style="font-size:1rem; color:#71639e; display:block; margin-bottom:0.75rem; text-align:center">Domain-Specific Tool Packs</strong>
-                                <div style="display:flex; gap:1.5rem; font-size:0.8rem; color:#495057; line-height:1.9">
-                                    <div style="flex:1">
+                                <div class="row">
+                                    <div class="col-6" style="font-size:0.8rem; color:#495057; line-height:1.9">
                                         <strong>llm_tool_account</strong> &middot; 18 accounting tools<br>
                                         <strong>llm_tool_mis_builder</strong> &middot; 44 MIS reporting tools
                                     </div>
-                                    <div style="flex:1">
+                                    <div class="col-6" style="font-size:0.8rem; color:#495057; line-height:1.9">
                                         <strong>llm_tool_knowledge</strong> &middot; RAG search tools<br>
                                         <strong>llm_tool_ocr_mistral</strong> &middot; OCR via Mistral vision
                                     </div>
