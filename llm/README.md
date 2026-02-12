@@ -46,14 +46,14 @@ This module is **auto-installed** as a dependency. You typically don't install i
 
 ### Common Setups
 
-| I want to...                                  | Install                                                 |
-| --------------------------------------------- | ------------------------------------------------------- |
-| **Use Claude/Cursor/Codex with Odoo (MCP)**   | `llm_mcp_server` (+ tool packs below)                   |
-| Chat with AI inside Odoo                      | `llm_assistant` + `llm_openai`                          |
-| Use local AI (privacy)                        | `llm_assistant` + `llm_ollama`                          |
-| Add RAG/knowledge base                        | Above + `llm_knowledge` + `llm_pgvector`                |
-| AI-powered accounting via MCP or chat         | `llm_tool_account` (+ `llm_mcp_server` for external AI) |
-| AI-powered financial reporting (MIS Builder)  | `llm_tool_mis_builder` (+ `llm_mcp_server`)             |
+| I want to...                                 | Install                                                 |
+| -------------------------------------------- | ------------------------------------------------------- |
+| **Use Claude/Cursor/Codex with Odoo (MCP)**  | `llm_mcp_server` (+ tool packs below)                   |
+| Chat with AI inside Odoo                     | `llm_assistant` + `llm_openai`                          |
+| Use local AI (privacy)                       | `llm_assistant` + `llm_ollama`                          |
+| Add RAG/knowledge base                       | Above + `llm_knowledge` + `llm_pgvector`                |
+| AI-powered accounting via MCP or chat        | `llm_tool_account` (+ `llm_mcp_server` for external AI) |
+| AI-powered financial reporting (MIS Builder) | `llm_tool_mis_builder` (+ `llm_mcp_server`)             |
 
 ### MCP Server — Connect External AI Clients
 
@@ -69,13 +69,13 @@ After installing, each user generates their own API key from **My Profile → Ac
 
 Install tool packs to give AI assistants (both in-Odoo and external MCP clients) specialized capabilities:
 
-| Module                 | Tools | Description                                                                    |
-| ---------------------- | ----- | ------------------------------------------------------------------------------ |
-| **`llm_tool_account`** | 18    | Trial balance, journal entries, reconciliation, payments, tax reports, P&L     |
-| **`llm_tool_mis_builder`** | 44 | KPI management, report computation, drill-down, variance analysis, trends      |
-| **`llm_tool_knowledge`** | —   | RAG search, semantic retrieval, source citations from your knowledge base      |
-| **`llm_tool_ocr_mistral`** | 1  | Extract text from images and PDFs using Mistral AI vision models               |
-| **`llm_tool_demo`**    | 6     | Example tools showing `@llm_tool` decorator patterns for developers            |
+| Module                     | Tools | Description                                                                |
+| -------------------------- | ----- | -------------------------------------------------------------------------- |
+| **`llm_tool_account`**     | 18    | Trial balance, journal entries, reconciliation, payments, tax reports, P&L |
+| **`llm_tool_mis_builder`** | 44    | KPI management, report computation, drill-down, variance analysis, trends  |
+| **`llm_tool_knowledge`**   | —     | RAG search, semantic retrieval, source citations from your knowledge base  |
+| **`llm_tool_ocr_mistral`** | 1     | Extract text from images and PDFs using Mistral AI vision models           |
+| **`llm_tool_demo`**        | 6     | Example tools showing `@llm_tool` decorator patterns for developers        |
 
 The base `llm_tool` module also includes 6 **generic CRUD tools** out of the box: `odoo_record_retriever`, `odoo_record_creator`, `odoo_record_updater`, `odoo_record_unlinker`, `odoo_model_method_executor`, and `odoo_model_inspector` — enabling AI to read, create, update, and delete records in any Odoo model.
 
@@ -89,13 +89,13 @@ The base `llm_tool` module also includes 6 **generic CRUD tools** out of the box
 
 ### Modules That Depend on This
 
-| Category           | Modules                                                                   |
-| ------------------ | ------------------------------------------------------------------------- |
-| **MCP Server**     | `llm_mcp_server`                                                          |
-| **Interfaces**     | `llm_assistant`, `llm_thread`                                             |
+| Category           | Modules                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| **MCP Server**     | `llm_mcp_server`                                                                                      |
+| **Interfaces**     | `llm_assistant`, `llm_thread`                                                                         |
 | **Tool Framework** | `llm_tool` → `llm_tool_account`, `llm_tool_mis_builder`, `llm_tool_knowledge`, `llm_tool_ocr_mistral` |
-| **Providers**      | `llm_openai`, `llm_ollama`, `llm_mistral`, `llm_replicate`, `llm_fal_ai` |
-| **Infrastructure** | `llm_store`, `llm_generate`                                               |
+| **Providers**      | `llm_openai`, `llm_ollama`, `llm_mistral`, `llm_replicate`, `llm_fal_ai`                              |
+| **Infrastructure** | `llm_store`, `llm_generate`                                                                           |
 
 ## Overview
 
@@ -197,26 +197,26 @@ The new `llm_role` field provides dramatic performance improvements:
 
 1. **Set up AI Provider:**
 
-    ```
-    Navigate to: LLM → Configuration → Providers
-    Create new provider with API credentials
-    Click "Fetch Models" to import available models
-    ```
+   ```
+   Navigate to: LLM → Configuration → Providers
+   Create new provider with API credentials
+   Click "Fetch Models" to import available models
+   ```
 
 2. **Configure Models:**
 
-    ```
-    Go to: LLM → Configuration → Models
-    Set default models for chat, embedding, etc.
-    Configure model parameters and capabilities
-    ```
+   ```
+   Go to: LLM → Configuration → Models
+   Set default models for chat, embedding, etc.
+   Configure model parameters and capabilities
+   ```
 
 3. **Security Setup:**
-    ```
-    Assign users to LLM User or LLM Manager groups
-    Configure API key access permissions
-    Set up tool consent requirements
-    ```
+   ```
+   Assign users to LLM User or LLM Manager groups
+   Configure API key access permissions
+   Set up tool consent requirements
+   ```
 
 ## Technical Specifications
 
@@ -358,28 +358,28 @@ thread.message_post(
 
 1. **Create Provider Module:**
 
-    ```python
-    class LLMProvider(models.Model):
-        _inherit = "llm.provider"
+   ```python
+   class LLMProvider(models.Model):
+       _inherit = "llm.provider"
 
-        @api.model
-        def _get_available_services(self):
-            return super()._get_available_services() + [
-                ('my_service', 'My AI Service')
-            ]
-    ```
+       @api.model
+       def _get_available_services(self):
+           return super()._get_available_services() + [
+               ('my_service', 'My AI Service')
+           ]
+   ```
 
 2. **Implement Service Methods:**
 
-    ```python
-    def my_service_chat(self, messages, model=None, **kwargs):
-        """Service-specific chat implementation"""
-        # Implementation details
+   ```python
+   def my_service_chat(self, messages, model=None, **kwargs):
+       """Service-specific chat implementation"""
+       # Implementation details
 
-    def my_service_embedding(self, text, model=None, **kwargs):
-        """Service-specific embedding implementation"""
-        # Implementation details
-    ```
+   def my_service_embedding(self, text, model=None, **kwargs):
+       """Service-specific embedding implementation"""
+       # Implementation details
+   ```
 
 ### Custom Message Handling
 
