@@ -6,36 +6,40 @@ The foundational module for integrating Large Language Models into Odoo. This ba
 
 ## Architecture
 
-```
-  External AI Clients                          Odoo AI Chat
-  ┌─────────────┐ ┌──────────┐               ┌─────────────┐ ┌───────────┐
-  │Claude Desktop│ │Claude Code│               │llm_assistant│ │llm_thread │
-  │  Cursor      │ │Codex CLI  │               └──────┬──────┘ └─────┬─────┘
-  └──────┬───────┘ └─────┬────┘                       │              │
-         └───────┬───────┘                            │              │
-                 │ MCP Protocol                       │              │
-                 ▼                                    ▼              ▼
-  ┌──────────────────────┐      ┌───────────────────────────────────────────────┐
-  │   llm_mcp_server     │      │              ★ llm (This Module) ★            │
-  │  MCP Server for Odoo │─────▶│  Provider Abstraction · Model Management     │
-  └──────────────────────┘      │  Enhanced mail.message · Security Framework   │
-                                └──────────────────────┬────────────────────────┘
-                                                       │
-                ┌──────────────────────────────────────┼──────────────┐
-                │                                      │              │
-    ┌───────────┴──────────┐      ┌────────────────────┴──┐  ┌───────┴────────┐
-    │      llm_tool        │      │   AI Providers         │  │ Infrastructure │
-    │  Tool Framework      │      │ llm_openai, llm_ollama │  │ llm_store      │
-    │  + Generic CRUD Tools│      │ llm_mistral, ...       │  │ llm_generate   │
-    └──────────┬───────────┘      └───────────────────────┘  └────────────────┘
-               │
-    ┌──────────┴────────────────────────────────────┐
-    │          Domain-Specific Tool Packs            │
-    │ llm_tool_account    · 18 accounting tools     │
-    │ llm_tool_mis_builder· 44 MIS reporting tools  │
-    │ llm_tool_knowledge  · RAG search tools        │
-    │ llm_tool_ocr_mistral· OCR via Mistral vision  │
-    └───────────────────────────────────────────────┘
+```mermaid
+graph TD
+    subgraph External AI Clients
+        CD[Claude Desktop<br>Cursor · Windsurf]
+        CC[Claude Code<br>Codex CLI]
+    end
+
+    subgraph Odoo AI Chat
+        LA[llm_assistant]
+        LT[llm_thread]
+    end
+
+    CD -->|MCP Protocol| MCP
+    CC -->|MCP Protocol| MCP
+
+    LA --> LLM
+    LT --> LLM
+
+    MCP[llm_mcp_server<br>MCP Server for Odoo] --> LLM
+
+    LLM[⭐ llm — This Module ⭐<br>Provider Abstraction · Model Management<br>Enhanced mail.message · Security Framework]
+
+    LLM --> TOOL[llm_tool<br>Tool Framework + Generic CRUD Tools]
+    LLM --> PROV[AI Providers<br>llm_openai · llm_ollama<br>llm_mistral · ...]
+    LLM --> INFRA[Infrastructure<br>llm_store · llm_generate]
+
+    TOOL --> PACKS[Domain-Specific Tool Packs<br>llm_tool_account · 18 accounting tools<br>llm_tool_mis_builder · 44 MIS reporting tools<br>llm_tool_knowledge · RAG search tools<br>llm_tool_ocr_mistral · OCR via Mistral vision]
+
+    style LLM fill:#f9f8fc,stroke:#71639e,stroke-width:3px,color:#71639e
+    style MCP fill:#fff,stroke:#71639e,stroke-width:2px,color:#71639e
+    style TOOL fill:#fff,stroke:#71639e,stroke-width:2px,color:#71639e
+    style PACKS fill:#f9f8fc,stroke:#71639e,stroke-width:2px,color:#71639e
+    style PROV fill:#fff,stroke:#dee2e6,stroke-width:2px
+    style INFRA fill:#fff,stroke:#dee2e6,stroke-width:2px
 ```
 
 ## Installation
