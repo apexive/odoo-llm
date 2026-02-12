@@ -66,39 +66,156 @@
         <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">How all the modules fit together</p>
 
         <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2rem; overflow-x:auto">
-<pre style="font-family:monospace; font-size:0.8rem; line-height:1.5; color:#495057; margin:0; white-space:pre; text-align:left">
-  External AI Clients                          Odoo AI Chat
-  &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488; &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;               &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488; &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-  &#9474;Claude Desktop&#9474; &#9474;Claude Code&#9474;               &#9474;llm_assistant&#9474; &#9474;llm_thread &#9474;
-  &#9474;  Cursor      &#9474; &#9474;Codex CLI  &#9474;               &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496; &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
-  &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496; &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9496;                       &#9474;              &#9474;
-         &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;                            &#9474;              &#9474;
-                 &#9474; MCP Protocol                       &#9474;              &#9474;
-                 &#9660;                                    &#9660;              &#9660;
-  &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;      &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-  &#9474;   <strong style="color:#71639e">llm_mcp_server</strong>     &#9474;      &#9474;              &#9733; <strong style="color:#71639e">llm</strong> (This Module) &#9733;            &#9474;
-  &#9474;  MCP Server for Odoo &#9474;&#9472;&#9472;&#9472;&#9472;&#9472;&#9654;&#9474;  Provider Abstraction &middot; Model Management     &#9474;
-  &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;      &#9474;  Enhanced mail.message &middot; Security Framework   &#9474;
-                                &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
-                                                       &#9474;
-                &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-                &#9474;                                      &#9474;              &#9474;
-    &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;      &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9488;  &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-    &#9474;      <strong style="color:#71639e">llm_tool</strong>        &#9474;      &#9474;   AI Providers         &#9474;  &#9474; Infrastructure &#9474;
-    &#9474;  Tool Framework      &#9474;      &#9474; llm_openai, llm_ollama &#9474;  &#9474; llm_store      &#9474;
-    &#9474;  + Generic CRUD Tools&#9474;      &#9474; llm_mistral, ...       &#9474;  &#9474; llm_generate   &#9474;
-    &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9516;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;      &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;  &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
-               &#9474;
-    &#9484;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9524;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9488;
-    &#9474;          <strong style="color:#71639e">Domain-Specific Tool Packs</strong>            &#9474;
-    &#9474; llm_tool_account    &middot; 18 accounting tools     &#9474;
-    &#9474; llm_tool_mis_builder&middot; 44 MIS reporting tools  &#9474;
-    &#9474; llm_tool_knowledge  &middot; RAG search tools        &#9474;
-    &#9474; llm_tool_ocr_mistral&middot; OCR via Mistral vision  &#9474;
-    &#9492;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9472;&#9496;
-</pre>
+            <div class="col-lg-11">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem 2rem">
+
+                    <!-- Row 1: External AI Clients + Odoo AI Chat -->
+                    <div class="row mb-0">
+                        <!-- Left: External AI Clients -->
+                        <div class="col-md-5">
+                            <p style="font-weight:700; color:#6c757d; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem">External AI Clients</p>
+                            <div class="d-flex" style="gap:0.75rem">
+                                <div style="flex:1; border:2px solid #dee2e6; border-radius:10px; padding:0.75rem; text-align:center">
+                                    <i class="fa fa-desktop" style="font-size:1.25rem; color:#71639e; display:block; margin-bottom:0.25rem"></i>
+                                    <strong style="font-size:0.8rem; color:#212529; display:block">Claude Desktop</strong>
+                                    <span style="font-size:0.75rem; color:#868e96">Cursor</span>
+                                </div>
+                                <div style="flex:1; border:2px solid #dee2e6; border-radius:10px; padding:0.75rem; text-align:center">
+                                    <i class="fa fa-terminal" style="font-size:1.25rem; color:#71639e; display:block; margin-bottom:0.25rem"></i>
+                                    <strong style="font-size:0.8rem; color:#212529; display:block">Claude Code</strong>
+                                    <span style="font-size:0.75rem; color:#868e96">Codex CLI</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <!-- Right: Odoo AI Chat -->
+                        <div class="col-md-5">
+                            <p style="font-weight:700; color:#6c757d; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem">Odoo AI Chat</p>
+                            <div class="d-flex" style="gap:0.75rem">
+                                <div style="flex:1; border:2px solid #dee2e6; border-radius:10px; padding:0.75rem; text-align:center">
+                                    <strong style="font-size:0.8rem; color:#212529">llm_assistant</strong>
+                                </div>
+                                <div style="flex:1; border:2px solid #dee2e6; border-radius:10px; padding:0.75rem; text-align:center">
+                                    <strong style="font-size:0.8rem; color:#212529">llm_thread</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connector arrows row -->
+                    <div class="row" style="height:2.5rem">
+                        <div class="col-md-5 text-center">
+                            <div style="width:2px; height:100%; background-color:#71639e; margin:0 auto"></div>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-5 text-center">
+                            <div style="width:2px; height:100%; background-color:#adb5bd; margin:0 auto"></div>
+                        </div>
+                    </div>
+
+                    <!-- Label on left arrow -->
+                    <div class="row" style="margin-bottom:0.25rem">
+                        <div class="col-md-5 text-center">
+                            <span style="font-size:0.75rem; font-weight:600; color:#71639e; background-color:#f0ecf7; padding:0.15rem 0.5rem; border-radius:4px">MCP Protocol</span>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-5"></div>
+                    </div>
+
+                    <!-- Connector arrows row 2 -->
+                    <div class="row" style="height:1rem">
+                        <div class="col-md-5 text-center">
+                            <div style="width:0; height:0; border-left:6px solid #ffffff00; border-right:6px solid #ffffff00; border-top:8px solid #71639e; margin:0 auto"></div>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-5 text-center">
+                            <div style="width:0; height:0; border-left:6px solid #ffffff00; border-right:6px solid #ffffff00; border-top:8px solid #adb5bd; margin:0 auto"></div>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: MCP Server + LLM Core -->
+                    <div class="row mb-0" style="gap:0">
+                        <!-- Left: MCP Server -->
+                        <div class="col-md-5" style="padding-right:0">
+                            <div style="border:2px solid #71639e; border-radius:12px; padding:1rem; text-align:center; height:100%; display:flex; flex-direction:column; justify-content:center">
+                                <strong style="font-size:1rem; color:#71639e; display:block; margin-bottom:0.25rem">llm_mcp_server</strong>
+                                <span style="font-size:0.85rem; color:#6c757d">MCP Server for Odoo</span>
+                            </div>
+                        </div>
+                        <!-- Arrow connecting them -->
+                        <div class="col-md-2 d-flex align-items-center justify-content-center" style="padding:0">
+                            <div style="width:100%; height:2px; background-color:#71639e; position:relative">
+                                <div style="position:absolute; right:-1px; top:-4px; width:0; height:0; border-top:5px solid #ffffff00; border-bottom:5px solid #ffffff00; border-left:8px solid #71639e"></div>
+                            </div>
+                        </div>
+                        <!-- Right: LLM Core -->
+                        <div class="col-md-5" style="padding-left:0">
+                            <div style="border:3px solid #71639e; border-radius:12px; padding:1rem; text-align:center; background-color:#f9f8fc">
+                                <span style="font-size:1.1rem; color:#71639e; font-weight:800; display:block; margin-bottom:0.5rem">&#9733; llm &#9733;</span>
+                                <span style="font-size:0.8rem; color:#495057; display:block; line-height:1.5">Provider Abstraction &middot; Model Management<br>Enhanced mail.message &middot; Security Framework</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connector: single line down from llm -->
+                    <div class="row" style="height:2rem">
+                        <div class="col-12 text-center">
+                            <div style="width:2px; height:100%; background-color:#adb5bd; margin:0 auto"></div>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: llm_tool + Providers + Infrastructure -->
+                    <div class="row mb-0" style="gap:0">
+                        <div class="col-md-4">
+                            <div style="border:2px solid #71639e; border-radius:10px; padding:1rem; text-align:center; height:100%">
+                                <strong style="font-size:0.95rem; color:#71639e; display:block; margin-bottom:0.35rem">llm_tool</strong>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">Tool Framework</span>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">+ Generic CRUD Tools</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="border:2px solid #dee2e6; border-radius:10px; padding:1rem; text-align:center; height:100%">
+                                <strong style="font-size:0.95rem; color:#495057; display:block; margin-bottom:0.35rem">AI Providers</strong>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">llm_openai, llm_ollama</span>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">llm_mistral, ...</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="border:2px solid #dee2e6; border-radius:10px; padding:1rem; text-align:center; height:100%">
+                                <strong style="font-size:0.95rem; color:#495057; display:block; margin-bottom:0.35rem">Infrastructure</strong>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">llm_store</span>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">llm_generate</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Connector: line down from llm_tool -->
+                    <div class="row" style="height:2rem">
+                        <div class="col-md-4 text-center">
+                            <div style="width:2px; height:100%; background-color:#71639e; margin:0 auto"></div>
+                        </div>
+                        <div class="col-md-8"></div>
+                    </div>
+
+                    <!-- Row 4: Domain-Specific Tool Packs -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div style="border:2px solid #71639e; border-radius:12px; padding:1.25rem; background-color:#f9f8fc">
+                                <strong style="font-size:1rem; color:#71639e; display:block; margin-bottom:0.75rem; text-align:center">Domain-Specific Tool Packs</strong>
+                                <div class="row" style="font-size:0.8rem; color:#495057; line-height:1.8">
+                                    <div class="col-6">
+                                        <strong>llm_tool_account</strong> &middot; 18 accounting tools<br>
+                                        <strong>llm_tool_mis_builder</strong> &middot; 44 MIS reporting tools
+                                    </div>
+                                    <div class="col-6">
+                                        <strong>llm_tool_knowledge</strong> &middot; RAG search tools<br>
+                                        <strong>llm_tool_ocr_mistral</strong> &middot; OCR via Mistral vision
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
