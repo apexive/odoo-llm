@@ -6,14 +6,6 @@
         <field name="model">llm.tool</field>
         <field name="arch" type="xml">
             <list>
-                <header>
-                    <button
-                        name="action_sync_tools"
-                        string="Sync Tools"
-                        type="object"
-                        class="btn-secondary"
-                    />
-                </header>
                 <field name="name" />
                 <field name="implementation" />
                 <field name="title" optional="show" />
@@ -32,14 +24,6 @@
         <field name="model">llm.tool</field>
         <field name="arch" type="xml">
             <form string="LLM Tool">
-                <header>
-                    <button
-                        name="action_sync_tools"
-                        string="Sync Tools"
-                        type="object"
-                        class="btn-secondary"
-                    />
-                </header>
                 <sheet>
                     <div class="oe_title">
                         <label for="name" class="oe_edit_only" />
