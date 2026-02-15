@@ -2,23 +2,33 @@
     "name": "LLM Tool Website",
     "version": "18.0.1.0.0",
     "category": "Productivity/LLM",
-    "summary": "24 AI-powered website tools: pages, menus, SEO, redirects, "
-    "visitor analytics, and configuration",
+    "summary": "31 AI-powered website tools: pages, content, media, menus, "
+    "SEO, redirects, visitor analytics, and configuration",
     "description": """
         LLM Tool Website - AI-Powered Website Management for Odoo
 
-        Provides 24 purpose-built website tools for AI assistants and MCP
+        Provides 31 purpose-built website tools for AI assistants and MCP
         servers. Designed for web designers, content managers, and marketing
         teams who use AI daily.
 
         Pages (6 tools):
         • Find, create, update, publish, clone, and delete website pages
-        • Manage page properties like indexing, publish date, header/footer
+        • Manage page properties: indexing, publish date, header/footer,
+          visibility, header overlay/color
+
+        Content (2 tools):
+        • Read raw HTML content of any website page
+        • Update page HTML content directly
+
+        Media (5 tools):
+        • Find media files by name, type, or mimetype
+        • Upload images from URL or base64 data
+        • Get detailed media info and delete attachments
 
         Menus (5 tools):
         • Get full menu hierarchy tree
         • Find, create, update, and delete menu items
-        • Support for submenus with parent placement
+        • Support for mega menus, page links, and group visibility
 
         SEO (3 tools):
         • Get and update meta title, description, keywords, and seo_name
@@ -36,7 +46,8 @@
 
         Configuration (3 tools):
         • List all websites
-        • Get full configuration (languages, social, analytics, CDN)
+        • Get full configuration (languages, social, analytics, CDN,
+          robots.txt, custom code, favicon, logo, signup policy)
         • Update website settings
 
         All tools use Odoo's native methods, respect access controls,

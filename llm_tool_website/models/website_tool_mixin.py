@@ -16,6 +16,32 @@ REDIRECT_TYPES = {
 
 REDIRECT_TYPE_LABELS = {v: k for k, v in REDIRECT_TYPES.items()}
 
+IMAGE_MIMETYPES = {
+    "image/png",
+    "image/jpeg",
+    "image/gif",
+    "image/svg+xml",
+    "image/webp",
+}
+
+MEDIA_TYPE_DOMAINS = {
+    "image": [("mimetype", "=like", "image/%")],
+    "document": [
+        (
+            "mimetype",
+            "in",
+            (
+                "application/pdf",
+                "application/msword",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                "application/vnd.ms-excel",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            ),
+        )
+    ],
+    "video": [("mimetype", "=like", "video/%")],
+}
+
 
 class WebsiteToolMixin(models.AbstractModel):
     _name = "website.tool.mixin"
@@ -99,6 +125,48 @@ class WebsiteToolMixin(models.AbstractModel):
         if not menu:
             raise UserError(_("Menu '%s' not found") % identifier)
         return menu
+
+    def _resolve_attachment(self, identifier):
+        """Resolve an attachment by ID or name.
+
+        Args:
+            identifier: Attachment numeric ID or name (ilike).
+
+        Returns:
+            ir.attachment record (single)
+        """
+        Attachment = self.env["ir.attachment"]
+        if isinstance(identifier, int) or (
+            isinstance(identifier, str) and identifier.isdigit()
+        ):
+            att = Attachment.browse(int(identifier)).exists()
+            if not att:
+                raise UserError(_("Attachment with ID %s not found") % identifier)
+            return att
+        att = Attachment.search([("name", "ilike", identifier)], limit=1)
+        if not att:
+            raise UserError(_("Attachment '%s' not found") % identifier)
+        return att
+
+    def _resolve_groups(self, identifiers):
+        """Resolve comma-separated group XML IDs to res.groups recordset.
+
+        Args:
+            identifiers: Comma-separated XML IDs (e.g. "base.group_user,base.group_portal")
+
+        Returns:
+            res.groups recordset
+        """
+        groups = self.env["res.groups"]
+        for xml_id in identifiers.split(","):
+            xml_id = xml_id.strip()
+            if not xml_id:
+                continue
+            group = self.env.ref(xml_id, raise_if_not_found=False)
+            if not group:
+                raise UserError(_("Group '%s' not found") % xml_id)
+            groups |= group
+        return groups
 
     def _get_current_website(self):
         """Get the current website with fallback to first.

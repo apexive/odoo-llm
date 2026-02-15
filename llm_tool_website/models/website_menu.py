@@ -96,6 +96,10 @@ class WebsiteToolMenu(models.Model):
                     "parent": menu.parent_id.name if menu.parent_id else "",
                     "parent_id": menu.parent_id.id if menu.parent_id else 0,
                     "children_count": len(menu.child_id),
+                    "is_mega_menu": menu.is_mega_menu,
+                    "page_id": menu.page_id.id if menu.page_id else 0,
+                    "page_url": menu.page_id.url if menu.page_id else "",
+                    "is_visible": menu.is_visible,
                 }
             )
 
@@ -105,11 +109,14 @@ class WebsiteToolMenu(models.Model):
     def website_create_menu(
         self,
         name: str,
-        url: str,
+        url: Optional[str] = None,
         website: Optional[str] = None,
         parent: Optional[str] = None,
+        page: Optional[str] = None,
         sequence: int = 10,
         new_window: bool = False,
+        is_mega_menu: bool = False,
+        groups: Optional[str] = None,
     ) -> dict:
         """Create a new menu item
 
@@ -118,11 +125,15 @@ class WebsiteToolMenu(models.Model):
         Args:
             name: Menu item display text
             url: URL the menu item links to (e.g. "/about",
-                 "https://example.com")
+                 "https://example.com"). Not needed if page is set.
             website: Website name or ID (defaults to current website)
             parent: Parent menu name or ID for submenu placement
+            page: Page URL or name to link to (alternative to raw url)
             sequence: Display order (lower = earlier, default: 10)
             new_window: Open link in new browser tab (default: False)
+            is_mega_menu: Create as mega menu (default: False)
+            groups: Comma-separated group XML IDs for visibility restriction
+                (e.g. "base.group_user,base.group_portal")
 
         Returns:
             Dictionary with created menu item details
@@ -130,15 +141,27 @@ class WebsiteToolMenu(models.Model):
         ws = self._resolve_website(website)
         vals = {
             "name": name,
-            "url": url,
             "website_id": ws.id,
             "sequence": sequence,
             "new_window": new_window,
+            "is_mega_menu": is_mega_menu,
         }
+
+        if page:
+            page_rec = self._resolve_page(page, ws)
+            vals["page_id"] = page_rec.id
+            vals["url"] = page_rec.url
+        elif url:
+            vals["url"] = url
+        else:
+            vals["url"] = ""
 
         if parent:
             parent_menu = self._resolve_menu(parent, ws)
             vals["parent_id"] = parent_menu.id
+
+        if groups:
+            vals["group_ids"] = [(6, 0, self._resolve_groups(groups).ids)]
 
         menu = self.env["website.menu"].create(vals)
 
@@ -148,6 +171,7 @@ class WebsiteToolMenu(models.Model):
             "url": menu.url,
             "sequence": menu.sequence,
             "parent": menu.parent_id.name if menu.parent_id else "",
+            "is_mega_menu": menu.is_mega_menu,
             "message": f"Menu item '{name}' created",
         }
 
@@ -160,6 +184,9 @@ class WebsiteToolMenu(models.Model):
         sequence: Optional[int] = None,
         parent: Optional[str] = None,
         new_window: Optional[bool] = None,
+        page: Optional[str] = None,
+        is_mega_menu: Optional[bool] = None,
+        groups: Optional[str] = None,
         website: Optional[str] = None,
     ) -> dict:
         """Update a menu item
@@ -173,6 +200,10 @@ class WebsiteToolMenu(models.Model):
             sequence: New display order
             parent: New parent menu name or ID (for moving to submenu)
             new_window: Open in new tab
+            page: Page URL or name to link to (sets both page_id and url)
+            is_mega_menu: Toggle mega menu mode
+            groups: Comma-separated group XML IDs for visibility restriction
+                (e.g. "base.group_user"). Pass empty string to clear.
             website: Website name or ID (defaults to current website)
 
         Returns:
@@ -193,6 +224,17 @@ class WebsiteToolMenu(models.Model):
         if parent is not None:
             parent_menu = self._resolve_menu(parent, ws)
             vals["parent_id"] = parent_menu.id
+        if page is not None:
+            page_rec = self._resolve_page(page, ws)
+            vals["page_id"] = page_rec.id
+            vals["url"] = page_rec.url
+        if is_mega_menu is not None:
+            vals["is_mega_menu"] = is_mega_menu
+        if groups is not None:
+            if groups:
+                vals["group_ids"] = [(6, 0, self._resolve_groups(groups).ids)]
+            else:
+                vals["group_ids"] = [(5, 0, 0)]
 
         if not vals:
             raise UserError(_("No fields to update"))
@@ -205,6 +247,7 @@ class WebsiteToolMenu(models.Model):
             "url": menu_rec.url or "",
             "sequence": menu_rec.sequence,
             "parent": menu_rec.parent_id.name if menu_rec.parent_id else "",
+            "is_mega_menu": menu_rec.is_mega_menu,
             "message": f"Menu item '{menu_rec.name}' updated",
         }
 

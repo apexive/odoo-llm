@@ -1,5 +1,7 @@
 from . import test_mixin
 from . import test_config_tools
+from . import test_content_tools
+from . import test_media_tools
 from . import test_page_tools
 from . import test_menu_tools
 from . import test_seo_tools

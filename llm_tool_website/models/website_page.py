@@ -61,6 +61,8 @@ class WebsiteToolPage(models.Model):
                     "website_indexed": page.website_indexed,
                     "date_publish": str(page.date_publish) if page.date_publish else "",
                     "is_homepage": page.is_homepage,
+                    "visibility": page.view_id.visibility or "public",
+                    "header_overlay": page.header_overlay,
                 }
             )
 
@@ -116,6 +118,9 @@ class WebsiteToolPage(models.Model):
         date_publish: Optional[str] = None,
         header_visible: Optional[bool] = None,
         footer_visible: Optional[bool] = None,
+        visibility: Optional[str] = None,
+        header_overlay: Optional[bool] = None,
+        header_color: Optional[str] = None,
         website: Optional[str] = None,
     ) -> dict:
         """Update page properties
@@ -131,6 +136,10 @@ class WebsiteToolPage(models.Model):
             date_publish: Scheduled publish date (YYYY-MM-DD HH:MM:SS)
             header_visible: Show website header on this page
             footer_visible: Show website footer on this page
+            visibility: Page access: "public", "connected", "restricted_group",
+                or "password"
+            header_overlay: Overlay header on top of page content
+            header_color: Header background color (CSS value)
             website: Website name or ID (defaults to current website)
 
         Returns:
@@ -140,6 +149,7 @@ class WebsiteToolPage(models.Model):
         page_rec = self._resolve_page(page, ws)
 
         vals = {}
+        view_vals = {}
         if name is not None:
             vals["name"] = name
         if url is not None:
@@ -152,11 +162,21 @@ class WebsiteToolPage(models.Model):
             vals["header_visible"] = header_visible
         if footer_visible is not None:
             vals["footer_visible"] = footer_visible
+        if header_overlay is not None:
+            vals["header_overlay"] = header_overlay
+        if header_color is not None:
+            vals["header_color"] = header_color
+        if visibility is not None:
+            vis_value = "" if visibility == "public" else visibility
+            view_vals["visibility"] = vis_value
 
-        if not vals:
+        if not vals and not view_vals:
             raise UserError(_("No fields to update"))
 
-        page_rec.write(vals)
+        if vals:
+            page_rec.write(vals)
+        if view_vals:
+            page_rec.view_id.write(view_vals)
 
         return {
             "id": page_rec.id,

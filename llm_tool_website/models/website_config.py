@@ -97,6 +97,14 @@ class WebsiteToolConfig(models.Model):
                 "cdn_url": ws.cdn_url or "",
             },
             "cookies_bar": ws.cookies_bar,
+            "has_favicon": bool(ws.favicon),
+            "has_logo": bool(ws.logo),
+            "robots_txt": ws.robots_txt or "",
+            "custom_code_head": ws.custom_code_head or "",
+            "custom_code_footer": ws.custom_code_footer or "",
+            "google_maps_api_key": ws.google_maps_api_key or "",
+            "block_third_party_domains": ws.block_third_party_domains,
+            "auth_signup_uninvited": ws.auth_signup_uninvited or "",
         }
 
     @llm_tool(destructive_hint=True)
@@ -115,6 +123,14 @@ class WebsiteToolConfig(models.Model):
         social_tiktok: Optional[str] = None,
         google_analytics_key: Optional[str] = None,
         cookies_bar: Optional[bool] = None,
+        favicon: Optional[str] = None,
+        logo: Optional[str] = None,
+        robots_txt: Optional[str] = None,
+        custom_code_head: Optional[str] = None,
+        custom_code_footer: Optional[str] = None,
+        google_maps_api_key: Optional[str] = None,
+        block_third_party_domains: Optional[bool] = None,
+        auth_signup_uninvited: Optional[str] = None,
     ) -> dict:
         """Update website configuration
 
@@ -135,6 +151,14 @@ class WebsiteToolConfig(models.Model):
             social_tiktok: TikTok profile URL
             google_analytics_key: Google Analytics measurement ID
             cookies_bar: Show cookie consent bar (True/False)
+            favicon: Base64-encoded favicon image data
+            logo: Base64-encoded logo image data
+            robots_txt: Custom robots.txt content
+            custom_code_head: Custom HTML code for <head> section
+            custom_code_footer: Custom HTML code for end of <body>
+            google_maps_api_key: Google Maps API key
+            block_third_party_domains: Block third-party domain resources
+            auth_signup_uninvited: Signup policy: "b2b" or "b2c"
 
         Returns:
             Dictionary with updated configuration
@@ -154,6 +178,14 @@ class WebsiteToolConfig(models.Model):
             "social_tiktok": social_tiktok,
             "google_analytics_key": google_analytics_key,
             "cookies_bar": cookies_bar,
+            "favicon": favicon,
+            "logo": logo,
+            "robots_txt": robots_txt,
+            "custom_code_head": custom_code_head,
+            "custom_code_footer": custom_code_footer,
+            "google_maps_api_key": google_maps_api_key,
+            "block_third_party_domains": block_third_party_domains,
+            "auth_signup_uninvited": auth_signup_uninvited,
         }
         for field, value in field_map.items():
             if value is not None:
