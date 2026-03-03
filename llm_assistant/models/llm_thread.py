@@ -422,6 +422,22 @@ class LLMThread(models.Model):
 
         return False
 
+    def _notify_bus(self, event_type, message):
+        """Hook for subclasses to push bus notifications during generation.
+
+        Called on each streaming event (message_create, message_chunk,
+        message_update) so that server-side generation can update connected
+        clients in real time without SSE.
+
+        Override in subclasses to push bus notifications as needed.
+        Default is a no-op so existing SSE-based flow is unaffected.
+
+        Args:
+            event_type (str): 'message_create', 'message_chunk', or 'message_update'
+            message (mail.message): the message record being created/updated
+        """
+        pass
+
     def _handle_streaming_response(self, stream_response):
         """Handle streaming response from LLM provider with tool call processing."""
         message = None
@@ -436,12 +452,14 @@ class LLMThread(models.Model):
                     llm_role="assistant",
                     author_id=False,
                 )
+                self._notify_bus("message_create", message)
                 yield {"type": "message_create", "message": message.to_store_format()}
 
             # Handle content streaming
             if chunk.get("content"):
                 accumulated_content += chunk["content"]
                 message.write({"body": self._process_llm_body(accumulated_content)})
+                self._notify_bus("message_chunk", message)
                 yield {"type": "message_chunk", "message": message.to_store_format()}
 
             # Collect tool calls for processing
@@ -461,25 +479,23 @@ class LLMThread(models.Model):
             body_json = {"tool_calls": collected_tool_calls}
 
             if not message:
-                # Create assistant message with body_json (handled by message_post override)
                 message = self.message_post(
                     body="",  # Empty body for tool-only responses
                     body_json=body_json,
                     llm_role="assistant",
                     author_id=False,
                 )
-                # Commit to ensure message is saved before tool execution
                 self.env.cr.commit()
+                self._notify_bus("message_create", message)
                 yield {"type": "message_create", "message": message.to_store_format()}
             else:
-                # Update existing message with tool calls
                 message.write({"body_json": body_json})
-                # Commit to ensure update is saved
                 self.env.cr.commit()
+                self._notify_bus("message_update", message)
                 yield {"type": "message_update", "message": message.to_store_format()}
         elif message and accumulated_content:
-            # Final update for assistant message without tool calls
             message.write({"body": self._process_llm_body(accumulated_content)})
+            self._notify_bus("message_update", message)
             yield {"type": "message_update", "message": message.to_store_format()}
 
         return message
