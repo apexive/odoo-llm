@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record id="llm_tool_technical_skill_retriever" model="llm.tool">
+        <field name="name">technical_skill_retriever</field>
+        <field name="description">Look up proven Odoo technical patterns before performing data operations. Call when uncertain about which model, domain, or fields to use for a given business concept.</field>
+        <field name="implementation">technical_skill_retriever</field>
+        <field name="active" eval="True" />
+        <field name="default" eval="False" />
+        <field name="requires_user_consent" eval="False" />
+    </record>
+</odoo>
