@@ -4,8 +4,8 @@
     <record id="default_mcp_server_config" model="llm.mcp.server.config">
         <field name="name">odoo_llm_mcp_server</field>
         <field name="version">1.0.0</field>
-        <field name="latest_protocol_version">2025-06-18</field>
-        <field name="supported_protocol_versions" eval="None" />
+        <field name="latest_protocol_version">2025-11-25</field>
+        <field name="supported_protocol_versions" eval="['2025-06-18']"/>
         <field name="active" eval="True" />
 
         <!-- Server Mode Configuration -->
