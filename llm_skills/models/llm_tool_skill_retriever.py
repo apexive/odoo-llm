@@ -8,13 +8,13 @@ _logger = logging.getLogger(__name__)
 
 class LLMToolSkillRetriever(models.Model):
     """
-    Provides the technical_skill_retriever @llm_tool.
+    Provides the technical_skill_retriever tool.
 
-    Inherits llm.tool to register a new implementation using the same
-    pattern as llm_tool_knowledge_retriever. The tool resolves the
-    collection to search from the assistant configuration at call time,
-    so no collection_id argument is exposed to the LLM — the assistant
-    configuration determines scope automatically.
+    Mirrors the knowledge_retriever pattern: collection_id is an explicit
+    required parameter, and available skills collections are dynamically
+    injected into the schema description at runtime. No assistant context
+    resolution needed — works identically in direct MCP sessions,
+    WhatsApp conversations, or any other context.
     """
 
     _inherit = "llm.tool"
@@ -26,49 +26,75 @@ class LLMToolSkillRetriever(models.Model):
             ("technical_skill_retriever", "Technical Skill Retriever")
         ]
 
+    @api.model
+    def _get_available_skills_collections(self):
+        """Return only collections that back a skills loader."""
+        loaders = self.env["llm.skills.loader"].sudo().search([])
+        seen = {}
+        for loader in loaders:
+            coll = loader.collection_id
+            if coll and coll.id not in seen:
+                seen[coll.id] = coll.name
+        return [(str(coll_id), name) for coll_id, name in seen.items()]
+
+    def get_input_schema(self):
+        schema = super().get_input_schema()
+        if self.implementation == "technical_skill_retriever":
+            collections = self._get_available_skills_collections()
+            desc = ", ".join(f"'{name}' (ID: {coll_id})" for coll_id, name in collections)
+            if "properties" in schema and "collection_id" in schema["properties"]:
+                schema["properties"]["collection_id"]["description"] = (
+                    f"ID of the skills collection to search. Available: {desc}"
+                )
+        return schema
+
     def technical_skill_retriever_execute(
         self,
         query: str,
+        collection_id: int,
         top_k: int = 3,
         similarity_cutoff: float = 0.35,
     ) -> dict[str, Any]:
         """
         Look up proven Odoo technical patterns before performing data operations.
 
-        Call this tool when you:
-        - Are about to query, create, update, or delete Odoo records but are
-          unsure which model, domain, or field combination to use
-        - Need to understand how two Odoo models relate to each other
-        - Want the correct domain syntax for a filtering requirement
-        - Need to know which fields to fetch for a given business concept
-
-        Describe what you need to accomplish. Returns relevant skill documents
-        with model names, domain examples, and field guidance extracted from
-        previously solved problems.
+        Call this tool BEFORE querying, creating, updating, or deleting Odoo
+        records when you are unsure which model, domain, fields, or method to
+        use. Describe what you need to accomplish — returns relevant skill
+        documents with model names, domain examples, and field guidance
+        extracted from previously solved problems.
 
         Do NOT call this tool for general Python or non-Odoo questions.
 
         Parameters:
-            query: What you need to accomplish in Odoo. Be specific about the
-                   business concept, e.g. "find customers with overdue invoices"
-                   rather than just "get records".
+            query: What you need to accomplish in Odoo. Be specific, e.g.
+                   "find customers with overdue invoices" not just "get records".
+            collection_id: REQUIRED. ID of the skills collection to search.
             top_k: Maximum number of skill fragments to return (default 3).
-            similarity_cutoff: Minimum semantic similarity threshold (default 0.35).
-                               Lower values return more results; raise to 0.5+ for
-                               stricter matching.
+            similarity_cutoff: Minimum semantic similarity threshold (default
+                               0.35). Lower values return more results.
         """
-        collection = self._resolve_technical_collection()
-        if not collection:
+        _logger.info(
+            "technical_skill_retriever_execute: query=%s collection_id=%s",
+            query, collection_id,
+        )
+
+        if not collection_id:
             return {
                 "query": query,
                 "skills": [],
-                "message": (
-                    "No technical skills collection is configured on this assistant. "
-                    "Proceeding with general knowledge."
-                ),
+                "message": "collection_id is required. Check the tool schema for available collections.",
             }
 
-        search_limit = top_k * top_k * 2  # over-fetch, then re-rank
+        collection = self.env["llm.knowledge.collection"].browse(collection_id)
+        if not collection.exists():
+            return {
+                "query": query,
+                "skills": [],
+                "message": f"Collection ID {collection_id} not found.",
+            }
+
+        search_limit = top_k * top_k * 2
         try:
             chunks = self.env["llm.knowledge.chunk"].search(
                 args=[("embedding", "=", query)],
@@ -99,41 +125,7 @@ class LLMToolSkillRetriever(models.Model):
         return {
             "query": query,
             "collection": collection.name,
+            "collection_id": collection.id,
             "skills": results,
             "total": len(results),
         }
-
-    def _resolve_technical_collection(self):
-        """
-        Walk context → message → llm.thread → llm.assistant →
-        technical_skills_collection_id.
-
-        Returns the collection record, or False if any step is missing.
-        Intentionally silent — missing configuration is not an error,
-        the tool just returns an empty result.
-        """
-        msg_id = self.env.context.get("message_id")
-        if not msg_id:
-            return False
-
-        # The message context key varies; try both common forms
-        msg = self.env["mail.message"].browse(msg_id)
-        if not msg.exists():
-            return False
-
-        thread = self.env["llm.thread"].search(
-            [("mail_thread_id", "=", msg.res_id),
-             ("model", "=", msg.model)],
-            limit=1,
-        )
-        if not thread:
-            # Fallback: try direct res_id as thread id
-            thread = self.env["llm.thread"].browse(msg.res_id)
-            if not thread.exists():
-                return False
-
-        assistant = thread.assistant_id
-        if not assistant:
-            return False
-
-        return assistant.technical_skills_collection_id or False
