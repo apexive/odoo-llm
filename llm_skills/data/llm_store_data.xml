@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- PgVector store using the Odoo PostgreSQL database — no extra server needed -->
+    <record id="llm_store_pgvector_default" model="llm.store">
+        <field name="name">Odoo PgVector</field>
+        <field name="service">pgvector</field>
+        <field name="pgvector_index_method">hnsw</field>
+        <field name="active">True</field>
+    </record>
+
+    <!-- LLM Meta Skills collection. Set embedding_model_id manually after install. -->
+    <function model="llm.knowledge.collection" name="_create_meta_skills_collection"/>
+</odoo>

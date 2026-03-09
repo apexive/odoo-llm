@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!--
+        Ensures the OpenAI provider exists and the three standard embedding models
+        are registered with stable external IDs. Idempotent on reinstall/upgrade.
+        api_key must be set manually: LLM > Configuration > Providers > OpenAI.
+    -->
+    <function model="llm.provider" name="_setup_openai_provider"/>
+</odoo>

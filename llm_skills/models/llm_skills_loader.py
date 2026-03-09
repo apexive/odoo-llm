@@ -92,7 +92,6 @@ class LLMSkillsLoader(models.Model):
                 loader.skill_count = self.env["llm.resource"].search_count([
                     ("collection_ids", "in", loader.collection_id.id),
                     ("skill_external_id", "!=", False),
-                    ("active", "=", True),
                 ])
             else:
                 loader.skill_count = 0
