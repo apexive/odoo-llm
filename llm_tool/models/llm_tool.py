@@ -202,8 +202,8 @@ class LLMTool(models.Model):
         model = self.get_pydantic_model_from_signature(method)
         validated = model(**parameters)
 
-        # Execute the method
-        return method(**validated.model_dump())
+        # Execute the method (exclude_unset=False ensures Optional params with None are passed)
+        return method(**validated.model_dump(exclude_unset=False))
 
     def _get_implementation_method(self):
         """Get the actual method for this tool's implementation"""
