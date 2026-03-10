@@ -1,4 +1,4 @@
-<odoo>
+<odoo noupdate="1">
     <record id="llm_tool_generate" model="llm.tool">
         <field name="name">odoo_generate</field>
         <field name="implementation">odoo_generate</field>

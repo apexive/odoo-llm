@@ -13,11 +13,12 @@ A JSON Editor widget for Odoo form views.
 ## Usage
 
 ```xml
-<field name="json_data" widget="json_editor"/>
+<field name="json_data" widget="json_editor" />
 ```
 
 ## OCA Contribution
 
 This module has been submitted to the Odoo Community Association (OCA):
+
 - **PR:** https://github.com/OCA/web/pull/3380
 - **OCA Module:** `web_widget_json_editor`

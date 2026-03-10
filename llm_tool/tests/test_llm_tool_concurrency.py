@@ -1,151 +1,226 @@
 """
-Test that savepoint pattern handles concurrent access gracefully.
+Test tool registration: in-memory scan + raw SQL sync.
 
-The SerializationFailure error has been reproduced manually - this test
-verifies the savepoint pattern correctly catches exceptions without
-crashing the entire transaction.
+_register_hook populates _tool_registry (no DB writes).
+_sync_tools_to_db writes via raw SQL with advisory lock.
+action_sync_tools wraps _sync_tools_to_db with UI notification.
 """
 
 from odoo.tests import common
-from odoo.tools import mute_logger
 
 
-class TestLLMToolSavepoint(common.TransactionCase):
-    """Test savepoint pattern in tool registration.
-
-    We verified the concurrent UPDATE race condition causes SerializationFailure.
-    This test ensures the savepoint pattern in _register_function_tool()
-    correctly catches such exceptions without crashing.
-    """
+class TestLLMToolSync(common.TransactionCase):
+    """Test the tool sync mechanism."""
 
     def setUp(self):
         super().setUp()
         self.LLMTool = self.env["llm.tool"]
 
-        # Create a test tool
-        self.tool = self.LLMTool.create(
+    def _create_tool(self, name, model="res.partner", method=None, **kw):
+        """Helper: create a function tool in DB."""
+        return self.LLMTool.create(
             {
-                "name": "test_savepoint_tool",
-                "description": "Test tool for savepoint testing",
+                "name": name,
+                "description": kw.pop("description", f"Desc for {name}"),
                 "implementation": "function",
-                "decorator_model": "res.partner",
-                "decorator_method": "test_savepoint_method",
+                "decorator_model": model,
+                "decorator_method": method or name,
+                **kw,
             }
         )
 
-    @mute_logger("odoo.sql_db")
-    def test_savepoint_catches_exception_and_continues(self):
-        """Test that savepoint pattern catches exceptions without crashing."""
+    # -- _sync_tools_to_db (raw SQL) --
 
-        # Simulate what happens in _register_function_tool with savepoint
-        exception_caught = False
+    def test_sync_creates_new_tool(self):
+        self.LLMTool._tool_registry = {
+            ("res.partner", "new_method"): {
+                "name": "new_tool",
+                "implementation": "function",
+                "decorator_model": "res.partner",
+                "decorator_method": "new_method",
+                "description": "A new tool",
+                "active": True,
+            }
+        }
+        self.LLMTool._xml_managed_keys = set()
 
-        try:
-            with self.env.cr.savepoint(flush=False):
-                # This would normally be tool.write()
-                # Simulate an exception (like SerializationFailure)
-                raise Exception("Simulated concurrent update error")
-        except Exception:
-            exception_caught = True
+        result = self.LLMTool._sync_tools_to_db()
 
-        # Savepoint should have caught the exception
-        self.assertTrue(exception_caught, "Exception should be caught by savepoint")
+        self.assertEqual(result["created"], 1)
+        tool = self.LLMTool.search([("name", "=", "new_tool")])
+        self.assertTrue(tool)
+        self.assertEqual(tool.description, "A new tool")
 
-        # Transaction should still be usable after savepoint rollback
-        # This verifies the pattern doesn't crash the entire transaction
-        tool = self.LLMTool.search([("id", "=", self.tool.id)])
-        self.assertTrue(tool, "Transaction should still work after savepoint rollback")
-        self.assertEqual(tool.name, "test_savepoint_tool")
+    def test_sync_updates_changed_tool(self):
+        self._create_tool("upd_tool", method="upd_method", description="Old")
 
-    def test_register_function_tool_handles_concurrent_access(self):
-        """Test _register_function_tool handles exceptions gracefully."""
+        self.LLMTool._tool_registry = {
+            ("res.partner", "upd_method"): {
+                "name": "upd_tool",
+                "implementation": "function",
+                "decorator_model": "res.partner",
+                "decorator_method": "upd_method",
+                "description": "New",
+                "active": True,
+            }
+        }
+        self.LLMTool._xml_managed_keys = set()
+        self.LLMTool.invalidate_model()
 
-        # Create a mock method that looks like an @llm_tool decorated method
-        def mock_tool_method(self):
-            """Mock tool method"""
-            pass
+        result = self.LLMTool._sync_tools_to_db()
 
-        mock_tool_method._is_llm_tool = True
-        mock_tool_method._llm_tool_name = "test_concurrent_registration"
-        mock_tool_method._llm_tool_description = "Test description"
-        mock_tool_method._llm_tool_metadata = {}
-        mock_tool_method._llm_tool_xml_managed = False
+        self.assertEqual(result["updated"], 1)
+        tool = self.LLMTool.search([("name", "=", "upd_tool")])
+        self.assertEqual(tool.description, "New")
 
-        # First registration should succeed
-        self.LLMTool._register_function_tool(
-            "res.partner", "mock_concurrent_tool", mock_tool_method
+    def test_sync_noop_when_unchanged(self):
+        self._create_tool("same_tool", method="same_method", description="Same")
+
+        self.LLMTool._tool_registry = {
+            ("res.partner", "same_method"): {
+                "name": "same_tool",
+                "implementation": "function",
+                "decorator_model": "res.partner",
+                "decorator_method": "same_method",
+                "description": "Same",
+                "active": True,
+            }
+        }
+        self.LLMTool._xml_managed_keys = set()
+        self.LLMTool.invalidate_model()
+
+        result = self.LLMTool._sync_tools_to_db()
+
+        self.assertEqual(result["created"], 0)
+        self.assertEqual(result["updated"], 0)
+        self.assertEqual(result["deactivated"], 0)
+
+    def test_sync_deactivates_missing_tool(self):
+        tool = self._create_tool("orphan", method="orphan_method")
+        self.LLMTool._tool_registry = {}
+        self.LLMTool._xml_managed_keys = set()
+        self.LLMTool.invalidate_model()
+
+        result = self.LLMTool._sync_tools_to_db()
+
+        self.assertEqual(result["deactivated"], 1)
+        tool.invalidate_recordset()
+        self.assertFalse(tool.active)
+
+    def test_sync_skips_xml_managed_deactivation(self):
+        tool = self._create_tool("xml_tool", method="xml_method")
+        self.LLMTool._tool_registry = {}
+        self.LLMTool._xml_managed_keys = {("res.partner", "xml_method")}
+        self.LLMTool.invalidate_model()
+
+        result = self.LLMTool._sync_tools_to_db()
+
+        self.assertEqual(result["deactivated"], 0)
+        tool.invalidate_recordset()
+        self.assertTrue(tool.active)
+
+    def test_sync_respects_auto_update_false(self):
+        self._create_tool(
+            "locked_tool",
+            method="locked_method",
+            description="Manual",
+            auto_update=False,
         )
+        self.LLMTool._tool_registry = {
+            ("res.partner", "locked_method"): {
+                "name": "locked_tool",
+                "implementation": "function",
+                "decorator_model": "res.partner",
+                "decorator_method": "locked_method",
+                "description": "Decorator says different",
+                "active": True,
+            }
+        }
+        self.LLMTool._xml_managed_keys = set()
+        self.LLMTool.invalidate_model()
 
-        # Verify tool was created
-        tool = self.LLMTool.search([("name", "=", "test_concurrent_registration")])
-        self.assertTrue(tool, "Tool should be created on first registration")
+        result = self.LLMTool._sync_tools_to_db()
 
-        # Second registration (simulating concurrent worker) should also succeed
-        # (it will just update the existing tool)
-        self.LLMTool._register_function_tool(
-            "res.partner", "mock_concurrent_tool", mock_tool_method
-        )
+        self.assertEqual(result["updated"], 0)
+        tool = self.LLMTool.search([("name", "=", "locked_tool")])
+        self.assertEqual(tool.description, "Manual")
 
-        # Tool should still exist
-        tool = self.LLMTool.search([("name", "=", "test_concurrent_registration")])
-        self.assertTrue(tool, "Tool should still exist after second registration")
+    # -- action_sync_tools (button) --
 
-    def test_register_function_tool_logs_on_concurrent_error(self):
-        """Test that _register_function_tool logs when concurrent access error occurs."""
-        from unittest.mock import patch
+    def test_action_empty_registry(self):
+        self.LLMTool._tool_registry = {}
+        result = self.LLMTool.action_sync_tools()
+        self.assertEqual(result["params"]["type"], "warning")
 
-        import psycopg2.errors
+    def test_action_already_in_sync(self):
+        self._create_tool("btn_tool", method="btn_method", description="OK")
+        self.LLMTool._tool_registry = {
+            ("res.partner", "btn_method"): {
+                "name": "btn_tool",
+                "implementation": "function",
+                "decorator_model": "res.partner",
+                "decorator_method": "btn_method",
+                "description": "OK",
+                "active": True,
+            }
+        }
+        self.LLMTool._xml_managed_keys = set()
+        self.LLMTool.invalidate_model()
 
-        def mock_tool_method():
-            """Mock tool method"""
-            pass
+        result = self.LLMTool.action_sync_tools()
+        self.assertIn("Already in sync", result["params"]["title"])
 
-        mock_tool_method._is_llm_tool = True
-        mock_tool_method._llm_tool_name = "test_exception_tool"
-        mock_tool_method._llm_tool_description = "Test description"
-        mock_tool_method._llm_tool_metadata = {}
-        mock_tool_method._llm_tool_xml_managed = False
+    def test_action_reports_changes(self):
+        self.LLMTool._tool_registry = {
+            ("res.partner", "action_new"): {
+                "name": "action_new_tool",
+                "implementation": "function",
+                "decorator_model": "res.partner",
+                "decorator_method": "action_new",
+                "description": "Via button",
+                "active": True,
+            }
+        }
+        self.LLMTool._xml_managed_keys = set()
 
-        # Mock create() to raise actual PostgreSQL concurrent access error
-        # This simulates what happens when another worker creates the same tool
-        def mock_create(self, vals):
-            raise psycopg2.errors.SerializationFailure(
-                "could not serialize access due to concurrent update"
-            )
+        result = self.LLMTool.action_sync_tools()
+        self.assertEqual(result["params"]["type"], "success")
 
-        with patch.object(self.LLMTool.__class__, "create", mock_create):
-            # This should NOT raise - exception should be caught by savepoint and logged
-            self.LLMTool._register_function_tool(
-                "res.partner", "mock_exception_tool", mock_tool_method
-            )
+    # -- _register_hook & helpers --
 
-        # Tool should NOT be created (create failed due to concurrent access)
-        tool = self.LLMTool.search([("name", "=", "test_exception_tool")])
-        self.assertFalse(tool, "Tool should not exist when concurrent error occurs")
+    def test_register_hook_populates_registry(self):
+        self.LLMTool._tool_registry.clear()
+        self.LLMTool._xml_managed_keys.clear()
+        self.LLMTool._register_hook()
+        self.assertIsInstance(self.LLMTool._tool_registry, dict)
+        self.assertIsInstance(self.LLMTool._xml_managed_keys, set)
 
-    def test_xml_managed_tools_are_skipped(self):
-        """Test that xml_managed=True tools are skipped during registration."""
+    def test_extract_tool_values(self):
+        def mock(self):
+            """Mock desc"""
 
-        def mock_xml_managed_method(self):
-            """Mock XML-managed tool method"""
-            pass
+        mock._llm_tool_name = "my_tool"
+        mock._llm_tool_description = "My tool"
+        mock._llm_tool_metadata = {"read_only_hint": True, "idempotent_hint": True}
 
-        mock_xml_managed_method._is_llm_tool = True
-        mock_xml_managed_method._llm_tool_name = "xml_managed_test_tool"
-        mock_xml_managed_method._llm_tool_description = "Should be skipped"
-        mock_xml_managed_method._llm_tool_metadata = {}
-        mock_xml_managed_method._llm_tool_xml_managed = True  # XML managed!
+        values = self.LLMTool._extract_tool_values("res.partner", "mock", mock)
 
-        # Count tools before
-        count_before = self.LLMTool.search_count([])
+        self.assertEqual(values["name"], "my_tool")
+        self.assertEqual(values["description"], "My tool")
+        self.assertTrue(values["read_only_hint"])
+        self.assertTrue(values["idempotent_hint"])
+        self.assertNotIn("destructive_hint", values)
 
-        # Registration should be skipped
-        self.LLMTool._register_function_tool(
-            "res.partner", "xml_managed_test_method", mock_xml_managed_method
-        )
+    def test_raw_values_changed_detects_difference(self):
+        db_row = {"name": "old", "description": "old desc", "active": True}
+        values = {
+            "name": "old",
+            "description": "new desc",
+            "active": True,
+        }
+        self.assertTrue(self.LLMTool._raw_values_changed(db_row, values))
 
-        # Count should be same (no new tool created)
-        count_after = self.LLMTool.search_count([])
-        self.assertEqual(
-            count_before, count_after, "XML-managed tool should not be auto-created"
-        )
+    def test_raw_values_changed_ignores_none_vs_empty(self):
+        db_row = {"name": "t", "description": None, "active": True}
+        values = {"name": "t", "description": "", "active": True}
+        self.assertFalse(self.LLMTool._raw_values_changed(db_row, values))

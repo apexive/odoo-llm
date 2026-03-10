@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_website_tools,llm.website.tools,llm_tool.model_llm_tool,website.group_website_designer,1,0,0,0
+access_website_tool_media,website.tool.media,model_website_tool_media,website.group_website_designer,1,0,0,0
+access_website_tool_content,website.tool.content,model_website_tool_content,website.group_website_designer,1,0,0,0

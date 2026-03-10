@@ -232,72 +232,13 @@ class LLMTool(models.Model):
                 )
             return getattr(self, impl_method_name)
 
-    @api.model
-    def _register_hook(self):
-        """Scan for @llm_tool decorated methods and auto-register them"""
-        super()._register_hook()
+    # In-memory registries, populated by _register_hook (no DB access).
+    _tool_registry = {}  # {(model_name, method_name): values_dict}
+    _xml_managed_keys = set()  # {(model_name, method_name)} for xml-managed tools
 
-        # Track found tools to deactivate missing ones later
-        found_tools = set()
-
-        # Scan all models in registry for decorated methods
-        for model_name in self.env.registry:
-            try:
-                model = self.env[model_name]
-            except Exception as e:
-                # Skip models that can't be accessed (expected for abstract models, etc.)
-                _logger.info("Skipping inaccessible model '%s': %s", model_name, e)
-                continue
-
-            # Scan class methods directly to avoid triggering property/descriptor access
-            # Using type(model) gets the class, avoiding recordset-specific attributes
-            model_class = type(model)
-            for attr_name in dir(model_class):
-                # Skip private attributes and known problematic ones
-                if attr_name.startswith("_"):
-                    continue
-
-                try:
-                    # Get attribute from class, not instance
-                    attr = getattr(model_class, attr_name, None)
-                    if callable(attr) and getattr(attr, "_is_llm_tool", False):
-                        # Found a decorated tool - register it (handles its own errors)
-                        self._register_function_tool(model_name, attr_name, attr)
-                        # Track that we found this tool
-                        found_tools.add((model_name, attr_name))
-                except Exception as e:
-                    # Some attributes may still fail - log and continue
-                    _logger.info(
-                        "Skipping attribute '%s' on model '%s': %s",
-                        attr_name,
-                        model_name,
-                        e,
-                    )
-                    continue
-
-        # Deactivate function tools that no longer exist in code
-        self._deactivate_missing_tools(found_tools)
-
-    def _register_function_tool(self, model_name, method_name, method):
-        """Create or update tool record for decorated method.
-
-        Handles concurrent registration from multiple workers using Odoo's
-        savepoint context manager pattern (same as ir_cron uses).
-
-        If xml_managed=True in the decorator, this method completely skips the tool.
-        XML data files have full control over XML-managed tools.
-        """
-        # Check if tool is XML-managed - if so, skip entirely
-        xml_managed = getattr(method, "_llm_tool_xml_managed", False)
-        if xml_managed:
-            _logger.info(
-                "Skipping XML-managed tool %s.%s (controlled by XML data file)",
-                model_name,
-                method_name,
-            )
-            return
-
-        # Prepare values from decorator metadata
+    @staticmethod
+    def _extract_tool_values(model_name, method_name, method):
+        """Build values dict from decorator metadata. No DB access."""
         tool_name = getattr(method, "_llm_tool_name", method_name)
         values = {
             "name": tool_name,
@@ -305,119 +246,247 @@ class LLMTool(models.Model):
             "decorator_model": model_name,
             "decorator_method": method_name,
             "description": getattr(method, "_llm_tool_description", ""),
-            "active": True,  # Ensure tool is active (reactivate if previously deactivated)
+            "active": True,
         }
-
-        # Add metadata if present
         metadata = getattr(method, "_llm_tool_metadata", {})
-        if "read_only_hint" in metadata:
-            values["read_only_hint"] = metadata["read_only_hint"]
-        if "idempotent_hint" in metadata:
-            values["idempotent_hint"] = metadata["idempotent_hint"]
-        if "destructive_hint" in metadata:
-            values["destructive_hint"] = metadata["destructive_hint"]
-        if "open_world_hint" in metadata:
-            values["open_world_hint"] = metadata["open_world_hint"]
-
-        # Store manual schema if provided via decorator
+        for hint in (
+            "read_only_hint",
+            "idempotent_hint",
+            "destructive_hint",
+            "open_world_hint",
+        ):
+            if hint in metadata:
+                values[hint] = metadata[hint]
         if hasattr(method, "_llm_tool_schema"):
             values["input_schema"] = json.dumps(method._llm_tool_schema, indent=2)
+        return values
 
-        # Use Odoo's savepoint pattern (same as demo data loading in loading.py)
-        # If concurrent access fails, savepoint rolls back and we skip gracefully
-        try:
-            with self.env.cr.savepoint(flush=False):
-                # Search for existing tool record (including inactive ones)
-                existing = self.with_context(active_test=False).search(
-                    [
-                        ("decorator_model", "=", model_name),
-                        ("decorator_method", "=", method_name),
-                    ],
-                    limit=1,
-                )
+    # ------------------------------------------------------------------
+    # Registration: _register_hook (scan) → _sync_tools_to_db (raw SQL)
+    # ------------------------------------------------------------------
 
-                if existing:
-                    # Only update if auto_update is enabled
-                    auto_update = getattr(existing, "auto_update", True)
-                    if auto_update:
-                        was_inactive = not existing.active
-                        existing.write(values)
-                        if was_inactive:
-                            _logger.info(
-                                "Reactivated function tool '%s' from %s.%s",
-                                values["name"],
-                                model_name,
-                                method_name,
-                            )
-                        else:
-                            _logger.debug(
-                                "Updated function tool '%s' from %s.%s",
-                                values["name"],
-                                model_name,
-                                method_name,
-                            )
-                    else:
-                        _logger.debug(
-                            "Skipped update for function tool '%s' (auto_update=False)",
-                            existing.name,
-                        )
-                else:
-                    # Auto-create the tool
-                    self.create(values)
-                    _logger.info(
-                        "Registered function tool '%s' from %s.%s",
-                        values["name"],
-                        model_name,
-                        method_name,
-                    )
+    @api.model
+    def _register_hook(self):
+        """Scan for @llm_tool decorated methods and sync to DB."""
+        super()._register_hook()
+        self._scan_tool_decorators()
+        self._sync_tools_to_db()
 
-        except Exception as e:
-            # Concurrent access or other error - skip gracefully (same as Odoo demo data)
-            # Tool either already exists or will be registered on next single-worker restart
-            _logger.info(
-                "Skipped tool registration for %s.%s (concurrent access or already exists): %s",
-                model_name,
-                method_name,
-                e,
-            )
+    def _scan_tool_decorators(self):
+        """Populate _tool_registry from @llm_tool decorated methods."""
+        self._tool_registry.clear()
+        self._xml_managed_keys.clear()
 
-    def _deactivate_missing_tools(self, found_tools):
-        """Deactivate function tools that no longer exist in code.
+        for model_name in self.env.registry:
+            try:
+                model = self.env[model_name]
+            except Exception:
+                continue
 
-        Args:
-            found_tools: Set of (model_name, method_name) tuples for tools found during scan
-
-        Uses Odoo's savepoint pattern to handle concurrent deactivation gracefully.
-        """
-        try:
-            # Get all active function tools
-            all_function_tools = self.search(
-                [("implementation", "=", "function"), ("active", "=", True)]
-            )
-        except Exception as e:
-            # During module upgrade, database might not be ready yet
-            _logger.debug("Skipping tool deactivation during upgrade: %s", e)
-            return
-
-        for tool in all_function_tools:
-            key = (tool.decorator_model, tool.decorator_method)
-            if key not in found_tools:
-                # Tool no longer exists in code - deactivate it
+            model_class = type(model)
+            for attr_name in dir(model_class):
+                if attr_name.startswith("_"):
+                    continue
                 try:
-                    with self.env.cr.savepoint(flush=False):
-                        tool.active = False
-                    _logger.info(
-                        "Deactivated missing function tool '%s' from %s.%s",
-                        tool.name,
-                        tool.decorator_model,
-                        tool.decorator_method,
-                    )
+                    attr = getattr(model_class, attr_name, None)
+                    if callable(attr) and getattr(attr, "_is_llm_tool", False):
+                        key = (model_name, attr_name)
+                        if getattr(attr, "_llm_tool_xml_managed", False):
+                            self._xml_managed_keys.add(key)
+                        else:
+                            self._tool_registry[key] = self._extract_tool_values(
+                                model_name, attr_name, attr
+                            )
                 except Exception:
-                    # Concurrent access - skip gracefully
-                    _logger.info(
-                        "Skipped deactivation for tool '%s' (concurrent access)",
-                        tool.name,
+                    continue
+
+    @staticmethod
+    def _raw_values_changed(db_row, values):
+        """Compare in-memory values dict with a raw DB row dict."""
+        _skip = {"implementation", "decorator_model", "decorator_method"}
+        for key, new_val in values.items():
+            if key in _skip:
+                continue
+            db_val = db_row.get(key)
+            # Treat None/False/"" as equivalent
+            if not db_val and not new_val:
+                continue
+            if db_val != new_val:
+                return True
+        return False
+
+    @api.model
+    def _sync_tools_to_db(self):
+        """Sync _tool_registry → DB via raw SQL.
+
+        Acquires a database-specific advisory lock so exactly one worker
+        performs the write.  Raw SQL bypasses the ORM cache, which avoids
+        the SerializationFailure that occurs when load_modules calls
+        flush_all() with dirty ORM state from concurrent workers.
+
+        Called automatically from _register_hook on every startup, and
+        can also be triggered manually via the "Sync Tools" button.
+
+        Returns dict: {created: int, updated: int, deactivated: int}.
+        """
+        cr = self.env.cr
+
+        # Database-specific advisory lock (transaction-scoped, auto-released)
+        lock_key = hash(cr.dbname) & 0x7FFFFFFF
+        cr.execute("SELECT pg_try_advisory_xact_lock(%s)", [lock_key])
+        if not cr.fetchone()[0]:
+            _logger.debug("Another worker is syncing tools, skipping")
+            return {"created": 0, "updated": 0, "deactivated": 0}
+
+        if not self._tool_registry:
+            return {"created": 0, "updated": 0, "deactivated": 0}
+
+        # Read existing function tools via raw SQL (bypasses ORM cache)
+        cr.execute(
+            "SELECT id, name, decorator_model, decorator_method, description,"
+            "       active, auto_update, read_only_hint, idempotent_hint,"
+            "       destructive_hint, open_world_hint, input_schema"
+            "  FROM llm_tool"
+            " WHERE implementation = 'function'"
+        )
+        existing_by_key = {}
+        for row in cr.dictfetchall():
+            existing_by_key[(row["decorator_model"], row["decorator_method"])] = row
+
+        now = fields.Datetime.now()
+        uid = self.env.uid or 1
+        created = updated = deactivated = 0
+
+        for key, values in self._tool_registry.items():
+            db_row = existing_by_key.pop(key, None)
+            if db_row:
+                if db_row["auto_update"] and self._raw_values_changed(db_row, values):
+                    cr.execute(
+                        "UPDATE llm_tool"
+                        "   SET name = %s, description = %s, active = %s,"
+                        "       read_only_hint = %s, idempotent_hint = %s,"
+                        "       destructive_hint = %s, open_world_hint = %s,"
+                        "       input_schema = %s,"
+                        "       write_date = %s, write_uid = %s"
+                        " WHERE id = %s",
+                        [
+                            values["name"],
+                            values.get("description", ""),
+                            values.get("active", True),
+                            values.get("read_only_hint", db_row["read_only_hint"]),
+                            values.get("idempotent_hint", db_row["idempotent_hint"]),
+                            values.get("destructive_hint", db_row["destructive_hint"]),
+                            values.get("open_world_hint", db_row["open_world_hint"]),
+                            values.get("input_schema", db_row["input_schema"]),
+                            now,
+                            uid,
+                            db_row["id"],
+                        ],
                     )
+                    updated += 1
+            else:
+                cr.execute(
+                    "INSERT INTO llm_tool"
+                    "  (name, implementation, decorator_model, decorator_method,"
+                    "   description, active, auto_update,"
+                    "   read_only_hint, idempotent_hint,"
+                    "   destructive_hint, open_world_hint,"
+                    "   input_schema,"
+                    "   create_date, write_date, create_uid, write_uid)"
+                    " VALUES (%s, 'function', %s, %s, %s, %s, true,"
+                    "         %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+                    [
+                        values["name"],
+                        values["decorator_model"],
+                        values["decorator_method"],
+                        values.get("description", ""),
+                        values.get("active", True),
+                        values.get("read_only_hint", False),
+                        values.get("idempotent_hint", False),
+                        values.get("destructive_hint", True),
+                        values.get("open_world_hint", True),
+                        values.get("input_schema"),
+                        now,
+                        now,
+                        uid,
+                        uid,
+                    ],
+                )
+                created += 1
+
+        # Deactivate function tools no longer in registry (skip xml-managed)
+        for key, db_row in existing_by_key.items():
+            if db_row["active"] and key not in self._xml_managed_keys:
+                cr.execute(
+                    "UPDATE llm_tool SET active = false,"
+                    "       write_date = %s, write_uid = %s"
+                    " WHERE id = %s",
+                    [now, uid, db_row["id"]],
+                )
+                deactivated += 1
+
+        if created or updated or deactivated:
+            self.invalidate_model()
+            _logger.info(
+                "Tool sync: %d created, %d updated, %d deactivated",
+                created,
+                updated,
+                deactivated,
+            )
+
+        return {"created": created, "updated": updated, "deactivated": deactivated}
+
+    # ------------------------------------------------------------------
+    # UI action: manual sync button on list view
+    # ------------------------------------------------------------------
+
+    def action_sync_tools(self):
+        """Manual sync button — wraps _sync_tools_to_db with UI notification."""
+        Tool = self.env["llm.tool"]
+        if not Tool._tool_registry:
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("Nothing to sync"),
+                    "message": _("Tool registry is empty. Restart the server first."),
+                    "type": "warning",
+                    "sticky": False,
+                },
+            }
+
+        result = Tool._sync_tools_to_db()
+        if not any(result.values()):
+            return {
+                "type": "ir.actions.client",
+                "tag": "display_notification",
+                "params": {
+                    "title": _("Already in sync"),
+                    "message": _("All tools are up to date."),
+                    "type": "info",
+                    "sticky": False,
+                },
+            }
+
+        parts = []
+        if result["created"]:
+            parts.append(_("%d created", result["created"]))
+        if result["updated"]:
+            parts.append(_("%d updated", result["updated"]))
+        if result["deactivated"]:
+            parts.append(_("%d deactivated", result["deactivated"]))
+
+        return {
+            "type": "ir.actions.client",
+            "tag": "display_notification",
+            "params": {
+                "title": _("Tools synced"),
+                "message": ", ".join(str(p) for p in parts),
+                "type": "success",
+                "sticky": False,
+                "next": {"type": "ir.actions.client", "tag": "reload"},
+            },
+        }
 
     # API methods for the Tool schema
     def get_tool_definition(self):

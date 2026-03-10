@@ -36,31 +36,37 @@ AI-powered invoice data extraction with OCR for Odoo 18 - integrates with OCA's 
 ## Screenshots
 
 ### 1. Configure Mistral Provider
+
 Add your Mistral API key and sync models. Mistral OCR is essential for parsing invoice attachments.
 
 ![Mistral Provider Configuration](static/description/screenshot-mistral-provider.png)
 
 ### 2. OCR Models Available
+
 After syncing, the `mistral-ocr-latest` model is automatically available for parsing invoice attachments.
 
 ![OCR Models](static/description/screenshot-ocr-models.png)
 
 ### 3. LLM Provider for Data Extraction
+
 Configure any LLM provider (ChatGPT, Gemini, Claude, etc.) for intelligent data extraction from OCR text.
 
 ![ChatGPT Provider](static/description/screenshot-chatgpt-provider.png)
 
 ### 4. Configure Invoice Extraction Assistant
+
 The module provides a pre-configured assistant. You must select a **Provider** and **Model** before processing invoices.
 
 ![Invoice Extraction Assistant](static/description/screenshot-assistant-config.png)
 
 ### 5. Click "Process with AI" on Draft Invoice
+
 Open any draft vendor bill with an attached PDF/image and click the "Process with AI" button. The form reloads with all extracted data populated automatically.
 
 ![Process with AI Button](static/description/screenshot-press-process.png)
 
 ### 6. Invoice Automatically Filled
+
 After AI processing, the form reloads with extracted data: vendor, date, amounts, line items.
 
 ![Filled Invoice](static/description/screenshot-filled-up-invoice.png)
@@ -282,6 +288,7 @@ To customize extraction behavior:
 ### Issue: "Failed to extract data"
 
 **Possible causes**:
+
 - Poor quality scan/image
 - Non-standard invoice format
 - OCR couldn't extract text
