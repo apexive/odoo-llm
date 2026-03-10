@@ -256,6 +256,8 @@ class LLMSkillsLoader(models.Model):
                     "name": title,
                     "state": "draft",
                     "skill_content_hash": content_hash,
+                    # Re-apply skill chunk overrides in case collection defaults changed
+                    **self.env["llm.resource"]._skill_chunk_overrides(),
                 })
                 resource.process_resource()
             _logger.info("llm_skills [%s]: updated skill '%s'", self.name, skill_id)
