@@ -1,3 +1,4 @@
+from . import llm_provider
 from . import llm_knowledge_collection
 from . import llm_skill_document
 from . import llm_resource

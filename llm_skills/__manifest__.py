@@ -25,6 +25,7 @@
         "llm_tool_knowledge",
         "llm_assistant",
         "llm_pgvector",
+        "llm_openai",
     ],
     "external_dependencies": {
         "python": ["pyyaml"],
@@ -32,6 +33,7 @@
     "data": [
         "security/ir.model.access.csv",
         "data/llm_tool_data.xml",
+        "data/llm_provider_data.xml",
         "data/llm_store_data.xml",
         "views/llm_skill_document_views.xml",
         "views/llm_skills_loader_views.xml",
