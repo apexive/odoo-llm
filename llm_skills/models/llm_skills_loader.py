@@ -5,6 +5,7 @@ from pathlib import Path
 import yaml
 
 from odoo import _, api, fields, models
+from odoo.tools import config
 
 _logger = logging.getLogger(__name__)
 
@@ -355,7 +356,7 @@ class LLMSkillsLoader(models.Model):
             return p if p.is_dir() else None
 
         # Try relative to each configured addons path
-        for addons_dir in self.env["ir.module.module"]._get_modules_path():
+        for addons_dir in [p.strip() for p in config.get('addons_path', '').split(',') if p.strip()]:
             candidate = Path(addons_dir) / p
             if candidate.is_dir():
                 return candidate
@@ -404,11 +405,18 @@ class LLMSkillsLoader(models.Model):
     def _register_hook(self):
         """
         Called by Odoo on every server start and module upgrade.
-        Triggers sync for all loaders with auto_sync_on_boot=True.
+
+        1. Auto-discovers skills/ directories in all installed addons and
+           creates loader records for them (idempotent). This means no addon
+           needs to depend on llm_skills — just ship a skills/ directory and
+           it will be picked up automatically.
+        2. Triggers sync for all loaders with auto_sync_on_boot=True.
+
         Failures on individual loaders are caught and logged — one broken
         loader does not block others or prevent Odoo from starting.
         """
         super()._register_hook()
+        self._auto_discover_skill_loaders()
         loaders = self.search([("auto_sync_on_boot", "=", True)])
         for loader in loaders:
             try:
@@ -416,4 +424,68 @@ class LLMSkillsLoader(models.Model):
             except Exception:
                 _logger.exception(
                     "llm_skills: failed to sync loader '%s' on boot", loader.name
+                )
+
+    @api.model
+    def _auto_discover_skill_loaders(self):
+        """
+        Scan all installed addon directories for a skills/ subdirectory.
+        For each one found, auto-create an llm.skills.loader record if no
+        loader already exists for that path.
+
+        All auto-discovered loaders are assigned to the default
+        'Odoo Technical Skills' collection (llm_skills.llm_collection_meta_skills).
+        To use a different collection, edit the loader record manually in the UI.
+
+        If the default collection doesn't exist yet (fresh DB, no embedding model),
+        discovery is skipped silently and retried on next boot/upgrade.
+        """
+        # Resolve default collection
+        collection = self.env.ref(
+            "llm_skills.llm_collection_meta_skills", raise_if_not_found=False
+        )
+        if not collection:
+            _logger.info(
+                "llm_skills: default collection not yet created — "
+                "skipping auto-discovery. Will retry on next boot/upgrade."
+            )
+            return
+
+        # Build index of already-registered paths to avoid duplicates
+        existing_paths = set(self.search([]).mapped("skills_path"))
+
+        # Scan every addon directory Odoo knows about
+        addon_paths = [p.strip() for p in config.get('addons_path', '').split(',') if p.strip()]
+        for addons_dir in addon_paths:
+            addons_dir = Path(addons_dir)
+            if not addons_dir.is_dir():
+                continue
+            for module_dir in sorted(addons_dir.iterdir()):
+                if not module_dir.is_dir():
+                    continue
+                skills_dir = module_dir / "skills"
+                if not skills_dir.is_dir():
+                    continue
+                # Check the module is actually installed
+                module_name = module_dir.name
+                installed = self.env["ir.module.module"].search(
+                    [("name", "=", module_name), ("state", "=", "installed")],
+                    limit=1,
+                )
+                if not installed:
+                    continue
+                skills_path = str(skills_dir)
+                if skills_path in existing_paths:
+                    continue
+                loader = self.create({
+                    "name": f"{module_name} Skills",
+                    "collection_id": collection.id,
+                    "skills_path": skills_path,
+                    "auto_sync_on_boot": True,
+                })
+                existing_paths.add(skills_path)
+                _logger.info(
+                    "llm_skills: auto-discovered skills/ in '%s' → "
+                    "created loader '%s' (id=%s)",
+                    module_name, loader.name, loader.id,
                 )

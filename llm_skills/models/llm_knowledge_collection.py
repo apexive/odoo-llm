@@ -11,17 +11,17 @@ class LLMKnowledgeCollectionSkills(models.Model):
     @api.model
     def _create_meta_skills_collection(self):
         """
-        Called from llm_store_data.xml to create the LLM Meta Skills collection.
+        Called from llm_store_data.xml to create the Odoo Technical Skills collection.
         Idempotent: skips if already exists.
         Resolves the embedding model automatically:
           - prefers text-embedding-3-small
           - falls back to any available embedding model
-          - leaves embedding_model_id empty and logs a warning if none found
+          - skips with a warning if none found (retry after fetching models)
         """
-        existing = self.search([("name", "=", "LLM Meta Skills")], limit=1)
+        existing = self.search([("name", "=", "Odoo Technical Skills")], limit=1)
         if existing:
             _logger.info(
-                "llm_skills: 'LLM Meta Skills' collection already exists (id=%s), skipping.",
+                "llm_skills: 'Odoo Technical Skills' collection already exists (id=%s), skipping.",
                 existing.id,
             )
             self._ensure_external_id(existing.id)
@@ -44,17 +44,17 @@ class LLMKnowledgeCollectionSkills(models.Model):
             )
         if not embedding_model:
             _logger.warning(
-                "llm_skills: No embedding model found — skipping 'LLM Meta Skills' collection creation. "
+                "llm_skills: No embedding model found — skipping 'Odoo Technical Skills' collection creation. "
                 "Fetch models from your provider, then call _create_meta_skills_collection() manually "
                 "or upgrade the llm_skills module."
             )
             return
 
         collection = self.create({
-            "name": "LLM Meta Skills",
+            "name": "Odoo Technical Skills",
             "description": (
-                "Knowledge collection for LLM skill management meta-skills "
-                "loaded from llm_skills/skills/."
+                "Default knowledge collection for all technical skill documents "
+                "loaded from installed addon skills/ directories."
             ),
             "store_id": store.id,
             "embedding_model_id": embedding_model.id,
@@ -63,9 +63,9 @@ class LLMKnowledgeCollectionSkills(models.Model):
         self._ensure_external_id(collection.id)
 
         _logger.info(
-            "llm_skills: Created 'LLM Meta Skills' collection (id=%s) with embedding model '%s'.",
+            "llm_skills: Created 'Odoo Technical Skills' collection (id=%s) with embedding model '%s'.",
             collection.id,
-            embedding_model.name if embedding_model else "none",
+            embedding_model.name,
         )
 
     @api.model
