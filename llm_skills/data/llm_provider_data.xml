@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo noupdate="1">
     <!--
-        Ensures the OpenAI provider exists and the three standard embedding models
-        are registered with stable external IDs. Idempotent on reinstall/upgrade.
-        api_key must be set manually: LLM > Configuration > Providers > OpenAI.
+        Ensures the Ollama provider exists and nomic-embed-text is registered
+        with a stable external ID. Idempotent on reinstall/upgrade.
+        api_base defaults to http://host.docker.internal:11434.
+        Override via: Settings > Technical > System Parameters > llm_skills.ollama_api_base
     -->
-    <function model="llm.provider" name="_setup_openai_provider"/>
+    <function model="llm.provider" name="_setup_ollama_provider"/>
 </odoo>

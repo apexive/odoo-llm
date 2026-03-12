@@ -1,70 +1,55 @@
 import logging
-import os
 
 from odoo import api, models
 
 _logger = logging.getLogger(__name__)
 
-# Fallback embedding models registered when no API key is available
-# or when the live fetch fails. These cover the models we always want.
-OPENAI_EMBEDDING_MODELS_FALLBACK = [
-    {"name": "text-embedding-3-small", "default": True},
-    {"name": "text-embedding-3-large", "default": False},
-    {"name": "text-embedding-ada-002", "default": False},
+# Default embedding models to register statically when the Ollama server
+# is not reachable at install/upgrade time.
+OLLAMA_EMBEDDING_MODELS_FALLBACK = [
+    {"name": "nomic-embed-text:latest", "default": True},
 ]
 
-# System parameter key where the OpenAI API key is stored.
-# Set this via Settings → Technical → System Parameters before install/upgrade
-# to enable automatic model fetching.
-OPENAI_API_KEY_PARAM = "llm_skills.openai_api_key"
+# System parameter key where the Ollama API base URL is optionally stored.
+# Defaults to http://host.docker.internal:11434 when not set.
+OLLAMA_API_BASE_PARAM = "llm_skills.ollama_api_base"
+OLLAMA_DEFAULT_HOST = "http://host.docker.internal:11434"
 
 
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
 
     @api.model
-    def _setup_openai_provider(self):
+    def _setup_ollama_provider(self):
         """
         Called from llm_provider_data.xml during install/upgrade.
 
         Steps (all idempotent):
-          1. Find or create the OpenAI provider record
-          2. If an API key is stored in ir.config_parameter, set it on the provider
-             and fetch all models live from the OpenAI API
-          3. If no API key / fetch fails, fall back to registering the three
-             standard embedding models statically
-          4. Register ir.model.data external IDs for provider + key models
+          1. Find or create the Ollama provider record
+          2. Set api_base from ir.config_parameter or use the default Docker host
+          3. Attempt to fetch models live from the Ollama server
+          4. If fetch fails, fall back to registering nomic-embed-text statically
+          5. Register ir.model.data external IDs for provider + embedding model
 
-        To enable automatic fetching:
+        To override the default Ollama host:
             Settings → Technical → System Parameters → New
-            Key:   llm_skills.openai_api_key
-            Value: sk-...
+            Key:   llm_skills.ollama_api_base
+            Value: http://host.docker.internal:11434
         """
         IrModelData = self.env["ir.model.data"]
 
         # ── 1. Provider ───────────────────────────────────────────────────────
-        provider = self._get_or_create_openai_provider(IrModelData)
+        provider = self._get_or_create_ollama_provider(IrModelData)
 
-        # ── 2. API key: env var → system parameter → already on provider ────────
-        api_key = self._resolve_openai_api_key(provider)
-
-        # ── 3. Fetch models (live or fallback) ────────────────────────────────
-        if provider.api_key:
-            fetched = self._fetch_openai_models(provider)
-            if not fetched:
-                _logger.warning(
-                    "llm_skills: Live model fetch failed — registering fallback embedding models."
-                )
-                self._register_fallback_embedding_models(provider, IrModelData)
-        else:
-            _logger.info(
-                "llm_skills: No OpenAI API key found (set '%s' in system parameters). "
-                "Registering fallback embedding models only.",
-                OPENAI_API_KEY_PARAM,
+        # ── 2. Fetch models (live or fallback) ────────────────────────────────
+        fetched = self._fetch_ollama_models(provider)
+        if not fetched:
+            _logger.warning(
+                "llm_skills: Ollama live model fetch failed — registering fallback embedding models."
             )
             self._register_fallback_embedding_models(provider, IrModelData)
 
-        # ── 4. Register external IDs for key embedding models ─────────────────
+        # ── 3. Register external IDs for key embedding models ─────────────────
         self._register_embedding_model_external_ids(provider, IrModelData)
 
     # -------------------------------------------------------------------------
@@ -72,95 +57,60 @@ class LLMProvider(models.Model):
     # -------------------------------------------------------------------------
 
     @api.model
-    def _get_or_create_openai_provider(self, IrModelData):
-        """Find or create the OpenAI provider. Returns the provider record."""
-        provider = self.search([("name", "=ilike", "OpenAI")], limit=1)
+    def _get_or_create_ollama_provider(self, IrModelData):
+        """Find or create the Ollama provider. Returns the provider record."""
+        provider = self.search([("name", "=ilike", "Ollama")], limit=1)
         if not provider:
+            # Resolve api_base: system parameter → default Docker host
+            IrConfigParam = self.env["ir.config_parameter"].sudo()
+            api_base = (
+                IrConfigParam.get_param(OLLAMA_API_BASE_PARAM, "").strip()
+                or OLLAMA_DEFAULT_HOST
+            )
             provider = self.create({
-                "name": "OpenAI",
-                "service": "openai",
+                "name": "Ollama",
+                "service": "ollama",
+                "api_base": api_base,
                 "active": True,
             })
-            _logger.info("llm_skills: Created OpenAI provider (id=%s).", provider.id)
+            _logger.info(
+                "llm_skills: Created Ollama provider (id=%s) with api_base='%s'.",
+                provider.id, api_base,
+            )
         else:
             _logger.info(
-                "llm_skills: OpenAI provider already exists (id=%s), skipping create.",
+                "llm_skills: Ollama provider already exists (id=%s), skipping create.",
                 provider.id,
             )
-        self._ensure_external_id(IrModelData, "llm.provider", provider.id, "llm_provider_openai")
+        self._ensure_external_id(IrModelData, "llm.provider", provider.id, "llm_provider_ollama")
         return provider
-
-    @api.model
-    def _resolve_openai_api_key(self, provider):
-        """
-        Resolve the OpenAI API key from multiple sources (priority order):
-          1. OPENAI_API_KEY environment variable (set via .env / Docker Compose)
-          2. ir.config_parameter key 'llm_skills.openai_api_key'
-          3. Already set on the provider record (no action needed)
-
-        If a key is found from env or system params and not yet on the provider,
-        it is written to the provider and also stored in ir.config_parameter
-        so it survives container restarts without the env var.
-
-        Returns the resolved api_key string, or None if not found.
-        """
-        IrConfigParam = self.env["ir.config_parameter"].sudo()
-
-        # Source 1: environment variable
-        env_key = os.environ.get("OPENAI_API_KEY", "").strip()
-        if env_key:
-            if not provider.api_key:
-                provider.sudo().write({"api_key": env_key})
-                _logger.info("llm_skills: Set OpenAI API key from OPENAI_API_KEY env var.")
-            # Always sync to ir.config_parameter so it persists
-            IrConfigParam.set_param(OPENAI_API_KEY_PARAM, env_key)
-            return env_key
-
-        # Source 2: ir.config_parameter
-        param_key = IrConfigParam.get_param(OPENAI_API_KEY_PARAM, "").strip()
-        if param_key:
-            if not provider.api_key:
-                provider.sudo().write({"api_key": param_key})
-                _logger.info("llm_skills: Set OpenAI API key from ir.config_parameter.")
-            return param_key
-
-        # Source 3: already on the provider
-        if provider.api_key:
-            _logger.info("llm_skills: OpenAI API key already set on provider.")
-            return provider.api_key
-
-        _logger.warning(
-            "llm_skills: No OpenAI API key found. "
-            "Set OPENAI_API_KEY in .env or '%s' in system parameters.",
-            OPENAI_API_KEY_PARAM,
-        )
-        return None
 
     # -------------------------------------------------------------------------
     # Live model fetching
     # -------------------------------------------------------------------------
 
     @api.model
-    def _fetch_openai_models(self, provider):
+    def _fetch_ollama_models(self, provider):
         """
-        Fetch all models from the OpenAI API and upsert llm.model records.
+        Fetch models from the running Ollama server and upsert llm.model records.
+        Only registers models whose name contains 'embed' as embedding models;
+        all others default to 'chat'.
 
-        Returns True if at least one model was successfully created/updated,
-        False if the fetch failed entirely.
+        Returns True if at least one model was created/updated, False otherwise.
         """
-        _logger.info("llm_skills: Fetching models from OpenAI API...")
+        _logger.info("llm_skills: Fetching models from Ollama server at '%s'...", provider.api_base)
         try:
             models_data = list(provider.list_models())
         except Exception as e:
-            _logger.warning("llm_skills: OpenAI model fetch failed: %s", e)
+            _logger.warning("llm_skills: Ollama model fetch failed: %s", e)
             return False
 
         if not models_data:
-            _logger.warning("llm_skills: OpenAI returned no models.")
+            _logger.warning("llm_skills: Ollama returned no models.")
             return False
 
         LLMModel = self.env["llm.model"]
-        publisher = self.env.ref("llm_openai.llm_publisher_openai", raise_if_not_found=False)
+        publisher = self.env.ref("llm_ollama.llm_publisher_ollama", raise_if_not_found=False)
         existing = {
             m.name: m
             for m in LLMModel.search([("provider_id", "=", provider.id)])
@@ -176,6 +126,9 @@ class LLMProvider(models.Model):
             capabilities = details.get("capabilities", ["chat"])
             model_use = provider._determine_model_use(name, capabilities)
 
+            # Mark as default embedding model if it's nomic-embed-text
+            is_default = "nomic-embed-text" in name and model_use == "embedding"
+
             vals = {
                 "name": name,
                 "provider_id": provider.id,
@@ -183,6 +136,8 @@ class LLMProvider(models.Model):
                 "details": details,
                 "active": True,
             }
+            if is_default:
+                vals["default"] = True
             if publisher:
                 vals["publisher_id"] = publisher.id
 
@@ -194,7 +149,7 @@ class LLMProvider(models.Model):
                 created += 1
 
         _logger.info(
-            "llm_skills: OpenAI model sync done — %d created, %d updated.",
+            "llm_skills: Ollama model sync done — %d created, %d updated.",
             created, updated,
         )
         return (created + updated) > 0
@@ -205,11 +160,11 @@ class LLMProvider(models.Model):
 
     @api.model
     def _register_fallback_embedding_models(self, provider, IrModelData):
-        """Register the three standard OpenAI embedding models without an API call."""
+        """Register nomic-embed-text statically without a live Ollama call."""
         LLMModel = self.env["llm.model"]
-        publisher = self.env.ref("llm_openai.llm_publisher_openai", raise_if_not_found=False)
+        publisher = self.env.ref("llm_ollama.llm_publisher_ollama", raise_if_not_found=False)
 
-        for spec in OPENAI_EMBEDDING_MODELS_FALLBACK:
+        for spec in OLLAMA_EMBEDDING_MODELS_FALLBACK:
             name = spec["name"]
             model = LLMModel.search([
                 ("name", "=", name),
@@ -239,14 +194,15 @@ class LLMProvider(models.Model):
     def _register_embedding_model_external_ids(self, provider, IrModelData):
         """Register ir.model.data external IDs for the key embedding models."""
         LLMModel = self.env["llm.model"]
-        for spec in OPENAI_EMBEDDING_MODELS_FALLBACK:
+        for spec in OLLAMA_EMBEDDING_MODELS_FALLBACK:
             name = spec["name"]
             model = LLMModel.search([
                 ("name", "=", name),
                 ("provider_id", "=", provider.id),
             ], limit=1)
             if model:
-                xml_id = name.replace("-", "_")  # e.g. text_embedding_3_small
+                # e.g. nomic-embed-text:latest → nomic_embed_text_latest
+                xml_id = name.replace("-", "_").replace(":", "_")
                 self._ensure_external_id(IrModelData, "llm.model", model.id, xml_id)
 
     @api.model
