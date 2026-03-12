@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_skill_document_user,llm.skill.document.user,model_llm_skill_document,base.group_user,1,0,0,0
+access_llm_skill_document_manager,llm.skill.document.manager,model_llm_skill_document,llm.group_llm_manager,1,1,1,1
+access_llm_skills_loader_user,llm.skills.loader.user,model_llm_skills_loader,base.group_user,1,0,0,0
+access_llm_skills_loader_manager,llm.skills.loader.manager,model_llm_skills_loader,llm.group_llm_manager,1,1,1,1

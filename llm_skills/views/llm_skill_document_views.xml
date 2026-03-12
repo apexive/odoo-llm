@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_llm_skill_document_list" model="ir.ui.view">
+        <field name="name">llm.skill.document.list</field>
+        <field name="model">llm.skill.document</field>
+        <field name="arch" type="xml">
+            <list string="Skill Documents" decoration-muted="not active">
+                <field name="skill_id" string="ID" optional="show" />
+                <field name="name" string="Title" />
+                <field name="tags" optional="show" />
+                <field name="odoo_models" optional="show" />
+                <field name="loader_id" optional="show" />
+                <field name="active" optional="hide" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_llm_skill_document_form" model="ir.ui.view">
+        <field name="name">llm.skill.document.form</field>
+        <field name="model">llm.skill.document</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active" />
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Finding overdue customer invoices" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Identity">
+                            <field name="skill_id" string="Skill ID" />
+                            <field name="loader_id" string="Loader" readonly="1" />
+                            <field name="active" widget="boolean_toggle" />
+                        </group>
+                        <group string="Metadata">
+                            <field name="tags" />
+                            <field name="odoo_models" string="Odoo Models" />
+                            <field name="content_hash" string="Content Hash" readonly="1" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Markdown Content" name="content">
+                            <field name="content" nolabel="1" widget="text"
+                                   placeholder="Skill markdown content including YAML frontmatter..." />
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <record id="view_llm_skill_document_search" model="ir.ui.view">
+        <field name="name">llm.skill.document.search</field>
+        <field name="model">llm.skill.document</field>
+        <field name="arch" type="xml">
+            <search string="Search Skills">
+                <field name="name" string="Title" />
+                <field name="skill_id" string="Skill ID" />
+                <field name="tags" />
+                <field name="odoo_models" string="Odoo Models" />
+                <field name="loader_id" />
+                <filter name="active" string="Active" domain="[('active','=',True)]" />
+                <filter name="inactive" string="Archived" domain="[('active','=',False)]" />
+                <group expand="0" string="Group By">
+                    <filter name="group_loader" string="Loader" context="{'group_by': 'loader_id'}" />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_llm_skill_document" model="ir.actions.act_window">
+        <field name="name">Skill Documents</field>
+        <field name="res_model">llm.skill.document</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No skill documents yet.</p>
+            <p>Skill documents are loaded automatically from the filesystem by the Skills Loader on Odoo start/upgrade.</p>
+        </field>
+    </record>
+</odoo>

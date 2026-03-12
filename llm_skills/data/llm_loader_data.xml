@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- Skills loader for llm_skills built-in meta-skills -->
+    <record id="llm_skills_loader_meta" model="llm.skills.loader">
+        <field name="name">LLM Meta Skills Loader</field>
+        <field name="collection_id" ref="llm_collection_meta_skills"/>
+        <field name="skills_path">/mnt/odoo-llm/llm_skills/skills</field>
+        <field name="auto_sync_on_boot">True</field>
+    </record>
+</odoo>

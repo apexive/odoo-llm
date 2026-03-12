@@ -1,0 +1,815 @@
+<!-- Hero Section -->
+<section style="padding:4rem 0 3rem">
+    <div class="container">
+        <div class="text-center" style="max-width:800px; margin:0 auto">
+            <div style="display:inline-flex; padding:0.5rem 1.25rem; border-radius:50px; margin-bottom:2rem">
+                <i class="fa fa-brain" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                <span style="color:#71639e; font-weight:600; font-size:0.9rem">RAG-Powered AI Memory for Odoo</span>
+            </div>
+
+            <h1 style="font-size:3rem; font-weight:800; color:#212529; margin-bottom:1.5rem; line-height:1.2">
+                Give Your AI Assistant<br>
+                <span style="color:#71639e">Permanent Expertise</span>
+            </h1>
+
+            <p style="font-size:1.25rem; color:#6c757d; margin-bottom:1rem; line-height:1.6">
+                Version-controlled skill documents that teach your AI <em>exactly</em> how to work with your Odoo — loaded from Git, retrieved by vector search, available everywhere.
+            </p>
+
+            <p style="font-size:1rem; color:#868e96; margin-bottom:2rem">
+                Works with <strong style="color:#495057">Claude Desktop</strong>, <strong style="color:#495057">Claude Code</strong>, <strong style="color:#495057">Odoo Assistants</strong>, <strong style="color:#495057">WhatsApp Bots</strong> and any MCP-compatible client
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap">
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-bolt" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#155724; font-weight:600">Zero-Touch Install</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-github" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#5b4c7d; font-weight:600">Open Source</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-code-fork" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#0c5460; font-weight:600">Git-Versioned</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+
+    <!-- What Is It -->
+    <section class="mb-5">
+        <h2 class="text-center mb-3" style="font-size:2.5rem; font-weight:700; color:#71639e">What Is LLM Skills?</h2>
+        <p class="text-center mb-5" style="font-size:1.2rem; color:#6c757d; font-weight:500">Persistent, versioned knowledge that travels with your code</p>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem">
+                    <p style="font-size:1.15rem; color:#495057; line-height:1.9; margin-bottom:0; text-align:center">
+                        LLM Skills turns markdown files in your addon's <code style="background-color:#f5efff; padding:0.2rem 0.5rem; border-radius:4px; color:#71639e">skills/</code> directory into a RAG-powered long-term memory for your AI assistants. Skills encode <em>how</em> to work with your specific Odoo — domain patterns, API quirks, business rules, Odoo model conventions — so the AI retrieves the right knowledge before acting, rather than guessing from base training.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Flow diagram -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2rem; background-color:#f8f9fa">
+                    <h4 class="text-center mb-4" style="color:#212529; font-weight:700">How It Works</h4>
+                    <div class="d-flex align-items-center justify-content-center flex-wrap">
+                        <div class="text-center" style="padding:1rem">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 0.75rem">
+                                <i class="fa fa-file-text-o" style="font-size:28px; color:#fff"></i>
+                            </div>
+                            <p style="font-size:0.85rem; font-weight:700; color:#212529; margin:0">skills/*.md</p>
+                            <p style="font-size:0.78rem; color:#6c757d; margin:0">in your addon</p>
+                        </div>
+                        <div style="font-size:1.5rem; color:#71639e; padding:0 0.5rem">&rarr;</div>
+                        <div class="text-center" style="padding:1rem">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 0.75rem">
+                                <i class="fa fa-refresh" style="font-size:28px; color:#fff"></i>
+                            </div>
+                            <p style="font-size:0.85rem; font-weight:700; color:#212529; margin:0">Auto-Sync</p>
+                            <p style="font-size:0.78rem; color:#6c757d; margin:0">on boot / upgrade</p>
+                        </div>
+                        <div style="font-size:1.5rem; color:#71639e; padding:0 0.5rem">&rarr;</div>
+                        <div class="text-center" style="padding:1rem">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 0.75rem">
+                                <i class="fa fa-database" style="font-size:28px; color:#fff"></i>
+                            </div>
+                            <p style="font-size:0.85rem; font-weight:700; color:#212529; margin:0">pgvector</p>
+                            <p style="font-size:0.78rem; color:#6c757d; margin:0">embedded &amp; stored</p>
+                        </div>
+                        <div style="font-size:1.5rem; color:#71639e; padding:0 0.5rem">&rarr;</div>
+                        <div class="text-center" style="padding:1rem">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 0.75rem">
+                                <i class="fa fa-search" style="font-size:28px; color:#fff"></i>
+                            </div>
+                            <p style="font-size:0.85rem; font-weight:700; color:#212529; margin:0">RAG Retrieval</p>
+                            <p style="font-size:0.78rem; color:#6c757d; margin:0">at query time</p>
+                        </div>
+                        <div style="font-size:1.5rem; color:#71639e; padding:0 0.5rem">&rarr;</div>
+                        <div class="text-center" style="padding:1rem">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 0.75rem">
+                                <i class="fa fa-robot" style="font-size:28px; color:#fff"></i>
+                            </div>
+                            <p style="font-size:0.85rem; font-weight:700; color:#212529; margin:0">AI Acts</p>
+                            <p style="font-size:0.78rem; color:#6c757d; margin:0">with precision</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why it matters -->
+        <h3 class="text-center mb-4" style="font-size:2rem; font-weight:700; color:#212529">Why This Matters</h3>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-times-circle" style="font-size:32px; color:#fff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Without Skills</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">The AI hallucinates field names, writes wrong domains, misses SYSCOHADA accounting rules, and fails on Odoo-specific patterns it was never trained on.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-check-circle" style="font-size:32px; color:#fff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">With Skills</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">The AI retrieves the exact pattern for the task at hand — correct model, correct domain, correct API — before writing a single line of code or calling a single tool.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-code-fork" style="font-size:32px; color:#fff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Versioned in Git</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Skills live next to the code they describe. Update the code, update the skill, commit both. AI knowledge and module code stay in sync automatically.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Features -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Key Features</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Everything you need to build a reliable AI knowledge system for Odoo</p>
+
+        <div class="row g-4">
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-magic" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Zero-Touch Install</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Set <code style="background-color:#f5efff; color:#71639e; padding:0.1rem 0.4rem; border-radius:4px">OPENAI_API_KEY</code> in <code style="background-color:#f5efff; color:#71639e; padding:0.1rem 0.4rem; border-radius:4px">.env</code> and install. The module auto-creates the OpenAI provider, fetches all models, creates the pgvector store, and bootstraps your first skill collection. Zero manual steps.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-folder-open" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Auto-Discovery</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Drop a <code style="background-color:#f5efff; color:#71639e; padding:0.1rem 0.4rem; border-radius:4px">skills/</code> folder in any installed addon and it's picked up automatically. No registration required, no module dependency on <code style="background-color:#f5efff; color:#71639e; padding:0.1rem 0.4rem; border-radius:4px">llm_skills</code> needed.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-shield" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Atomic Chunking</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Each skill is embedded as a single unit (2000-token ceiling, zero overlap). Skills are atomic — splitting one mid-context destroys coherence. The AI always retrieves complete, actionable patterns.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-tachometer" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">SHA-256 Incremental Sync</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">On each boot or upgrade, only changed files are re-embedded. Unchanged skills are skipped entirely. Large skill libraries sync in seconds, not minutes.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-plug" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">MCP-Exposed Retriever</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">The <code style="background-color:#f5efff; color:#71639e; padding:0.1rem 0.4rem; border-radius:4px">technical_skill_retriever</code> tool is automatically available to every MCP client connected to your Odoo — Claude Desktop, Claude Code, Cursor, and more.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-sitemap" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Multi-Collection</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Organize skills into domain collections — <em>Odoo Technical Skills</em> for generic patterns, <em>WhatsApp Skills</em> for messaging patterns, and so on. Each assistant retrieves from the right collection.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Skill Format -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Skills Are Just Markdown</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">YAML frontmatter for metadata, markdown for content. No special tooling required.</p>
+
+        <div class="row g-4">
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:1rem">
+                            <i class="fa fa-file-code-o" style="color:#71639e; margin-right:0.5rem"></i>
+                            Example Skill File
+                        </h4>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1.25rem; border-radius:12px; border:none; white-space:pre; font-family:monospace; font-size:0.82rem; line-height:1.65">---
+id: find-overdue-invoices
+title: Find Overdue Customer Invoices
+tags: [invoicing, accounting, partners]
+odoo_models: [account.move, res.partner]
+tools: [odoo_record_retriever]
+---
+
+## When to use
+When asked about unpaid or overdue customer invoices.
+
+## Solution
+Query `account.move` with domain:
+`[('move_type','=','out_invoice'),
+  ('payment_state','not in',['paid','reversed']),
+  ('invoice_date_due','&lt;', fields.Date.today())]`
+
+Key fields: `name`, `partner_id`,
+            `amount_residual`, `invoice_date_due`.
+
+## Notes
+Sort by `invoice_date_due asc` to surface oldest first.</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:1.5rem">
+                            <i class="fa fa-list-ul" style="color:#71639e; margin-right:0.5rem"></i>
+                            Anatomy of a Good Skill
+                        </h4>
+
+                        <div style="margin-bottom:1.25rem">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:36px; height:36px; border-radius:8px; margin-right:1rem; flex-shrink:0">
+                                    <i class="fa fa-tag" style="font-size:16px; color:#71639e"></i>
+                                </div>
+                                <div>
+                                    <strong style="color:#212529; font-size:0.95rem">Stable ID</strong>
+                                    <p style="color:#6c757d; font-size:0.85rem; margin:0.25rem 0 0">Kebab-case, matches filename stem. Never change after creation — it's the content hash anchor.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:1.25rem">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:36px; height:36px; border-radius:8px; margin-right:1rem; flex-shrink:0">
+                                    <i class="fa fa-question-circle" style="font-size:16px; color:#71639e"></i>
+                                </div>
+                                <div>
+                                    <strong style="color:#212529; font-size:0.95rem">When to Use</strong>
+                                    <p style="color:#6c757d; font-size:0.85rem; margin:0.25rem 0 0">One clear trigger sentence. This is what the vector search matches against the AI's query.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom:1.25rem">
+                            <div class="d-flex align-items-start">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:36px; height:36px; border-radius:8px; margin-right:1rem; flex-shrink:0">
+                                    <i class="fa fa-wrench" style="font-size:16px; color:#71639e"></i>
+                                </div>
+                                <div>
+                                    <strong style="color:#212529; font-size:0.95rem">Solution</strong>
+                                    <p style="color:#6c757d; font-size:0.85rem; margin:0.25rem 0 0">Concrete, copy-pasteable code. Model names, domains, field names — exactly as they are in your Odoo.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="d-flex align-items-start">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:36px; height:36px; border-radius:8px; margin-right:1rem; flex-shrink:0">
+                                    <i class="fa fa-lightbulb-o" style="font-size:16px; color:#71639e"></i>
+                                </div>
+                                <div>
+                                    <strong style="color:#212529; font-size:0.95rem">One Skill = One Question</strong>
+                                    <p style="color:#6c757d; font-size:0.85rem; margin:0.25rem 0 0">Small, focused skills retrieve better than large, multi-topic ones. Split by business question, not by file size.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Automated Setup -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Fully Automated Setup</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Install with <code style="background-color:#f5efff; color:#71639e; padding:0.2rem 0.6rem; border-radius:6px">OPENAI_API_KEY</code> in your <code style="background-color:#f5efff; color:#71639e; padding:0.2rem 0.6rem; border-radius:6px">.env</code> and the entire pipeline configures itself</p>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">1</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Set API Key</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">Add <code style="background-color:#f5efff; color:#71639e; padding:0.1rem 0.4rem; border-radius:4px">OPENAI_API_KEY=sk-...</code> to your <code style="background-color:#f5efff; color:#71639e; padding:0.1rem 0.4rem; border-radius:4px">.env</code> file before install.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">2</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Install Module</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">Search <strong>LLM Skills</strong> in Apps and install. Provider, models, store, and collection are created automatically.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">3</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Skills Load</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">On first boot, all <code style="background-color:#f5efff; color:#71639e; padding:0.1rem 0.4rem; border-radius:4px">skills/</code> directories are discovered, synced, and embedded. Ready to use.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- What happens under the hood -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2rem">
+                    <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem; text-align:center">
+                        <i class="fa fa-cogs" style="color:#71639e; margin-right:0.5rem"></i>
+                        What Happens During Install
+                    </h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.5rem">
+                                    <i class="fa fa-check" style="color:#28a745; margin-right:0.75rem"></i>
+                                    <strong style="color:#212529; font-size:0.95rem">OpenAI Provider Created</strong>
+                                </div>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0; padding-left:1.75rem">API key read from env var, written to provider and persisted in system parameters</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.5rem">
+                                    <i class="fa fa-check" style="color:#28a745; margin-right:0.75rem"></i>
+                                    <strong style="color:#212529; font-size:0.95rem">All Models Fetched Live</strong>
+                                </div>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0; padding-left:1.75rem">Full model list pulled from OpenAI API and upserted — including all embedding models</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.5rem">
+                                    <i class="fa fa-check" style="color:#28a745; margin-right:0.75rem"></i>
+                                    <strong style="color:#212529; font-size:0.95rem">pgvector Store Created</strong>
+                                </div>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0; padding-left:1.75rem">Uses your existing Odoo PostgreSQL database — no extra infrastructure needed</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.5rem">
+                                    <i class="fa fa-check" style="color:#28a745; margin-right:0.75rem"></i>
+                                    <strong style="color:#212529; font-size:0.95rem">Collection Bootstrapped</strong>
+                                </div>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0; padding-left:1.75rem"><em>Odoo Technical Skills</em> collection created with <code style="font-size:0.82rem; color:#71639e">text-embedding-3-small</code></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.5rem">
+                                    <i class="fa fa-check" style="color:#28a745; margin-right:0.75rem"></i>
+                                    <strong style="color:#212529; font-size:0.95rem">Loaders Auto-Discovered</strong>
+                                </div>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0; padding-left:1.75rem">Every <code style="font-size:0.82rem; color:#71639e">skills/</code> directory in all installed addons is registered automatically</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.5rem">
+                                    <i class="fa fa-check" style="color:#28a745; margin-right:0.75rem"></i>
+                                    <strong style="color:#212529; font-size:0.95rem">Skills Synced &amp; Embedded</strong>
+                                </div>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0; padding-left:1.75rem">All markdown files read, embedded with OpenAI, and stored in pgvector on boot</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- MCP + Clients -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Available Everywhere via MCP</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">The <code style="background-color:#f5efff; color:#71639e; padding:0.2rem 0.6rem; border-radius:6px">technical_skill_retriever</code> tool is exposed automatically to any connected MCP client</p>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-3 col-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem">
+                            <i class="fa fa-desktop" style="font-size:28px; color:#fff"></i>
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.25rem; font-size:1rem">Claude Desktop</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">AI workflows</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem">
+                            <i class="fa fa-terminal" style="font-size:28px; color:#fff"></i>
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.25rem; font-size:1rem">Claude Code</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">AI coding assistant</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem">
+                            <i class="fa fa-comments" style="font-size:28px; color:#fff"></i>
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.25rem; font-size:1rem">Odoo Assistants</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">In-app chat bots</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem">
+                            <i class="fa fa-whatsapp" style="font-size:28px; color:#fff"></i>
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.25rem; font-size:1rem">WhatsApp Bots</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">Messaging automation</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MCP Key generation -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2rem">
+                    <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1.5rem; text-align:center">
+                        <i class="fa fa-key" style="color:#71639e; margin-right:0.5rem"></i>
+                        Connect Claude Desktop in 3 Steps
+                    </h3>
+
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:10px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:32px; height:32px; border-radius:50%; margin-right:0.75rem; flex-shrink:0">
+                                        <span style="color:white; font-weight:700; font-size:0.9rem">1</span>
+                                    </div>
+                                    <strong style="color:#212529">Generate MCP Key</strong>
+                                </div>
+                                <p style="color:#6c757d; margin:0; font-size:0.9rem">Click your avatar &rarr; <strong>My Profile</strong> &rarr; <strong>Account Security</strong> &rarr; <strong>New MCP Key</strong>. Copy the key immediately.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:10px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:32px; height:32px; border-radius:50%; margin-right:0.75rem; flex-shrink:0">
+                                        <span style="color:white; font-weight:700; font-size:0.9rem">2</span>
+                                    </div>
+                                    <strong style="color:#212529">Paste Config</strong>
+                                </div>
+                                <p style="color:#6c757d; margin:0; font-size:0.9rem">The wizard provides ready-to-paste config for Claude Desktop, Claude Code, and Cursor. Just copy and paste.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:10px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:32px; height:32px; border-radius:50%; margin-right:0.75rem; flex-shrink:0">
+                                        <span style="color:white; font-weight:700; font-size:0.9rem">3</span>
+                                    </div>
+                                    <strong style="color:#212529">Ask Away</strong>
+                                </div>
+                                <p style="color:#6c757d; margin:0; font-size:0.9rem">Restart your client and try <em>"Retrieve the skill for querying overdue invoices in Odoo"</em>. The AI does the rest.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1.25rem; border-radius:12px; border:none; white-space:pre; font-family:monospace; font-size:0.82rem; line-height:1.6">{
+  "mcpServers": {
+    "odoo": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:8069/mcp",
+               "--header", "Authorization: Bearer YOUR_API_KEY"],
+      "env": { "MCP_TRANSPORT": "streamable-http" }
+    }
+  }
+}</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- Use cases -->
+        <h3 class="text-center mb-4" style="font-size:2rem; font-weight:700; color:#212529">What You Can Ask</h3>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:1.5rem; border-radius:16px">
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px; margin-bottom:1rem">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.95rem">"Before querying overdue invoices, get the relevant Odoo skill."</p>
+                    </div>
+                    <p style="color:#6c757d; font-size:0.9rem; margin:0">The retriever finds the exact model, domain, and field names for your version of Odoo.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:1.5rem; border-radius:16px">
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px; margin-bottom:1rem">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.95rem">"What's the correct way to send a WhatsApp message through Odoo?"</p>
+                    </div>
+                    <p style="color:#6c757d; font-size:0.9rem; margin:0">Retrieves the WhatsApp skill with the exact method, record format, and queue_job pattern.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:1.5rem; border-radius:16px">
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px; margin-bottom:1rem">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.95rem">"How do I book a SYSCOHADA journal entry for asset depreciation?"</p>
+                    </div>
+                    <p style="color:#6c757d; font-size:0.9rem; margin:0">Domain-specific skills surface accounting rules that aren't in any LLM's base training.</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:1.5rem; border-radius:16px">
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px; margin-bottom:1rem">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.95rem">"Retrieve the skill on Odoo 18 form view chatter syntax before writing XML."</p>
+                    </div>
+                    <p style="color:#6c757d; font-size:0.9rem; margin:0">Prevents the classic Odoo 18 bug: returns <code style="font-size:0.82rem; color:#71639e">&lt;chatter /&gt;</code> not the broken verbose syntax.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Skill directory layout -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Skills Live Next to Code</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Each addon keeps its own <code style="background-color:#f5efff; color:#71639e; padding:0.2rem 0.6rem; border-radius:6px">skills/</code> directory. All are auto-discovered.</p>
+
+        <div class="row g-4">
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:1.25rem">
+                            <i class="fa fa-sitemap" style="color:#71639e; margin-right:0.5rem"></i>
+                            Directory Layout
+                        </h4>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1.25rem; border-radius:12px; border:none; white-space:pre; font-family:monospace; font-size:0.82rem; line-height:1.7">llm_skills/skills/
+  skill-authoring-guide.md
+  skill-lifecycle.md
+  skill-when-to-create.md
+
+whatsapp_llm/skills/
+  whatsapp-send-message.md
+  whatsapp-llm-configuration.md
+
+llm_tool_account/skills/
+  syscohada-depreciation.md
+  find-overdue-invoices.md
+
+your_module/skills/
+  your-domain-pattern.md</pre>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:1.25rem">
+                            <i class="fa fa-layer-group" style="color:#71639e; margin-right:0.5rem"></i>
+                            Collections
+                        </h4>
+                        <div style="margin-bottom:1.25rem">
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px; margin-bottom:0.75rem">
+                                <strong style="color:#212529; font-size:0.95rem">Odoo Technical Skills</strong>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0.25rem 0 0">Default for all auto-discovered loaders. Generic Odoo patterns, model conventions, API quirks.</p>
+                            </div>
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px; margin-bottom:0.75rem">
+                                <strong style="color:#212529; font-size:0.95rem">WhatsApp Skills</strong>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0.25rem 0 0">Reassign the <code style="font-size:0.82rem; color:#71639e">whatsapp_llm</code> loader via UI for domain-specific retrieval.</p>
+                            </div>
+                            <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                                <strong style="color:#212529; font-size:0.95rem">Your Domain Collection</strong>
+                                <p style="color:#6c757d; font-size:0.85rem; margin:0.25rem 0 0">Create new collections in <strong>LLM &rarr; Knowledge &rarr; Collections</strong> and reassign loaders as needed.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- CTA -->
+    <section class="mb-5">
+        <div class="text-center bg-primary" style="padding:3.5rem 2rem; border-radius:16px">
+            <div class="bg-white d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                <i class="fa fa-graduation-cap" style="font-size:40px; color:#71639e"></i>
+            </div>
+            <h3 style="color:#ffffff; font-weight:700; font-size:2rem; margin-bottom:1rem">Start Building Your Skill Library</h3>
+            <p style="color:#f8f9fa; font-size:1.1rem; margin-bottom:1.5rem">Every pattern you encode today is expertise your AI keeps forever.</p>
+            <div class="bg-white" style="padding:1rem 2rem; border-radius:12px; display:inline-block">
+                <span style="color:#71639e; font-size:1rem; font-weight:500; font-family:monospace">your_module/skills/first-skill.md</span>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Related modules -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Part of the Odoo LLM Ecosystem</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">LLM Skills builds on and enhances the full odoo-llm stack</p>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-plug" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM MCP Server</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0.5rem">Exposes the skill retriever to Claude Desktop, Claude Code, Cursor, and any MCP client.</p>
+                        <code style="font-size:0.85rem; color:#71639e">llm_mcp_server</code>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-book" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Knowledge</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0.5rem">The collection and embedding infrastructure that powers skill storage and retrieval.</p>
+                        <code style="font-size:0.85rem; color:#71639e">llm_knowledge</code>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-database" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM pgvector</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0.5rem">Vector store backend using your existing PostgreSQL. No extra vector DB required.</p>
+                        <code style="font-size:0.85rem; color:#71639e">llm_pgvector</code>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-user-circle-o" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Assistant</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0.5rem">Wire a skill collection to your assistant so it auto-retrieves before responding.</p>
+                        <code style="font-size:0.85rem; color:#71639e">llm_assistant</code>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-wrench" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Tool</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0.5rem">The tool registry that makes <code style="font-size:0.85rem; color:#71639e">technical_skill_retriever</code> available to AI clients.</p>
+                        <code style="font-size:0.85rem; color:#71639e">llm_tool</code>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-whatsapp" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">WhatsApp LLM</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0.5rem">WhatsApp-as-a-Service on Odoo. Includes its own <code style="font-size:0.85rem; color:#71639e">skills/</code> directory with messaging patterns.</p>
+                        <code style="font-size:0.85rem; color:#71639e">whatsapp_llm</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Support -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Documentation &amp; Support</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-book" style="font-size:32px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Full Documentation</h3>
+                        <p style="color:#495057; margin-bottom:1.25rem">README covers architecture, skill authoring, collection strategy, chunking rationale, MCP setup, and troubleshooting.</p>
+                        <div class="bg-light" style="padding:0.75rem 1rem; border-radius:8px">
+                            <code style="font-size:0.85rem">github.com/apexive/odoo-llm/tree/18.0/llm_skills</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-github" style="font-size:32px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Open Source</h3>
+                        <p style="color:#495057; margin-bottom:1.25rem">Full source available. Contribute new skills, improve the loader engine, or add support for new embedding providers.</p>
+                        <div class="bg-light" style="padding:0.75rem 1rem; border-radius:8px">
+                            <code style="font-size:0.85rem">github.com/apexive/odoo-llm</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</div>
+
+<!-- Footer -->
+<footer class="bg-primary" style="padding:3rem 2rem; border-radius:16px; margin:2rem 1rem">
+    <div class="container">
+        <div style="border-radius:12px; padding:2.5rem">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 style="font-weight:700; color:#ffffff; font-size:1.5rem; margin-bottom:0.75rem">LLM Skills for Odoo</h4>
+                    <p style="color:#f8f9fa; font-size:1rem; margin-bottom:1rem">RAG-powered, Git-versioned AI expertise for your Odoo instance</p>
+                    <p style="color:#e9d5ff; margin-bottom:0.25rem">Developed by <strong style="color:#ffffff">Apexive Solutions LLC</strong></p>
+                    <p style="color:#e0d4ec; font-size:0.9rem; margin-bottom:0">Licensed under LGPL-3 &bull; &copy; 2025 All rights reserved.</p>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="d-flex flex-column">
+                        <div class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; color:#71639e; font-weight:600; margin-bottom:0.75rem">
+                            <i class="fa fa-globe" style="font-size:18px; margin-right:0.5rem"></i>
+                            apexive.com
+                        </div>
+                        <a href="mailto:hello@apexive.com" class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; text-decoration:none; color:#71639e; font-weight:600">
+                            <i class="fa fa-envelope" style="font-size:18px; margin-right:0.5rem"></i>
+                            hello@apexive.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
