@@ -78,9 +78,9 @@ Claude models support sending images and PDFs along with text messages.
 
 1. Attach files (images, PDFs, text files) to your chat message
 2. The module automatically:
-    - Converts images to base64 for Claude's vision API
-    - Sends PDFs as document blocks
-    - Includes text file contents in the message
+   - Converts images to base64 for Claude's vision API
+   - Sends PDFs as document blocks
+   - Includes text file contents in the message
 
 ### Supported Formats
 

@@ -11,4 +11,16 @@
             action = records.action_reset_input_schema()
         </field>
     </record>
+
+    <!-- Server Action for Sync Tools (Action dropdown in list view) -->
+    <record id="action_server_sync_tools" model="ir.actions.server">
+        <field name="name">Sync Tools</field>
+        <field name="model_id" ref="model_llm_tool" />
+        <field name="binding_model_id" ref="model_llm_tool" />
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">
+            action = model.action_sync_tools()
+        </field>
+    </record>
 </odoo>

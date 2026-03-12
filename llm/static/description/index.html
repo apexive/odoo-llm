@@ -21,16 +21,20 @@
 
             <div class="d-flex justify-content-center flex-wrap">
                 <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
-                    <i class="fa fa-comments" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
-                    <span style="color:#5b4c7d; font-weight:600">Chat Completions</span>
+                    <i class="fa fa-plug" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#5b4c7d; font-weight:600">MCP Server</span>
                 </div>
                 <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
-                    <i class="fa fa-code" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
-                    <span style="color:#0c5460; font-weight:600">Embeddings</span>
+                    <i class="fa fa-wrench" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#0c5460; font-weight:600">60+ AI Tools</span>
                 </div>
                 <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
-                    <i class="fa fa-github" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
-                    <span style="color:#155724; font-weight:600">Open Source</span>
+                    <i class="fa fa-comments" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#155724; font-weight:600">Chat &amp; Embeddings</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-github" style="color:#495057; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#343a40; font-weight:600">Open Source</span>
                 </div>
             </div>
         </div>
@@ -49,6 +53,291 @@
                     <p style="font-size:1.15rem; color:#495057; line-height:1.9; margin-bottom:0; text-align:center">
                         LLM Integration Base provides a unified framework for connecting various AI providers and models with your Odoo instance. This module serves as the foundation for building AI-powered features across your Odoo applications, supporting chat completions, text embeddings, and model management.
                     </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Architecture Diagram Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Architecture</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">How all the modules fit together</p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-11">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem 1.5rem">
+
+                    <!-- Top row: External AI Clients + Odoo AI Chat -->
+                    <div class="row g-3 mb-2">
+                        <div class="col-md-5">
+                            <p style="font-weight:700; color:#6c757d; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem">External AI Clients</p>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="text-center" style="border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem">
+                                        <i class="fa fa-desktop" style="font-size:1.1rem; color:#71639e; display:block; margin-bottom:0.25rem"></i>
+                                        <strong style="font-size:0.8rem; color:#212529; display:block">Claude Desktop</strong>
+                                        <span style="font-size:0.7rem; color:#868e96">Cursor &middot; Windsurf</span>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center" style="border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem">
+                                        <i class="fa fa-terminal" style="font-size:1.1rem; color:#71639e; display:block; margin-bottom:0.25rem"></i>
+                                        <strong style="font-size:0.8rem; color:#212529; display:block">Claude Code</strong>
+                                        <span style="font-size:0.7rem; color:#868e96">Codex CLI</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-5">
+                            <p class="text-end" style="font-weight:700; color:#6c757d; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:0.75rem">Odoo AI Chat</p>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="text-center" style="border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem">
+                                        <strong style="font-size:0.8rem; color:#212529">llm_assistant</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="text-center" style="border:2px solid #dee2e6; border-radius:10px; padding:0.75rem 0.5rem">
+                                        <strong style="font-size:0.8rem; color:#212529">llm_thread</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vertical lines down + MCP Protocol label -->
+                    <div class="row">
+                        <div class="col-md-5 text-center">
+                            <div style="width:2px; height:1.5rem; background-color:#71639e; margin:0 auto"></div>
+                            <span style="font-size:0.75rem; font-weight:700; color:#71639e; background-color:#f0ecf7; padding:0.2rem 0.75rem; border-radius:4px; display:inline-block">MCP Protocol</span>
+                            <div style="width:2px; height:1rem; background-color:#71639e; margin:0 auto"></div>
+                            <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #71639e; margin:0 auto"></div>
+                        </div>
+                        <div class="col-md-2"></div>
+                        <div class="col-md-5 text-center">
+                            <div style="width:2px; height:3rem; background-color:#adb5bd; margin:0 auto"></div>
+                            <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #adb5bd; margin:0 auto"></div>
+                        </div>
+                    </div>
+
+                    <!-- Middle row: MCP Server + arrow + LLM Core -->
+                    <div class="row g-0 align-items-stretch mb-3">
+                        <div class="col-md-4">
+                            <div style="border:2px solid #71639e; border-radius:12px; padding:1.25rem 1rem; text-align:center; height:100%">
+                                <strong style="font-size:1.05rem; color:#71639e; display:block; margin-bottom:0.25rem">llm_mcp_server</strong>
+                                <span style="font-size:0.85rem; color:#6c757d">MCP Server for Odoo</span>
+                            </div>
+                        </div>
+                        <div class="col-md-1 d-flex align-items-center justify-content-center" style="padding:0">
+                            <div style="height:2px; background-color:#71639e; flex:1"></div>
+                            <div style="width:0; height:0; border-top:7px solid transparent; border-bottom:7px solid transparent; border-left:10px solid #71639e"></div>
+                        </div>
+                        <div class="col-md-7">
+                            <div style="border:3px solid #71639e; border-radius:12px; padding:1.25rem 1rem; text-align:center; background-color:#f9f8fc">
+                                <span style="font-size:1.15rem; color:#71639e; font-weight:800; display:block; margin-bottom:0.4rem">&#9733; llm (This Module) &#9733;</span>
+                                <span style="font-size:0.8rem; color:#495057; display:block; line-height:1.6">Provider Abstraction &middot; Model Management<br>Enhanced mail.message &middot; Security Framework</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Down arrow from llm -->
+                    <div class="text-center" style="margin:0">
+                        <div style="width:2px; height:2rem; background-color:#adb5bd; margin:0 auto"></div>
+                        <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #adb5bd; margin:0 auto"></div>
+                    </div>
+
+                    <!-- Child modules row -->
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <div style="border:2px solid #71639e; border-radius:10px; padding:1rem; text-align:center; height:100%">
+                                <strong style="font-size:0.95rem; color:#71639e; display:block; margin-bottom:0.35rem">llm_tool</strong>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">Tool Framework</span>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">+ Generic CRUD Tools</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="border:2px solid #dee2e6; border-radius:10px; padding:1rem; text-align:center; height:100%">
+                                <strong style="font-size:0.95rem; color:#495057; display:block; margin-bottom:0.35rem">AI Providers</strong>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">llm_openai, llm_ollama</span>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">llm_mistral, ...</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div style="border:2px solid #dee2e6; border-radius:10px; padding:1rem; text-align:center; height:100%">
+                                <strong style="font-size:0.95rem; color:#495057; display:block; margin-bottom:0.35rem">Infrastructure</strong>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">llm_store</span>
+                                <span style="font-size:0.8rem; color:#6c757d; display:block">llm_generate</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Down arrow from llm_tool -->
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            <div style="width:2px; height:1.5rem; background-color:#71639e; margin:0 auto"></div>
+                            <div style="width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid #71639e; margin:0 auto"></div>
+                        </div>
+                        <div class="col-md-8"></div>
+                    </div>
+
+                    <!-- Domain-Specific Tool Packs -->
+                    <div class="row">
+                        <div class="col-lg-9 col-md-10">
+                            <div style="border:2px solid #71639e; border-radius:12px; padding:1.25rem; background-color:#f9f8fc">
+                                <strong style="font-size:1rem; color:#71639e; display:block; margin-bottom:0.75rem; text-align:center">Domain-Specific Tool Packs</strong>
+                                <div class="row">
+                                    <div class="col-6" style="font-size:0.8rem; color:#495057; line-height:1.9">
+                                        <strong>llm_tool_account</strong> &middot; 18 accounting tools<br>
+                                        <strong>llm_tool_mis_builder</strong> &middot; 44 MIS reporting tools
+                                    </div>
+                                    <div class="col-6" style="font-size:0.8rem; color:#495057; line-height:1.9">
+                                        <strong>llm_tool_knowledge</strong> &middot; RAG search tools<br>
+                                        <strong>llm_tool_ocr_mistral</strong> &middot; OCR via Mistral vision
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- MCP Server Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Connect External AI Clients via MCP</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Use Claude Desktop, Claude Code, Cursor, Codex CLI and more with your Odoo data</p>
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem">
+                    <p style="font-size:1.15rem; color:#495057; line-height:1.9; margin-bottom:1.5rem; text-align:center">
+                        The <strong>LLM MCP Server</strong> module exposes all your Odoo tools to external AI clients via the <strong>Model Context Protocol (MCP)</strong>. Install it, generate an API key from your profile, and paste the ready-made config into your AI client. That&apos;s it &mdash; your AI can now read, create, update, and analyze Odoo data with your permissions.
+                    </p>
+                    <div class="row g-3">
+                        <div class="col-sm-4">
+                            <div class="text-center" style="padding:1.25rem; border-radius:12px; background-color:#f8f9fa">
+                                <i class="fa fa-desktop" style="font-size:2rem; color:#71639e; margin-bottom:0.75rem; display:block"></i>
+                                <strong style="color:#212529; display:block; margin-bottom:0.25rem">Claude Desktop</strong>
+                                <span style="color:#6c757d; font-size:0.85rem">Chat with Odoo data</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="text-center" style="padding:1.25rem; border-radius:12px; background-color:#f8f9fa">
+                                <i class="fa fa-terminal" style="font-size:2rem; color:#71639e; margin-bottom:0.75rem; display:block"></i>
+                                <strong style="color:#212529; display:block; margin-bottom:0.25rem">Claude Code &amp; Codex</strong>
+                                <span style="color:#6c757d; font-size:0.85rem">AI-powered dev workflow</span>
+                            </div>
+                        </div>
+                        <div class="col-sm-4">
+                            <div class="text-center" style="padding:1.25rem; border-radius:12px; background-color:#f8f9fa">
+                                <i class="fa fa-code" style="font-size:2rem; color:#71639e; margin-bottom:0.75rem; display:block"></i>
+                                <strong style="color:#212529; display:block; margin-bottom:0.25rem">Cursor &amp; VS Code</strong>
+                                <span style="color:#6c757d; font-size:0.85rem">IDE integration</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Tool Packs Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">AI Tool Packs for Odoo</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Give AI deep domain knowledge with purpose-built tool packs</p>
+
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; background-color:#e8f5e9; margin-right:1rem">
+                                <i class="fa fa-calculator" style="font-size:24px; color:#2e7d32"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool Account</h4>
+                                <span style="color:#2e7d32; font-weight:600; font-size:0.85rem">18 tools</span>
+                            </div>
+                        </div>
+                        <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Trial balance, journal entries, reconciliation, payments, tax reports, P&amp;L, cash position, and period close. Built for CPAs and finance teams.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; background-color:#e3f2fd; margin-right:1rem">
+                                <i class="fa fa-bar-chart" style="font-size:24px; color:#1565c0"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool MIS Builder</h4>
+                                <span style="color:#1565c0; font-weight:600; font-size:0.85rem">44 tools</span>
+                            </div>
+                        </div>
+                        <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Create KPIs, configure periods, compute reports, drill down into cells, compare periods, and analyze variances through natural language.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; background-color:#fff3e0; margin-right:1rem">
+                                <i class="fa fa-book" style="font-size:24px; color:#e65100"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool Knowledge (RAG)</h4>
+                                <span style="color:#e65100; font-weight:600; font-size:0.85rem">Semantic search</span>
+                            </div>
+                        </div>
+                        <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Retrieve answers from your knowledge base with semantic search, source citations, and document context for grounded AI responses.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; background-color:#fce4ec; margin-right:1rem">
+                                <i class="fa fa-file-text" style="font-size:24px; color:#c62828"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool OCR (Mistral)</h4>
+                                <span style="color:#c62828; font-weight:600; font-size:0.85rem">Vision OCR</span>
+                            </div>
+                        </div>
+                        <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Extract text from invoices, receipts, scanned documents, and images using Mistral AI vision models. No knowledge base required.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Built-in generic tools callout -->
+        <div class="card border-0 shadow-sm" style="border-radius:16px; background-color:#f8f9fa">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-start">
+                    <div class="d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:12px; margin-right:1rem; flex-shrink:0; background-color:#71639e">
+                        <i class="fa fa-wrench" style="font-size:24px; color:#ffffff"></i>
+                    </div>
+                    <div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.5rem">6 Generic CRUD Tools Included</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">
+                            The <strong>LLM Tool</strong> base module ships with tools to <strong>retrieve</strong>, <strong>create</strong>, <strong>update</strong>, and <strong>delete</strong> records in any Odoo model, plus a <strong>model inspector</strong> and <strong>method executor</strong>. These work out of the box via both in-Odoo chat and the MCP server.
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -334,6 +623,114 @@
         <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Related Modules</h2>
         <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Extend your AI capabilities with these modules</p>
 
+        <!-- MCP Server - Featured -->
+        <div class="row g-4 mb-4">
+            <div class="col-12">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_mcp_server" style="text-decoration:none">
+                    <div class="card border-0 shadow-sm" style="border-radius:16px; border-left:4px solid #71639e !important">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-right:1rem; background-color:#71639e">
+                                    <i class="fa fa-plug" style="font-size:28px; color:#ffffff"></i>
+                                </div>
+                                <div>
+                                    <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.25rem">LLM MCP Server</h4>
+                                    <span style="color:#71639e; font-weight:600; font-size:0.85rem">Connect Claude Desktop, Claude Code, Cursor, Codex CLI &amp; more</span>
+                                </div>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.95rem; line-height:1.6; margin-bottom:0">Expose all your Odoo tools to external AI clients via the Model Context Protocol (MCP). One-click API key generation with ready-to-paste configurations. Each user connects with their own permissions.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Tool Packs -->
+        <h5 class="mb-3" style="font-weight:700; color:#495057; padding-left:0.5rem">Tool Packs</h5>
+        <div class="row g-4 mb-4">
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-wrench" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Tool framework with 6 generic CRUD tools. Retrieve, create, update, delete records in any model.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool_account" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-calculator" style="font-size:24px; color:#2e7d32"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool Account</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">18 accounting tools: trial balance, journal entries, reconciliation, payments, tax reports, P&amp;L.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool_mis_builder" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-bar-chart" style="font-size:24px; color:#1565c0"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool MIS Builder</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">44 MIS reporting tools: KPIs, periods, report computation, drill-down, variance analysis.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool_knowledge" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-book" style="font-size:24px; color:#e65100"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool Knowledge</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">RAG tools for semantic search, knowledge retrieval, and source citations.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool_ocr_mistral" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-file-text" style="font-size:24px; color:#c62828"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">Mistral OCR Tool</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Extract text from invoices, receipts, and scanned documents via Mistral vision.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Providers & Chat -->
+        <h5 class="mb-3" style="font-weight:700; color:#495057; padding-left:0.5rem">Providers &amp; Chat</h5>
         <div class="row g-4">
             <div class="col-md-6 col-lg-4">
                 <a href="https://apps.odoo.com/apps/modules/18.0/llm_openai" style="text-decoration:none">
@@ -368,22 +765,6 @@
             </div>
 
             <div class="col-md-6 col-lg-4">
-                <a href="https://apps.odoo.com/apps/modules/18.0/llm_thread" style="text-decoration:none">
-                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
-                        <div class="card-body p-4">
-                            <div class="d-flex align-items-center mb-3">
-                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
-                                    <i class="fa fa-comments" style="font-size:24px; color:#71639e"></i>
-                                </div>
-                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Thread</h4>
-                            </div>
-                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Persistent chat conversations with streaming responses and history.</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="col-md-6 col-lg-4">
                 <a href="https://apps.odoo.com/apps/modules/18.0/llm_assistant" style="text-decoration:none">
                     <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
                         <div class="card-body p-4">
@@ -400,16 +781,16 @@
             </div>
 
             <div class="col-md-6 col-lg-4">
-                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool" style="text-decoration:none">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_thread" style="text-decoration:none">
                     <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
-                                    <i class="fa fa-wrench" style="font-size:24px; color:#71639e"></i>
+                                    <i class="fa fa-comments" style="font-size:24px; color:#71639e"></i>
                                 </div>
-                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool</h4>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Thread</h4>
                             </div>
-                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Enable AI to execute Odoo functions with the @llm_tool decorator.</p>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Persistent chat conversations with streaming responses and history.</p>
                         </div>
                     </div>
                 </a>
@@ -421,7 +802,7 @@
                         <div class="card-body p-4">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
-                                    <i class="fa fa-book" style="font-size:24px; color:#71639e"></i>
+                                    <i class="fa fa-database" style="font-size:24px; color:#71639e"></i>
                                 </div>
                                 <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Knowledge</h4>
                             </div>

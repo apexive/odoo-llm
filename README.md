@@ -4,23 +4,54 @@
 
 This repository provides a comprehensive framework for integrating Large Language Models (LLMs) into Odoo. It allows seamless interaction with various AI providers including OpenAI, Anthropic, Ollama, and Replicate, enabling chat completions, text embeddings, and more within your Odoo environment.
 
-## 🏗️ Module Ecosystem
+## 🏗️ Architecture
 
-![Architecture Overview](llm/static/description/overview.jpg)
+```mermaid
+graph TD
+    subgraph External AI Clients
+        CD[Claude Desktop<br>Cursor · Windsurf]
+        CC[Claude Code<br>Codex CLI]
+    end
 
-The Odoo-LLM modules are organized in three layers:
+    subgraph Odoo AI Chat
+        LA[llm_assistant]
+        LT[llm_thread]
+    end
 
-**Layer 1: User Space & Applications** - Domain-specific tool modules that expose business logic to AI assistants (e.g., `llm_tool_account` provides 18 accounting tools, `llm_tool_mis_builder` provides 44 MIS Builder reporting tools).
+    CD -->|MCP Protocol| MCP
+    CC -->|MCP Protocol| MCP
 
-**Layer 2: Utility & Interface** - Core functionality accessible through two interfaces:
-- **Internal Interface** (`llm_assistant`): Chat with AI directly in Odoo's UI
-- **External Interface** (`llm_mcp_server`): Connect external tools (Claude Desktop, Cursor, IDEs) via Model Context Protocol
+    LA --> LLM
+    LT --> LLM
 
-Both interfaces share:
-- **`llm_knowledge`**: RAG engine for semantic search across Odoo documents
-- **`llm_tool`**: Function-calling framework for AI-Odoo interactions
+    MCP[llm_mcp_server<br>MCP Server for Odoo] --> LLM
 
-**Layer 3: Infrastructure** - Foundation modules including the `llm` core, AI provider drivers (`llm_openai`, `llm_ollama`, etc.), and vector store drivers (`llm_pgvector`, `llm_qdrant`, etc.).
+    LLM[⭐ llm ⭐<br>Provider Abstraction · Model Management<br>Enhanced mail.message · Security Framework]
+
+    LLM --> TOOL[llm_tool<br>Tool Framework + Generic CRUD Tools]
+    LLM --> PROV[AI Providers<br>llm_openai · llm_ollama<br>llm_mistral · ...]
+    LLM --> INFRA[Infrastructure<br>llm_store · llm_generate]
+
+    TOOL --> PACKS[Domain-Specific Tool Packs<br>llm_tool_account · 18 accounting tools<br>llm_tool_mis_builder · 44 MIS reporting tools<br>llm_tool_knowledge · RAG search tools<br>llm_tool_ocr_mistral · OCR via Mistral vision]
+
+    style LLM fill:#f9f8fc,stroke:#71639e,stroke-width:3px,color:#71639e
+    style MCP fill:#fff,stroke:#71639e,stroke-width:2px,color:#71639e
+    style TOOL fill:#fff,stroke:#71639e,stroke-width:2px,color:#71639e
+    style PACKS fill:#f9f8fc,stroke:#71639e,stroke-width:2px,color:#71639e
+    style PROV fill:#fff,stroke:#dee2e6,stroke-width:2px
+    style INFRA fill:#fff,stroke:#dee2e6,stroke-width:2px
+```
+
+Two ways to use AI with Odoo — both powered by the same tool framework:
+
+- **External AI Clients** (Claude Desktop, Claude Code, Cursor, Codex CLI) connect via `llm_mcp_server` using the Model Context Protocol
+- **Odoo AI Chat** (`llm_assistant` + `llm_thread`) provides a built-in chat interface inside Odoo
+
+Both feed into the **`llm` core** module, which provides provider abstraction, model management, and security. Below that:
+
+- **`llm_tool`** — function-calling framework with 6 generic CRUD tools out of the box, plus domain-specific tool packs (accounting, MIS Builder, knowledge, OCR)
+- **AI Providers** — `llm_openai`, `llm_ollama`, `llm_mistral`, and more (any OpenAI-compatible API works)
+- **Infrastructure** — `llm_store` (vector storage), `llm_generate` (content generation)
 
 ## 🚀 Latest Updates (Version 18.0)
 
