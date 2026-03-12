@@ -345,6 +345,9 @@ class LLMThread(models.Model):
         - Limits to the most recent N messages for context window management
         - Uses efficient database queries with proper indexing
         - Excludes error messages (is_error=True) from context
+        - Sanitizes the window to remove orphaned tool_result blocks that
+          would cause Anthropic HTTP 400 errors when their tool_use is
+          outside the window (see _sanitize_message_window).
 
         Args:
             limit (int): Maximum number of recent messages to retrieve (default: 25)
@@ -371,12 +374,105 @@ class LLMThread(models.Model):
                 limit=limit,
             )
             # 2. Sort them chronologically for LLM context (ASC order)
-            return recent_messages.sorted(lambda m: (m.create_date, m.write_date, m.id))
-        # If no limit, get all messages in chronological order
-        return self.env["mail.message"].search(
-            domain,
-            order="create_date ASC, write_date ASC, id ASC",
-        )
+            messages = recent_messages.sorted(
+                lambda m: (m.create_date, m.write_date, m.id)
+            )
+        else:
+            # If no limit, get all messages in chronological order
+            messages = self.env["mail.message"].search(
+                domain,
+                order="create_date ASC, write_date ASC, id ASC",
+            )
+
+        return self._sanitize_message_window(messages)
+
+    def _sanitize_message_window(self, messages):
+        """Remove messages from the start of the window that would cause orphan errors.
+
+        When the context window is limited (e.g. limit=25), the oldest fetched
+        message might be a tool_result whose corresponding tool_use was cut off.
+        Anthropic strictly requires every tool_result to have a preceding
+        tool_use in the same request — sending an orphaned tool_result causes:
+            HTTP 400 "unexpected tool_use_id found in tool_result blocks"
+
+        Strategy:
+        1. Collect all tool_use IDs present in assistant messages in the window.
+        2. Collect all tool_result IDs present in tool messages in the window.
+        3. Walk forward from the start, dropping:
+           - tool messages whose tool_call_id has no matching tool_use in window
+           - assistant messages at the very start whose tool_use blocks have no
+             matching tool_result in window (incomplete cycle, would confuse API)
+        4. Stop as soon as the first valid message is found.
+
+        Args:
+            messages: mail.message recordset in chronological order
+
+        Returns:
+            mail.message recordset with orphaned leading messages removed
+        """
+        if not messages:
+            return messages
+
+        # Build set of tool_use IDs present in assistant messages within window
+        tool_use_ids_in_window = set()
+        for msg in messages:
+            if msg.llm_role == "assistant":
+                for tc in (msg.body_json or {}).get("tool_calls", []):
+                    if tc.get("id"):
+                        tool_use_ids_in_window.add(tc["id"])
+
+        # Build set of tool_result IDs present in tool messages within window
+        tool_result_ids_in_window = set()
+        for msg in messages:
+            if msg.llm_role == "tool":
+                tc_id = (msg.body_json or {}).get("tool_call_id")
+                if tc_id:
+                    tool_result_ids_in_window.add(tc_id)
+
+        messages_list = list(messages)
+
+        while messages_list:
+            first = messages_list[0]
+
+            # Drop tool messages whose tool_use was cut off by the window limit
+            if first.llm_role == "tool":
+                tc_id = (first.body_json or {}).get("tool_call_id")
+                if tc_id and tc_id not in tool_use_ids_in_window:
+                    _logger.debug(
+                        "Dropping orphaned tool_result message %s "
+                        "(tool_call_id %s has no matching tool_use in window)",
+                        first.id,
+                        tc_id,
+                    )
+                    messages_list.pop(0)
+                    continue
+
+            # Drop assistant messages at the start whose tool_use cycle is incomplete
+            # (tool_use present but no tool_result in window → API would stall)
+            if first.llm_role == "assistant":
+                tool_calls = (first.body_json or {}).get("tool_calls", [])
+                if tool_calls:
+                    unresolved = [
+                        tc for tc in tool_calls
+                        if tc.get("id") not in tool_result_ids_in_window
+                    ]
+                    if unresolved:
+                        _logger.debug(
+                            "Dropping assistant message %s at window start: "
+                            "%d tool_use block(s) have no tool_result in window",
+                            first.id,
+                            len(unresolved),
+                        )
+                        messages_list.pop(0)
+                        continue
+
+            # First message is clean — stop trimming
+            break
+
+        if not messages_list:
+            return self.env["mail.message"]
+
+        return self.env["mail.message"].browse([m.id for m in messages_list])
 
     def get_latest_llm_message(self):
         """Get the most recent LLM message for flow control.

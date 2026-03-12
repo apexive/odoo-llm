@@ -274,10 +274,41 @@ class LLMProvider(models.Model):
 
         return formatted_messages
 
+    def _content_has_tool_result(self, content):
+        """Check if message content contains tool_result blocks.
+
+        Anthropic requires that tool_result blocks are never merged with plain
+        text or other content in the same user message — doing so breaks the
+        strict tool_use ↔ tool_result pairing and causes HTTP 400 errors.
+
+        Args:
+            content: Message content (str or list of content blocks)
+
+        Returns:
+            bool: True if content contains any tool_result block
+        """
+        if isinstance(content, list):
+            return any(
+                isinstance(block, dict) and block.get("type") == "tool_result"
+                for block in content
+            )
+        return False
+
     def _anthropic_merge_consecutive_user_messages(self, messages):
         """Merge consecutive user messages as required by Anthropic API.
 
-        Anthropic requires alternating user/assistant messages.
+        Anthropic requires strictly alternating user/assistant turns.
+
+        IMPORTANT — tool_result isolation rule:
+        A tool_result block must appear in a user message that immediately
+        follows the assistant message containing the matching tool_use block.
+        If we merge a tool_result user message with the next plain-text user
+        message, Anthropic sees the tool_use_id in a context where there is
+        no preceding tool_use, and returns:
+            HTTP 400 "unexpected tool_use_id found in tool_result blocks"
+
+        Fix: never merge any message that contains (or would receive)
+        tool_result blocks — keep them as separate user turns.
         """
         if not messages:
             return []
@@ -287,6 +318,12 @@ class LLMProvider(models.Model):
             if merged and merged[-1]["role"] == msg["role"] == "user":
                 prev_content = merged[-1]["content"]
                 curr_content = msg["content"]
+
+                # Never merge when either side carries tool_result blocks
+                if self._content_has_tool_result(prev_content) or \
+                        self._content_has_tool_result(curr_content):
+                    merged.append(msg)
+                    continue
 
                 if isinstance(prev_content, str) and isinstance(curr_content, str):
                     merged[-1]["content"] = prev_content + "\n" + curr_content
