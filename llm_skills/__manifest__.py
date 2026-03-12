@@ -26,6 +26,7 @@
         "llm_assistant",
         "llm_pgvector",
         "llm_ollama",
+        "llm_anthropic",
         "llm_mcp_server",
     ],
     "external_dependencies": {

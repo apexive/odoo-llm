@@ -91,10 +91,12 @@ then execute the full configuration chain autonomously.
             <field name="name">Admin Assistant</field>
             <field name="code">admin_assistant</field>
             <field name="prompt_id" ref="llm_prompt_admin_assistant"/>
+            <field name="provider_id" ref="llm_skills.llm_provider_anthropic"/>
+            <field name="model_id" ref="llm_skills.claude_sonnet_4_6"/>
             <field name="active" eval="True"/>
             <field name="is_public" eval="False"/>
             <field name="tool_calls_max">20</field>
-            <field name="technical_skills_collection_id" ref="llm_collection_meta_skills"/>
+            <field name="technical_skills_collection_id" ref="llm_skills.llm_collection_meta_skills"/>
             <field name="tool_ids" eval="[(6, 0, [
                 ref('llm_tool.llm_tool_odoo_record_retriever'),
                 ref('llm_tool.llm_tool_odoo_record_creator'),

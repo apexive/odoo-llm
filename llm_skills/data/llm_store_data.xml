@@ -8,6 +8,14 @@
         <field name="active">True</field>
     </record>
 
-    <!-- LLM Meta Skills collection. Set embedding_model_id manually after install. -->
-    <function model="llm.knowledge.collection" name="_create_meta_skills_collection"/>
+    <!-- LLM Meta Skills collection.
+         embedding_model_id references nomic-embed-text registered by _setup_ollama_provider()
+         which runs in llm_provider_data.xml (loaded before this file). -->
+    <record id="llm_collection_meta_skills" model="llm.knowledge.collection">
+        <field name="name">Odoo Technical Skills</field>
+        <field name="description">Default knowledge collection for all technical skill documents loaded from installed addon skills/ directories.</field>
+        <field name="store_id" ref="llm_store_pgvector_default"/>
+        <field name="embedding_model_id" ref="llm_skills.nomic_embed_text_latest"/>
+        <field name="active">True</field>
+    </record>
 </odoo>
