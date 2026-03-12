@@ -32,9 +32,9 @@ class LLMKnowledgeCollectionSkills(models.Model):
             _logger.warning("llm_skills: pgvector store not found, skipping collection creation.")
             return
 
-        # Resolve embedding model — prefer text-embedding-3-small
+        # Resolve embedding model — prefer nomic-embed-text (Ollama local)
         embedding_model = self.env["llm.model"].search(
-            [("name", "=", "text-embedding-3-small"), ("model_use", "=", "embedding")],
+            [("name", "like", "nomic-embed-text"), ("model_use", "=", "embedding")],
             limit=1,
         )
         if not embedding_model:

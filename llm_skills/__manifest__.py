@@ -25,7 +25,7 @@
         "llm_tool_knowledge",
         "llm_assistant",
         "llm_pgvector",
-        "llm_openai",
+        "llm_ollama",
         "llm_mcp_server",
     ],
     "external_dependencies": {
