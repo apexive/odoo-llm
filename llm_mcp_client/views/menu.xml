@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <menuitem id="menu_llm_mcp_client_servers"
+              name="MCP Servers (Client)"
+              parent="llm.menu_llm_config"
+              action="action_llm_mcp_client_server"
+              sequence="30"/>
+
+</odoo>

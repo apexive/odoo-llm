@@ -1,0 +1,567 @@
+<!-- Hero Section -->
+<section style="padding:4rem 0 3rem">
+    <div class="container">
+        <div class="text-center" style="max-width:800px; margin:0 auto">
+            <div style="display:inline-flex; padding:0.5rem 1.25rem; border-radius:50px; margin-bottom:2rem">
+                <i class="fa fa-plug" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                <span style="color:#71639e; font-weight:600; font-size:0.9rem">Odoo as MCP Client</span>
+            </div>
+
+            <h1 style="font-size:3rem; font-weight:800; color:#212529; margin-bottom:1.5rem; line-height:1.2">
+                Give Odoo AI Assistants<br>
+                <span style="color:#71639e">Superpowers from Any MCP Server</span>
+            </h1>
+
+            <p style="font-size:1.25rem; color:#6c757d; margin-bottom:1rem; line-height:1.6">
+                Connect your Odoo AI assistants to any external MCP server &mdash; GitHub, Brave Search, filesystem tools, custom services &mdash; and call their tools directly from within an Odoo conversation.
+            </p>
+
+            <p style="font-size:1rem; color:#868e96; margin-bottom:2rem">
+                The <strong style="color:#495057">reverse of llm_mcp_server</strong>: instead of Odoo <em>exposing</em> tools, Odoo <em>consumes</em> them.
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap">
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem; background-color:#f5efff">
+                    <i class="fa fa-sync" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#155724; font-weight:600">One-Click Sync</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem; background-color:#f5efff">
+                    <i class="fa fa-github" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#5b4c7d; font-weight:600">Open Source</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem; background-color:#f5efff">
+                    <i class="fa fa-shield" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#0c5460; font-weight:600">Works with Local &amp; Remote</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="container my-5">
+
+    <!-- What Is It -->
+    <section class="mb-5">
+        <h2 class="text-center mb-3" style="font-size:2.5rem; font-weight:700; color:#71639e">What Is LLM MCP Client?</h2>
+        <p class="text-center mb-5" style="font-size:1.2rem; color:#6c757d; font-weight:500">A bridge between Odoo's AI assistants and the wider MCP ecosystem</p>
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem">
+                    <p style="font-size:1.15rem; color:#495057; line-height:1.9; margin-bottom:0; text-align:center">
+                        MCP (Model Context Protocol) is an open standard that lets AI assistants call tools from any compatible server.
+                        This module makes Odoo a <strong>MCP client</strong>: it pulls tool definitions from remote MCP servers,
+                        registers them as <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">llm.tool</code> records,
+                        and proxies tool calls to the remote server when an AI assistant decides to use them.
+                        All of this happens transparently inside a normal Odoo AI conversation.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture diagram in text -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2rem; background-color:#f8f9fa">
+                    <h4 class="text-center" style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem">How It Works</h4>
+                    <div class="row align-items-center text-center g-3">
+                        <div class="col-12 col-md-2">
+                            <div class="bg-white shadow-sm" style="padding:1rem; border-radius:12px">
+                                <i class="fa fa-user" style="font-size:28px; color:#71639e; display:block; margin-bottom:0.5rem"></i>
+                                <strong style="font-size:0.85rem; color:#212529">User Chat</strong>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-1">
+                            <i class="fa fa-arrow-right" style="font-size:1.5rem; color:#71639e"></i>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <div class="bg-white shadow-sm" style="padding:1rem; border-radius:12px">
+                                <i class="fa fa-comments" style="font-size:28px; color:#71639e; display:block; margin-bottom:0.5rem"></i>
+                                <strong style="font-size:0.85rem; color:#212529">llm.thread</strong>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-1">
+                            <i class="fa fa-arrow-right" style="font-size:1.5rem; color:#71639e"></i>
+                        </div>
+                        <div class="col-12 col-md-2">
+                            <div class="bg-primary shadow-sm" style="padding:1rem; border-radius:12px">
+                                <i class="fa fa-wrench" style="font-size:28px; color:#ffffff; display:block; margin-bottom:0.5rem"></i>
+                                <strong style="font-size:0.85rem; color:#ffffff">llm.tool<br>(mcp_client)</strong>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-1">
+                            <i class="fa fa-arrow-right" style="font-size:1.5rem; color:#71639e"></i>
+                        </div>
+                        <div class="col-12 col-md-3">
+                            <div class="bg-white shadow-sm" style="padding:1rem; border-radius:12px; border:2px solid #71639e">
+                                <i class="fa fa-server" style="font-size:28px; color:#71639e; display:block; margin-bottom:0.5rem"></i>
+                                <strong style="font-size:0.85rem; color:#212529">Remote MCP Server</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Why It Matters -->
+        <h3 class="text-center mb-4" style="font-size:2rem; font-weight:700; color:#212529">Why This Matters</h3>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-puzzle-piece" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Unlock the MCP Ecosystem</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Thousands of MCP servers exist for GitHub, search engines, databases, file systems, and more. Your Odoo assistants can now use all of them.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-code" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">No Custom Integration Code</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Add a URL, click Sync Tools, assign to an assistant. No Python, no webhooks, no API wrappers to maintain.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-refresh" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Connect Two Odoo Instances</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Point this module at another Odoo instance running <strong>llm_mcp_server</strong>. AI assistants can then query cross-company data seamlessly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Features -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Key Features</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Everything you need to consume external MCP tools from Odoo</p>
+
+        <div class="row g-4">
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-download" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Automatic Tool Sync</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Click <strong>Sync Tools</strong> and the module calls <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">tools/list</code> on the remote server, creating or updating <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">llm.tool</code> records automatically. Removed tools are deactivated, not deleted.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-key" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Bearer Token Auth</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Supports both anonymous and Bearer token authenticated MCP servers. Tokens are stored securely per server record and sent as <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">Authorization</code> headers.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-check-circle" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Test Connection</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">One-click connectivity test sends <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">initialize</code> and <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">ping</code> to the server and shows a clear success or failure notification.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-sitemap" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Mixed Tool Threads</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Local <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">@llm_tool</code> decorated tools and remote <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">mcp_client</code> tools can coexist on the same assistant. The AI picks whichever is appropriate for each task.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-sliders" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Schema Preservation</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">The full JSON input schema from the remote server is stored and forwarded to the LLM unchanged, ensuring the AI sends exactly the right parameters to each tool.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 col-12">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-heartbeat" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Sync Status Tracking</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Each server record shows its last sync timestamp, success/error status, and tool count. Errors are stored in the record for easy debugging, not just logged.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Setup -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Up and Running in 3 Steps</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">No code, no configuration files, no extra services to deploy</p>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">1</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Add an MCP Server</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">Go to <strong>LLM &rarr; Configuration &rarr; MCP Servers (Client)</strong>. Enter the server URL and optional Bearer token.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">2</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Sync Tools</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">Click <strong>Sync Tools</strong>. The module imports all tools from the remote server as <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">llm.tool</code> records.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">3</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Assign to Assistant</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">Add the synced tools to any <strong>llm.assistant</strong> or <strong>llm.thread</strong> just like any other tool. The AI will call them automatically.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Example Use Cases -->
+        <h3 class="text-center mb-4" style="font-size:1.75rem; font-weight:700; color:#212529">Example Use Cases</h3>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:2rem; border-radius:16px">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                        <i class="fa fa-github" style="font-size:28px; color:#71639e"></i>
+                    </div>
+                    <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.75rem">GitHub MCP + Odoo CRM</h4>
+                    <p style="color:#6c757d; margin-bottom:1rem">Connect the GitHub MCP server to an Odoo sales assistant. It can create issues directly from customer complaints logged in a CRM lead.</p>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.9rem">"Create a GitHub issue for the bug in lead #1042 and link it to the customer record."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:2rem; border-radius:16px">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                        <i class="fa fa-search" style="font-size:28px; color:#71639e"></i>
+                    </div>
+                    <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.75rem">Brave Search + Odoo Products</h4>
+                    <p style="color:#6c757d; margin-bottom:1rem">Connect the Brave Search MCP to a product assistant. The assistant can look up competitor prices online and compare them to your own catalog.</p>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.9rem">"Search for the current market price of this product and tell me how our price compares."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:2rem; border-radius:16px">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                        <i class="fa fa-database" style="font-size:28px; color:#71639e"></i>
+                    </div>
+                    <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.75rem">Odoo &rarr; Odoo Cross-Company</h4>
+                    <p style="color:#6c757d; margin-bottom:1rem">Point this module at a sister company's Odoo instance running <strong>llm_mcp_server</strong>. Query their inventory in real time from your own assistant.</p>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.9rem">"Check if our warehouse in Paris has stock for product X and create a transfer request."</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:2rem; border-radius:16px">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                        <i class="fa fa-cogs" style="font-size:28px; color:#71639e"></i>
+                    </div>
+                    <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.75rem">Internal MCP Service</h4>
+                    <p style="color:#6c757d; margin-bottom:1rem">Build a lightweight internal MCP server (Python, Node.js) exposing your ERP APIs, legacy systems, or proprietary tools. Connect without writing any Odoo code.</p>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.9rem">"Fetch the production schedule from our MES system for next week."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Technical Details -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Technical Details</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Clean architecture that hooks into existing llm_tool extension points</p>
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-code-fork" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Non-Invasive Extension</h3>
+                        <p style="color:#495057; margin-bottom:1rem">Uses the existing <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">_get_available_implementations()</code> hook in <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">llm.tool</code> to register the new <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">mcp_client</code> implementation type. Zero changes to any upstream model.</p>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1.25rem; border-radius:12px; border:none; font-family:monospace; font-size:0.82rem; line-height:1.6">def _get_available_implementations(self):
+    impls = super()._get_available_implementations()
+    return impls + [
+        ("mcp_client", "External MCP Server")
+    ]</pre>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-exchange" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Automatic Dispatch</h3>
+                        <p style="color:#495057; margin-bottom:1rem">The <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">{implementation}_execute</code> naming convention means <code style="background-color:#f5efff; padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">mcp_client_execute()</code> is picked up automatically by the tool dispatch chain. No overrides to core models needed.</p>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1.25rem; border-radius:12px; border:none; font-family:monospace; font-size:0.82rem; line-height:1.6">def mcp_client_execute(self, **kwargs):
+    return self.mcp_server_id.call_tool(
+        self.mcp_tool_name,
+        kwargs
+    )</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Protocol compliance -->
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2rem; background-color:#f8f9fa">
+                    <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem; text-align:center">MCP Protocol Compliance</h4>
+                    <div class="row g-3">
+                        <div class="col-md-3 col-6">
+                            <div class="bg-white shadow-sm text-center" style="padding:1.25rem; border-radius:12px">
+                                <i class="fa fa-check-circle" style="font-size:24px; color:#28a745; display:block; margin-bottom:0.5rem"></i>
+                                <strong style="font-size:0.85rem; color:#212529">initialize</strong>
+                                <p style="font-size:0.75rem; color:#6c757d; margin:0">Handshake</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="bg-white shadow-sm text-center" style="padding:1.25rem; border-radius:12px">
+                                <i class="fa fa-check-circle" style="font-size:24px; color:#28a745; display:block; margin-bottom:0.5rem"></i>
+                                <strong style="font-size:0.85rem; color:#212529">tools/list</strong>
+                                <p style="font-size:0.75rem; color:#6c757d; margin:0">Discovery</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="bg-white shadow-sm text-center" style="padding:1.25rem; border-radius:12px">
+                                <i class="fa fa-check-circle" style="font-size:24px; color:#28a745; display:block; margin-bottom:0.5rem"></i>
+                                <strong style="font-size:0.85rem; color:#212529">tools/call</strong>
+                                <p style="font-size:0.75rem; color:#6c757d; margin:0">Execution</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="bg-white shadow-sm text-center" style="padding:1.25rem; border-radius:12px">
+                                <i class="fa fa-check-circle" style="font-size:24px; color:#28a745; display:block; margin-bottom:0.5rem"></i>
+                                <strong style="font-size:0.85rem; color:#212529">ping</strong>
+                                <p style="font-size:0.75rem; color:#6c757d; margin:0">Health check</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-center" style="color:#6c757d; font-size:0.9rem; margin-top:1rem; margin-bottom:0">
+                        Protocol version: <code style="background-color:#e9ecef; padding:0.2rem 0.5rem; border-radius:4px">2025-06-18</code> &bull; Transport: JSON-RPC 2.0 over HTTP
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Companion module -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Part of the Odoo LLM Ecosystem</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Use alongside the companion server module for full bidirectional MCP connectivity</p>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-5">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px; border-left:4px solid #71639e !important">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center" style="margin-bottom:1rem">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                <i class="fa fa-plug" style="font-size:24px; color:#ffffff"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.15rem; font-weight:700; color:#212529; margin-bottom:0.1rem">LLM MCP Client</h4>
+                                <code style="font-size:0.8rem; color:#71639e">llm_mcp_client</code>
+                            </div>
+                            <div class="bg-primary" style="padding:0.25rem 0.75rem; border-radius:20px; margin-left:auto">
+                                <span style="color:#ffffff; font-size:0.75rem; font-weight:700">THIS MODULE</span>
+                            </div>
+                        </div>
+                        <p style="color:#495057; margin-bottom:0; font-size:0.95rem">Odoo <strong>consumes</strong> tools from external MCP servers. AI assistants inside Odoo can call tools on any remote service.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-5">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center" style="margin-bottom:1rem">
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                <i class="fa fa-server" style="font-size:24px; color:#71639e"></i>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.15rem; font-weight:700; color:#212529; margin-bottom:0.1rem">LLM MCP Server</h4>
+                                <code style="font-size:0.8rem; color:#71639e">llm_mcp_server</code>
+                            </div>
+                        </div>
+                        <p style="color:#495057; margin-bottom:0; font-size:0.95rem">Odoo <strong>exposes</strong> tools to external MCP clients. Claude Desktop, Claude Code, and Cursor can call Odoo tools directly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-2">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-comments" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Thread</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0">Persistent AI conversations inside Odoo with full context, history, and tool access</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-user-circle-o" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Assistant</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0">Role-specific AI assistants with dedicated tool sets, system prompts, and providers</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-wrench" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Tool</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0">The decorator-based tool framework that llm_mcp_client extends with the mcp_client implementation type</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Support -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Documentation &amp; Support</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-book" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Documentation</h3>
+                        <div class="d-flex flex-column">
+                            <div class="bg-light" style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:0.75rem">
+                                <i class="fa fa-github" style="color:#71639e; margin-right:0.5rem"></i>
+                                <strong>Source &amp; README:</strong><br>
+                                <code style="font-size:0.85rem; margin-top:0.25rem; display:inline-block">github.com/apexive/odoo-llm</code>
+                            </div>
+                            <div class="bg-light" style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:0">
+                                <i class="fa fa-globe" style="color:#71639e; margin-right:0.5rem"></i>
+                                <strong>MCP Protocol Spec:</strong><br>
+                                <code style="font-size:0.85rem; margin-top:0.25rem; display:inline-block">modelcontextprotocol.io</code>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-envelope" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Get in Touch</h3>
+                        <p style="color:#495057; margin-bottom:1.5rem">Questions, feature requests, or enterprise support? We'd love to hear from you.</p>
+                        <a href="mailto:hello@apexive.com" class="d-flex align-items-center bg-light" style="padding:0.875rem 1.25rem; border-radius:10px; text-decoration:none; margin-bottom:0.75rem">
+                            <i class="fa fa-envelope" style="font-size:20px; color:#71639e; margin-right:0.75rem"></i>
+                            <span style="color:#212529; font-weight:600">hello@apexive.com</span>
+                        </a>
+                        <div class="bg-light d-flex align-items-center" style="padding:0.875rem 1.25rem; border-radius:10px">
+                            <i class="fa fa-globe" style="font-size:20px; color:#71639e; margin-right:0.75rem"></i>
+                            <span style="color:#212529; font-weight:600">apexive.com</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Footer -->
+<footer class="bg-primary" style="padding:3rem 2rem; border-radius:16px; margin:2rem 1rem">
+    <div class="container">
+        <div style="border-radius:12px; padding:2.5rem">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 style="font-weight:700; color:#ffffff; font-size:1.5rem; margin-bottom:0.75rem">LLM MCP Client for Odoo</h4>
+                    <p style="color:#f8f9fa; font-size:1rem; margin-bottom:1rem">Connect Odoo AI assistants to any external MCP server</p>
+                    <p style="color:#e9d5ff; margin-bottom:0.25rem">Developed by <strong style="color:#ffffff">Apexive Solutions LLC</strong></p>
+                    <p style="color:#e0d4ec; font-size:0.9rem; margin-bottom:0">Licensed under LGPL-3 &bull; &copy; 2025 All rights reserved.</p>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="d-flex flex-column">
+                        <div class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; color:#71639e; font-weight:600; margin-bottom:0.75rem">
+                            <i class="fa fa-globe" style="font-size:18px; margin-right:0.5rem"></i>
+                            apexive.com
+                        </div>
+                        <a href="mailto:hello@apexive.com" class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; text-decoration:none; color:#71639e; font-weight:600; margin-bottom:0">
+                            <i class="fa fa-envelope" style="font-size:18px; margin-right:0.5rem"></i>
+                            hello@apexive.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
