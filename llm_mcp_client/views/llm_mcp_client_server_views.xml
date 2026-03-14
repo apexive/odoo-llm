@@ -8,8 +8,9 @@
         <field name="arch" type="xml">
             <list string="MCP Servers">
                 <field name="name"/>
-                <field name="url"/>
-                <field name="auth_type"/>
+                <field name="transport"/>
+                <field name="url" optional="show"/>
+                <field name="command" optional="show"/>
                 <field name="sync_status"
                        decoration-success="sync_status == 'ok'"
                        decoration-danger="sync_status == 'error'"
@@ -56,13 +57,8 @@
                     </div>
 
                     <group>
-                        <group string="Connection">
-                            <field name="url" placeholder="https://mcp.example.com/mcp"/>
-                            <field name="auth_type"/>
-                            <field name="token"
-                                   password="True"
-                                   invisible="auth_type != 'bearer'"
-                                   required="auth_type == 'bearer'"/>
+                        <group string="Transport">
+                            <field name="transport"/>
                             <field name="timeout"/>
                         </group>
                         <group string="Sync Status">
@@ -70,6 +66,31 @@
                             <field name="sync_error" readonly="1"
                                    invisible="sync_status != 'error'"/>
                         </group>
+                    </group>
+
+                    <!-- HTTP fields -->
+                    <group string="HTTP Connection"
+                           invisible="transport != 'http'">
+                        <field name="url"
+                               placeholder="https://mcp.example.com/mcp"
+                               required="transport == 'http'"/>
+                        <field name="auth_type"/>
+                        <field name="token"
+                               password="True"
+                               invisible="auth_type != 'bearer'"
+                               required="auth_type == 'bearer'"/>
+                    </group>
+
+                    <!-- Stdio fields -->
+                    <group string="Stdio Process"
+                           invisible="transport != 'stdio'">
+                        <field name="command"
+                               placeholder="npx"
+                               required="transport == 'stdio'"/>
+                        <field name="args"
+                               placeholder="-y @upstash/context7-mcp"/>
+                        <field name="env_vars"
+                               placeholder="OPENAI_API_KEY=sk-...&#10;NODE_ENV=production"/>
                     </group>
 
                     <group string="Description">
@@ -106,8 +127,8 @@
                 Connect your first external MCP server
             </p>
             <p>
-                Add a remote MCP server URL, then click <b>Sync Tools</b>
-                to import its tools and make them available to your AI assistants.
+                Add an HTTP endpoint or a local stdio command, then click
+                <b>Sync Tools</b> to import its tools into your AI assistants.
             </p>
         </field>
     </record>

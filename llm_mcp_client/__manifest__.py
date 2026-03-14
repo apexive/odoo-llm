@@ -39,6 +39,7 @@
     },
     "data": [
         "security/ir.model.access.csv",
+        "data/llm_mcp_client_default_servers.xml",
         "views/llm_mcp_client_server_views.xml",
         "views/llm_tool_views.xml",
         "views/menu.xml",
