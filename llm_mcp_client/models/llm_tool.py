@@ -39,6 +39,19 @@ class LLMTool(models.Model):
 
     # ── Execution ──────────────────────────────────────────────────────────────
 
+    def execute(self, parameters):
+        """Override execute() for mcp_client tools.
+
+        The base execute() builds a Pydantic model from mcp_client_execute(**kwargs),
+        making Pydantic expect a literal 'kwargs' field — breaking all mcp_client calls.
+
+        For mcp_client, bypass signature introspection and pass parameters directly.
+        """
+        if self.implementation == "mcp_client":
+            self.ensure_one()
+            return self.mcp_client_execute(**parameters)
+        return super().execute(parameters)
+
     def mcp_client_execute(self, **kwargs):
         """
         Execute this tool by proxying the call to the remote MCP server.

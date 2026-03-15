@@ -8,6 +8,7 @@ Supports two transports:
 
 import json
 import logging
+import re
 import subprocess
 
 import requests
@@ -616,8 +617,12 @@ class LLMMcpClientServer(models.Model):
             description = tool_def.get("description", "") or ""
             input_schema = tool_def.get("inputSchema") or {}
 
+            # Sanitize: MCP tool names must match ^[a-zA-Z0-9_-]{1,64}$
+            safe_server = re.sub(r'[^a-zA-Z0-9_-]', '_', self.name)
+            safe_name = f"{safe_server}__{mcp_name}"[:64]
+
             vals = {
-                "name": f"{self.name}/{mcp_name}",
+                "name": safe_name,
                 "mcp_tool_name": mcp_name,
                 "description": description,
                 "implementation": "mcp_client",
