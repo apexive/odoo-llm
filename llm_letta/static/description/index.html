@@ -1,404 +1,412 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Letta LLM Integration for Odoo | Stateful AI Agents with Persistent Memory</title>
-    <meta name="description" content="Enterprise-ready Letta integration that brings stateful AI agents with persistent memory to Odoo. Full MCP tool support and automatic agent lifecycle management.">
-    <meta name="keywords" content="Letta integration, AI agents, persistent memory, Odoo AI, stateful conversations, MCP tools, Letta Cloud, self-hosted Letta">
-    <meta name="author" content="Apexive Solutions LLC">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-    <style>
-        :root {
-            --primary-color: #6f42c1;
-            --secondary-color: #e9ecef;
-            --accent-color: #ffc107;
-            --text-color: #343a40;
-            --light-bg: #f8f9fa;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-        }
-
-        .header-container {
-            background-color: var(--light-bg);
-            border-bottom: 3px solid var(--primary-color);
-            padding: 2rem 0;
-        }
-
-        h1, h2, h3, h4 {
-            color: var(--primary-color);
-        }
-
-        .feature-card {
-            height: 100%;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-top: 3px solid var(--primary-color);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        .module-card {
-            border-left: 3px solid var(--primary-color);
-            transition: transform 0.3s;
-        }
-
-        .module-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .btn-primary:hover {
-            background-color: #5a32a3;
-            border-color: #5a32a3;
-        }
-
-        .section-divider {
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), transparent);
-            margin: 3rem 0;
-        }
-
-        .highlight-box {
-            background-color: var(--light-bg);
-            border-left: 4px solid var(--primary-color);
-            padding: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        code {
-            color: var(--primary-color);
-            background-color: var(--light-bg);
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-        }
-
-        .github-link {
-            font-weight: bold;
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .github-link:hover {
-            color: #5a32a3;
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-<div class="header-container">
+<!-- Hero Section -->
+<section style="padding:4rem 0 3rem">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="fw-bold">Letta LLM Integration</h1>
-                <p class="lead mb-4">Enterprise-ready integration bringing stateful AI agents with persistent memory to your Odoo workflows.</p>
-                <div class="d-flex mb-3 align-items-center">
-                    <span class="badge bg-primary me-2">v18.0.1.0.0</span>
-                    <span class="badge bg-secondary me-2">LGPL-3</span>
-                    <span class="badge bg-success me-2">Letta 0.11.7+</span>
-                    <a href="https://github.com/apexive/odoo-llm" class="github-link ms-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github me-1" viewBox="0 0 16 16">
-                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                        </svg>
-                        GitHub Repository
-                    </a>
-                </div>
-                <p>Transform your AI interactions with Letta's stateful agents that remember context, maintain conversation history, and execute Odoo tools through MCP.</p>
+        <div class="text-center" style="max-width:800px; margin:0 auto">
+            <div style="display:inline-flex; padding:0.5rem 1.25rem; border-radius:50px; margin-bottom:2rem">
+                <i class="fa fa-user-secret" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                <span style="color:#71639e; font-weight:600; font-size:0.9rem">Stateful AI Agents</span>
             </div>
-            <div class="col-md-4 text-center">
-                <img src="icon.svg" alt="Letta Integration Logo" class="img-fluid" style="max-width: 200px;">
+
+            <h1 style="font-size:3rem; font-weight:800; color:#212529; margin-bottom:1.5rem; line-height:1.2">
+                Letta LLM Integration
+            </h1>
+
+            <p style="font-size:1.25rem; color:#6c757d; margin-bottom:1rem; line-height:1.6">
+                Enterprise-ready integration bringing stateful AI agents with persistent memory to your Odoo workflows.
+            </p>
+
+            <p style="font-size:1rem; color:#868e96; margin-bottom:2rem">
+                Transform AI interactions with <strong style="color:#495057">Letta agents</strong> that remember context and execute Odoo tools
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap">
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-database" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#5b4c7d; font-weight:600">Persistent Memory</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-plug" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#0c5460; font-weight:600">MCP Tools</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-github" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#155724; font-weight:600">Open Source</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<div class="container py-5">
+<div class="container my-5">
     <!-- Overview Section -->
     <section class="mb-5">
-        <h2 class="mb-4">Overview</h2>
-        <p>The Letta LLM Integration brings advanced AI agent capabilities to Odoo, enabling stateful conversations with persistent memory. Unlike traditional stateless chatbots, Letta agents remember your interactions and maintain context across sessions.</p>
+        <h2 class="text-center mb-3" style="font-size:2.5rem; font-weight:700; color:#71639e">What Makes Letta Different?</h2>
+        <p class="text-center mb-5" style="font-size:1.2rem; color:#6c757d; font-weight:500">Stateful AI agents with long-term memory</p>
 
-        <div class="highlight-box">
-            <h4>What Makes Letta Different</h4>
-            <ul class="mb-0">
-                <li><strong>Persistent Memory</strong> - Agents remember past conversations and maintain context indefinitely</li>
-                <li><strong>Stateful Architecture</strong> - Each thread gets its own dedicated agent with isolated memory</li>
-                <li><strong>MCP Tool Integration</strong> - Full access to Odoo tools through Model Context Protocol</li>
-                <li><strong>Automatic Lifecycle</strong> - Agents are created, updated, and managed automatically with threads</li>
-                <li><strong>Flexible Deployment</strong> - Support for both Letta Cloud and self-hosted servers</li>
-            </ul>
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem">
+                    <p style="font-size:1.15rem; color:#495057; line-height:1.9; margin-bottom:0; text-align:center">
+                        Unlike traditional stateless chatbots, Letta agents remember your interactions and maintain context across sessions. Each thread gets its own dedicated agent with isolated memory, full MCP tool integration, and automatic lifecycle management.
+                    </p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <div class="section-divider"></div>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
     <!-- Key Features Section -->
     <section class="mb-5">
-        <h2 class="mb-4">Key Features</h2>
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Key Features</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Enterprise-ready AI agent capabilities</p>
+
         <div class="row g-4">
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Agent-Based Conversations</h3>
-                        <p class="card-text">Each thread gets its own Letta agent with dedicated memory and personality, creating truly personalized AI interactions.</p>
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-database" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Persistent Memory</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Agents remember past conversations and maintain context indefinitely, building long-term relationships.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Persistent Memory System</h3>
-                        <p class="card-text">Agents maintain conversation history and context across sessions, building long-term relationships with users.</p>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-user" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Agent-Based Conversations</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Each thread gets its own Letta agent with dedicated memory and personality for personalized AI.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">MCP Tool Access</h3>
-                        <p class="card-text">Seamless integration with Odoo's MCP server gives agents access to all your configured tools and actions.</p>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-plug" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">MCP Tool Access</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Seamless integration with Odoo&apos;s MCP server gives agents access to all your configured tools.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Automatic Agent Management</h3>
-                        <p class="card-text">Agents are created, updated, and cleaned up automatically as you manage threads - no manual intervention needed.</p>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-cogs" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Automatic Management</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Agents are created, updated, and cleaned up automatically as you manage threads.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Streaming Responses</h3>
-                        <p class="card-text">Real-time message streaming with support for tool calls, reasoning steps, and assistant responses.</p>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-bolt" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Streaming Responses</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Real-time message streaming with support for tool calls, reasoning steps, and assistant responses.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Cloud & Self-Hosted</h3>
-                        <p class="card-text">Deploy on Letta Cloud for instant setup or self-host with Docker for complete control over your data.</p>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-cloud" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Cloud &amp; Self-Hosted</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Deploy on Letta Cloud for instant setup or self-host with Docker for complete control.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="section-divider"></div>
-
-    <!-- Getting Started Section -->
-    <section class="mb-5">
-        <h2 class="mb-4">Getting Started</h2>
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Quick Setup with Docker</h3>
-                        <ol>
-                            <li>Create Letta database in PostgreSQL</li>
-                            <li>Configure <code>.env.letta</code> with your settings</li>
-                            <li>Run: <code>docker compose up letta_server -d</code></li>
-                            <li>Server available at <code>http://localhost:8283</code></li>
-                        </ol>
-                        <p class="mt-3">
-                            <a href="https://docs.letta.com/guides/selfhosting#running-with-docker-recommended" target="_blank" class="github-link">
-                                View Full Docker Setup Guide →
-                            </a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Cloud Setup</h3>
-                        <ol>
-                            <li>Sign up at <a href="https://cloud.letta.com" target="_blank" class="github-link">cloud.letta.com</a></li>
-                            <li>Get your API token from settings</li>
-                            <li>Configure Letta (Cloud) provider in Odoo</li>
-                            <li>Start creating threads with AI agents!</li>
-                        </ol>
-                        <p class="mt-3">No infrastructure setup required - perfect for getting started quickly.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div class="section-divider"></div>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
     <!-- How It Works Section -->
     <section class="mb-5">
-        <h2 class="mb-4">How It Works</h2>
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">How It Works</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Simple three-step process</p>
+
         <div class="row g-4">
             <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h3 class="card-title h5">1. Thread Creation</h3>
-                        <p class="card-text">When you create a thread with Letta provider, an agent is automatically created with configured memory, tools, and personality.</p>
+                <div class="card h-100 border-0 shadow-sm bg-light" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <span style="font-size:24px; font-weight:700; color:#ffffff">1</span>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#5b4c7d">Thread Creation</h3>
+                        <p style="color:#5b4c7d; margin-bottom:0">When you create a thread with Letta provider, an agent is automatically created with configured memory, tools, and personality.</p>
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h3 class="card-title h5">2. Conversation</h3>
-                        <p class="card-text">Messages are sent to the agent which maintains full conversation history and can execute Odoo tools through MCP.</p>
+                <div class="card h-100 border-0 shadow-sm bg-light" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <span style="font-size:24px; font-weight:700; color:#ffffff">2</span>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#5b4c7d">Conversation</h3>
+                        <p style="color:#5b4c7d; margin-bottom:0">Messages are sent to the agent which maintains full conversation history and can execute Odoo tools through MCP.</p>
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h3 class="card-title h5">3. Memory Persistence</h3>
-                        <p class="card-text">All interactions are stored in the agent's memory, allowing it to recall past conversations and build on previous context.</p>
+                <div class="card h-100 border-0 shadow-sm bg-light" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <span style="font-size:24px; font-weight:700; color:#ffffff">3</span>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#5b4c7d">Memory Persistence</h3>
+                        <p style="color:#5b4c7d; margin-bottom:0">All interactions are stored in the agent&apos;s memory, allowing it to recall past conversations and build on context.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="section-divider"></div>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Getting Started Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Getting Started</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Choose your deployment option</p>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-5">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem">
+                            <i class="fa fa-server" style="color:#71639e; margin-right:0.5rem"></i>
+                            Self-Hosted Setup
+                        </h4>
+                        <ol style="color:#6c757d; margin-bottom:0; padding-left:1.25rem">
+                            <li style="margin-bottom:0.75rem">Create Letta database in PostgreSQL</li>
+                            <li style="margin-bottom:0.75rem">Configure environment variables</li>
+                            <li style="margin-bottom:0.75rem">Run Docker container</li>
+                            <li style="margin-bottom:0">Connect to server at localhost:8283</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem">
+                            <i class="fa fa-cloud" style="color:#71639e; margin-right:0.5rem"></i>
+                            Cloud Setup
+                        </h4>
+                        <ol style="color:#6c757d; margin-bottom:0; padding-left:1.25rem">
+                            <li style="margin-bottom:0.75rem">Sign up at cloud.letta.com</li>
+                            <li style="margin-bottom:0.75rem">Get your API token from settings</li>
+                            <li style="margin-bottom:0.75rem">Configure Letta (Cloud) provider in Odoo</li>
+                            <li style="margin-bottom:0">Start creating threads with AI agents</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Technical Details -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Technical Details</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Requirements and dependencies</p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem">Module Information</h4>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Dependencies:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">llm_mcp_server (required)</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Python Packages:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">letta-client</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Letta Version:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">0.11.7+</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">License:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">LGPL-3</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-light mt-4" style="padding:1.5rem; border-radius:12px">
+                            <h5 style="font-weight:700; color:#212529; margin-bottom:0.75rem">Recommended Modules</h5>
+                            <p style="color:#6c757d; margin-bottom:0">Install LLM Assistant for custom prompts, LLM Tool for custom tools, and Easy AI Chat for a user-friendly interface.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
     <!-- Related Modules Section -->
     <section class="mb-5">
-        <h2 class="mb-4">Required & Recommended Modules</h2>
-        <p>The Letta Integration works best with these complementary modules:</p>
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Related Modules</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Explore other modules in the Odoo LLM suite</p>
 
-        <div class="row g-4 mt-3">
-            <div class="col-lg-6">
-                <div class="card module-card shadow-sm p-3 mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title h4">LLM MCP Server <span class="badge bg-danger ms-2">Required</span></h3>
-                        <p class="card-text">Exposes Odoo tools to Letta agents through the Model Context Protocol. This module is essential for tool execution capabilities.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-success">Core Dependency</span>
-                            <a href="https://github.com/apexive/odoo-llm" class="btn btn-sm btn-outline-primary">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card module-card shadow-sm p-3 mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title h4">LLM Assistant</h3>
-                        <p class="card-text">Define specialized AI assistants with custom prompts that become agent personalities in Letta, creating purpose-built AI helpers.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-info">Recommended</span>
-                            <a href="https://github.com/apexive/odoo-llm" class="btn btn-sm btn-outline-primary">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card module-card shadow-sm p-3 mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title h4">LLM Tool</h3>
-                        <p class="card-text">Create custom tools that Letta agents can execute, extending their capabilities to interact with any part of your Odoo system.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-info">Recommended</span>
-                            <a href="https://github.com/apexive/odoo-llm" class="btn btn-sm btn-outline-primary">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card module-card shadow-sm p-3 mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Easy AI Chat</h3>
-                        <p class="card-text">User-friendly chat interface that works seamlessly with Letta agents, providing a complete conversational AI experience.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-info">Recommended</span>
-                            <a href="https://github.com/apexive/odoo-llm" class="btn btn-sm btn-outline-primary">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Support & Resources Section -->
-    <section class="mb-5">
-        <h2 class="mb-4">Support & Resources</h2>
         <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Documentation</h3>
-                        <p class="card-text">Find detailed setup guides, API documentation, and integration examples in our GitHub repository.</p>
-                        <a href="https://github.com/apexive/odoo-llm" class="btn btn-primary mt-2">View Documentation</a>
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-cogs" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Base</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Core framework for LLM integration with provider management and model configuration.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Letta Resources</h3>
-                        <p class="card-text">Learn more about Letta's architecture, capabilities, and deployment options.</p>
-                        <a href="https://docs.letta.com" class="btn btn-outline-primary mt-2 me-2">Letta Docs</a>
-                        <a href="https://github.com/letta-ai/letta" class="btn btn-outline-primary mt-2">Letta GitHub</a>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_thread" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-comments" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Thread</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Conversational AI threads with message history and streaming responses.</p>
+                        </div>
                     </div>
-                </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_assistant" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-user-circle" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Assistant</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Create customizable AI assistants with specific instructions and personalities.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-wrench" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Enable function calling for AI to interact with Odoo.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_mcp_server" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-plug" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">MCP Server</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Model Context Protocol server for Letta agent tool integration.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_openai" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-bolt" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">OpenAI Provider</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Connect to OpenAI GPT models for Letta agent backends.</p>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     </section>
 </div>
 
-<footer class="bg-light py-4 border-top">
+<!-- Footer -->
+<footer class="bg-primary" style="padding:3rem 2rem; border-radius:16px; margin:2rem 1rem">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-6">
-                <h4>Letta LLM Integration</h4>
-                <p>Developed by Apexive Solutions LLC</p>
-                <p>Licensed under <a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank">LGPL-3</a></p>
+        <div style="border-radius:12px; padding:2.5rem">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 style="font-weight:700; color:#ffffff; font-size:1.5rem; margin-bottom:0.75rem">Letta LLM Integration</h4>
+                    <p style="color:#f8f9fa; font-size:1rem; margin-bottom:1rem">Stateful AI agents for Odoo</p>
+                    <p style="color:#e9d5ff; margin-bottom:0.25rem">Developed by <strong style="color:#ffffff">Apexive Solutions LLC</strong></p>
+                    <p style="color:#e0d4ec; font-size:0.9rem; margin-bottom:0">Licensed under LGPL-3 &bull; &copy; 2025 All rights reserved.</p>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="d-flex flex-column">
+                        <div class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; color:#71639e; font-weight:600; margin-bottom:0.75rem">
+                            <i class="fa fa-github" style="font-size:18px; margin-right:0.5rem"></i>
+                            github.com/apexive/odoo-llm
+                        </div>
+                        <a href="mailto:hello@apexive.com" class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; text-decoration:none; color:#71639e; font-weight:600; margin-bottom:0">
+                            <i class="fa fa-envelope" style="font-size:18px; margin-right:0.5rem"></i>
+                            hello@apexive.com
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-6 text-lg-end">
-                <p>For the latest updates and additional modules, visit:</p>
-                <a href="https://github.com/apexive/odoo-llm" class="btn btn-outline-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github me-2" viewBox="0 0 16 16">
-                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                    </svg>
-                    GitHub Repository
-                </a>
-            </div>
-        </div>
-        <div class="mt-4 pt-3 border-top text-center">
-            <p class="mb-0">© 2025 Apexive Solutions LLC. All rights reserved.</p>
         </div>
     </div>
 </footer>
-
-<script>
-    // Simple script to handle smooth scrolling for anchor links
-    document.addEventListener('DOMContentLoaded', function() {
-        const links = document.querySelectorAll('a[href^="#"]');
-        for (const link of links) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 70,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        }
-    });
-</script>
-</body>
-</html>

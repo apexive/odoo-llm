@@ -11,6 +11,15 @@ class LLMProvider(models.Model):
 
     @api.model
     def _is_tool_call_complete(self, function_data, expected_endings=("]", "}")):
+        """Check if a tool call is complete (utility function for providers).
+
+        Args:
+            function_data: Dictionary with 'name' and 'arguments' keys
+            expected_endings: Tuple of valid JSON ending characters
+
+        Returns:
+            bool: True if the tool call appears complete
+        """
         tool_name = function_data.get("name")
         args_str = function_data.get("arguments", "").strip()
 
@@ -26,96 +35,80 @@ class LLMProvider(models.Model):
 
         return False
 
-    def _prepare_chat_params(
-        self,
-        model,
-        messages,
-        stream,
-        tools,
-        prepend_messages=None,
-        **kwargs,
-    ):
-        """Generic method to prepare chat parameters for API call."""
-        params = {
-            "model": model.name,
-            "stream": stream,
-        }
+    def _prepare_prepend_messages(self, prepend_messages, tools):
+        """Inject tool consent instructions into prepend messages.
 
-        messages = messages or []
+        Overrides the base hook to add consent instructions for tools
+        that require user consent before execution.
 
-        # Handle prepend_messages parameter
-        if prepend_messages and isinstance(prepend_messages, list):
-            # Format the messages from the thread
-            formatted_messages = self.format_messages(messages)
-            # Prepend the additional messages
-            params["messages"] = prepend_messages + formatted_messages
-        else:
-            # Just format the messages without any system prompt
-            formatted_messages = self.format_messages(messages)
-            params["messages"] = formatted_messages
+        Args:
+            prepend_messages: List of pre-formatted message dicts
+            tools: llm.tool recordset of available tools
 
-        if tools:
-            formatted_tools = self.format_tools(tools)
-            if formatted_tools:
-                params["tools"] = formatted_tools
-                if "tool_choice" in kwargs:
-                    params["tool_choice"] = kwargs["tool_choice"]
+        Returns:
+            List of message dicts with consent instructions injected
+        """
+        prepend_messages = super()._prepare_prepend_messages(prepend_messages, tools)
 
-                consent_required_tools = tools.filtered(
-                    lambda t: t.requires_user_consent
-                )
-                if consent_required_tools:
-                    consent_tool_names = ", ".join(
-                        [f"'{t.name}'" for t in consent_required_tools]
+        if not tools:
+            return prepend_messages
+
+        consent_required = tools.filtered(lambda t: t.requires_user_consent)
+        if not consent_required:
+            return prepend_messages
+
+        return self._inject_tool_consent(prepend_messages, consent_required)
+
+    def _inject_tool_consent(self, prepend_messages, consent_tools):
+        """Add consent instructions to prepend messages.
+
+        Args:
+            prepend_messages: List of message dicts to modify
+            consent_tools: llm.tool recordset of tools requiring consent
+
+        Returns:
+            List of message dicts with consent instructions added
+        """
+        tool_names = ", ".join([f"'{t.name}'" for t in consent_tools])
+        config = self.env["llm.tool.consent.config"].get_active_config()
+        consent_instruction = config.system_message_template.format(
+            tool_names=tool_names
+        )
+
+        # Make a copy to avoid modifying the original
+        prepend_messages = list(prepend_messages or [])
+
+        # Find existing system message and append consent instructions
+        for msg in prepend_messages:
+            if msg.get("role") == "system":
+                content = msg.get("content", "")
+
+                # Handle list format - modify in place (preserves format)
+                if (
+                    isinstance(content, list)
+                    and content
+                    and isinstance(content[0], dict)
+                ):
+                    existing_text = self._extract_content_text(content)
+                    separator = "\n\n" if existing_text else ""
+                    content[0]["text"] = (
+                        f"{existing_text}{separator}{consent_instruction}"
                     )
-                    config = self.env["llm.tool.consent.config"].get_active_config()
-                    consent_instruction = config.system_message_template.format(
-                        tool_names=consent_tool_names
-                    )
+                else:
+                    # String format
+                    existing_text = self._extract_content_text(content)
+                    separator = "\n\n" if existing_text else ""
+                    msg["content"] = f"{existing_text}{separator}{consent_instruction}"
 
-                    if "messages" not in params:
-                        params["messages"] = []
+                return prepend_messages
 
-                    has_system_message = False
-                    for msg in params["messages"]:
-                        if msg.get("role") == "system":
-                            content = msg.get("content")
+        # No system message found, insert one at the beginning
+        prepend_messages.insert(
+            0,
+            {
+                "role": "system",
+                "content": consent_instruction,
+            },
+        )
 
-                            # Handle different content formats
-                            if (
-                                isinstance(content, list)
-                                and len(content) > 0
-                                and isinstance(content[0], dict)
-                            ):
-                                # Content is a list of objects format
-                                if all(item.get("type") == "text" for item in content):
-                                    # Append to the text of the first item
-                                    existing_text = content[0].get("text", "")
-                                    separator = "\n\n" if existing_text else ""
-                                    content[0]["text"] = (
-                                        f"{existing_text}{separator}{consent_instruction}"
-                                    )
-                            else:
-                                # Content is a string
-                                existing_content = content or ""
-                                separator = "\n\n" if existing_content else ""
-                                msg["content"] = (
-                                    f"{existing_content}{separator}{consent_instruction}"
-                                )
-
-                            has_system_message = True
-                            break
-
-                    if not has_system_message:
-                        # Insert a new system message using the list format for content
-                        params["messages"].insert(
-                            0,
-                            {
-                                "role": "system",
-                                "content": [
-                                    {"type": "text", "text": consent_instruction}
-                                ],
-                            },
-                        )
-
-        return params
+        return prepend_messages

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<odoo>
+<odoo noupdate="1">
     <record id="llm_tool_odoo_record_retriever" model="llm.tool">
         <field name="name">odoo_record_retriever</field>
         <field name="implementation">odoo_record_retriever</field>

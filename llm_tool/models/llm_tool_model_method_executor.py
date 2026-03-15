@@ -1,6 +1,6 @@
 import json
 import logging
-from typing import Any, Optional
+from typing import Any, Union
 
 from odoo import api, models
 from odoo.exceptions import UserError
@@ -18,13 +18,31 @@ class LLMToolModelMethodExecutor(models.Model):
             ("odoo_model_method_executor", "Odoo Model Method Executor"),
         ]
 
+    def _parse_json_value(self, value: Union[str, int, bool, float, None]) -> Any:
+        """
+        Automatically parse JSON-encoded strings to Python objects.
+        Non-string values or non-JSON strings are returned as-is.
+
+        This allows LLMs to pass complex structures (lists, dicts) as JSON strings
+        while keeping the schema OpenAI-compatible (primitives only).
+        """
+        if not isinstance(value, str):
+            return value
+
+        # Try to parse as JSON
+        try:
+            return json.loads(value)
+        except (json.JSONDecodeError, TypeError):
+            # Not valid JSON, return as plain string
+            return value
+
     def odoo_model_method_executor_execute(
         self,
         model: str,
         method: str,
-        record_ids: Optional[list[int]] = None,
-        args: Optional[list[Any]] = None,
-        kwargs: Optional[dict[str, Any]] = None,
+        record_ids: Union[list[int], None] = None,
+        args: Union[list[Union[str, int, bool, float, None]], None] = None,
+        kwargs: Union[dict[str, Union[str, int, bool, float, None]], None] = None,
         allow_private: bool = False,
     ) -> dict[str, Any]:
         """Executes the specified method on the model or records.
@@ -33,12 +51,17 @@ class LLMToolModelMethodExecutor(models.Model):
             model: The technical Odoo model name (e.g., res.partner).
             method: The name of the method to execute on the model or records.
             record_ids: Optional list of database IDs. If provided, the method is called on this recordset; otherwise, it's called on the model.
-            args: Optional list of positional arguments to pass to the method.
-            kwargs: Optional dictionary of keyword arguments to pass to the method.
+            args: Optional list of positional arguments. Simple values (str, int, bool, float, None) are passed directly. For complex structures (lists, dicts), pass them as JSON-encoded strings - they will be automatically parsed. Example: '[[\"name\", \"=\", \"John\"]]' for a domain.
+            kwargs: Optional dictionary of keyword arguments. Simple values are passed directly. For complex values (lists, dicts), pass them as JSON-encoded strings - they will be automatically parsed. Example: {\"values\": '{\"name\": \"John\", \"age\": 30}'}.
             allow_private: Set to true to allow calling private methods (those starting with '_'). Defaults to False.
         """
-        actual_args = args if args is not None else []
-        actual_kwargs = kwargs if kwargs is not None else {}
+        # Parse args: convert JSON strings to Python objects
+        actual_args = [self._parse_json_value(arg) for arg in args] if args else []
+
+        # Parse kwargs: convert JSON strings to Python objects
+        actual_kwargs = (
+            {k: self._parse_json_value(v) for k, v in kwargs.items()} if kwargs else {}
+        )
 
         if not model or not method:
             return {"error": "Model name and method name are required"}

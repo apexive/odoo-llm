@@ -12,7 +12,11 @@
         <field name="name">LLM Manager</field>
         <field name="category_id" ref="module_category_llm" />
         <field name="implied_ids" eval="[(4, ref('base.group_user'))]" />
-        <field name="users" eval="[(4, ref('base.user_admin'))]" />
+    </record>
+
+    <!-- Make Settings/Admin group imply LLM Manager -->
+    <record id="base.group_system" model="res.groups">
+        <field name="implied_ids" eval="[(4, ref('group_llm_manager'))]" />
     </record>
 
     <!-- Record Rules -->

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Server Action for Mass Processing -->
+    <record id="action_mass_process_rag_resources" model="ir.actions.server">
+        <field name="name">Process Resources</field>
+        <field name="model_id" ref="model_llm_resource" />
+        <field name="binding_model_id" ref="model_llm_resource" />
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+# Calls the overridden process_resource method in llm_knowledge
+action = model.action_mass_process_resources()
+        </field>
+    </record>
+
+    <!-- Server Action for Mass Unlock -->
+    <record id="action_mass_unlock_resources" model="ir.actions.server">
+        <field name="name">Force Unlock</field>
+        <field name="model_id" ref="model_llm_resource" />
+        <field name="binding_model_id" ref="model_llm_resource" />
+        <field name="binding_view_types">list,form,kanban</field>
+        <field name="state">code</field>
+        <field name="code">
+action = model.action_mass_unlock()
+        </field>
+    </record>
+
+    <!-- Server Action for Mass Reset -->
+    <record id="action_mass_reset_resources" model="ir.actions.server">
+        <field name="name">Reset Resources</field>
+        <field name="model_id" ref="model_llm_resource" />
+        <field name="binding_model_id" ref="model_llm_resource" />
+        <field name="binding_view_types">list,form,kanban</field>
+        <field name="state">code</field>
+        <field name="code">
+action = model.action_mass_reset()
+        </field>
+    </record>
+
+    <!-- Server Action for Creating RAG Resources (from specific models like attachment) -->
+    <record id="action_create_rag_resource_knowledge" model="ir.actions.server">
+        <field name="name">Create RAG Resource</field>
+        <field
+      name="model_id"
+      ref="base.model_ir_attachment"
+    /> <!-- Example binding -->
+        <field name="binding_model_id" ref="base.model_ir_attachment" />
+        <field name="binding_view_types">list,form</field>
+        <field name="state">code</field>
+        <field name="code">
+if records:
+    action = {
+        "type": "ir.actions.act_window",
+        "name": "Create RAG Resources",
+        "res_model": "llm.create.rag.resource.wizard", # Wizard in llm_knowledge
+        "view_mode": "form",
+        "target": "new",
+        "context": {"active_model": records._name, "active_ids": records.ids},
+    }
+        </field>
+    </record>
+
+    <!-- Server Action for Re-indexing RAG Resources -->
+    <record id="action_reindex_rag_resources" model="ir.actions.server">
+        <field name="name">Re-index RAG Resources</field>
+        <field name="model_id" ref="model_llm_resource" />
+        <field name="binding_model_id" ref="model_llm_resource" />
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">
+# action_mass_reindex method is added by llm_knowledge inheriting llm.resource
+action = records.action_mass_reindex()
+        </field>
+    </record>
+
+    <!-- Server Action for Upload Resources button in llm.resource views -->
+    <record
+    id="action_button_upload_resources_knowledge"
+    model="ir.actions.server"
+  >
+        <field name="name">Upload Resources</field>
+        <field name="model_id" ref="model_llm_resource" />
+        <field name="binding_model_id" ref="model_llm_resource" />
+        <field name="binding_view_types">list,kanban</field>
+        <field name="state">code</field>
+        <field name="code">
+action = {
+    "type": "ir.actions.act_window",
+    "name": "Upload RAG Resources",
+    "res_model": "llm.upload.resource.wizard", # Wizard in llm_knowledge
+    "view_mode": "form",
+    "target": "new",
+    "context": {}, # No collection pre-selected
+}
+        </field>
+    </record>
+
+    <!-- Server Action for Upload Resources button in collection views -->
+    <record id="action_collection_upload_resources" model="ir.actions.server">
+        <field name="name">Upload Resources</field>
+        <field name="model_id" ref="model_llm_knowledge_collection" />
+        <field name="binding_model_id" ref="model_llm_knowledge_collection" />
+        <field
+      name="binding_view_types"
+    >list,kanban,form</field> <!-- Added form -->
+        <field name="state">code</field>
+        <field name="code">
+# Pass current collection ID in context
+context = dict(env.context or {})
+if records and len(records) == 1:
+    context['default_collection_id'] = records.id
+# Handle context from form view
+elif env.context.get('active_id') and env.context.get('active_model') == 'llm.knowledge.collection':
+     context['default_collection_id'] = env.context.get('active_id')
+
+action = {
+    "type": "ir.actions.act_window",
+    "name": "Upload RAG Resources",
+    "res_model": "llm.upload.resource.wizard", # Wizard in llm_knowledge
+    "view_mode": "form",
+    "target": "new",
+    "context": context,
+}
+        </field>
+    </record>
+</odoo>

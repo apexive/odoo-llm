@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_knowledge_chunk_embedding_user,llm.knowledge.chunk.embedding.user,model_llm_knowledge_chunk_embedding,base.group_user,1,0,0,0
+access_llm_knowledge_chunk_embedding_manager,llm.knowledge.chunk.embedding.manager,model_llm_knowledge_chunk_embedding,llm.group_llm_manager,1,1,1,1

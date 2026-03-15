@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_store_view_form_inherit_pgvector" model="ir.ui.view">
+        <field name="name">llm.store.form.inherit.pgvector</field>
+        <field name="model">llm.store</field>
+        <field name="inherit_id" ref="llm_store.llm_store_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='service']" position="after">
+                <field
+          name="pgvector_index_method"
+          invisible="service != 'pgvector'"
+        />
+            </xpath>
+        </field>
+    </record>
+</odoo>

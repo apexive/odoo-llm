@@ -1,0 +1,478 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Base Kanban View for llm.resource -->
+    <record id="view_llm_resource_kanban" model="ir.ui.view">
+        <field name="name">llm.resource.kanban</field>
+        <field name="model">llm.resource</field>
+        <field name="arch" type="xml">
+            <kanban
+        default_group_by="state"
+        class="o_kanban_small_column"
+        sample="1"
+      >
+                <field name="id" />
+                <field name="name" />
+                <field name="state" />
+                <field name="kanban_state" />
+                <field name="lock_date" />
+                <field name="model_id" />
+                <field name="res_id" />
+                <field name="chunk_count" />
+                <field name="collection_ids" />
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="oe_kanban_card">
+                                <div class="o_kanban_record_top">
+                                    <div class="o_kanban_record_headings">
+                                        <strong
+                      class="o_kanban_record_title"
+                    ><field name="name" /></strong>
+                                    </div>
+                                    <div class="o_dropdown_kanban dropdown">
+                                        <button
+                      class="btn btn-sm btn-light dropdown-toggle"
+                      name="kanban_dropdown_toggle"
+                      type="button"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                                            <i
+                        class="fa fa-ellipsis-v"
+                        title="Menu"
+                        aria-label="Menu"
+                      />
+                                        </button>
+                                        <div
+                      class="dropdown-menu dropdown-menu-end"
+                      role="menu"
+                    >
+                                            <t t-if="widget.editable"><a
+                          type="edit"
+                          class="dropdown-item"
+                        >Edit</a></t>
+                                            <t t-if="widget.deletable"><a
+                          type="delete"
+                          class="dropdown-item"
+                        >Delete</a></t>
+                                            <div
+                        role="separator"
+                        class="dropdown-divider"
+                      />
+                                            <!-- Base Actions -->
+                                            <a
+                        name="retrieve"
+                        type="object"
+                        class="dropdown-item"
+                        t-if="record.state.raw_value == 'draft'"
+                      >Retrieve</a>
+                                            <a
+                        name="parse"
+                        type="object"
+                        class="dropdown-item"
+                        t-if="record.state.raw_value == 'retrieved'"
+                      >Parse</a>
+                                            <a
+                        name="chunk"
+                        type="object"
+                        class="dropdown-item"
+                        t-if="record.state.raw_value == 'parsed'"
+                      >Chunk</a>
+                                            <a
+                        name="action_embed"
+                        type="object"
+                        class="dropdown-item"
+                        t-if="record.state.raw_value == 'chunked'"
+                      >Embed</a>
+                                            <a
+                        name="process_resource"
+                        type="object"
+                        class="dropdown-item"
+                      >Process All</a>
+                                            <a
+                        name="action_reindex"
+                        type="object"
+                        class="dropdown-item"
+                        t-if="record.state.raw_value == 'ready'"
+                      >Re-index</a>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_body">
+                                    <div><span class="o_kanban_tag"><field
+                        name="model_id"
+                      />: <field name="res_id" /></span></div>
+                                    <div
+                    class="text-muted"
+                    t-if="record.chunk_count.raw_value > 0"
+                  >
+                                        <i
+                      class="fa fa-puzzle-piece"
+                      title="Chunks"
+                    /> <field name="chunk_count" /> chunks
+                                    </div>
+                                    <div
+                    t-if="record.collection_ids.raw_value.length > 0"
+                    class="mt-2"
+                  >
+                                        <field
+                      name="collection_ids"
+                      widget="many2many_tags"
+                    />
+                                    </div>
+                                </div>
+                                <div class="o_kanban_record_bottom">
+                                    <div class="oe_kanban_bottom_left"><field
+                      name="kanban_state"
+                      widget="state_selection"
+                    /></div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field
+                      name="state"
+                      widget="label_selection"
+                      options="{'classes': {'draft': 'default', 'retrieved': 'primary', 'parsed': 'info', 'chunked': 'warning', 'ready': 'success'}}"
+                    />
+                                    </div>
+                                </div>
+                                <div class="oe_clear" />
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Base Form View for llm.resource -->
+    <record id="view_llm_resource_form" model="ir.ui.view">
+        <field name="name">llm.resource.form</field>
+        <field name="model">llm.resource</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+            name="retrieve"
+            string="Retrieve"
+            type="object"
+            class="oe_highlight"
+            invisible="state != 'draft'"
+          />
+                    <button
+            name="parse"
+            string="Parse"
+            type="object"
+            class="oe_highlight"
+            invisible="state != 'retrieved'"
+          />
+                    <button
+            name="chunk"
+            string="Chunk"
+            type="object"
+            class="oe_highlight"
+            invisible="state != 'parsed'"
+          />
+                    <button
+            name="action_embed"
+            string="Embed"
+            type="object"
+            class="oe_highlight"
+            invisible="state != 'chunked'"
+          />
+                    <button
+            name="process_resource"
+            string="Process All"
+            type="object"
+            class="btn-secondary"
+          />
+                    <button
+            name="action_reindex"
+            string="Re-index"
+            type="object"
+            class="btn-secondary"
+            invisible="state != 'ready'"
+          />
+                    <field
+            name="state"
+            widget="statusbar"
+            statusbar_visible="draft,retrieved,parsed,chunked,ready"
+            options="{'clickable':1}"
+          />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <field name="chunk_count" invisible="1" />
+                        <button
+              name="action_view_chunks"
+              type="object"
+              class="oe_stat_button"
+              icon="fa-puzzle-piece"
+              invisible="chunk_count == 0"
+            >
+                            <field
+                name="chunk_count"
+                widget="statinfo"
+                string="Chunks"
+              />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field
+                name="name"
+                placeholder="Resource Name"
+              /></h1>
+                    </div>
+                    <group>
+                        <group name="group_left">
+                            <field
+                name="model_id"
+                options="{'no_create': True}"
+              />
+                            <field name="res_model" invisible="1" />
+                            <field name="res_id" />
+                            <field name="lock_date" readonly="1" />
+                            <field
+                name="external_url"
+                widget="url"
+                invisible="not external_url"
+              />
+                        </group>
+                        <group name="group_right">
+                            <field
+                name="collection_ids"
+                widget="many2many_tags"
+              />
+                            <field
+                name="retriever"
+                readonly="state != 'draft'"
+              />
+                            <field
+                name="parser"
+                readonly="state not in ('draft', 'retrieved')"
+              />
+                            <field
+                name="chunker"
+                readonly="state not in ('draft', 'retrieved', 'parsed')"
+              />
+                            <field
+                name="target_chunk_size"
+                readonly="state not in ('draft', 'retrieved', 'parsed')"
+              />
+                            <field
+                name="target_chunk_overlap"
+                readonly="state not in ('draft', 'retrieved', 'parsed')"
+              />
+                            <field
+                name="kanban_state"
+                widget="state_selection"
+              />
+                            <label
+                for="action_reset_chunk_settings"
+                colspan="2"
+              />
+                            <button
+                name="action_reset_chunk_settings"
+                string="RESET CHUNK SETTINGS"
+                type="object"
+                class="btn-primary"
+                colspan="2"
+                invisible="state not in ('draft', 'retrieved', 'parsed')"
+              />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Content" name="content">
+                            <field
+                name="content"
+                nolabel="1"
+                placeholder="Resource content will appear here after retrieval and parsing"
+                widget="text"
+              />
+                        </page>
+                        <page
+              string="Chunks"
+              name="chunks"
+              invisible="chunk_count == 0"
+            >
+                            <field
+                name="chunk_ids"
+                context="{'default_resource_id': id}"
+              >
+                                <tree>
+                                    <field name="sequence" widget="handle" />
+                                    <field name="name" />
+                                    <field
+                    name="metadata"
+                    widget="json_preview"
+                    optional="show"
+                  />
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <!-- Base Tree View for llm.resource -->
+    <record id="view_llm_resource_tree" model="ir.ui.view">
+        <field name="name">llm.resource.tree</field>
+        <field name="model">llm.resource</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="model_id" />
+                <field name="res_id" />
+                <field name="external_url" widget="url" optional="show" />
+                <field name="state" />
+                <field name="chunk_count" />
+                <field name="lock_date" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Base Search View for llm.resource -->
+    <record id="view_llm_resource_search" model="ir.ui.view">
+        <field name="name">llm.resource.search</field>
+        <field name="model">llm.resource</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="model_id" />
+                <field name="res_id" />
+                <field name="collection_ids" invisible="1" />
+                <filter
+          string="Draft"
+          name="state_draft"
+          domain="[('state', '=', 'draft')]"
+        />
+                <filter
+          string="Retrieved"
+          name="state_retrieved"
+          domain="[('state', '=', 'retrieved')]"
+        />
+                <filter
+          string="Parsed"
+          name="state_parsed"
+          domain="[('state', '=', 'parsed')]"
+        />
+                <filter
+          string="Chunked"
+          name="state_chunked"
+          domain="[('state', '=', 'chunked')]"
+        />
+                <filter
+          string="Ready"
+          name="state_ready"
+          domain="[('state', '=', 'ready')]"
+        />
+                <filter
+          string="Locked"
+          name="locked"
+          domain="[('lock_date', '!=', False)]"
+        />
+                <group expand="0" string="Group By">
+                    <filter
+            string="State"
+            name="group_by_state"
+            domain="[]"
+            context="{'group_by':'state'}"
+          />
+                    <filter
+            string="Model"
+            name="group_by_model"
+            domain="[]"
+            context="{'group_by':'model_id'}"
+          />
+                    <separator />
+                    <filter
+            string="Collection"
+            name="group_by_collection"
+            domain="[]"
+            context="{'group_by':'collection_ids'}"
+          />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Base Action for llm.resource -->
+    <record id="action_llm_resource" model="ir.actions.act_window">
+        <field name="name">Resources</field>
+        <field name="res_model">llm.resource</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field
+      name="view_ids"
+      eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_llm_resource_kanban')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_llm_resource_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_llm_resource_form')})]"
+    />
+        <field name="search_view_id" ref="view_llm_resource_search" />
+        <field name="context">{"search_default_group_by_state": 1}</field>
+        <field name="help" type="html">
+            <p
+        class="o_view_nocontent_smiling_face"
+      >Create your first resource</p>
+        </field>
+    </record>
+
+    <!-- Specific Tree View for "Documents" Menu -->
+    <record id="view_llm_resource_document_tree" model="ir.ui.view">
+        <field name="name">llm.resource.document.tree</field>
+        <field name="model">llm.resource</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="model_id" />
+                <field
+          name="collection_ids"
+          widget="many2many_tags"
+          optional="show"
+        />
+                <field name="state" />
+                <field name="chunk_count" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Kanban View for "Documents" Menu -->
+    <record id="view_llm_resource_document_kanban" model="ir.ui.view">
+        <field name="name">llm.resource.document.kanban</field>
+        <field name="model">llm.resource</field>
+        <field name="inherit_id" ref="view_llm_resource_kanban" />
+        <field name="mode">primary</field>
+        <field name="arch" type="xml">
+            <!-- Add group_by attribute to kanban -->
+            <xpath expr="//kanban" position="attributes">
+                <attribute name="group_by">state</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Action for "Documents" Menu -->
+    <record id="action_llm_knowledge_document" model="ir.actions.act_window">
+        <field name="name">Documents</field>
+        <field name="res_model">llm.resource</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <!-- Use the specific views -->
+        <field
+      name="view_ids"
+      eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_llm_resource_document_kanban')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_llm_resource_document_tree')}),
+            (0, 0, {'view_mode': 'form', 'view_id': ref('view_llm_resource_form')})]"
+    />
+        <field name="domain">[('collection_ids', '!=', False)]</field>
+        <field name="context">{'search_default_group_by_state': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Manage knowledge documents.
+            </p><p>
+                These are resources used for Retrieval Augmented Generation (RAG).
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -3,5 +3,6 @@ access_llm_mcp_server_config_manager,llm.mcp.server.config manager,model_llm_mcp
 access_llm_mcp_server_config_user,llm.mcp.server.config user,model_llm_mcp_server_config,base.group_user,1,0,0,0
 access_llm_mcp_server_config_public,llm.mcp.server.config public,model_llm_mcp_server_config,,1,0,0,0
 access_llm_mcp_session_manager,llm.mcp.session manager,model_llm_mcp_session,llm.group_llm_manager,1,1,1,1
-access_llm_mcp_session_user,llm.mcp.session user,model_llm_mcp_session,base.group_user,1,1,1,0
+access_llm_mcp_session_user,llm.mcp.session user,model_llm_mcp_session,base.group_user,1,1,1,1
 access_llm_mcp_session_public,llm.mcp.session public,model_llm_mcp_session,,1,1,1,0
+access_llm_mcp_key_show_user,llm.mcp.key.show user,model_llm_mcp_key_show,base.group_user,1,1,1,1

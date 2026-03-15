@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record
+    id="view_upload_rag_resources_wizard_form_inherit_document_page"
+    model="ir.ui.view"
+  >
+        <field
+      name="name"
+    >llm.upload.resource.wizard.form.inherit.document.page</field>
+        <field name="model">llm.upload.resource.wizard</field>
+        <field
+      name="inherit_id"
+      ref="llm_knowledge.view_llm_upload_resource_wizard_form"
+    />
+        <field name="arch" type="xml">
+            <!-- Add the checkbox under process_immediately -->
+            <xpath expr="//field[@name='process_immediately']" position="after">
+                <field
+          name="download_as_document_page"
+          invisible="external_urls in [False, '']"
+          help="Create document pages from external URLs. Note: Only works with text-based content (HTML, plain text). Binary files like PDFs, images, or videos are not supported."
+        />
+            </xpath>
+
+            <!-- Add the alert after the group containing process_immediately -->
+            <xpath
+        expr="//group[field[@name='process_immediately']]"
+        position="after"
+      >
+                <div
+          class="alert alert-info mt-3"
+          invisible="external_urls in [False, ''] or not download_as_document_page"
+          role="alert"
+        >
+                    <p><strong>Document Page Support</strong></p>
+                    <p
+          >Document pages only support text-based content (HTML, plain text). Binary files like PDFs, images, or videos will NOT be retrieved properly.</p>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <menuitem
+    id="menu_llm_knowledge_chunk_embedding"
+    name="Chunk Embeddings"
+    parent="llm_knowledge.menu_llm_knowledge_root"
+    action="action_llm_knowledge_chunk_embedding"
+    sequence="40"
+  />
+</odoo>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Top Level Knowledge Menu -->
+    <menuitem
+    id="menu_llm_knowledge_root"
+    name="Knowledge"
+    parent="llm.menu_llm_root"
+    sequence="30"
+  />
+
+    <!-- Collections Menu -->
+    <menuitem
+    id="menu_llm_knowledge_collection"
+    name="Collections"
+    parent="menu_llm_knowledge_root"
+    action="action_llm_knowledge_collection"
+    sequence="5"
+  />
+    <menuitem
+    id="menu_llm_knowledge_document"
+    name="Documents"
+    parent="menu_llm_knowledge_root"
+    action="action_llm_knowledge_document"
+    sequence="15"
+  />
+
+   <!-- Chunks Menu -->
+   <menuitem
+    id="menu_llm_knowledge_chunk"
+    name="Knowledge Chunks"
+    parent="menu_llm_knowledge_root"
+    action="action_llm_knowledge_chunk"
+    sequence="30"
+  />
+</odoo>

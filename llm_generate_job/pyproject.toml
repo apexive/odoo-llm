@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "llm_generate_job"
+version = "16.0.1.0.0"
+description = "Generation Job Management and Queue System for LLM Providers"
+authors = [
+    {name = "Apexive", email = "info@apexive.com"},
+]
+license = {text = "LGPL-3"}
+dependencies = [
+    "odoo>=16.0,<16.1",
+]

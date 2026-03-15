@@ -29,25 +29,6 @@ class LLMModel(models.Model):
                 else False
             )
 
-    def write(self, vals):
-        """Override write to auto-generate schema when details or model_use changes"""
-        result = super().write(vals)
-
-        # Process if details or model_use was changed
-        if 'details' in vals or 'model_use' in vals:
-            for record in self.filtered('is_replicate_provider'):
-                # Only for generation models with OpenAPI schema
-                # The check for "not input_schema" prevents infinite recursion
-                if (
-                    record.model_use in ["generation", "image_generation"]
-                    and record.details
-                    and record.details.get("latest_version", {}).get("openapi_schema")
-                    and not record.details.get("input_schema")
-                ):
-                    record.provider_id.replicate_generate_io_schema(record)
-
-        return result
-
     def _replicate_model_name_with_version(self):
         """Get the full model name including version if specified"""
         self.ensure_one()

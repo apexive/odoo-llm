@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- Default Knowledge Retriever Tool -->
+    <record id="llm_tool_knowledge_retriever" model="llm.tool">
+        <field name="name">knowledge_retriever</field>
+        <field
+      name="description"
+    >Retrieves relevant knowledge from document database using semantic search. Use this tool when you need specific information from the knowledge base to answer questions accurately. Supports both pure semantic and hybrid search methods, with configurable relevance thresholds.</field>
+        <field name="implementation">knowledge_retriever</field>
+        <field name="active" eval="True" />
+        <field name="default" eval="False" />
+        <field name="requires_user_consent" eval="False" />
+    </record>
+</odoo>

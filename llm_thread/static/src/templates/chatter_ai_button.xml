@@ -1,27 +1,58 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <templates>
     <!--
-    Extend Chatter topbar to add AI Chat button
-    IMPORTANT: Only adds AI button, preserves all existing chatter functionality
+    Extend Chatter to add AI Chat button and inline AI chat mode
+    IMPORTANT: Conditionally replaces chatter content with LLM chat interface
     -->
     <t
     t-name="llm_thread.ChatterAIExtension"
     t-inherit="mail.Chatter"
     t-inherit-mode="extension"
   >
-        <!-- Add AI button to the topbar left buttons section -->
-        <xpath expr="//t[@name='chatter-topbar-left-buttons']" position="after">
-            <!-- Only show AI button when appropriate -->
+        <!-- Add AI button before the spacer in the left buttons section -->
+        <xpath
+      expr="//span[hasclass('o-mail-Chatter-topbarGrow')]"
+      position="before"
+    >
+            <!-- Toggle AI Chat button -->
             <button
         t-if="shouldShowAIButton"
-        class="o-mail-Chatter-aiChat btn btn-link text-action"
+        class="o-mail-Chatter-aiChat btn text-nowrap ms-1 me-1"
+        t-att-class="{
+            'btn-primary': state.isChattingWithLLM,
+            'my-2': !props.compactHeight
+        }"
         type="button"
         t-on-click="onAIChatClick"
-        title="Start AI Chat about this record"
+        t-att-title="state.isChattingWithLLM ? 'Exit AI Chat' : 'Start AI Chat'"
       >
                 <i class="fa fa-robot me-1" role="img" aria-label="AI Chat" />
-                <span class="d-none d-sm-inline">AI Chat</span>
+                <span
+          class="d-none d-sm-inline"
+          t-esc="state.isChattingWithLLM ? 'Exit AI' : 'AI'"
+        />
             </button>
+        </xpath>
+
+        <!-- Insert LLM chat container before chatter content, hide content when AI chat is active -->
+        <xpath
+      expr="//div[hasclass('o-mail-Chatter-content')]"
+      position="before"
+    >
+            <t t-if="state.isChattingWithLLM">
+                <div class="o-mail-Chatter-content d-flex flex-column flex-grow-1">
+                    <LLMChatContainer
+            recordModel="props.threadModel"
+            recordId="props.threadId"
+          />
+                </div>
+            </t>
+        </xpath>
+        <xpath
+      expr="//div[hasclass('o-mail-Chatter-content')]"
+      position="attributes"
+    >
+            <attribute name="t-if">!state.isChattingWithLLM</attribute>
         </xpath>
     </t>
 </templates>

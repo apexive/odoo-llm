@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_generation_job_user,llm.generation.job.user,model_llm_generation_job,base.group_user,1,1,1,1
+access_llm_generation_job_manager,llm.generation.job.manager,model_llm_generation_job,llm.group_llm_manager,1,1,1,1
+access_llm_generation_queue_user,llm.generation.queue.user,model_llm_generation_queue,base.group_user,1,0,0,0
+access_llm_generation_queue_manager,llm.generation.queue.manager,model_llm_generation_queue,llm.group_llm_manager,1,1,1,1

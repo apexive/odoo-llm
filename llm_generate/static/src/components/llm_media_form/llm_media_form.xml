@@ -8,20 +8,23 @@
         >
                     <div>
                         <h5 class="mt-0 mb-0">Generate Media</h5>
-                        <small class="text-muted" t-if="!state.isLoading">
+                        <small
+              class="text-muted d-inline-flex align-items-center"
+              t-if="!state.isLoading"
+            >
                             <i class="fa fa-info-circle me-1" />
                             Schema source: <t t-esc="schemaSource.name" />
                             <span
                 t-if="schemaSource.type === 'prompt'"
-                class="badge badge-primary ms-1"
+                class="badge bg-secondary ms-1"
               >Prompt</span>
                             <span
                 t-elif="schemaSource.type === 'model'"
-                class="badge badge-secondary ms-1"
+                class="badge bg-secondary ms-1"
               >Model</span>
                             <span
                 t-elif="schemaSource.type === 'none'"
-                class="badge badge-warning ms-1"
+                class="badge bg-warning ms-1"
               >None</span>
                         </small>
                     </div>

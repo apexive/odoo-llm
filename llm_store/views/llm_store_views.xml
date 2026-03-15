@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Store Form View -->
+    <record id="llm_store_view_form" model="ir.ui.view">
+        <field name="name">llm.store.view.form</field>
+        <field name="model">llm.store</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+              name="toggle_active"
+              type="object"
+              class="oe_stat_button"
+              icon="fa-archive"
+            >
+                            <field
+                name="active"
+                widget="boolean_toggle"
+                options="{'terminology': 'archive'}"
+              />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Store Name" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="service" />
+                        </group>
+                        <group>
+                            <field
+                name="connection_uri"
+                placeholder="postgres://username:password@localhost:5432/database"
+              />
+                            <field name="api_key" password="True" />
+                            <field name="metadata" widget="json_inline" />
+                        </group>
+                    </group>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <!-- Store Tree View -->
+    <record id="llm_store_view_tree" model="ir.ui.view">
+        <field name="name">llm.store.view.tree</field>
+        <field name="model">llm.store</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="service" />
+                <field name="active" invisible="1" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Store Search View -->
+    <record id="llm_store_view_search" model="ir.ui.view">
+        <field name="name">llm.store.view.search</field>
+        <field name="model">llm.store</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="service" />
+                <separator />
+                <filter
+          string="Archived"
+          name="inactive"
+          domain="[('active', '=', False)]"
+        />
+                <group expand="0" string="Group By">
+                    <filter
+            string="Service"
+            name="group_by_service"
+            context="{'group_by': 'service'}"
+          />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Store Action -->
+    <record id="llm_store_action" model="ir.actions.act_window">
+        <field name="name">Vector Stores</field>
+        <field name="res_model">llm.store</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first vector store!
+            </p>
+            <p>
+                Configure vector stores like Chroma, Qdrant, or PostgreSQL to enable vector search for RAG.
+            </p>
+        </field>
+    </record>
+</odoo>

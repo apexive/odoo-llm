@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- MCP Key Show Form - displays key and config snippets -->
+    <record id="view_llm_mcp_key_show_form" model="ir.ui.view">
+        <field name="name">llm.mcp.key.show.form</field>
+        <field name="model">llm.mcp.key.show</field>
+        <field name="arch" type="xml">
+            <form string="MCP Key Ready">
+                <sheet>
+                    <group>
+                        <group string="Your API Key">
+                            <field
+                name="key"
+                readonly="1"
+                widget="CopyClipboardChar"
+              />
+                        </group>
+                        <group string="MCP Server URL">
+                            <field
+                name="mcp_url"
+                readonly="1"
+                widget="CopyClipboardChar"
+              />
+                        </group>
+                    </group>
+
+                    <div class="alert alert-warning mt-3" role="alert">
+                        <strong
+            >Important:</strong> This key cannot be retrieved later.
+                        Store it securely before closing this dialog.
+                    </div>
+
+                    <notebook>
+                        <page string="Claude Desktop" name="claude_desktop">
+                            <div class="mb-2">
+                                <p><strong>Prerequisite:</strong> Install <code
+                  >mcp-remote</code> via npm: <code
+                  >npm install -g mcp-remote</code></p>
+                                <p>Add this to your <code
+                  >claude_desktop_config.json</code>:</p>
+                                <ul>
+                                    <li>Linux: <code
+                    >~/.config/claude_desktop/claude_desktop_config.json</code></li>
+                                    <li>macOS: <code
+                    >~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+                                    <li>Windows: <code
+                    >%APPDATA%\Claude\claude_desktop_config.json</code></li>
+                                </ul>
+                            </div>
+                            <field
+                name="config_claude_desktop"
+                readonly="1"
+                nolabel="1"
+                class="font-monospace bg-light p-3 border rounded d-block overflow-auto"
+                style="white-space: pre; font-size: 12px; max-height: 300px;"
+              />
+                            <field
+                name="config_claude_desktop"
+                readonly="1"
+                nolabel="1"
+                widget="CopyClipboardButton"
+                string="Copy Configuration"
+                class="mt-2"
+              />
+                        </page>
+                        <page string="Claude Code" name="claude_code">
+                            <div class="mb-2">
+                                <p><strong>Prerequisite:</strong> Install <code
+                  >mcp-remote</code> via npm: <code
+                  >npm install -g mcp-remote</code></p>
+                                <p>Run this command in your terminal:</p>
+                            </div>
+                            <field
+                name="config_claude_code"
+                readonly="1"
+                nolabel="1"
+                class="font-monospace bg-light p-3 border rounded d-block overflow-auto"
+                style="white-space: pre; font-size: 12px; max-height: 300px;"
+              />
+                            <field
+                name="config_claude_code"
+                readonly="1"
+                nolabel="1"
+                widget="CopyClipboardButton"
+                string="Copy Command"
+                class="mt-2"
+              />
+                        </page>
+                        <page string="Codex (OpenAI)" name="codex">
+                            <div class="mb-2">
+                                <p>Add this to your Codex CLI configuration:</p>
+                                <ul>
+                                    <li>Config: <code
+                    >~/.codex/config.toml</code></li>
+                                </ul>
+                            </div>
+                            <field
+                name="config_codex"
+                readonly="1"
+                nolabel="1"
+                class="font-monospace bg-light p-3 border rounded d-block overflow-auto"
+                style="white-space: pre; font-size: 12px; max-height: 300px;"
+              />
+                            <field
+                name="config_codex"
+                readonly="1"
+                nolabel="1"
+                widget="CopyClipboardButton"
+                string="Copy Configuration"
+                class="mt-2"
+              />
+                        </page>
+                    </notebook>
+                </sheet>
+                <footer>
+                    <button
+            special="cancel"
+            data-hotkey="x"
+            string="Done"
+            class="btn-primary"
+          />
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for MCP Key Show -->
+    <record id="action_llm_mcp_key_show" model="ir.actions.act_window">
+        <field name="name">MCP Key Ready</field>
+        <field name="res_model">llm.mcp.key.show</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+</odoo>

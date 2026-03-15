@@ -1,15 +1,16 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
+import { Component, onWillStart, useEffect, useRef, useState } from "@odoo/owl";
 import { JsonEditorComponent } from "@web_json_editor/components/json_editor/json_editor";
 import { LLMFormFieldsView } from "./llm_form_fields_view";
 import { useService } from "@web/core/utils/hooks";
-import { Component, useState, onWillStart, useEffect, useRef } from "@odoo/owl";
 
 export class LLMMediaForm extends Component {
   setup() {
     this.orm = useService("orm");
-    this.llmStore = useService("llm.store");
-    this.mailStore = useService("mail.store");
+    this.llmStore = useState(useService("llm.store"));
+    this.mailStore = useState(useService("mail.store"));
     this.attachmentInputRef = useRef("attachmentInput");
 
     this.state = useState({
@@ -31,6 +32,7 @@ export class LLMMediaForm extends Component {
       },
       attachments: [],
       uploadingFiles: false,
+      schemaSource: { type: "loading", name: _t("Loading...") },
     });
 
     onWillStart(async () => {
@@ -48,7 +50,24 @@ export class LLMMediaForm extends Component {
       () => {
         this._handleContextChange();
       },
-      () => [this.props.threadId, this.thread?.model_id, this.thread?.assistant_id]
+      () => [
+        this.props.threadId,
+        this.thread?.model_id,
+        this.thread?.assistant_id,
+      ]
+    );
+
+    // Compute schema source when prompt_id changes
+    useEffect(
+      () => {
+        this._computeSchemaSource();
+      },
+      () => [
+        this.thread?.prompt_id,
+        this.thread?.assistant_id,
+        this.state.threadConfig.input_schema,
+        this.llmModel,
+      ]
     );
   }
 
@@ -64,7 +83,7 @@ export class LLMMediaForm extends Component {
     const modelId = this.thread?.model_id?.id || this.thread?.model_id;
     if (!modelId) return null;
 
-    return this.llmStore.llmModels.get(modelId);
+    return this.llmStore.llmModels[modelId];
   }
 
   get composer() {
@@ -83,17 +102,21 @@ export class LLMMediaForm extends Component {
 
     this.state.isLoading = true;
     try {
-      const config = await this.orm.call("llm.thread", "get_generation_form_config", [
-        threadId,
-      ]);
+      const config = await this.orm.call(
+        "llm.thread",
+        "get_generation_form_config",
+        [threadId]
+      );
       this.state.threadConfig = config;
 
       if (config.error) {
         this.state.error = config.error;
+      } else {
+        this.state.error = null;
       }
     } catch (error) {
       console.error("Error loading thread configuration:", error);
-      this.state.error = "Failed to load thread configuration";
+      this.state.error = _t("Failed to load thread configuration");
     } finally {
       this.state.isLoading = false;
     }
@@ -128,16 +151,18 @@ export class LLMMediaForm extends Component {
 
     if (!schema || typeof schema !== "object") {
       console.warn("No input schema found for model:", this.llmModel?.name);
-      return {}; // Return empty object instead of null
+      // Return empty object instead of null
+      return {};
     }
 
-    let parsedSchema;
+    let parsedSchema = null;
     if (typeof schema === "string") {
       try {
         parsedSchema = JSON.parse(schema);
       } catch (e) {
         console.error("Error parsing input schema:", e);
-        return {}; // Return empty object instead of null
+        // Return empty object instead of null
+        return {};
       }
     } else {
       parsedSchema = schema;
@@ -151,6 +176,8 @@ export class LLMMediaForm extends Component {
 
   /**
    * Normalize schema to fix field-level required issue
+   * @param {Object} schema - JSON schema to normalize
+   * @returns {Object} Normalized schema
    */
   _normalizeSchema(schema) {
     if (!schema || typeof schema !== "object") {
@@ -178,7 +205,8 @@ export class LLMMediaForm extends Component {
         // Move field-level required to schema-level required array
         if (fieldDef.required === true) {
           requiredFields.push(fieldName);
-          delete fieldDef.required; // Remove invalid field-level required
+          // Remove invalid field-level required
+          delete fieldDef.required;
         }
       }
     );
@@ -221,7 +249,7 @@ export class LLMMediaForm extends Component {
         const isPromptField = name.toLowerCase() === "prompt";
 
         // Handle enum types
-        let choices;
+        let choices = null;
         let fieldType = fieldDef.type;
 
         if (fieldDef.allOf?.[0]?.enum) {
@@ -266,37 +294,45 @@ export class LLMMediaForm extends Component {
   }
 
   /**
-   * Get information about the schema source for transparency
+   * Compute schema source information - called when dependencies change
+   */
+  _computeSchemaSource() {
+    if (this.state.isLoading) {
+      this.state.schemaSource = { type: "loading", name: _t("Loading...") };
+      return;
+    }
+
+    // Check if thread has a prompt_id - if so, schema is from prompt
+    const hasPrompt = Boolean(this.thread?.prompt_id);
+    const hasSchema =
+      this.state.threadConfig.input_schema &&
+      Object.keys(this.state.threadConfig.input_schema).length > 0;
+
+    if (hasSchema) {
+      if (hasPrompt) {
+        // Schema exists AND prompt is set -> schema is from prompt
+        this.state.schemaSource = {
+          type: "prompt",
+          name: this.thread?.prompt_id?.name || _t("Selected Prompt"),
+        };
+      } else {
+        // Schema exists but NO prompt -> schema must be from model
+        this.state.schemaSource = {
+          type: "model",
+          name: this.llmModel?.name || _t("Model Default"),
+        };
+      }
+      return;
+    }
+
+    this.state.schemaSource = { type: "none", name: _t("No Schema Available") };
+  }
+
+  /**
+   * Get schema source from state (for template access)
    */
   get schemaSource() {
-    if (this.state.isLoading) {
-      return { type: "loading", name: "Loading..." };
-    }
-
-    if (
-      this.state.threadConfig.input_schema &&
-      Object.keys(this.state.threadConfig.input_schema).length > 0
-    ) {
-      return {
-        type: "prompt",
-        name:
-          this.thread?.prompt_id?.name ||
-          this.llmAssistant?.prompt_id?.name ||
-          "Selected Prompt",
-      };
-    }
-
-    if (
-      this.llmModel?.inputSchema &&
-      Object.keys(this.llmModel.inputSchema).length > 0
-    ) {
-      return {
-        type: "model",
-        name: this.llmModel?.name || "Model Default",
-      };
-    }
-
-    return { type: "none", name: "No Schema Available" };
+    return this.state.schemaSource;
   }
 
   /**
@@ -358,10 +394,11 @@ export class LLMMediaForm extends Component {
       };
 
       // Call backend method to prepare generation inputs (which handles template rendering)
-      const result = await this.orm.call("llm.thread", "prepare_generation_inputs", [
-        threadId,
-        mergedInputs,
-      ]);
+      const result = await this.orm.call(
+        "llm.thread",
+        "prepare_generation_inputs",
+        [threadId, mergedInputs]
+      );
 
       // Display the result based on its type
       if (typeof result === "string") {
@@ -383,7 +420,7 @@ export class LLMMediaForm extends Component {
    * Get formatted template preview
    */
   get formattedTemplatePreview() {
-    return this.state.templatePreviewContent || "Loading preview...";
+    return this.state.templatePreviewContent || _t("Loading preview...");
   }
 
   /**
@@ -407,16 +444,15 @@ export class LLMMediaForm extends Component {
       if (!this.state.hasSchemaValidationErrors) {
         this.state.jsonEditorError = null;
       }
-    } else {
+    } else if (!this.state.hasSchemaValidationErrors) {
       // Only set syntax errors if we don't have schema validation errors
-      if (!this.state.hasSchemaValidationErrors) {
-        this.state.jsonEditorError = error || "Invalid JSON format.";
-      }
+      this.state.jsonEditorError = error || "Invalid JSON format.";
     }
   }
 
   /**
    * Handle JSON validation errors
+   * @param {Array} errors - Validation errors from JSON schema
    */
   onJsonValidationError(errors) {
     if (errors?.length > 0) {
@@ -438,6 +474,7 @@ export class LLMMediaForm extends Component {
 
   /**
    * Handle general JSON editor errors
+   * @param {Object} error - Error object from JSON editor
    */
   onJsonEditorError(error) {
     console.error("JSON Editor Error:", error);
@@ -454,10 +491,12 @@ export class LLMMediaForm extends Component {
 
   /**
    * Handle form input changes
+   * @param {String} fieldName - Name of the field being changed
+   * @param {Event} event - Input change event
    */
   onInputChange(fieldName, event) {
     const target = event.target;
-    let value;
+    let value = null;
 
     const fieldDef = this.formFields.find((field) => field.name === fieldName);
 
@@ -483,7 +522,55 @@ export class LLMMediaForm extends Component {
   }
 
   /**
+   * Validate and convert field value based on type
+   * @param {*} value - Field value to validate
+   * @param {Object} schemaField - Schema field definition
+   * @param {String} label - Field label for error messages
+   * @returns {Object} Object with processedValue and error (if any)
+   */
+  _validateFieldValue(value, schemaField, label) {
+    let processedValue = value;
+    let error = null;
+
+    switch (schemaField.type) {
+      case "integer": {
+        const intValue = parseFloat(value);
+        if (isNaN(intValue) || !Number.isInteger(intValue)) {
+          error = `Field "${label}" must be an integer.`;
+        } else {
+          processedValue = intValue;
+        }
+        break;
+      }
+      case "number": {
+        const floatValue = parseFloat(value);
+        if (isNaN(floatValue)) {
+          error = `Field "${label}" must be a number.`;
+        } else {
+          processedValue = floatValue;
+        }
+        break;
+      }
+      case "boolean":
+        if (typeof value === "string") {
+          processedValue = value.toLowerCase() === "true";
+        } else if (typeof value !== "boolean") {
+          error = `Field "${label}" must be a boolean.`;
+        }
+        break;
+      case "string":
+        if (value !== null && value !== undefined) {
+          processedValue = String(value);
+        }
+        break;
+    }
+
+    return { processedValue, error };
+  }
+
+  /**
    * Validate form values against schema
+   * @returns {Object} Object with errors array and validatedValues
    */
   _validateFormValues() {
     const errors = [];
@@ -509,40 +596,11 @@ export class LLMMediaForm extends Component {
 
       // Validate and convert types
       if (value !== undefined) {
-        let processedValue = value;
-
-        switch (schemaField.type) {
-          case "integer":
-            const intValue = parseFloat(value);
-            if (isNaN(intValue) || !Number.isInteger(intValue)) {
-              errors.push(`Field "${label}" must be an integer.`);
-            } else {
-              processedValue = intValue;
-            }
-            break;
-          case "number":
-            const floatValue = parseFloat(value);
-            if (isNaN(floatValue)) {
-              errors.push(`Field "${label}" must be a number.`);
-            } else {
-              processedValue = floatValue;
-            }
-            break;
-          case "boolean":
-            if (typeof value === "string") {
-              processedValue = value.toLowerCase() === "true";
-            } else if (typeof value !== "boolean") {
-              errors.push(`Field "${label}" must be a boolean.`);
-            }
-            break;
-          case "string":
-            if (value !== null && value !== undefined) {
-              processedValue = String(value);
-            }
-            break;
+        const result = this._validateFieldValue(value, schemaField, label);
+        if (result.error) {
+          errors.push(result.error);
         }
-
-        validatedValues[fieldName] = processedValue;
+        validatedValues[fieldName] = result.processedValue;
       }
     }
 
@@ -555,6 +613,7 @@ export class LLMMediaForm extends Component {
 
   /**
    * Handle form submission
+   * @param {Event} event - Form submit event
    */
   async onSubmit(event) {
     event.preventDefault();
@@ -583,9 +642,6 @@ export class LLMMediaForm extends Component {
     this.state.error = null;
 
     try {
-      console.log("Submitting generation request:", validationResult.values);
-      console.log("Attachments:", this.state.attachments);
-
       // Submit through llmStore - uses body_json and includes attachments
       await this.llmStore.postGenerationMessage(
         threadId,
@@ -606,14 +662,16 @@ export class LLMMediaForm extends Component {
 
   /**
    * Check if streaming is active
+   * @returns {Boolean} True if streaming is active
    */
   isStreaming() {
     const threadId = this.props.threadId;
-    return this.llmStore.getStreamingStatus(threadId) || false;
+    return this.llmStore.isStreamingThread(threadId) || false;
   }
 
   /**
    * Handle file attachment changes
+   * @param {Event} event - File input change event
    */
   async onAttachmentChange(event) {
     const files = Array.from(event.target.files);
@@ -625,21 +683,25 @@ export class LLMMediaForm extends Component {
       for (const file of files) {
         // Use Odoo's ORM to create attachment record directly
         const fileDataUrl = await this._readFileAsDataURL(file);
-        const base64Data = fileDataUrl.split(",")[1]; // Remove data:mime/type;base64, prefix
+        // Remove data:mime/type;base64, prefix
+        const base64Data = fileDataUrl.split(",")[1];
 
-        const attachment = await this.orm.create("ir.attachment", [
+        const attachmentIds = await this.orm.create("ir.attachment", [
           {
             name: file.name,
             datas: base64Data,
             res_model: "mail.compose.message",
-            res_id: 0, // Temporary attachment
+            // Temporary attachment
+            res_id: 0,
             mimetype: file.type,
           },
         ]);
 
-        if (attachment) {
+        // Orm.create with array returns array of IDs, extract first element
+        if (attachmentIds && attachmentIds.length > 0) {
           this.state.attachments.push({
-            id: attachment,
+            // Get first ID from array
+            id: attachmentIds[0],
             name: file.name,
             size: file.size,
             mimetype: file.type,
@@ -648,7 +710,7 @@ export class LLMMediaForm extends Component {
       }
     } catch (error) {
       console.error("Error uploading attachments:", error);
-      this.state.error = "Failed to upload one or more attachments.";
+      this.state.error = _t("Failed to upload one or more attachments.");
     } finally {
       this.state.uploadingFiles = false;
       // Clear the input to allow re-selecting the same files
@@ -660,6 +722,8 @@ export class LLMMediaForm extends Component {
 
   /**
    * Read file as data URL
+   * @param {File} file - File to read
+   * @returns {Promise<String>} Promise resolving to data URL
    */
   _readFileAsDataURL(file) {
     return new Promise((resolve, reject) => {
@@ -672,6 +736,7 @@ export class LLMMediaForm extends Component {
 
   /**
    * Remove an attachment from the list
+   * @param {Object} attachment - Attachment to remove
    */
   removeAttachment(attachment) {
     const index = this.state.attachments.findIndex(
@@ -684,6 +749,8 @@ export class LLMMediaForm extends Component {
 
   /**
    * Format file size for display
+   * @param {Number} bytes - File size in bytes
+   * @returns {String} Formatted file size string
    */
   formatFileSize(bytes) {
     if (bytes === 0) return "0 Bytes";

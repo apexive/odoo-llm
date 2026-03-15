@@ -78,3 +78,4 @@ docs/_build/
 llm_thread/gptree_output.txt
 **/.gptree_config
 **/gptree_output.txt
+odoo-docs-maintenance-swarm.yml

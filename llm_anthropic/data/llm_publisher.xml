@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_publisher_anthropic" model="llm.publisher">
+        <field name="name">Anthropic</field>
+        <field name="official" eval="True" />
+        <field name="frontier" eval="True" />
+        <field
+      name="description"
+    >Anthropic is an artificial intelligence research company focused on developing safe and ethical AI systems. Known for developing the Claude series of language models, Anthropic emphasizes constitutional AI and responsible development practices. Claude models excel at nuanced reasoning, following complex instructions, and providing helpful, harmless, and honest responses.</field>
+        <field
+      name="logo"
+      type="base64"
+      file="llm_anthropic/static/description/anthropic_logo.png"
+    />
+        <field name="meta">{
+            "website": "https://www.anthropic.com",
+            "founded": 2021,
+            "headquarters": "San Francisco, California",
+            "key_products": ["Claude Opus 4.5", "Claude Sonnet 4.5", "Claude Haiku 4.5", "Constitutional AI"]
+        }</field>
+    </record>
+</odoo>

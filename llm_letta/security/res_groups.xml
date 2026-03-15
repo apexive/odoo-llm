@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <odoo>
-    <data>
-        <!-- Extend LLM Manager Group to set API key duration -->
+    <!-- Extend LLM Manager Group to set API key duration -->
         <record id="llm.group_llm_manager" model="res.groups">
             <field
-        name="api_key_duration"
-      >365.0</field> <!-- 365 days for long-lived keys -->
+      name="api_key_duration"
+    >365.0</field> <!-- 365 days for long-lived keys -->
         </record>
-    </data>
 </odoo>

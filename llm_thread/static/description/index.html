@@ -1,261 +1,378 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Easy AI Chat for Odoo: A user-friendly AI chat module. Integrate multiple AI providers, enjoy real-time chat, and build custom AI use cases in your Odoo workflows.">
-    <meta name="keywords" content="Easy AI Chat, Odoo AI Chat, AI Chat Module, Odoo Chatbot, Real-time AI Chat, Enterprise AI, Multimodal AI, Odoo Productivity Tools, Apexive, Tool Selection, Function Calling">
-    <meta name="author" content="Apexive">
-    <meta name="robots" content="index, follow">
-    <meta property="og:title" content="Easy AI Chat for Odoo - Seamless AI Chat Solution">
-    <meta property="og:description" content="Transform your Odoo experience with Easy AI Chat. Connect AI providers, chat in real time, and create custom AI solutions effortlessly.">
-    <meta property="og:image" content="banner.jpeg">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="mailto:support@apexive.com">
-    <title>Easy AI Chat for Odoo - Your Simple AI Chat Solution | Apexive</title>
-</head>
-<body>
-    <div class="container py-4 bg-light">
-        <!-- Header Section -->
-        <header class="bg-white rounded shadow p-4 text-center mb-5">
-            <img src="banner.jpeg" alt="Easy AI Chat Interface for Odoo" class="img-fluid rounded mb-3" style="max-height: 300px; object-fit: cover;">
-            <h1 class="text-primary fw-bold">Easy AI Chat for Odoo</h1>
-            <div class="bg-light p-3 rounded mt-3 fw-semibold text-primary">
-                <p class="mb-0">A simple, powerful AI chat module to supercharge your Odoo workflows with real-time conversations.</p>
+<!-- Hero Section -->
+<section style="padding:4rem 0 3rem">
+    <div class="container">
+        <div class="text-center" style="max-width:800px; margin:0 auto">
+            <div style="display:inline-flex; padding:0.5rem 1.25rem; border-radius:50px; margin-bottom:2rem">
+                <i class="fa fa-comments" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                <span style="color:#71639e; font-weight:600; font-size:0.9rem">AI Chat</span>
             </div>
-        </header>
 
-        <!-- Why Easy AI Chat Section -->
-        <section class="mb-5">
-            <h2 class="text-primary fw-bold mb-4 border-bottom border-primary pb-2 d-inline-block">Why Easy AI Chat?</h2>
-            <div class="row g-4">
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 shadow-sm" style="transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <div class="card-body">
-                            <div class="mb-3 p-2 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(0, 123, 255, 0.05);">
-                                <span class="text-primary fw-bold">1</span>
-                            </div>
-                            <h3 class="card-title h5 fw-bold text-primary">Multiple AI Providers</h3>
-                            <p class="card-text">Connect with OpenAI, Anthropic, Grok, Ollama, DeepSeek, and more. Switch models instantly.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 shadow-sm" style="transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <div class="card-body">
-                            <div class="mb-3 p-2 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(0, 123, 255, 0.05);">
-                                <span class="text-primary fw-bold">2</span>
-                            </div>
-                            <h3 class="card-title h5 fw-bold text-primary">Real-Time Chat</h3>
-                            <p class="card-text">Chat instantly with AI, integrated into Odoo's mail system, with full conversation history.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 shadow-sm" style="transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <div class="card-body">
-                            <div class="mb-3 p-2 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(0, 123, 255, 0.05);">
-                                <span class="text-primary fw-bold">3</span>
-                            </div>
-                            <h3 class="card-title h5 fw-bold text-primary">Multimodal Power</h3>
-                            <p class="card-text">Go beyond text—use advanced AI models for rich, actionable responses.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 shadow-sm" style="transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <div class="card-body">
-                            <div class="mb-3 p-2 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(0, 123, 255, 0.05);">
-                                <span class="text-primary fw-bold">4</span>
-                            </div>
-                            <h3 class="card-title h5 fw-bold text-primary">Odoo Integration</h3>
-                            <p class="card-text">Link chats to any Odoo app or object for smarter workflows.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6 col-lg-3">
-                    <div class="card h-100 shadow-sm" style="transition: transform 0.3s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-                        <div class="card-body">
-                            <div class="mb-3 p-2 rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: rgba(0, 123, 255, 0.05);">
-                                <span class="text-primary fw-bold">5</span>
-                            </div>
-                            <h3 class="card-title h5 fw-bold text-primary">Tool Selection</h3>
-                            <p class="card-text">Choose which tools are available for each AI conversation to enhance capabilities.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+            <h1 style="font-size:3rem; font-weight:800; color:#212529; margin-bottom:1.5rem; line-height:1.2">
+                Easy AI Chat for Odoo
+            </h1>
 
-        <!-- Get Started Section -->
-        <section class="mb-5">
-            <h2 class="text-primary fw-bold mb-4 border-bottom border-primary pb-2 d-inline-block">Get Started with Easy AI Chat</h2>
-            <p>Follow these steps to set up and start chatting:</p>
-            
-            <div class="row g-4 mt-2">
-                <div class="col-md-6">
-                    <div class="card h-100 border-0" style="background-color: rgba(0, 123, 255, 0.05);">
-                        <div class="card-body p-4">
-                            <div class="d-flex">
-                                <div class="me-3 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                    <span class="text-primary fw-bold">1</span>
-                                </div>
-                                <div>
-                                    <h3 class="h5 fw-bold">Install the Module</h3>
-                                    <p class="mb-0">Add "Easy AI Chat" and its dependency "LLM Integration Base" to your Odoo environment.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card h-100 border-0" style="background-color: rgba(0, 123, 255, 0.05);">
-                        <div class="card-body p-4">
-                            <div class="d-flex">
-                                <div class="me-3 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                    <span class="text-primary fw-bold">2</span>
-                                </div>
-                                <div>
-                                    <h3 class="h5 fw-bold">Set Up Providers</h3>
-                                    <p class="mb-0">Go to <strong>LLM > Configuration > Providers</strong>, create a new provider, and add your API key.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card h-100 border-0" style="background-color: rgba(0, 123, 255, 0.05);">
-                        <div class="card-body p-4">
-                            <div class="d-flex">
-                                <div class="me-3 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                    <span class="text-primary fw-bold">3</span>
-                                </div>
-                                <div>
-                                    <h3 class="h5 fw-bold">Fetch Models</h3>
-                                    <p class="mb-0">Click "Fetch Models" in the provider form to import available AI models using your API key.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card h-100 border-0" style="background-color: rgba(0, 123, 255, 0.05);">
-                        <div class="card-body p-4">
-                            <div class="d-flex">
-                                <div class="me-3 bg-white rounded-circle shadow-sm d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
-                                    <span class="text-primary fw-bold">4</span>
-                                </div>
-                                <div>
-                                    <h3 class="h5 fw-bold">Start Chatting</h3>
-                                    <p class="mb-0">Navigate to <strong>Chat</strong> in the Odoo menu, create a new thread, and ask AI anything!</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="alert alert-info mt-4" style="background-color: rgba(23, 162, 184, 0.05);">
-                <p class="mb-0"><strong>Pro Tip:</strong> Get API keys from providers like OpenAI or Anthropic. Ensure your "LLM Integration Base" module is installed first.</p>
-            </div>
-        </section>
+            <p style="font-size:1.25rem; color:#6c757d; margin-bottom:1rem; line-height:1.6">
+                A simple, powerful AI chat module to supercharge your Odoo workflows.
+            </p>
 
-        <!-- How to Use Section -->
-        <section class="mb-5">
-            <h2 class="text-primary fw-bold mb-4 border-bottom border-primary pb-2 d-inline-block">How to Use Easy AI Chat</h2>
-            
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <p>Once set up, chatting with AI is simple and flexible:</p>
-                    
-                    <div class="row g-3 mt-3">
-                        <div class="col-md-6">
-                            <div class="p-3 rounded" style="background-color: rgba(0, 123, 255, 0.05);">
-                                <p class="mb-0"><strong>Start from Anywhere:</strong> Look for the "AI" button in any Odoo record's chat area to start a conversation.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded" style="background-color: rgba(0, 123, 255, 0.05);">
-                                <p class="mb-0"><strong>Create a Thread:</strong> Click "New Chat" from the sidebar to start a fresh conversation.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded" style="background-color: rgba(0, 123, 255, 0.05);">
-                                <p class="mb-0"><strong>Switch Models:</strong> Pick different AI providers or models from the thread header.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded" style="background-color: rgba(0, 123, 255, 0.05);">
-                                <p class="mb-0"><strong>Integrate:</strong> Link chats to Odoo records via the chatter for context.</p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-3 rounded" style="background-color: rgba(0, 123, 255, 0.05);">
-                                <p class="mb-0"><strong>Select Tools:</strong> Choose specific tools for each thread to enable AI to perform actions in your Odoo system.</p>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="text-center mt-4">
-                        <a href="mailto:support@apexive.com" class="btn btn-primary">Contact Us to Get Started</a>
-                    </div>
+            <p style="font-size:1rem; color:#868e96; margin-bottom:2rem">
+                Connect with <strong style="color:#495057">multiple AI providers</strong> and enjoy real-time conversations
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap">
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-plug" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#5b4c7d; font-weight:600">Multi-Provider</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-bolt" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#0c5460; font-weight:600">Real-Time</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-github" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#155724; font-weight:600">Open Source</span>
                 </div>
             </div>
-        </section>
-
-        <!-- Use Cases Section -->
-        <section class="mb-5">
-            <h2 class="text-primary fw-bold mb-4 border-bottom border-primary pb-2 d-inline-block">Build More with Easy AI Chat</h2>
-            
-            <div class="card shadow-sm">
-                <div class="card-body p-4">
-                    <div class="row">
-                        <div class="col-lg-4 mb-3 mb-lg-0">
-                            <h3 class="h4 fw-bold text-primary">Potential Use Cases</h3>
-                            <p>Your foundation for limitless AI-powered chat solutions in Odoo.</p>
-                        </div>
-                        <div class="col-lg-8">
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item bg-transparent px-0">Create AI-driven customer support bots</li>
-                                <li class="list-group-item bg-transparent px-0">Automate data analysis chats</li>
-                                <li class="list-group-item bg-transparent px-0">Build interactive training assistants</li>
-                                <li class="list-group-item bg-transparent px-0">Design custom AI workflows for your business</li>
-                                <li class="list-group-item bg-transparent px-0">Enable AI to perform actions using function calling and tools</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Footer -->
-        <footer class="bg-white rounded shadow p-4 text-center">
-            <h2 class="h4 fw-bold text-primary">Support & Resources</h2>
-            <p class="mb-3">Need help? We've got you covered:</p>
-            <a href="mailto:support@apexive.com" class="btn btn-outline-primary">support@apexive.com</a>
-        </footer>
+        </div>
     </div>
+</section>
 
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "SoftwareApplication",
-        "name": "Easy AI Chat for Odoo",
-        "applicationCategory": "BusinessApplication",
-        "operatingSystem": "Any",
-        "description": "Easy AI Chat is a user-friendly Odoo module for seamless AI chat integration. Connect multiple AI providers, manage real-time chats from any record, build custom AI solutions, and enable tool selection for enhanced capabilities.",
-        "offers": {
-            "@type": "Offer",
-            "price": "0",
-            "priceCurrency": "USD"
-        },
-        "provider": {
-            "@type": "Organization",
-            "name": "Apexive",
-            "url": "mailto:support@apexive.com"
-        },
-        "keywords": "Easy AI Chat, Odoo AI Chat, AI Chat Module, Odoo Chatbot, Real-time AI Chat, Tool Selection, Function Calling"
-    }
-    </script>
-</body>
-</html>
+<div class="container my-5">
+    <!-- Why Easy AI Chat Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Why Easy AI Chat?</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Everything you need for AI-powered conversations</p>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-plug" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Multiple AI Providers</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Connect with OpenAI, Anthropic, Grok, Ollama, DeepSeek, and more. Switch models instantly.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-bolt" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Real-Time Chat</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Chat instantly with AI, integrated into Odoo&apos;s mail system, with full conversation history.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-picture-o" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Multimodal Power</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Go beyond text&mdash;use advanced AI models for rich, actionable responses.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-link" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Odoo Integration</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Link chats to any Odoo app or object for smarter, context-aware workflows.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-wrench" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Tool Selection</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Choose which tools are available for each AI conversation to enhance capabilities.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-history" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Conversation History</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Full message history preserved for context and reference across sessions.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Getting Started Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Getting Started</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Set up and start chatting in minutes</p>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:40px; height:40px; border-radius:50%; margin-right:1rem; flex-shrink:0">
+                                <span style="color:#ffffff; font-weight:700">1</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.5rem">Install the Module</h4>
+                                <p style="color:#6c757d; font-size:0.95rem; margin-bottom:0">Add &quot;Easy AI Chat&quot; and its dependency &quot;LLM Integration Base&quot; to your Odoo environment.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:40px; height:40px; border-radius:50%; margin-right:1rem; flex-shrink:0">
+                                <span style="color:#ffffff; font-weight:700">2</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.5rem">Set Up Providers</h4>
+                                <p style="color:#6c757d; font-size:0.95rem; margin-bottom:0">Go to <strong>LLM &rarr; Configuration &rarr; Providers</strong>, create a new provider, and add your API key.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:40px; height:40px; border-radius:50%; margin-right:1rem; flex-shrink:0">
+                                <span style="color:#ffffff; font-weight:700">3</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.5rem">Fetch Models</h4>
+                                <p style="color:#6c757d; font-size:0.95rem; margin-bottom:0">Click &quot;Fetch Models&quot; in the provider form to import available AI models using your API key.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <div class="bg-primary d-flex align-items-center justify-content-center" style="width:40px; height:40px; border-radius:50%; margin-right:1rem; flex-shrink:0">
+                                <span style="color:#ffffff; font-weight:700">4</span>
+                            </div>
+                            <div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.5rem">Start Chatting</h4>
+                                <p style="color:#6c757d; font-size:0.95rem; margin-bottom:0">Navigate to <strong>Chat</strong> in the Odoo menu, create a new thread, and ask AI anything!</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Technical Details -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Technical Details</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Requirements and dependencies</p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem">Module Information</h4>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Dependencies:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">llm, mail</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Category:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">Productivity/LLM</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Version:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">18.0.1.0.0</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">License:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">LGPL-3</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-light mt-4" style="padding:1.5rem; border-radius:12px">
+                            <h5 style="font-weight:700; color:#212529; margin-bottom:0.75rem">Pro Tip</h5>
+                            <p style="color:#6c757d; margin-bottom:0">Get API keys from providers like OpenAI or Anthropic. Ensure your &quot;LLM Integration Base&quot; module is installed first.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Related Modules Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Related Modules</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Enhance your AI chat experience</p>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-puzzle-piece" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Base</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Core framework for AI integration. Required dependency for all LLM modules.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_assistant" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-user-circle" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Assistant</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Create specialized AI assistants with custom prompts and personalities.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-wrench" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Enable AI to execute Odoo functions with the @llm_tool decorator.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_openai" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-circle-o" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">OpenAI Provider</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Connect to OpenAI, Gemini, Grok, DeepSeek, and any OpenAI-compatible API.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_knowledge" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-book" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Knowledge</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">RAG-powered knowledge base with semantic search and document indexing.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_ollama" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-server" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">Ollama Provider</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Run open-source models locally with full privacy and no API costs.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<!-- Footer -->
+<footer class="bg-primary" style="padding:3rem 2rem; border-radius:16px; margin:2rem 1rem">
+    <div class="container">
+        <div style="border-radius:12px; padding:2.5rem">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 style="font-weight:700; color:#ffffff; font-size:1.5rem; margin-bottom:0.75rem">Easy AI Chat for Odoo</h4>
+                    <p style="color:#f8f9fa; font-size:1rem; margin-bottom:1rem">Real-time AI conversations in Odoo</p>
+                    <p style="color:#e9d5ff; margin-bottom:0.25rem">Developed by <strong style="color:#ffffff">Apexive Solutions LLC</strong></p>
+                    <p style="color:#e0d4ec; font-size:0.9rem; margin-bottom:0">Licensed under LGPL-3 &bull; &copy; 2025 All rights reserved.</p>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="d-flex flex-column">
+                        <div class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; color:#71639e; font-weight:600; margin-bottom:0.75rem">
+                            <i class="fa fa-github" style="font-size:18px; margin-right:0.5rem"></i>
+                            github.com/apexive/odoo-llm
+                        </div>
+                        <a href="mailto:hello@apexive.com" class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; text-decoration:none; color:#71639e; font-weight:600; margin-bottom:0">
+                            <i class="fa fa-envelope" style="font-size:18px; margin-right:0.5rem"></i>
+                            hello@apexive.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

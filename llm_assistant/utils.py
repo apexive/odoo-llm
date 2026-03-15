@@ -46,4 +46,11 @@ def render_template(template=None, context=None):
         template = env.from_string(template)
         return template.render(**processed_args)
     except Exception as e:
-        raise ValidationError(_("Error rendering template: %s") % str(e))
+        raise ValidationError(
+            _(
+                "Could not process the prompt template. Check that all placeholder "
+                "variables ({{variable}}) are correctly named and the template syntax is valid.\n\n"
+                "Details: %s"
+            )
+            % str(e)
+        ) from e

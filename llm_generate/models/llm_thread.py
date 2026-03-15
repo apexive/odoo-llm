@@ -137,11 +137,26 @@ class LLMThread(models.Model):
         # Generate using model - now returns tuple (output_data, urls)
         output_data, urls = self.model_id.generate(final_inputs)
 
+        # TODO: CRITICAL - Fix Replicate file expiration (API predictions deleted after 1 hour)
+        # Current: URLs stored as type='url' attachments → break after expiry
+        # Solution: Implement provider hook pattern for downloading outputs
+        #   1. Add provider.download_generation_output(url_data) hook in llm.provider base
+        #   2. Implement in llm_replicate to download files before expiry
+        #   3. Pass provider_id in url_data dict from generate()
+        #   4. Update mail_message._create_url_attachment() to:
+        #      - Check if provider has download hook
+        #      - Download and create type='binary' attachment with datas field
+        #      - Fall back to type='url' for providers that don't need download
+        #
+        # TODO: Fix misleading variable naming
+        # - "output_data" actually contains INPUT metadata (model_name, inputs, provider, num_outputs)
+        # - The actual OUTPUT (images/videos) is in "urls" and becomes attachments
+
         # Create assistant message first (without attachments)
         generated_message = self.message_post(
             body="",  # Will be updated with markdown content
             llm_role="assistant",
-            body_json=output_data,
+            body_json=output_data,  # Misleading name - contains input metadata, not output
         )
 
         # Use message method to process URLs and create attachments

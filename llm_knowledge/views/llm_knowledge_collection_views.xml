@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_llm_knowledge_collection_form" model="ir.ui.view">
+        <field name="name">llm.knowledge.collection.form</field>
+        <field name="model">llm.knowledge.collection</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button
+            name="sync_resources"
+            string="Sync Resources"
+            type="object"
+            class="btn-primary"
+            invisible="not domain_ids"
+            confirm="This will synchronize the collection with domain filters, adding new resources and removing those no longer matching. Continue?"
+          />
+                    <button
+            name="action_open_upload_wizard"
+            string="Upload Resources"
+            type="object"
+            class="btn-primary"
+          />
+                    <button
+            name="process_resources"
+            string="Process Resources"
+            type="object"
+            class="btn-primary"
+            confirm="This will process resources through the RAG pipeline until chunked state. Continue?"
+          />
+                    <button
+            name="action_embed_resources"
+            string="Embed Resources"
+            type="object"
+            class="btn-primary"
+            confirm="This will embed all resource chunks with the selected embedding model. Continue?"
+          />
+                    <button
+            name="reindex_collection"
+            string="Reindex Collection"
+            type="object"
+            class="btn-secondary"
+            confirm="This will recreate vector indexes for resources. Continue?"
+          />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button
+              name="action_view_resources"
+              type="object"
+              class="oe_stat_button"
+              icon="fa-file-text"
+            >
+                            <field
+                name="resource_count"
+                widget="statinfo"
+                string="Resources"
+              />
+                        </button>
+                        <button
+              name="action_view_chunks"
+              type="object"
+              class="oe_stat_button"
+              icon="fa-puzzle-piece"
+            >
+                            <field
+                name="chunk_count"
+                widget="statinfo"
+                string="Chunks"
+              />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1><field
+                name="name"
+                placeholder="Collection Name"
+              /></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="active" widget="boolean_toggle" />
+                            <field
+                name="embedding_model_id"
+                options="{'no_create': True}"
+                required="1"
+              />
+                            <field name="store_id" required="1" />
+                        </group>
+                        <group>
+                            <field name="default_parser" />
+                            <field name="default_chunker" />
+                            <field name="default_chunk_size" />
+                            <field name="default_chunk_overlap" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Description">
+                            <field
+                name="description"
+                placeholder="Collection description..."
+                nolabel="1"
+              />
+                        </page>
+                        <page string="Resources">
+                            <field
+                name="resource_ids"
+                nolabel="1"
+                options="{'reload_on_button': true}"
+              >
+                                <tree editable="bottom">
+                                    <field name="name" />
+                                    <field name="parser" />
+                                    <field name="chunker" />
+                                    <field name="target_chunk_size" />
+                                    <field name="target_chunk_overlap" />
+                                    <field
+                    name="res_model"
+                    readonly="1"
+                    optional="hide"
+                  />
+                                    <field
+                    name="res_id"
+                    readonly="1"
+                    optional="hide"
+                  />
+                                    <field name="state" readonly="1" />
+                                    <field
+                    name="chunk_count"
+                    readonly="1"
+                    sum="Total Chunks"
+                  />
+                                    <button
+                    name="process_resource"
+                    string="Process"
+                    type="object"
+                    icon="fa-cogs"
+                  />
+                                    <button
+                    string="View"
+                    type="object"
+                    name="action_open_resource"
+                    icon="fa-external-link"
+                  />
+                                </tree>
+                            </field>
+                        </page>
+                         <page string="Chunks"> <!-- Added page for chunks -->
+                            <field name="chunk_ids" nolabel="1">
+                                <tree>
+                                    <field name="name" />
+                                    <field name="resource_id" />
+                                    <field name="sequence" />
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Domain Filters">
+                            <field
+                name="domain_ids"
+                nolabel="1"
+              > <!-- Reference llm.knowledge.domain -->
+                                <tree editable="bottom">
+                                    <field name="sequence" widget="handle" />
+                                    <field
+                    name="model_id"
+                    options="{'no_create': True}"
+                  />
+                                    <field name="model_name" invisible="1" />
+                                    <field
+                    name="domain"
+                    widget="domain"
+                    options="{'model': 'model_name'}"
+                  />
+                                    <field
+                    name="active"
+                    widget="boolean_toggle"
+                  />
+                                </tree>
+                            </field>
+                            <div class="alert alert-info mt-3" role="alert">
+                                <p><strong
+                  >Domain filters are used to automatically create RAG resources</strong></p>
+                                <p
+                >Add domain filters for different models to select records that will be converted to RAG resources. Click 'Sync Resources' to process these filters.</p>
+                            </div>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <!-- Tree View -->
+    <record id="view_llm_knowledge_collection_tree" model="ir.ui.view">
+        <field name="name">llm.knowledge.collection.tree</field>
+        <field name="model">llm.knowledge.collection</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="resource_count" />
+                <field name="chunk_count" />
+                <field name="embedding_model_id" />
+                <field name="active" widget="boolean_toggle" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_llm_knowledge_collection_search" model="ir.ui.view">
+        <field name="name">llm.knowledge.collection.search</field>
+        <field name="model">llm.knowledge.collection</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" />
+                <field name="embedding_model_id" />
+                <filter
+          string="Archived"
+          name="inactive"
+          domain="[('active', '=', False)]"
+        />
+                <group expand="0" string="Group By">
+                    <filter
+            string="Embedding Model"
+            name="group_by_model"
+            domain="[]"
+            context="{'group_by':'embedding_model_id'}"
+          />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Kanban View -->
+    <record id="view_llm_knowledge_collection_kanban" model="ir.ui.view">
+        <field name="name">llm.knowledge.collection.kanban</field>
+        <field name="model">llm.knowledge.collection</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_mobile">
+                <field name="id" />
+                <field name="name" />
+                <field name="resource_count" />
+                <field name="chunk_count" />
+                <field name="embedding_model_id" />
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><field
+                      name="name"
+                    /></strong>
+                                </div>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <div class="row">
+                                    <div class="col-6"><strong
+                    >Resources:</strong> <field name="resource_count" /></div>
+                                    <div class="col-6"><strong
+                    >Chunks:</strong> <field name="chunk_count" /></div>
+                                </div>
+                                <div><strong>Model:</strong> <field
+                    name="embedding_model_id"
+                  /></div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_llm_knowledge_collection" model="ir.actions.act_window">
+        <field name="name">Collections</field>
+        <field name="res_model">llm.knowledge.collection</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="help" type="html">
+            <p
+        class="o_view_nocontent_smiling_face"
+      >Create your first RAG collection</p>
+            <p
+      >Collections group resources that share the same embedding model for RAG processing.</p>
+        </field>
+    </record>
+</odoo>

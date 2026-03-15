@@ -35,9 +35,125 @@
                 name="external_url"
                 placeholder="e.g., http://host.docker.internal:8069"
               />
+                            <field
+                name="client_name"
+                placeholder="e.g., odoo-localhost-mydb (auto-generated if empty)"
+              />
                         </group>
                     </group>
                     <notebook>
+                        <page
+              string="Client Configuration"
+              name="client_config"
+            >
+                            <div
+                class="alert alert-info mb-3 d-flex justify-content-between align-items-center"
+                role="alert"
+              >
+                                <div>
+                                    <strong
+                  >How to connect:</strong> Copy the configuration below for your MCP client.
+                                    Replace <code
+                  >YOUR_API_KEY</code> with your Odoo API key.
+                                </div>
+                                <button
+                  name="action_new_mcp_key"
+                  type="object"
+                  class="btn btn-primary"
+                >
+                                    New MCP Key
+                                </button>
+                            </div>
+
+                            <notebook>
+                                <page
+                  string="Claude Desktop"
+                  name="claude_desktop"
+                >
+                                    <div class="mb-2">
+                                        <p><strong
+                      >Prerequisite:</strong> Install <code
+                      >mcp-remote</code> via npm: <code
+                      >npm install -g mcp-remote</code></p>
+                                        <p>Add this to your <code
+                      >claude_desktop_config.json</code>:</p>
+                                        <ul>
+                                            <li>Linux: <code
+                        >~/.config/claude_desktop/claude_desktop_config.json</code></li>
+                                            <li>macOS: <code
+                        >~/Library/Application Support/Claude/claude_desktop_config.json</code></li>
+                                            <li>Windows: <code
+                        >%APPDATA%\Claude\claude_desktop_config.json</code></li>
+                                        </ul>
+                                    </div>
+                                    <field
+                    name="config_claude_desktop"
+                    readonly="1"
+                    nolabel="1"
+                    class="font-monospace bg-light p-3 border rounded d-block overflow-auto"
+                    style="white-space: pre; font-size: 12px; max-height: 300px;"
+                  />
+                                    <field
+                    name="config_claude_desktop"
+                    readonly="1"
+                    nolabel="1"
+                    widget="CopyClipboardButton"
+                    string="Copy Configuration"
+                    class="mt-2"
+                  />
+                                </page>
+                                <page string="Claude Code" name="claude_code">
+                                    <div class="mb-2">
+                                        <p><strong
+                      >Prerequisite:</strong> Install <code
+                      >mcp-remote</code> via npm: <code
+                      >npm install -g mcp-remote</code></p>
+                                        <p
+                    >Run this command in your terminal:</p>
+                                    </div>
+                                    <field
+                    name="config_claude_code"
+                    readonly="1"
+                    nolabel="1"
+                    class="font-monospace bg-light p-3 border rounded d-block overflow-auto"
+                    style="white-space: pre; font-size: 12px; max-height: 300px;"
+                  />
+                                    <field
+                    name="config_claude_code"
+                    readonly="1"
+                    nolabel="1"
+                    widget="CopyClipboardButton"
+                    string="Copy Command"
+                    class="mt-2"
+                  />
+                                </page>
+                                <page string="Codex (OpenAI)" name="codex">
+                                    <div class="mb-2">
+                                        <p
+                    >Add this to your Codex CLI configuration:</p>
+                                        <ul>
+                                            <li>Config: <code
+                        >~/.codex/config.toml</code></li>
+                                        </ul>
+                                    </div>
+                                    <field
+                    name="config_codex"
+                    readonly="1"
+                    nolabel="1"
+                    class="font-monospace bg-light p-3 border rounded d-block overflow-auto"
+                    style="white-space: pre; font-size: 12px; max-height: 300px;"
+                  />
+                                    <field
+                    name="config_codex"
+                    readonly="1"
+                    nolabel="1"
+                    widget="CopyClipboardButton"
+                    string="Copy Configuration"
+                    class="mt-2"
+                  />
+                                </page>
+                            </notebook>
+                        </page>
                         <page string="Information" name="info">
                             <group>
                                 <field name="create_date" readonly="1" />
@@ -56,14 +172,14 @@
         <field name="name">llm.mcp.server.config.view.list</field>
         <field name="model">llm.mcp.server.config</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="version" />
                 <field name="latest_protocol_version" />
                 <field name="all_supported_protocol_versions" />
                 <field name="active" />
                 <field name="write_date" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -95,7 +211,7 @@
     <record id="llm_mcp_server_config_action" model="ir.actions.act_window">
         <field name="name">MCP Server Configuration</field>
         <field name="res_model">llm.mcp.server.config</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_active': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

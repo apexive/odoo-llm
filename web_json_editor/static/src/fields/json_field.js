@@ -1,11 +1,19 @@
 /** @odoo-module */
 
-import { Component, onMounted, onWillUnmount, useEffect, useRef } from "@odoo/owl";
+import {
+  Component,
+  onMounted,
+  onWillUnmount,
+  useEffect,
+  useRef,
+} from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { standardFieldProps } from "@web/views/fields/standard_field_props";
 
 /**
  * Simple JSON formatter for display mode
+ * @param {*} value - Value to format as JSON
+ * @returns {String} Formatted JSON string
  */
 export function formatJSON(value) {
   if (!value) return "";
@@ -25,7 +33,8 @@ export class JsonEditorField extends Component {
   setup() {
     this.editorRef = useRef("editor");
     this.editor = null;
-    this.isDirty = false; // Track if user is currently editing
+    // Track if user is currently editing
+    this.isDirty = false;
 
     onMounted(() => this.initEditor());
     onWillUnmount(() => this.destroyEditor());
@@ -81,7 +90,8 @@ export class JsonEditorField extends Component {
       mainMenuBar: true,
       onChange: () => {
         if (!this.props.readonly) {
-          this.isDirty = true; // Mark as dirty when user edits
+          // Mark as dirty when user edits
+          this.isDirty = true;
           this.onEditorChange();
         }
       },
@@ -127,6 +137,7 @@ export class JsonEditorField extends Component {
 
   /**
    * Format the value for display mode
+   * @returns {String} Formatted JSON string for display
    */
   formatValue() {
     const value = this.props.record.data[this.props.name];

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Form View for Upload Wizard -->
+    <record id="view_llm_upload_resource_wizard_form" model="ir.ui.view">
+        <field name="name">llm.upload.resource.wizard.form</field>
+        <!-- Model name should match the Python class _name -->
+        <field name="model">llm.upload.resource.wizard</field>
+        <field name="arch" type="xml">
+             <!-- String updated for clarity -->
+            <form string="Upload RAG Resources">
+                <field name="state" invisible="1" />
+                <sheet>
+                    <div invisible="state != 'confirm'">
+                        <div class="alert alert-info" role="alert">
+                            <p><strong
+                >Upload resources for RAG processing</strong></p>
+                            <p
+              >You can upload local files and/or provide external URLs. Resources will be added to the selected collection.</p>
+                        </div>
+                        <group>
+                            <!-- Collection uses llm.knowledge.collection model -->
+                            <field
+                name="collection_id"
+                options="{'no_create': True}"
+                required="1"
+              />
+                            <!-- Field name updated -->
+                            <field
+                name="resource_name_template"
+                placeholder="e.g. {filename}"
+                required="1"
+              />
+                        </group>
+                        <notebook>
+                            <page string="Local Files" name="local_files">
+                                <field
+                  name="file_ids"
+                  widget="many2many_binary"
+                  nolabel="1"
+                  options="{'accepted_file_extensions': 'pdf,txt,html,doc,docx,odt,xls,xlsx,csv,ppt,pptx'}"
+                />
+                            </page>
+                            <page string="External URLs" name="external_urls">
+                                <field
+                  name="external_urls"
+                  placeholder="Enter one URL per line
+https://example.com/document1.pdf
+https://example.com/document2.html"
+                  nolabel="1"
+                />
+                            </page>
+                        </notebook>
+                        <group>
+                            <field name="process_immediately" />
+                        </group>
+                        <div class="alert alert-info mt-3" role="alert">
+                            <p><strong
+                >Available placeholders for resource name:</strong></p>
+                            <ul>
+                                <li><code
+                  >{filename}</code> - Name of the file or URL</li>
+                                <li><code
+                  >{collection}</code> - Name of the collection</li>
+                                <!-- Field name updated -->
+                                <li><code>{index}</code> - Resource index</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div invisible="state != 'done'">
+                        <div class="alert alert-success" role="alert">
+                            <p><i
+                  class="fa fa-check-circle"
+                  title="Success"
+                  aria-label="Success"
+                /> <strong>Successfully created <field
+                    name="created_count"
+                  /> RAG resources!</strong></p>
+                        </div>
+                        <group>
+                            <!-- Field name updated -->
+                            <field
+                name="created_resource_ids"
+                nolabel="1"
+                readonly="1"
+              >
+                                 <!-- Tree displays llm.resource fields -->
+                                <tree>
+                                    <field name="name" />
+                                    <field name="res_model" />
+                                    <field name="res_id" />
+                                    <field name="state" />
+                                     <!-- Add chunk_count if desired -->
+                                    <!-- <field name="chunk_count"/> -->
+                                </tree>
+                            </field>
+                        </group>
+                    </div>
+                </sheet>
+                <footer>
+                    <!-- Action names updated -->
+                    <button
+            name="action_upload_resources"
+            string="Upload Resources"
+            type="object"
+            class="btn-primary"
+            invisible="state == 'done'"
+          />
+                    <button
+            name="action_view_resources"
+            string="View Resources"
+            type="object"
+            class="btn-primary"
+            invisible="state == 'confirm'"
+          />
+                    <button
+            special="cancel"
+            string="Close"
+            class="btn-secondary"
+          />
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

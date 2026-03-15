@@ -1,8 +1,21 @@
 .o_LLMChatContainer {
+  // Force single column grid for composer (no avatar sidebar)
+  .o-llm-composer-area .o-mail-Composer {
+    grid-template-columns: 1fr !important;
+    grid-template-areas:
+      "core-header"
+      "core-main"
+      "core-footer" !important;
+  }
+
   .o-llm-sidebar {
     flex-shrink: 0; // Prevent shrinking
-    min-width: 280px; // Ensure minimum width
-    width: 280px !important; // Force width to stay consistent
+    min-width: 48px; // Minimum width when collapsed
+    transition: width 0.2s ease-in-out; // Smooth collapse/expand animation
+
+    .o-llm-sidebar-header {
+      min-height: 60px; // Match chat header height
+    }
 
     .o-llm-thread-item {
       transition: background-color 0.2s ease;
@@ -15,6 +28,113 @@
           color: rgba(255, 255, 255, 0.7) !important;
         }
       }
+    }
+
+    // Mobile: Slide-in modal pattern (from 16.0)
+    &.o-mobile {
+      position: fixed;
+      top: 0;
+      left: 0;
+      bottom: 0;
+      z-index: 1055; // Bootstrap modal z-index
+      width: 100%;
+      max-width: 300px;
+      background-color: $o-view-background-color; // Odoo's view background (white)
+      transform: translateX(-100%); // Hidden off-screen to the left
+      transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
+
+      &.o-visible {
+        transform: translateX(0); // Slide in
+      }
+
+      .o-llm-sidebar-header {
+        min-height: 60px;
+      }
+
+      // Very small screens: Make sidebar take 80% of screen width
+      @media (max-width: 575px) {
+        max-width: 80%; // More reasonable width for very small screens
+        min-width: 250px; // But not too small
+      }
+    }
+  }
+
+  // Backdrop overlay for mobile sidebar
+  .o-llm-sidebar-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1050; // Below sidebar, above content
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+      visibility 0ms linear 300ms;
+
+    &.o-visible {
+      opacity: 1;
+      visibility: visible;
+      transition: opacity 300ms cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0ms linear;
+    }
+  }
+
+  // Match sidebar header height with chat header
+  .o-llm-sidebar-header,
+  .o-llm-thread-header {
+    min-height: 60px; // Ensure both headers have the same height
+
+    // Mobile: Reduce header height
+    @media (max-width: 767px) {
+      min-height: 48px;
+    }
+  }
+
+  // Fix horizontal overflow on very small screens (< 576px)
+  @media (max-width: 575px) {
+    // Ensure flex items can shrink below content size
+    & > * {
+      min-width: 0;
+    }
+
+    // Mobile header: Reduce padding and ensure buttons don't overflow
+    .d-flex.align-items-center.p-2.border-bottom {
+      padding: 0.25rem !important; // Reduce padding from p-2
+      flex-wrap: nowrap; // Prevent wrapping
+
+      .btn-sm {
+        padding: 0.25rem 0.5rem; // Smaller button padding
+        min-width: auto; // Remove any min-width
+      }
+
+      h6 {
+        font-size: 0.875rem; // Smaller font size
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  // Thread area mobile padding
+  .o-llm-thread-area {
+    @media (max-width: 767px) {
+      padding: 0.5rem !important;
+    }
+  }
+
+  // Composer area mobile padding
+  .o-llm-composer-area {
+    @media (max-width: 767px) {
+      padding: 0.5rem !important;
+    }
+  }
+
+  // Thread list mobile optimization - larger touch targets
+  .o-llm-thread-item {
+    @media (max-width: 767px) {
+      padding: 0.75rem !important;
+      min-height: 60px; // Touch-friendly
     }
   }
 }
@@ -40,6 +160,16 @@
     height: auto;
     display: block;
     margin: 0.5rem 0;
+
+    // Mobile: Full width images
+    @media (max-width: 767px) {
+      max-width: 100%;
+    }
+  }
+
+  // Mobile: Smaller font size
+  @media (max-width: 767px) {
+    font-size: 0.875rem;
   }
 }
 

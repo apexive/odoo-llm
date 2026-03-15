@@ -5,7 +5,7 @@
         <field name="name">llm.tool.tree</field>
         <field name="model">llm.tool</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="implementation" />
                 <field name="title" optional="show" />
@@ -14,7 +14,7 @@
                 <field name="requires_user_consent" />
                 <field name="read_only_hint" optional="hide" />
                 <field name="destructive_hint" optional="hide" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -38,6 +38,10 @@
                             <field name="default" />
                             <field name="active" />
                             <field name="requires_user_consent" />
+                            <field
+                name="auto_update"
+                invisible="implementation != 'function'"
+              />
                             <field
                 name="server_action_id"
                 invisible="implementation != 'server_action'"
@@ -95,6 +99,31 @@
                 >Use this field when you want to override the automatic schema generation or provide a more detailed schema with examples, enums, or other constraints.</p>
                             </div>
                         </page>
+                        <page
+              string="Technical Info"
+              invisible="implementation != 'function'"
+            >
+                            <group>
+                                <field name="decorator_model" readonly="1" />
+                                <field name="decorator_method" readonly="1" />
+                            </group>
+                            <div class="alert alert-info" role="alert">
+                                <p><strong
+                  >Function Tool Information:</strong></p>
+                                <p
+                >This tool is automatically linked to a Python method decorated with @llm_tool.</p>
+                                <p>Model: <strong><field
+                      name="decorator_model"
+                      readonly="1"
+                    /></strong></p>
+                                <p>Method: <strong><field
+                      name="decorator_method"
+                      readonly="1"
+                    /></strong></p>
+                                <p
+                >These fields are set during auto-registration and cannot be edited manually.</p>
+                            </div>
+                        </page>
                     </notebook>
                 </sheet>
                 <chatter />
@@ -146,7 +175,7 @@
     <record id="action_llm_tool" model="ir.actions.act_window">
         <field name="name">LLM Tools</field>
         <field name="res_model">llm.tool</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_active': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

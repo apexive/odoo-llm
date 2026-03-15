@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- One-Shot Invoice Data Extraction Assistant (automatic decoder) -->
+    <record id="llm_assistant_invoice_extraction" model="llm.assistant">
+        <field name="name">Invoice Data Extraction (Automatic)</field>
+        <field name="code">invoice_extraction</field>
+        <field name="res_model">account.move</field>
+        <field name="is_default" eval="False" />
+        <field name="is_public" eval="False" />
+        <field
+      name="prompt_id"
+      ref="account_invoice_import_llm.llm_prompt_invoice_extraction"
+    />
+        <field name="has_dynamic_defaults" eval="True" />
+        <field
+      name="default_values"
+    ><![CDATA[{
+            "role": "Invoice Data Extraction Specialist",
+            "goal": "extract structured invoice data from OCR text and return as clean JSON for automated processing",
+            "background": "You process invoice documents for Odoo ERP system. Extract vendor information, invoice details, and line items accurately.",
+            "instructions": "Extract the following fields from invoice documents:\n\n**Required Fields (use camelCase, NO underscores):**\n- vendorName (str): Company/supplier name\n- invoiceNumber (str): Invoice reference number\n- invoiceDate (str): Invoice date in YYYY-MM-DD format\n- subtotalAmount (float): Subtotal BEFORE tax (excl. VAT/BTW)\n- taxAmount (float): Total tax/VAT amount charged\n- totalAmount (float): Total invoice amount INCLUDING tax\n- lines (array): Invoice line items\n\n**Optional Fields:**\n- vat (str): VAT/tax number (include country code if present, e.g., BE0123456789)\n- currency (str): Currency code (EUR, USD, etc.) - default EUR if not found\n- dueDate (str): Payment due date in YYYY-MM-DD format\n- paymentReference (str): Payment reference or structured communication\n\n**Line Items Structure:**\nEach line in the 'lines' array must have:\n- description (str): Product/service description\n- quantity (float): Quantity (default 1.0 if not specified)\n- unitPrice (float): Unit price excluding tax\n- lineSubtotal (float): Line subtotal amount (EXACT value from invoice, usually qty × unitPrice but may differ due to discounts/rounding)\n- taxPercent (float, optional): Tax percentage LABELED on invoice (see rules below)\n\n**CRITICAL: Tax Percentage Extraction Rules:**\nFor taxPercent, extract the LABELED tax percentage shown on the invoice:\n\n- If invoice shows '21% VAT = 5.25 EUR' → taxPercent: 21.00\n- If invoice shows '21% BTW = 0.00 EUR' → taxPercent: 21.00 (use labeled 21%, NOT 0!)\n- If invoice shows '9% VAT = 0.00 EUR' → taxPercent: 9.00\n- If invoice shows '0% VAT' or 'VAT Exempt' or 'No VAT' → taxPercent: 0.00\n\nThe key rule: Extract the PERCENTAGE LABEL (21%, 9%, 0%) from the invoice.\nThe tax amount being 0.00 does NOT change the percentage - if it says '21% BTW', use 21.00.\n\n**Output Format:**\nReturn ONLY a valid JSON object with this structure:\n```json\n{\n  \"vendorName\": \"Supplier Inc.\",\n  \"vat\": \"BE0123456789\",\n  \"invoiceNumber\": \"INV-2024-001\",\n  \"invoiceDate\": \"2024-01-15\",\n  \"dueDate\": \"2024-02-14\",\n  \"currency\": \"EUR\",\n  \"subtotalAmount\": 1000.00,\n  \"taxAmount\": 210.00,\n  \"totalAmount\": 1210.00,\n  \"lines\": [\n    {\n      \"description\": \"Web Development Services\",\n      \"quantity\": 10.0,\n      \"unitPrice\": 100.00,\n      \"lineSubtotal\": 1000.00,\n      \"taxPercent\": 21.00\n    }\n  ]\n}\n```\n\n**Important Rules:**\n- Use camelCase for ALL field names (NO underscores!)\n- Dates MUST be in YYYY-MM-DD format\n- Amounts MUST be numbers (float), not strings\n- DO NOT include currency symbols in amounts\n- Return ONLY the JSON object, no explanations, no markdown code blocks\n- If a field is not found, omit it (except required fields)\n- Extract lineSubtotal from the actual invoice line total, don't calculate it\n- Vendor name should be the company name, not individual person names",
+            "footer": "CRITICAL: Return ONLY valid JSON. NO markdown code blocks, NO explanations, NO additional text. Dates in YYYY-MM-DD format. Numbers as floats, not strings.",
+            "ocr_text": "{{ ocr_text }}"
+        }]]></field>
+        <field name="active" eval="True" />
+    </record>
+</odoo>

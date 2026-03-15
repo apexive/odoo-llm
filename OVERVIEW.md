@@ -1,5 +1,9 @@
 # Architecture Overview - Odoo LLM Integration
 
+**Version:** Odoo 18.0
+**Last Updated:** 2025-10-24
+**Status:** Current and accurate for 18.0 migration
+
 This document provides a comprehensive technical overview of the Odoo LLM Integration architecture, covering the consolidated module structure, core concepts, and development patterns.
 
 ## Architecture Overview
@@ -395,6 +399,51 @@ def get_tool_definition(self):
 
 ## Frontend Architecture
 
+### Odoo 18.0 Frontend Changes
+
+**Major architectural shift from Odoo 16.0:**
+
+Odoo 18.0 completely replaced the frontend model system with a new Record-based architecture:
+
+**Removed in 18.0:**
+
+- `registerModel()` - Model registration pattern
+- `registerPatch()` - Model patching pattern
+- Frontend model definition system
+
+**New in 18.0:**
+
+- ES6 classes extending `Record` from `@mail/core/common/record`
+- OWL's `patch()` utility for component extensions
+- Built-in reactivity via `@odoo/owl`
+- Centralized record storage in `static records`
+- Type-safe JSDoc/TypeScript support
+
+**Example migration:**
+
+```javascript
+// ❌ Odoo 16.0 pattern (REMOVED)
+import { registerModel } from '@mail/model/model_core';
+registerModel({
+    name: 'Thread',
+    fields: { id: attr(), name: attr() }
+});
+
+// ✅ Odoo 18.0 pattern (USE THIS)
+import { Record } from "@mail/core/common/record";
+import { patch } from "@web/core/utils/patch";
+
+export class Thread extends Record {
+    static id = AND("model", "id");
+    static records = {};
+    id; name;
+}
+
+patch(Thread.prototype, {
+    customMethod() { ... }
+});
+```
+
 ### JavaScript Component Structure
 
 **Core Components**:
@@ -403,6 +452,8 @@ def get_tool_definition(self):
 - **LLMChatComposer**: Message input and generation forms
 - **LLMChatThreadHeader**: Provider/model/assistant selection
 - **LLMMediaForm**: Dynamic form generation with schema handling
+- **LLMRelatedRecord**: Link chat threads to any Odoo record
+- **LLMRecordPickerDialog**: 2-step wizard for record selection
 
 ### Real-time Features
 
@@ -410,6 +461,7 @@ def get_tool_definition(self):
 - **Tool Execution**: Visual feedback for function calls
 - **Context Switching**: Dynamic provider/model/assistant changes
 - **Form Generation**: Automatic UI generation from model schemas
+- **Related Records**: Link threads to business objects with instant UI updates
 
 ## Security & Access Control
 
@@ -478,7 +530,9 @@ read_only_hint = fields.Boolean(default=True)
 
 ### Module Consolidations
 
-**Completed Consolidations**:
+**Completed Consolidations** (pre-18.0 migration):
+
+These consolidations were completed in the 16.0 version before the 18.0 migration began:
 
 - `llm_resource` → `llm_knowledge` (resource management + RAG)
 - `llm_prompt` → `llm_assistant` (prompt templates + assistants)
@@ -490,6 +544,16 @@ read_only_hint = fields.Boolean(default=True)
 - Tool data format migration
 - Module dependency updates
 - Configuration preservation
+
+### Odoo 18.0 Migration
+
+**All 26 modules successfully migrated** with the following changes:
+
+- Views: `<tree>` → `<list>`, `attrs` → direct attributes
+- Models: `name_get()` → `searchRead()` with `display_name`
+- Frontend: `registerModel()` → ES6 classes extending `Record`
+- Mail system: Migrated to new mail.store architecture
+- UI components: Enhanced reactivity and proper OWL patterns
 
 ### Backward Compatibility
 

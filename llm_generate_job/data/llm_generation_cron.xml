@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Cron job for processing generation queues -->
+        <record id="cron_process_generation_queues" model="ir.cron">
+            <field name="name">Process Generation Queues</field>
+            <field name="model_id" ref="model_llm_generation_queue" />
+            <field name="state">code</field>
+            <field name="code">model._process_all_queues()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+        </record>
+
+        <!-- Cron job for checking job statuses -->
+        <record id="cron_check_job_statuses" model="ir.cron">
+            <field name="name">Check Generation Job Statuses</field>
+            <field name="model_id" ref="model_llm_generation_queue" />
+            <field name="state">code</field>
+            <field name="code">model._check_job_statuses()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+        </record>
+
+        <!-- Cron job for auto-retrying failed jobs -->
+        <record id="cron_auto_retry_failed_jobs" model="ir.cron">
+            <field name="name">Auto-Retry Failed Generation Jobs</field>
+            <field name="model_id" ref="model_llm_generation_queue" />
+            <field name="state">code</field>
+            <field name="code">model._auto_retry_failed_jobs()</field>
+            <field name="interval_number">5</field>
+            <field name="interval_type">minutes</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+        </record>
+
+        <!-- Cron job for cleaning up old jobs -->
+        <record id="cron_cleanup_old_jobs" model="ir.cron">
+            <field name="name">Cleanup Old Generation Jobs</field>
+            <field name="model_id" ref="model_llm_generation_job" />
+            <field name="state">code</field>
+            <field name="code">model.cleanup_old_jobs(days=7)</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="active" eval="True" />
+            <field name="user_id" ref="base.user_root" />
+        </record>
+</odoo>

@@ -96,6 +96,25 @@ class LLMProvider(models.Model):
             "capabilities": capabilities or ["image_generation"],
         }
 
+    def replicate_should_generate_io_schema(self, model_record):
+        """Check if I/O schema should be generated for this Replicate model.
+
+        Schema should be generated if:
+        1. Model has details with OpenAPI schema from the API
+        2. Model doesn't already have input_schema in details (to avoid regenerating)
+
+        Args:
+            model_record (llm.model): The model record to check
+
+        Returns:
+            bool: True if schema generation should be triggered
+        """
+        return (
+            model_record.details
+            and model_record.details.get("latest_version", {}).get("openapi_schema")
+            and not model_record.details.get("input_schema")
+        )
+
     def replicate_generate_io_schema(self, model_record):
         """Generate a configuration from Replicate model details
 
@@ -221,19 +240,19 @@ class LLMProvider(models.Model):
             return None
 
         # Extract filename from URL
-        filename = url.split('/')[-1] or 'generated_content'
+        filename = url.split("/")[-1] or "generated_content"
 
         # Determine content type from file extension
         extension_map = {
-            '.png': 'image/png',
-            '.jpg': 'image/jpeg',
-            '.jpeg': 'image/jpeg',
-            '.gif': 'image/gif',
-            '.webp': 'image/webp',
-            '.mp4': 'video/mp4',
+            ".png": "image/png",
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".gif": "image/gif",
+            ".webp": "image/webp",
+            ".mp4": "video/mp4",
         }
 
-        content_type = 'application/octet-stream'
+        content_type = "application/octet-stream"
         filename_lower = filename.lower()
         for ext, mime_type in extension_map.items():
             if filename_lower.endswith(ext):
@@ -241,7 +260,7 @@ class LLMProvider(models.Model):
                 break
 
         return {
-            'url': url,
-            'content_type': content_type,
-            'filename': filename,
+            "url": url,
+            "content_type": content_type,
+            "filename": filename,
         }

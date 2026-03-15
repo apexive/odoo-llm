@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Main Generation Menu (under LLM root menu) -->
+        <menuitem
+    id="menu_llm_generation_root"
+    name="Generation"
+    parent="llm.menu_llm_root"
+    sequence="15"
+  />
+
+        <!-- Generation Jobs Menu -->
+        <menuitem
+    id="menu_llm_generation_job"
+    name="Jobs"
+    parent="menu_llm_generation_root"
+    action="action_llm_generation_job"
+    sequence="10"
+  />
+
+        <!-- Generation Queues Menu -->
+        <menuitem
+    id="menu_llm_generation_queue"
+    name="Queues"
+    parent="menu_llm_generation_root"
+    action="action_llm_generation_queue"
+    sequence="20"
+  />
+</odoo>

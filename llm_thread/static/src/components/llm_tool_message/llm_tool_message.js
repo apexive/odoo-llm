@@ -1,5 +1,6 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { Component, useState } from "@odoo/owl";
 
 /**
@@ -29,7 +30,7 @@ export class LLMToolMessage extends Component {
    * Get tool name
    */
   get toolName() {
-    return this.toolData.tool_name || "Unknown Tool";
+    return this.toolData.tool_name || _t("Unknown Tool");
   }
 
   /**
@@ -73,7 +74,7 @@ export class LLMToolMessage extends Component {
    */
   get resultFormatted() {
     if (this.isError) {
-      return this.toolData.error || "Unknown error";
+      return this.toolData.error || _t("Unknown error");
     }
     const result = this.toolData.result;
     if (typeof result === "string") {
@@ -92,9 +93,8 @@ export class LLMToolMessage extends Component {
       return "fa-exclamation-circle text-danger";
     } else if (this.status === "executing") {
       return "fa-spinner fa-spin text-info";
-    } else {
-      return "fa-clock text-muted";
     }
+    return "fa-clock text-muted";
   }
 
   /**

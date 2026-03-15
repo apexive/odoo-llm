@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- OCR tool registration moved to llm_tool_ocr_mistral module -->
+</odoo>

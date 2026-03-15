@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm_thread.RecordPickerDialog">
+        <Dialog title="'Link Record to Chat'" size="'lg'">
+            <div class="o_RecordPickerDialog">
+                <!-- Step 1: Model Selection -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="fa fa-cube me-2" />
+                        1. Choose Record Type
+                    </label>
+                    <t t-if="state.isLoadingModels">
+                        <div class="text-muted">
+                            <i class="fa fa-spinner fa-spin me-2" />
+                            Loading models...
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <select
+              class="form-select"
+              t-model="state.selectedModel"
+              t-on-change="onModelChange"
+            >
+                            <option value="">Select a record type...</option>
+                            <t
+                t-foreach="state.availableModels"
+                t-as="model"
+                t-key="model.id"
+              >
+                                <option
+                  t-att-value="model.model"
+                  t-esc="model.name"
+                />
+                            </t>
+                        </select>
+                    </t>
+                </div>
+
+                <!-- Step 2: Record Selection -->
+                <div t-if="state.selectedModel" class="mb-3">
+                    <label class="form-label fw-bold">
+                        <i class="fa fa-search me-2" />
+                        2. Search and Select Record
+                    </label>
+
+                    <!-- Search Input -->
+                    <div class="input-group mb-2">
+                        <input
+              type="text"
+              class="form-control"
+              placeholder="Type to search records... (min 2 characters)"
+              t-model="state.searchQuery"
+              t-on-input="onSearchInput"
+              t-on-keydown="onSearchKeydown"
+            />
+                        <button
+              class="btn btn-outline-secondary"
+              type="button"
+              t-on-click="onSearchClick"
+            >
+                            <i class="fa fa-search" />
+                        </button>
+                    </div>
+
+                    <!-- Search Results -->
+                    <div
+            class="record-results border rounded"
+            style="max-height: 300px; overflow-y: auto;"
+          >
+                        <!-- Loading State -->
+                        <t t-if="state.isSearching">
+                            <div class="text-center p-3 text-muted">
+                                <div
+                  class="spinner-border spinner-border-sm me-2"
+                />
+                                Searching...
+                            </div>
+                        </t>
+
+                        <!-- No Search Yet -->
+                        <t t-elif="state.searchQuery.length lt 2">
+                            <div class="text-muted text-center p-3">
+                                <i class="fa fa-search fa-2x mb-2" />
+                                <p class="mb-0">Search for records above</p>
+                                <small>Type at least 2 characters</small>
+                            </div>
+                        </t>
+
+                        <!-- No Results -->
+                        <t t-elif="state.searchResults.length === 0">
+                            <div class="text-muted text-center p-3">
+                                <i class="fa fa-search fa-2x mb-2" />
+                                <p class="mb-0">
+                                    No records found for "<t
+                    t-esc="state.searchQuery"
+                  />"
+                                </p>
+                            </div>
+                        </t>
+
+                        <!-- Results List -->
+                        <t t-else="">
+                            <div class="list-group list-group-flush">
+                                <t
+                  t-foreach="state.searchResults"
+                  t-as="record"
+                  t-key="record.id"
+                >
+                                    <a
+                    href="#"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                    t-att-class="{ 'active': isRecordSelected(record) }"
+                    t-on-click.prevent="() => this.selectRecord(record)"
+                  >
+                                        <div>
+                                            <div
+                        class="fw-medium"
+                        t-esc="record.name"
+                      />
+                                            <small class="text-muted">
+                                                <t t-esc="record.model" /> #<t
+                          t-esc="record.id"
+                        />
+                                            </small>
+                                        </div>
+                                        <i
+                      class="fa fa-chevron-right text-muted"
+                    />
+                                    </a>
+                                </t>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Selected Record Preview -->
+                <div
+          t-if="state.selectedRecord"
+          class="alert alert-info d-flex align-items-start"
+        >
+                    <i class="fa fa-check-circle fa-2x me-3 mt-1" />
+                    <div>
+                        <h6 class="alert-heading mb-1">Selected Record</h6>
+                        <div
+              class="fw-medium"
+              t-esc="state.selectedRecord.name"
+            />
+                        <small class="text-muted">
+                            <t t-esc="state.selectedRecord.model" /> #<t
+                t-esc="state.selectedRecord.id"
+              />
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <t t-set-slot="footer">
+                <button class="btn btn-secondary" t-on-click="props.close">
+                    Cancel
+                </button>
+                <button
+          class="btn btn-primary"
+          t-on-click="confirm"
+          t-att-disabled="!canConfirm"
+        >
+                    <i class="fa fa-link me-2" />
+                    Link to Chat
+                </button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

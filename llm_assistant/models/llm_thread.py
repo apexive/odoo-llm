@@ -1,6 +1,6 @@
 import logging
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -32,6 +32,9 @@ class LLMThread(models.Model):
             self.model_id = self.assistant_id.model_id
             self.tool_ids = self.assistant_id.tool_ids
             self.prompt_id = self.assistant_id.prompt_id
+        else:
+            # Clear prompt when assistant is cleared
+            self.prompt_id = False
 
     def set_assistant(self, assistant_id):
         """Set the assistant for this thread and update related fields
@@ -44,9 +47,9 @@ class LLMThread(models.Model):
         """
         self.ensure_one()
 
-        # If assistant_id is False or 0, just clear the assistant
+        # If assistant_id is False or 0, clear the assistant and its prompt
         if not assistant_id:
-            return self.write({"assistant_id": False})
+            return self.write({"assistant_id": False, "prompt_id": False})
 
         # Get the assistant record
         assistant = self.env["llm.assistant"].browse(assistant_id)
@@ -156,24 +159,32 @@ class LLMThread(models.Model):
 
         return thread, assistant, None
 
-    def _thread_to_store(self, store, **kwargs):
-        """Extend base _thread_to_store to include assistant_id."""
-        super()._thread_to_store(store, **kwargs)
+    def _thread_to_store_info(self):
+        """Extend base _thread_to_store_info to include assistant_id and prompt_id."""
+        result = super()._thread_to_store_info()
 
-        # Always add assistant_id to thread data (either value or False)
-        for thread in self:
-            thread_data = {
-                "id": thread.id,
-                "model": "llm.thread",
-                "assistant_id": {
+        # Add assistant_id and prompt_id to each thread data dict
+        for thread, thread_data in zip(self, result):
+            thread_data["assistant_id"] = (
+                {
                     "id": thread.assistant_id.id,
                     "name": thread.assistant_id.name,
                     "model": "llm.assistant",
                 }
                 if thread.assistant_id
-                else False,
-            }
-            store.add("mail.thread", thread_data)
+                else False
+            )
+            thread_data["prompt_id"] = (
+                {
+                    "id": thread.prompt_id.id,
+                    "name": thread.prompt_id.name,
+                    "model": "llm.prompt",
+                }
+                if thread.prompt_id
+                else False
+            )
+
+        return result
 
     def _extract_message_content(self, message):
         """Extract text content from a message regardless of format"""
@@ -181,10 +192,9 @@ class LLMThread(models.Model):
 
         if isinstance(content, list) and len(content) > 0:
             return content[0].get("text", "")
-        elif isinstance(content, str):
+        if isinstance(content, str):
             return content
-        else:
-            return ""
+        return ""
 
     def get_prepend_messages(self):
         """Hook: return a list of formatted messages to prepend to the conversation."""
@@ -198,11 +208,16 @@ class LLMThread(models.Model):
                 _logger.error(
                     "Error getting messages from prompt '%s': %s",
                     self.prompt_id.name,
-                    str(e),
+                    e,
                 )
                 # Continue without prompt messages rather than failing completely
+                # Post a user-friendly warning to the thread
                 self.message_post(
-                    body=f"Warning: Could not load prompt messages from '{self.prompt_id.name}': {str(e)}"
+                    body=_(
+                        "Note: The prompt '%s' could not be loaded. "
+                        "Continuing without it. (Error: %s)",
+                    )
+                    % (self.prompt_id.name, str(e)),
                 )
 
         return []
@@ -213,7 +228,33 @@ class LLMThread(models.Model):
 
         # Get last message if not provided
         if not last_message:
-            last_message = self.get_latest_llm_message()
+            try:
+                last_message = self.get_latest_llm_message()
+            except UserError:
+                # No DB messages found - check if prepended messages have a user message
+                prepend_msgs = self.get_prepend_messages()
+                user_msg = next(
+                    (msg for msg in prepend_msgs if msg.get("role") == "user"),
+                    None,
+                )
+
+                if user_msg:
+                    # Extract content from prepended user message
+                    content = user_msg.get("content", [])
+                    if isinstance(content, list) and content:
+                        body = content[0].get("text", "")
+                    else:
+                        body = str(content)
+
+                    # Create actual user message from prepended content
+                    last_message = self.message_post(
+                        body=body,
+                        llm_role="user",
+                        author_id=self.env.user.partner_id.id,
+                    )
+                else:
+                    # No user message in prepended messages either
+                    raise
 
         # Continue generation loop
         while self._should_continue(last_message):
@@ -228,14 +269,15 @@ class LLMThread(models.Model):
                 tool_calls = last_message.get_tool_calls()
                 for tool_call in tool_calls:
                     tool_message = yield from self._execute_tool_call(
-                        tool_call, last_message
+                        tool_call,
+                        last_message,
                     )
                     last_message = tool_message
                     self.env.cr.commit()
             else:
                 _logger.info(
                     f"Breaking loop. Last message role: {last_message.llm_role}, "
-                    f"has_tool_calls: {last_message.has_tool_calls()}"
+                    f"has_tool_calls: {last_message.has_tool_calls()}",
                 )
                 break
 
@@ -245,7 +287,11 @@ class LLMThread(models.Model):
         raise NotImplementedError
 
     def _generate_assistant_response(self):
-        """Generate assistant response and handle tool calls."""
+        """Generate assistant response and handle tool calls.
+
+        Catches LLM API errors and posts them as error messages in the thread
+        so users can see what went wrong without checking server logs.
+        """
         # Flush any pending writes to ensure latest messages are visible
         self.env.flush_all()
 
@@ -256,16 +302,29 @@ class LLMThread(models.Model):
         use_streaming = getattr(self.model_id, "supports_streaming", True)
 
         chat_kwargs = self._prepare_chat_kwargs(message_history, use_streaming)
-        if use_streaming:
-            # Handle streaming response - process tool calls directly from stream
-            stream_response = self.sudo().model_id.chat(**chat_kwargs)
-            assistant_message = yield from self._handle_streaming_response(
-                stream_response
+
+        try:
+            if use_streaming:
+                # Handle streaming response - process tool calls directly from stream
+                stream_response = self.sudo().model_id.chat(**chat_kwargs)
+                assistant_message = yield from self._handle_streaming_response(
+                    stream_response,
+                )
+            else:
+                # Handle non-streaming response
+                response = self.sudo().model_id.chat(**chat_kwargs)
+                assistant_message = yield from self._handle_non_streaming_response(
+                    response,
+                )
+        except Exception as e:
+            # Post error message to thread so user can see it
+            _logger.exception("LLM API error in thread %s", self.id)
+            error_message, event = self._post_error_message(
+                e,
+                title=_("LLM API Error"),
             )
-        else:
-            # Handle non-streaming response
-            response = self.sudo().model_id.chat(**chat_kwargs)
-            assistant_message = yield from self._handle_non_streaming_response(response)
+            yield event
+            return error_message
 
         return assistant_message
 
@@ -285,6 +344,7 @@ class LLMThread(models.Model):
         - Always returns messages in chronological order (ASC)
         - Limits to the most recent N messages for context window management
         - Uses efficient database queries with proper indexing
+        - Excludes error messages (is_error=True) from context
 
         Args:
             limit (int): Maximum number of recent messages to retrieve (default: 25)
@@ -294,26 +354,29 @@ class LLMThread(models.Model):
         """
         self.ensure_one()
 
-        # Domain for filtering LLM messages only
+        # Domain for filtering LLM messages only (excluding error messages)
         domain = [
             ("model", "=", self._name),
             ("res_id", "=", self.id),
             ("llm_role", "!=", False),  # Only messages with LLM roles
+            ("is_error", "=", False),  # Exclude error messages from LLM context
         ]
 
         if limit:
             # Two-step approach for efficiency:
             # 1. Get the N most recent messages (DESC order)
             recent_messages = self.env["mail.message"].search(
-                domain, order="create_date DESC, write_date DESC, id DESC", limit=limit
+                domain,
+                order="create_date DESC, write_date DESC, id DESC",
+                limit=limit,
             )
             # 2. Sort them chronologically for LLM context (ASC order)
             return recent_messages.sorted(lambda m: (m.create_date, m.write_date, m.id))
-        else:
-            # If no limit, get all messages in chronological order
-            return self.env["mail.message"].search(
-                domain, order="create_date ASC, write_date ASC, id ASC"
-            )
+        # If no limit, get all messages in chronological order
+        return self.env["mail.message"].search(
+            domain,
+            order="create_date ASC, write_date ASC, id ASC",
+        )
 
     def get_latest_llm_message(self):
         """Get the most recent LLM message for flow control.
@@ -333,7 +396,9 @@ class LLMThread(models.Model):
         ]
 
         result = self.env["mail.message"].search(
-            domain, order="create_date DESC, write_date DESC, id DESC", limit=1
+            domain,
+            order="create_date DESC, write_date DESC, id DESC",
+            limit=1,
         )
 
         if not result:
@@ -350,9 +415,9 @@ class LLMThread(models.Model):
         # 1. Last message is user message → generate assistant response
         # 2. Last message is tool message → generate assistant response
         # 3. Last message is assistant with tool calls → execute tools
-        if last_message.llm_role in ("user", "tool"):
-            return True
-        elif last_message.llm_role == "assistant" and last_message.has_tool_calls():
+        if last_message.llm_role in ("user", "tool") or (
+            last_message.llm_role == "assistant" and last_message.has_tool_calls()
+        ):
             return True
 
         return False
@@ -367,7 +432,9 @@ class LLMThread(models.Model):
             # Initialize message on first content
             if message is None and chunk.get("content"):
                 message = self.message_post(
-                    body="Thinking...", llm_role="assistant", author_id=False
+                    body="Thinking...",
+                    llm_role="assistant",
+                    author_id=False,
                 )
                 yield {"type": "message_create", "message": message.to_store_format()}
 
@@ -381,7 +448,7 @@ class LLMThread(models.Model):
             if chunk.get("tool_calls"):
                 collected_tool_calls.extend(chunk["tool_calls"])
                 _logger.debug(
-                    f"Collected {len(chunk['tool_calls'])} tool calls from chunk"
+                    f"Collected {len(chunk['tool_calls'])} tool calls from chunk",
                 )
 
             # Handle errors
@@ -459,7 +526,8 @@ class LLMThread(models.Model):
         try:
             # Create tool message using the post_tool_call method
             tool_msg = self.env["mail.message"].post_tool_call(
-                tool_call, thread_model=self
+                tool_call,
+                thread_model=self,
             )
             yield {"type": "message_create", "message": tool_msg.to_store_format()}
 
@@ -473,7 +541,9 @@ class LLMThread(models.Model):
             # Create error tool message using the new method
             try:
                 error_msg = self.env["mail.message"].create_tool_error_message(
-                    tool_call, str(e), thread_model=self
+                    tool_call,
+                    str(e),
+                    thread_model=self,
                 )
                 yield {
                     "type": "message_create",
@@ -482,4 +552,10 @@ class LLMThread(models.Model):
                 return error_msg
             except Exception as e2:
                 _logger.error(f"Failed to create error message: {e2}")
-                return None
+                # Yield error event so frontend knows something went wrong
+                yield {
+                    "type": "error",
+                    "error": f"Tool execution failed: {e!s}",
+                }
+                # Re-raise the original exception - don't silently return None
+                raise e from e2

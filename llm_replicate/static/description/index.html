@@ -1,226 +1,307 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Replicate Provider for Odoo LLM Integration</title>
-    <meta name="description" content="Connect your Odoo instance with Replicate's diverse AI models. This module provides integration with Replicate's API.">
-    <meta name="keywords" content="Odoo Replicate, Replicate API integration, Odoo AI, LLM for ERP, AI Odoo module">
-    <meta name="author" content="Apexive Solutions LLC">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-    <style>
-        :root {
-            --primary-color: #6f42c1;
-            --secondary-color: #e9ecef;
-            --accent-color: #ffc107;
-            --text-color: #343a40;
-            --light-bg: #f8f9fa;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-        }
-
-        .header-container {
-            background-color: var(--light-bg);
-            border-bottom: 3px solid var(--primary-color);
-            padding: 2rem 0;
-        }
-
-        .banner-image {
-            width: 100%;
-            max-height: 300px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        h1, h2, h3, h4 {
-            color: var(--primary-color);
-        }
-
-        .feature-card {
-            height: 100%;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-top: 3px solid var(--primary-color);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        .section-divider {
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), transparent);
-            margin: 3rem 0;
-        }
-
-        .highlight-box {
-            background-color: var(--light-bg);
-            border-left: 4px solid var(--primary-color);
-            padding: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        code {
-            color: var(--primary-color);
-            background-color: var(--light-bg);
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-        }
-
-        .github-link {
-            font-weight: bold;
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .github-link:hover {
-            color: #5a32a3;
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-<div class="header-container">
+<!-- Hero Section -->
+<section style="padding:4rem 0 3rem">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="fw-bold">Replicate Provider for Odoo LLM</h1>
-                <p class="lead mb-4">Connect your Odoo instance with Replicate's diverse AI models.</p>
-                <div class="d-flex mb-3 align-items-center">
-                    <span class="badge bg-primary me-2">v16.0.1.1.0</span>
-                    <span class="badge bg-secondary me-2">LGPL-3</span>
-                    <a href="https://github.com/apexive/odoo-llm" class="github-link ms-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github me-1" viewBox="0 0 16 16">
-                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                        </svg>
-                        GitHub Repository
-                    </a>
-                </div>
-                <p>This module provides integration with Replicate's API for accessing a diverse range of AI models.</p>
+        <div class="text-center" style="max-width:800px; margin:0 auto">
+            <div style="display:inline-flex; padding:0.5rem 1.25rem; border-radius:50px; margin-bottom:2rem">
+                <i class="fa fa-cloud" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                <span style="color:#71639e; font-weight:600; font-size:0.9rem">AI Provider</span>
             </div>
-            <div class="col-md-4 text-center">
-                <img src="icon.png" alt="Replicate Provider Logo" class="img-fluid" style="max-width: 200px;">
+
+            <h1 style="font-size:3rem; font-weight:800; color:#212529; margin-bottom:1.5rem; line-height:1.2">
+                Replicate Provider for Odoo LLM
+            </h1>
+
+            <p style="font-size:1.25rem; color:#6c757d; margin-bottom:1rem; line-height:1.6">
+                Connect your Odoo instance with Replicate&apos;s diverse AI models.
+            </p>
+
+            <p style="font-size:1rem; color:#868e96; margin-bottom:2rem">
+                Access a <strong style="color:#495057">diverse range of open-source models</strong> via Replicate&apos;s API
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap">
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-comments" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#5b4c7d; font-weight:600">Text Generation</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-cubes" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#0c5460; font-weight:600">Diverse Models</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-github" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#155724; font-weight:600">Open Source</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<div class="container py-5">
-    <!-- Banner Image -->
-    <img src="banner.jpeg" alt="Replicate Integration Banner" class="img-fluid mb-4">
-
+<div class="container my-5">
     <!-- Overview Section -->
     <section class="mb-5">
-        <h2 class="mb-4">Overview</h2>
-        <p>The Replicate Provider module extends the LLM Integration Base to connect with Replicate's API. This module allows you to use a diverse range of AI models hosted on Replicate directly from your Odoo instance.</p>
+        <h2 class="text-center mb-3" style="font-size:2.5rem; font-weight:700; color:#71639e">What is Replicate Provider?</h2>
+        <p class="text-center mb-5" style="font-size:1.2rem; color:#6c757d; font-weight:500">Access diverse open-source models via the cloud</p>
 
-        <div class="highlight-box">
-            <h4>Early Development Stage</h4>
-            <p class="mb-0">This module is in an early stage of development. Basic functionality for connecting to Replicate's API and generating text with various models is implemented, but advanced features are still under development.</p>
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem">
+                    <p style="font-size:1.15rem; color:#495057; line-height:1.9; margin-bottom:0; text-align:center">
+                        The Replicate Provider module extends the LLM Integration Base to connect with Replicate&apos;s API. This module allows you to use a diverse range of AI models hosted on Replicate directly from your Odoo instance, including open-source models like Llama, Mistral, and more.
+                    </p>
+                </div>
+            </div>
         </div>
 
-        <div class="highlight-box">
-            <h4>Key Capabilities</h4>
-            <ul class="mb-0">
-                <li><strong>Text generation</strong> - Generate text responses using various models</li>
-                <li><strong>Model discovery</strong> - Automatically discover available models</li>
-            </ul>
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm bg-light" style="border-radius:16px; padding:1.5rem">
+                    <div class="d-flex align-items-center">
+                        <i class="fa fa-info-circle" style="font-size:24px; color:#71639e; margin-right:1rem"></i>
+                        <p style="color:#495057; margin-bottom:0">
+                            <strong>Early Development Stage:</strong> This module is in an early stage of development. Basic functionality for connecting to Replicate&apos;s API and generating text with various models is implemented, but advanced features are still under development.
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <div class="section-divider"></div>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Capabilities Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Capabilities</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">What you can do with Replicate in Odoo</p>
+
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-comments" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Text Generation</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Generate text responses using various open-source models hosted on Replicate.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-search" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Model Discovery</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Automatically discover and import available models from Replicate.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
     <!-- Configuration Section -->
     <section class="mb-5">
-        <h2 class="mb-4">Configuration</h2>
-        <p>Setting up the Replicate provider is straightforward:</p>
-        <ol>
-            <li>Install the module in your Odoo instance</li>
-            <li>Navigate to <strong>LLM > Configuration > Providers</strong></li>
-            <li>Create a new provider and select "Replicate" as the provider type</li>
-            <li>Enter your Replicate API key</li>
-            <li>Click "Fetch Models" to import available models</li>
-            <li>Set default models for text generation</li>
-        </ol>
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Configuration</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Get started with Replicate</p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <ol style="color:#6c757d; margin-bottom:0; padding-left:1.25rem">
+                            <li style="margin-bottom:1rem">Install the module in your Odoo instance</li>
+                            <li style="margin-bottom:1rem">Navigate to <strong style="color:#495057">LLM &rarr; Configuration &rarr; Providers</strong></li>
+                            <li style="margin-bottom:1rem">Create a new provider and select &quot;Replicate&quot; as the provider type</li>
+                            <li style="margin-bottom:1rem">Enter your Replicate API key</li>
+                            <li style="margin-bottom:1rem">Click &quot;Fetch Models&quot; to import available models</li>
+                            <li style="margin-bottom:0">Set default models for text generation</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <div class="section-divider"></div>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
-    <!-- Technical Details Section -->
+    <!-- Technical Details -->
     <section class="mb-5">
-        <h2 class="mb-4">Technical Details</h2>
-        <p>This module extends the base LLM integration framework with Replicate-specific implementations:</p>
-        <ul>
-            <li>Implements the Replicate API client with proper authentication</li>
-            <li>Provides model mapping between Replicate formats and Odoo LLM formats</li>
-            <li>Handles basic error cases</li>
-        </ul>
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Technical Details</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Requirements and dependencies</p>
 
-        <div class="row mt-4">
-            <div class="col-lg-6">
-                <h3 class="h5">Module Information</h3>
-                <table class="table table-sm">
-                    <tbody>
-                    <tr>
-                        <th scope="row">Name</th>
-                        <td>Replicate Provider for Odoo LLM</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Version</th>
-                        <td>16.0.1.1.0</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Category</th>
-                        <td>Technical</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">License</th>
-                        <td>LGPL-3</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Dependencies</th>
-                        <td>llm</td>
-                    </tr>
-                    <tr>
-                        <th scope="row">Author</th>
-                        <td>Apexive Solutions LLC</td>
-                    </tr>
-                    </tbody>
-                </table>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem">Module Information</h4>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Dependencies:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">llm</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Python Packages:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">replicate</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Category:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">Technical</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">License:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">LGPL-3</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Related Modules Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Related Modules</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Explore other modules in the Odoo LLM suite</p>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-cogs" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Base</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Core framework for LLM integration with provider management and model configuration.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_thread" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-comments" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Thread</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Conversational AI threads with message history and streaming responses.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_assistant" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-user-circle" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Assistant</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Create customizable AI assistants with specific instructions and personalities.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_openai" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-bolt" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">OpenAI Provider</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Connect to OpenAI GPT models and any OpenAI-compatible provider.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_ollama" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-server" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">Ollama Provider</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Run open-source models locally with complete privacy and no API costs.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_knowledge" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-book" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Knowledge</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">RAG system for AI-powered search and retrieval from your documents.</p>
+                        </div>
+                    </div>
+                </a>
             </div>
         </div>
     </section>
 </div>
 
-<footer class="bg-light py-4 border-top">
+<!-- Footer -->
+<footer class="bg-primary" style="padding:3rem 2rem; border-radius:16px; margin:2rem 1rem">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-6">
-                <h4>Replicate Provider for Odoo LLM</h4>
-                <p>Developed by Apexive Solutions LLC</p>
-                <p>Licensed under <a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank">LGPL-3</a></p>
+        <div style="border-radius:12px; padding:2.5rem">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 style="font-weight:700; color:#ffffff; font-size:1.5rem; margin-bottom:0.75rem">Replicate Provider for Odoo LLM</h4>
+                    <p style="color:#f8f9fa; font-size:1rem; margin-bottom:1rem">Diverse AI models for Odoo</p>
+                    <p style="color:#e9d5ff; margin-bottom:0.25rem">Developed by <strong style="color:#ffffff">Apexive Solutions LLC</strong></p>
+                    <p style="color:#e0d4ec; font-size:0.9rem; margin-bottom:0">Licensed under LGPL-3 &bull; &copy; 2025 All rights reserved.</p>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="d-flex flex-column">
+                        <div class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; color:#71639e; font-weight:600; margin-bottom:0.75rem">
+                            <i class="fa fa-github" style="font-size:18px; margin-right:0.5rem"></i>
+                            github.com/apexive/odoo-llm
+                        </div>
+                        <a href="mailto:hello@apexive.com" class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; text-decoration:none; color:#71639e; font-weight:600; margin-bottom:0">
+                            <i class="fa fa-envelope" style="font-size:18px; margin-right:0.5rem"></i>
+                            hello@apexive.com
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-6 text-lg-end">
-                <p>For the latest updates and additional modules, visit:</p>
-                <a href="https://github.com/apexive/odoo-llm" class="btn btn-outline-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github me-2" viewBox="0 0 16 16">
-                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                    </svg>
-                    GitHub Repository
-                </a>
-            </div>
-        </div>
-        <div class="mt-4 pt-3 border-top text-center">
-            <p class="mb-0">© 2025 Apexive Solutions LLC. All rights reserved.</p>
         </div>
     </div>
 </footer>
-</body>
-</html>

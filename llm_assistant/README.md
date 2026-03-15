@@ -2,6 +2,49 @@
 
 Advanced AI assistant management with integrated prompt templates, testing capabilities, and intelligent configuration orchestration. This module serves as the intelligence layer that defines how Odoo data connects to AI models.
 
+**Module Type:** 🚀 Entry Point
+
+![Architecture](static/description/llm_assistant_architecture.png)
+
+## Installation
+
+### What to Install
+
+This is the **main entry point** for AI chat features in Odoo.
+
+**Basic AI Chat Setup:**
+
+```bash
+odoo-bin -d your_db -i llm_assistant,llm_openai
+```
+
+### Auto-Installed Dependencies
+
+These are pulled in automatically:
+
+- `llm` (core infrastructure)
+- `llm_tool` (function calling)
+- `llm_thread` (chat interface)
+- `mail` (Odoo messaging)
+
+### Choose a Provider
+
+| Provider | Module        | Best For                    |
+| -------- | ------------- | --------------------------- |
+| OpenAI   | `llm_openai`  | GPT-4, most capable         |
+| Ollama   | `llm_ollama`  | Local/private, no API costs |
+| Mistral  | `llm_mistral` | European, fast              |
+
+### Common Setups
+
+| I want to...                    | Install                                                      |
+| ------------------------------- | ------------------------------------------------------------ |
+| Chat with GPT-4 in Odoo         | `llm_assistant` + `llm_openai`                               |
+| Use local AI (privacy)          | `llm_assistant` + `llm_ollama`                               |
+| Add document search (RAG)       | Above + `llm_knowledge` + `llm_pgvector`                     |
+| Connect Claude Desktop          | Above + `llm_mcp_server`                                     |
+| Build domain-specific assistant | Extend `llm_assistant` (see `llm_assistant_account_invoice`) |
+
 ## Overview
 
 The LLM Assistant module provides sophisticated AI assistant management that goes far beyond simple chatbots. It serves as the intelligent configuration layer that orchestrates how AI models interact with Odoo data, with integrated prompt template management and comprehensive testing capabilities.
@@ -19,7 +62,7 @@ The LLM Assistant module provides sophisticated AI assistant management that goe
 
 ### Consolidated Architecture
 
-**Version 16.0.1.4.0** consolidates functionality from the former `llm_prompt` module:
+The module consolidates functionality from the former `llm_prompt` module:
 
 - ✅ **Prompt templates integrated** into assistant management
 - ✅ **Enhanced testing wizard** with context simulation
@@ -377,34 +420,12 @@ class ProjectTask(models.Model):
         return response
 ```
 
-## Migration Notes
-
-### From llm_prompt Module
-
-**Automatic Migration** (Version 16.0.1.4.0):
-
-- All existing prompts automatically migrated to assistant module
-- Template functionality seamlessly integrated
-- Enhanced testing capabilities added
-- No data loss or configuration changes required
-
-**New Features Added**:
-
-- Auto-argument detection for existing templates
-- Enhanced testing wizard with context simulation
-- Improved UI with unified assistant/prompt management
-- Better error handling and validation
-
-### Breaking Changes
-
-None - this is a consolidation update with full backward compatibility.
-
 ## Technical Specifications
 
 ### Module Information
 
 - **Name**: LLM Assistant
-- **Version**: 16.0.1.4.0
+- **Version**: 18.0.1.5.0
 - **Category**: Productivity
 - **License**: LGPL-3
 - **Dependencies**: `llm`, `mail`

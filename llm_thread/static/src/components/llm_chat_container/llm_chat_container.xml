@@ -2,14 +2,27 @@
 <templates xml:space="preserve">
     <t t-name="llm_thread.LLMChatContainer">
         <div class="o_LLMChatContainer h-100 d-flex flex-row overflow-hidden">
-            <!-- Thread List Sidebar -->
+            <!-- Mobile: Backdrop overlay -->
+            <t t-if="isSmall">
+                <div
+          class="o-llm-sidebar-backdrop"
+          t-att-class="{ 'o-visible': state.isMobileSidebarVisible }"
+          t-on-click="onBackdropClick"
+        />
+            </t>
+
+            <!-- Mobile Sidebar: Slide-in from left (shown when isSmall = true) -->
             <div
-        class="o-llm-sidebar d-flex flex-column"
-        style="width: 280px; border-right: 1px solid #dee2e6;"
+        t-if="isSmall"
+        class="o-llm-sidebar d-flex flex-column border-end"
+        t-att-class="{
+                    'o-mobile': true,
+                    'o-visible': state.isMobileSidebarVisible
+                }"
       >
                 <!-- Sidebar Header -->
                 <div
-          class="d-flex justify-content-between align-items-center p-3 border-bottom"
+          class="o-llm-sidebar-header d-flex align-items-center justify-content-between border-bottom p-3"
         >
                     <h6 class="mb-0 text-muted">Conversations</h6>
                     <button
@@ -23,8 +36,110 @@
 
                 <!-- Thread List -->
                 <div class="flex-grow-1 overflow-auto">
+                    <!-- Empty State -->
                     <div
-            t-if="llmStore.llmThreadList.length === 0"
+            t-if="filteredThreadList.length === 0"
+            class="p-3 text-center text-muted"
+          >
+                        <i class="fa fa-comments-o fa-2x mb-2" />
+                        <div>No conversations yet</div>
+                        <small>Start your first AI chat</small>
+                    </div>
+
+                    <!-- Thread Items -->
+                    <t
+            t-foreach="filteredThreadList"
+            t-as="thread"
+            t-key="thread.id"
+          >
+                        <div
+              class="o-llm-thread-item p-3 border-bottom cursor-pointer"
+              t-att-class="{ 'o-llm-thread-active': thread.id === activeThread?.id }"
+              t-on-click.stop.prevent="() => this.selectThread(thread.id)"
+              t-att-title="thread.name"
+            >
+                            <div
+                class="d-flex justify-content-between align-items-start"
+              >
+                                <div class="flex-grow-1 min-width-0">
+                                    <div
+                    class="text-truncate fw-medium"
+                    t-esc="thread.name"
+                  />
+                                    <div class="text-muted small mt-1">
+                                        <span
+                      t-if="thread.write_date"
+                      t-esc="formatDate(thread.write_date)"
+                    />
+                                    </div>
+                                </div>
+                                <div class="ms-2 flex-shrink-0">
+                                    <i
+                    t-if="isStreamingThread(thread.id)"
+                    class="fa fa-circle-o-notch fa-spin text-primary"
+                  />
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+
+            <!-- Desktop Sidebar: Expand/collapse pattern (shown when isSmall = false) -->
+            <div
+        t-if="!isSmall"
+        class="o-llm-sidebar d-flex flex-column border-end"
+        t-att-style="state.isSidebarCollapsed ? 'width: 48px;' : 'width: 280px;'"
+      >
+                <!-- Sidebar Header - matches height of chat header -->
+                <div
+          class="o-llm-sidebar-header d-flex align-items-center border-bottom"
+          t-att-class="state.isSidebarCollapsed ? 'justify-content-center px-2 py-3' : 'justify-content-between p-3'"
+        >
+                    <!-- Expanded state: Header content + collapse button on right -->
+                    <t t-if="!state.isSidebarCollapsed">
+                        <div class="d-flex align-items-center gap-2">
+                            <h6 class="mb-0 text-muted">Conversations</h6>
+                            <button
+                class="btn btn-sm btn-primary"
+                t-on-click="createNewThread"
+                title="New Thread"
+              >
+                                <i class="fa fa-plus" />
+                            </button>
+                        </div>
+                        <!-- Collapse button (Odoo Apps style classes) -->
+                        <button
+              class="btn btn-secondary btn-sm px-2 py-1"
+              t-on-click="toggleSidebar"
+              title="Collapse sidebar"
+            >
+                            <i class="oi oi-panel-right" />
+                        </button>
+                    </t>
+
+                    <!-- Collapsed state: Centered expand button -->
+                    <t t-else="">
+                        <button
+              class="btn btn-secondary btn-sm px-2 py-1"
+              t-on-click="toggleSidebar"
+              title="Expand sidebar"
+            >
+                            <i
+                class="oi oi-panel-right"
+                style="transform: rotate(180deg);"
+              />
+                        </button>
+                    </t>
+                </div>
+
+                <!-- Thread List (only when expanded) -->
+                <div
+          t-if="!state.isSidebarCollapsed"
+          class="flex-grow-1 overflow-auto"
+        >
+                    <div
+            t-if="filteredThreadList.length === 0"
             class="p-3 text-center text-muted"
           >
                         <i class="fa fa-comments-o fa-2x mb-2" />
@@ -33,14 +148,14 @@
                     </div>
 
                     <t
-            t-foreach="llmStore.llmThreadList"
+            t-foreach="filteredThreadList"
             t-as="thread"
             t-key="thread.id"
           >
                         <div
               class="o-llm-thread-item p-3 border-bottom cursor-pointer"
               t-att-class="{ 'o-llm-thread-active': thread.id === activeThread?.id }"
-              t-on-click="() => this.selectThread(thread.id)"
+              t-on-click.stop.prevent="() => this.selectThread(thread.id)"
               t-att-title="thread.name"
             >
                             <div
@@ -72,22 +187,56 @@
 
             <!-- Main Chat Area -->
             <div class="flex-grow-1 d-flex flex-column h-100">
+                <!-- Mobile: Hamburger button to open sidebar + Cog for settings -->
+                <div
+          t-if="isSmall and hasActiveThread"
+          class="d-flex align-items-center p-2 border-bottom flex-shrink-0"
+        >
+                    <button
+            class="btn btn-sm btn-secondary me-2"
+            t-on-click="openMobileSidebar"
+            title="Show conversations"
+          >
+                        <i class="fa fa-bars" />
+                    </button>
+                    <h6
+            class="mb-0 text-truncate flex-grow-1 me-2"
+            t-esc="activeThread.name"
+          />
+                    <button
+            class="btn btn-sm btn-secondary"
+            t-on-click="openThreadSettings"
+            title="Thread settings"
+          >
+                        <i class="fa fa-cog" />
+                    </button>
+                </div>
+
                 <!-- Show thread and composer only if we have an active LLM thread -->
-                <div t-if="hasActiveThread" class="d-flex flex-column h-100">
-                    <!-- Thread Header with dropdowns -->
-                    <LLMThreadHeader thread="activeThread" />
+                <div
+          t-if="hasActiveThread"
+          class="d-flex flex-column flex-grow-1 overflow-hidden"
+        >
+                    <!-- Thread Header with dropdowns (desktop only) -->
+                    <LLMThreadHeader t-if="!isSmall" thread="activeThread" />
 
                     <!-- Thread area - reuse mail's Thread component -->
                     <div
+            t-ref="threadScrollable"
             class="o-llm-thread-area flex-grow-1 overflow-auto p-3"
+            style="min-height: 0;"
           >
-                        <Thread thread="activeThread" order="'asc'" />
+                        <Thread
+              thread="activeThread"
+              order="'asc'"
+              scrollRef="threadScrollableRef"
+            />
                     </div>
 
                     <!-- Streaming indicator -->
                     <div
             t-if="isStreaming"
-            class="o-llm-streaming-indicator p-2 text-center text-muted"
+            class="o-llm-streaming-indicator p-2 text-center text-muted flex-shrink-0"
           >
                         <i
               class="fa fa-circle-o-notch fa-spin"
@@ -95,11 +244,14 @@
                     </div>
 
                     <!-- Composer area - reuse mail's Composer component -->
-                    <div class="o-llm-composer-area border-top p-3">
+                    <div
+            class="o-llm-composer-area border-top p-3 flex-shrink-0"
+          >
                         <Composer
               t-if="threadComposer"
               composer="threadComposer"
               mode="'compact'"
+              sidebar="false"
             />
                     </div>
                 </div>

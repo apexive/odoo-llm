@@ -1,350 +1,906 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM MCP Server for Odoo | Model Context Protocol Integration with Claude Desktop & MCP Hosts</title>
-    <meta name="description" content="Production-ready MCP server that exposes Odoo LLM tools to Claude Desktop, Letta, and other MCP hosts through the Model Context Protocol standard.">
-    <meta name="keywords" content="Model Context Protocol, MCP server, Claude Desktop integration, Odoo AI tools, LLM tool execution, MCP host integration, Letta MCP, Odoo MCP server">
-    <meta name="author" content="Apexive Solutions LLC">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-    <style>
-        :root {
-            --primary-color: #6f42c1;
-            --secondary-color: #e9ecef;
-            --accent-color: #ffc107;
-            --text-color: #343a40;
-            --light-bg: #f8f9fa;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-        }
-
-        .header-container {
-            background-color: var(--light-bg);
-            border-bottom: 3px solid var(--primary-color);
-            padding: 2rem 0;
-        }
-
-        h1, h2, h3, h4 {
-            color: var(--primary-color);
-        }
-
-        .feature-card {
-            height: 100%;
-            transition: transform 0.3s, box-shadow 0.3s;
-            border-top: 3px solid var(--primary-color);
-        }
-
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        .module-card {
-            border-left: 3px solid var(--primary-color);
-            transition: transform 0.3s;
-        }
-
-        .module-card:hover {
-            transform: translateY(-3px);
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            border-color: var(--primary-color);
-        }
-
-        .btn-primary:hover {
-            background-color: #5a32a3;
-            border-color: #5a32a3;
-        }
-
-        .section-divider {
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary-color), transparent);
-            margin: 3rem 0;
-        }
-
-        .highlight-box {
-            background-color: var(--light-bg);
-            border-left: 4px solid var(--primary-color);
-            padding: 1.5rem;
-            margin: 2rem 0;
-        }
-
-        code {
-            color: var(--primary-color);
-            background-color: var(--light-bg);
-            padding: 0.2rem 0.4rem;
-            border-radius: 3px;
-        }
-
-        .provider-logo {
-            width: 40px;
-            height: 40px;
-            margin-right: 10px;
-            opacity: 0.8;
-            transition: opacity 0.3s;
-        }
-
-        .provider-logo:hover {
-            opacity: 1;
-        }
-
-        .github-link {
-            font-weight: bold;
-            color: var(--primary-color);
-            text-decoration: none;
-            transition: color 0.3s;
-        }
-
-        .github-link:hover {
-            color: #5a32a3;
-            text-decoration: underline;
-        }
-    </style>
-</head>
-<body>
-<div class="header-container">
+<!-- Hero Section -->
+<section style="padding:4rem 0 3rem">
     <div class="container">
-        <div class="row align-items-center">
-            <div class="col-md-8">
-                <h1 class="fw-bold">LLM MCP Server</h1>
-                <p class="lead mb-4">Production-ready Model Context Protocol server that exposes Odoo LLM tools to Claude Desktop and other MCP hosts.</p>
-                <div class="d-flex mb-3 align-items-center">
-                    <span class="badge bg-primary me-2">v18.0.1.0.0</span>
-                    <span class="badge bg-secondary me-2">LGPL-3</span>
-                    <span class="badge bg-success me-2">MCP 2025-06-18</span>
-                    <a href="https://github.com/apexive/odoo-llm" class="github-link ms-auto">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github me-1" viewBox="0 0 16 16">
-                            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                        </svg>
-                        GitHub Repository
-                    </a>
-                </div>
-                <p>Standards-compliant MCP server enabling Claude Desktop, Letta, and other MCP hosts to discover and execute your Odoo LLM tools seamlessly.</p>
+        <div class="text-center" style="max-width:800px; margin:0 auto">
+            <div style="display:inline-flex; padding:0.5rem 1.25rem; border-radius:50px; margin-bottom:2rem">
+                <i class="fa fa-star" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                <span style="color:#71639e; font-weight:600; font-size:0.9rem">AI-Powered Odoo Access</span>
             </div>
-            <div class="col-md-4 text-center">
-                <img src="icon.svg" alt="LLM Integration Base Logo" class="img-fluid" style="max-width: 200px;">
+
+            <h1 style="font-size:3rem; font-weight:800; color:#212529; margin-bottom:1.5rem; line-height:1.2">
+                Talk to Your Odoo Data<br>
+                <span>with AI</span>
+            </h1>
+
+            <p style="font-size:1.25rem; color:#6c757d; margin-bottom:1rem; line-height:1.6">
+                Connect any MCP client to Odoo and manage your business using natural language. Zero configuration required.
+            </p>
+
+            <p style="font-size:1rem; color:#868e96; margin-bottom:2rem">
+                Works with <strong style="color:#495057">Claude Desktop</strong>, <strong style="color:#495057">Claude Code</strong>, <strong style="color:#495057">Claude Cowork</strong>, <strong style="color:#495057">Codex CLI</strong>, and any MCP-compatible client
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap">
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-bolt" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#155724; font-weight:600">Zero Setup</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-github" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#5b4c7d; font-weight:600">Open Source</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-shield" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#0c5460; font-weight:600">Enterprise Ready</span>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</section>
 
-<div class="container py-5">
-    <!-- Overview Section -->
+<div class="container my-5">
+    <!-- What is MCP Section -->
     <section class="mb-5">
-        <h2 class="mb-4">Overview</h2>
-        <p>The LLM MCP Server enables Claude Desktop, Letta, and other MCP hosts to discover and execute your Odoo LLM tools through a standards-compliant JSON-RPC 2.0 interface.</p>
+        <h2 class="text-center mb-3" style="font-size:2.5rem; font-weight:700; color:#71639e">What is Model Context Protocol (MCP)?</h2>
+        <p class="text-center mb-5" style="font-size:1.2rem; color:#6c757d; font-weight:500">Connect AI assistants directly to your Odoo data</p>
 
-        <div class="highlight-box">
-            <h4>What You Get</h4>
-            <ul class="mb-0">
-                <li><strong>Native Odoo Implementation</strong> - 100% pure Odoo module using standard controllers and models</li>
-                <li><strong>Claude Desktop Integration</strong> - Direct access to Odoo tools from Claude conversations</li>
-                <li><strong>Tool Discovery</strong> - Automatic exposure of all active llm.tool records via tools/list</li>
-                <li><strong>Secure Execution</strong> - Bearer token authentication with Odoo user permissions</li>
-                <li><strong>Session Management</strong> - Stateful protocol handling with concurrent request support</li>
-            </ul>
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem">
+                    <p style="font-size:1.15rem; color:#495057; line-height:1.9; margin-bottom:0; text-align:center">
+                        MCP is an open protocol created by Anthropic (makers of Claude AI) that standardizes how AI assistants connect to external data sources and tools. This module implements an MCP server inside Odoo, exposing your business data and operations to any MCP-compatible AI client through a simple, secure interface.
+                    </p>
+                </div>
+            </div>
         </div>
-    </section>
 
-    <div class="section-divider"></div>
+        <!-- Why MCP is Revolutionary -->
+        <h3 class="text-center mb-4" style="font-size:2rem; font-weight:700; color:#212529">Why This Matters</h3>
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-plug" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Works Everywhere</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Use Claude Desktop on your laptop, Claude Code in your terminal, or Codex CLI in your IDE. One integration, all your tools.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-shield" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Your Data Stays Safe</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Every user brings their own API key. They can only see what they're allowed to see in Odoo. All permissions are enforced.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin:0 auto 1.5rem">
+                            <i class="fa fa-rocket" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Built for Tomorrow</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">More AI tools adopt MCP every month. Connect once, benefit forever - no rewiring when you change tools.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <!-- Key Features Section -->
-    <section class="mb-5">
-        <h2 class="mb-4">Key Features</h2>
+        <!-- How MCP Benefits Your Business -->
+        <h3 class="text-center mb-4" style="font-size:2rem; font-weight:700; color:#212529">What You Get</h3>
         <div class="row g-4">
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">MCP 2025-06-18 Compliance</h3>
-                        <p class="card-text">Full Model Context Protocol implementation with JSON-RPC 2.0 and streamable_http transport.</p>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:10px; margin-bottom:1.5rem">
+                            <i class="fa fa-bolt" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Zero Development Time</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Skip the API docs, SDKs, and webhooks. Install the module, connect your AI client, and you're done.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Claude Desktop Ready</h3>
-                        <p class="card-text">Verified working integration with Claude Desktop using mcp-remote transport.</p>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:10px; margin-bottom:1.5rem">
+                            <i class="fa fa-users" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Use Your Favorite Tools</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Your team already has preferred AI assistants. Let them keep using them with your Odoo data.</p>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Auto Tool Discovery</h3>
-                        <p class="card-text">Automatically exposes all active llm.tool records through the tools/list endpoint.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Bearer Authentication</h3>
-                        <p class="card-text">Secure API key authentication integrated with Odoo's user system and permissions.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Session Management</h3>
-                        <p class="card-text">Stateful protocol handling with concurrent request support and race condition protection.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Native Odoo Architecture</h3>
-                        <p class="card-text">100% pure Odoo implementation using standard HTTP controllers, models, and security systems.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6">
-                <div class="card feature-card shadow-sm">
-                    <div class="card-body">
-                        <h3 class="card-title h5">Production Ready</h3>
-                        <p class="card-text">Optimized logging, error handling, and performance. Future SSE streaming support planned.</p>
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:10px; margin-bottom:1.5rem">
+                            <i class="fa fa-unlock-alt" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Freedom to Switch</h4>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Try different AI providers without rebuilding integrations. Your MCP server keeps working no matter which AI you choose.</p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="section-divider"></div>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
-    <!-- Getting Started Section -->
+    <!-- Demo Section -->
     <section class="mb-5">
-        <h2 class="mb-4">Getting Started</h2>
-        <div class="row">
-            <div class="col-lg-6">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Quick Setup</h3>
-                        <ol>
-                            <li>Install the <code>llm_mcp_server</code> module</li>
-                            <li>Get your API key from Odoo: <a href="https://www.odoo.com/documentation/18.0/developer/reference/external_api.html#api-keys" target="_blank" class="github-link">Follow API Key Tutorial</a></li>
-                            <li>Install <code>mcp-remote</code>: <code>npm install -g mcp-remote</code></li>
-                        </ol>
-                    </div>
-                </div>
+        <h2 class="text-center mb-5" style="font-size:2.5rem; font-weight:700; color:#71639e">See It In Action</h2>
+        <div class="text-center">
+            <div style="display:inline-block; max-width:100%">
+                <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/llm_mcp_server_demo.gif?9203e76" alt="MCP Server Demo - Talk to Odoo with AI" class="img-fluid rounded border border-primary" style="max-width:100%; display:block">
             </div>
-            <div class="col-lg-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Claude Desktop Config</h3>
-                        <ol>
-                            <li>Open Claude Desktop config file</li>
-                            <li>Add MCP server configuration with your API key</li>
-                            <li>Restart Claude Desktop</li>
-                            <li>Ask Claude: "What tools do you have available?"</li>
-                        </ol>
+            <p class="text-muted mt-4" style="font-size:1.1rem">Ask questions, and let AI do all the work - all in natural language</p>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Claude Cowork Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Works Great with Claude Cowork</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Connect your Odoo MCP server to Claude Cowork and let your team collaborate with AI on real business data</p>
+
+        <div class="row g-4 mb-4">
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2rem">
+                    <div class="d-flex align-items-start" style="margin-bottom:1.5rem">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-right:1rem; padding:8px; flex-shrink:0">
+                            <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_claude_cowork.png?9203e76" alt="Claude Cowork" style="max-width:100%; object-fit:contain">
+                        </div>
+                        <div>
+                            <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:0.5rem">Claude Cowork + Odoo = AI-Powered Finance Team</h3>
+                            <p style="color:#6c757d; margin-bottom:0">Add Odoo as an MCP server in Claude Cowork and your entire team can query accounting data, run financial reports, and analyze KPIs - all through natural conversation.</p>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size:1.15rem; font-weight:700; color:#212529; margin-bottom:1rem">Recommended modules to install:</h4>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:12px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <i class="fa fa-calculator" style="font-size:24px; color:#71639e; margin-right:0.75rem"></i>
+                                    <strong style="color:#212529; font-size:1.1rem">LLM Tool Account</strong>
+                                </div>
+                                <p style="color:#6c757d; margin-bottom:0.75rem; font-size:0.95rem">18 AI-powered accounting tools for CPAs: trial balance, tax reports, journal entries, reconciliation, payments, and period close.</p>
+                                <code style="font-size:0.85rem; color:#71639e">llm_tool_account</code>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:12px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <i class="fa fa-bar-chart" style="font-size:24px; color:#71639e; margin-right:0.75rem"></i>
+                                    <strong style="color:#212529; font-size:1.1rem">LLM Tool MIS Builder</strong>
+                                </div>
+                                <p style="color:#6c757d; margin-bottom:0.75rem; font-size:0.95rem">44 AI-powered tools for MIS Builder: create KPIs, configure periods, compute reports, drill down, and analyze variances.</p>
+                                <code style="font-size:0.85rem; color:#71639e">llm_tool_mis_builder</code>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px; margin-top:1rem">
+                        <p style="margin:0; color:#495057; font-size:0.95rem">
+                            <i class="fa fa-lightbulb-o" style="color:#71639e; margin-right:0.5rem"></i>
+                            Install these modules alongside <strong>llm_mcp_server</strong>, then add Odoo as an MCP server in Claude Cowork. Your team can immediately ask questions like <em>"What's our profit margin this quarter?"</em> or <em>"Show me the trial balance for January"</em>.
+                        </p>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <div class="section-divider"></div>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
-    <!-- Related Modules Section -->
+    <!-- Natural Language Operations -->
     <section class="mb-5">
-        <h2 class="mb-4">Related Modules</h2>
-        <p>The LLM Integration Base is part of a comprehensive AI ecosystem for Odoo. Explore these additional modules for enhanced functionality:</p>
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Just Ask in Plain English</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Your AI assistant understands natural language and handles complex operations instantly</p>
 
-        <div class="row g-4 mt-3">
-            <div class="col-lg-6">
-                <div class="card module-card shadow-sm p-3 mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Easy AI Chat</h3>
-                        <p class="card-text">A simple, powerful AI chat module to supercharge your Odoo workflows with real-time conversations. Connect with multiple AI providers and enjoy multimodal capabilities.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-success">Available Now</span>
-                            <a href="https://github.com/apexive/odoo-llm" class="btn btn-sm btn-outline-primary">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card module-card shadow-sm p-3 mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title h4">LLM Assistant</h3>
-                        <p class="card-text">Create and manage specialized AI assistants with dedicated tools and configurations. Assign specific models and customize system prompts for different use cases.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-success">Available Now</span>
-                            <a href="https://github.com/apexive/odoo-llm" class="btn btn-sm btn-outline-primary">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card module-card shadow-sm p-3 mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title h4">LLM RAG (Retrieval Augmented Generation)</h3>
-                        <p class="card-text">Enhance AI responses with knowledge from your Odoo database. Create document collections, generate embeddings, and implement semantic search for more accurate AI interactions.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-success">Available Now</span>
-                            <a href="https://github.com/apexive/odoo-llm" class="btn btn-sm btn-outline-primary">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-lg-6">
-                <div class="card module-card shadow-sm p-3 mb-3">
-                    <div class="card-body">
-                        <h3 class="card-title h4">LLM Tool</h3>
-                        <p class="card-text">Implement function calling capabilities for AI models. Enable your AI to perform actions in Odoo through a standardized tool execution framework.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="badge bg-success">Available Now</span>
-                            <a href="https://github.com/apexive/odoo-llm" class="btn btn-sm btn-outline-primary">Learn More</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="highlight-box mt-4">
-            <div class="d-flex align-items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle me-3" viewBox="0 0 16 16">
-                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                    <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
-                <div>
-                    <h4 class="mb-2">Explore The Full Ecosystem</h4>
-                    <p class="mb-0">For specific integrations, provider implementations, and tools, visit our <a href="https://github.com/apexive/odoo-llm" class="github-link">GitHub repository</a>. The repository contains additional modules, documentation, and examples to extend your Odoo AI capabilities.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-    <!-- Support & Resources Section -->
-    <section class="mb-5">
-        <h2 class="mb-4">Support & Resources</h2>
         <div class="row g-4">
             <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Documentation</h3>
-                        <p class="card-text">Find detailed documentation, examples, and integration guides in our GitHub repository. The repository includes setup guides, API references, and example implementations.</p>
-                        <a href="https://github.com/apexive/odoo-llm" class="btn btn-primary mt-2">View Documentation</a>
+                <div class="card border-0 shadow-sm" style="padding:2rem; border-radius:16px">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                        <i class="fa fa-search" style="font-size:28px; color:#71639e"></i>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.75rem">Search &amp; Retrieve</h3>
+                    <p style="color:#6c757d; margin-bottom:1rem">Find any data across your entire Odoo database</p>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.95rem">"Show me all customers in California"</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:2rem; border-radius:16px">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                        <i class="fa fa-plus-circle" style="font-size:28px; color:#71639e"></i>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.75rem">Create Records</h3>
+                    <p style="color:#6c757d; margin-bottom:1rem">Add new customers, orders, products instantly</p>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.95rem">"Create a new lead for Acme Corp"</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:2rem; border-radius:16px">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                        <i class="fa fa-edit" style="font-size:28px; color:#71639e"></i>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.75rem">Update Data</h3>
+                    <p style="color:#6c757d; margin-bottom:1rem">Modify existing records with simple instructions</p>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.95rem">"Update the status of order #789 to delivered"</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm" style="padding:2rem; border-radius:16px">
+                    <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                        <i class="fa fa-lightbulb-o" style="font-size:28px; color:#71639e"></i>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:0.75rem">Get Insights</h3>
+                    <p style="color:#6c757d; margin-bottom:1rem">Ask complex questions about your business data</p>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px">
+                        <p style="margin:0; color:#495057; font-style:italic; font-size:0.95rem">"What's our total revenue this quarter?"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm bg-light" style="padding:2rem; border-radius:16px">
+                    <div class="d-flex align-items-start">
+                        <i class="fa fa-th-large" style="font-size:32px; color:#17a2b8; margin-right:1rem"></i>
+                        <div>
+                            <h4 style="color:#0c5460; font-weight:700; margin-bottom:0.75rem">Works Across All Odoo Apps</h4>
+                            <p style="color:#0c5460; margin-bottom:0">Sales, CRM, Inventory, Accounting, HR, Project Management, Manufacturing - if it's in Odoo, you can talk to it with AI.</p>
+                        </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-body">
-                        <h3 class="card-title h4">Community & Support</h3>
-                        <p class="card-text">Join our community to get help, share ideas, and contribute to the development of the LLM integration ecosystem for Odoo.</p>
-                        <a href="https://github.com/apexive/odoo-llm/issues" class="btn btn-outline-primary mt-2 me-2">Report Issues</a>
-                        <a href="https://github.com/apexive/odoo-llm" class="btn btn-outline-primary mt-2">Feature Requests</a>
+                <div class="card border-0 shadow-sm bg-light" style="padding:2rem; border-radius:16px">
+                    <div class="d-flex align-items-start">
+                        <i class="fa fa-code" style="font-size:32px; color:#71639e; margin-right:1rem"></i>
+                        <div>
+                            <h4 style="color:#5b4c7d; font-weight:700; margin-bottom:0.75rem">Build Your Own Tools</h4>
+                            <p style="color:#5b4c7d; margin-bottom:0">Create custom AI tools in seconds with the <code class="bg-light" style="padding:0.2rem 0.4rem; border-radius:4px; color:#71639e">@llm_tool</code> decorator. Extend functionality however you need.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Why This Matters Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Why Teams Love This</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Because it's awesome - and makes work feel like magic</p>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 text-center border-0 shadow-sm bg-light" style="border-radius:16px; padding:1rem">
+                    <div class="card-body p-4">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <i class="fa fa-bolt" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h3 class="mt-3" style="font-size:1.25rem; font-weight:700; color:#5b4c7d">10x Faster</h3>
+                        <p class="mt-2" style="color:#5b4c7d">No more clicking through menus. Just ask what you need, get instant results.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center border-0 shadow-sm bg-light" style="border-radius:16px; padding:1rem">
+                    <div class="card-body p-4">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <i class="fa fa-users" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h3 class="mt-3" style="font-size:1.25rem; font-weight:700; color:#5b4c7d">Easy for Everyone</h3>
+                        <p class="mt-2" style="color:#5b4c7d">Non-technical staff can access Odoo data without training. Just talk naturally.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 text-center border-0 shadow-sm bg-light" style="border-radius:16px; padding:1rem">
+                    <div class="card-body p-4">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <i class="fa fa-shield" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h3 class="mt-3" style="font-size:1.25rem; font-weight:700; color:#5b4c7d">Secure by Design</h3>
+                        <p class="mt-2" style="color:#5b4c7d">Respects all Odoo permissions. Users only see data they're authorized to access.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Setup Section -->
+    <section id="setup" class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Literally Zero Setup Required</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Yes, you heard it right! The MCP server starts automatically when you install the module.<br>No extra MCP server to run, no configuration needed - it's all built into Odoo.</p>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">1</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Install LLM MCP Server</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">Search in Apps and click Install. That's it - the MCP server is now running inside Odoo.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">2</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Generate Your MCP Key</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">Open <strong>My Profile</strong> (click your avatar, top-right), scroll to <strong>Account Security</strong>, and click <strong>"New MCP Key"</strong>.</p>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                        <span style="color:white; font-size:2rem; font-weight:700">3</span>
+                    </div>
+                    <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Paste the Config</h3>
+                    <p style="color:#6c757d; font-size:1rem; line-height:1.6">The wizard gives you <strong>ready-to-paste</strong> configurations for Claude Desktop, Claude Code, and Codex CLI. Just copy and paste!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed step-by-step -->
+        <div class="row g-4 mb-5">
+            <div class="col-lg-10 mx-auto">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2rem">
+                    <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1.5rem; text-align:center">
+                        <i class="fa fa-map-signs" style="color:#71639e; margin-right:0.5rem"></i>
+                        Step-by-Step: Generate Your MCP Key
+                    </h3>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:12px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:32px; height:32px; border-radius:50%; margin-right:0.75rem; flex-shrink:0">
+                                        <span style="color:white; font-weight:700; font-size:0.9rem">1</span>
+                                    </div>
+                                    <strong style="color:#212529">Open My Profile</strong>
+                                </div>
+                                <p style="color:#6c757d; margin:0; padding-left:2.75rem; font-size:0.95rem">Click your <strong>avatar</strong> in the top-right corner, then select <strong>My Profile</strong> (or Preferences).</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:12px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:32px; height:32px; border-radius:50%; margin-right:0.75rem; flex-shrink:0">
+                                        <span style="color:white; font-weight:700; font-size:0.9rem">2</span>
+                                    </div>
+                                    <strong style="color:#212529">Find Account Security</strong>
+                                </div>
+                                <p style="color:#6c757d; margin:0; padding-left:2.75rem; font-size:0.95rem">Scroll down to the <strong>Account Security</strong> section where you manage your API keys.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:12px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:32px; height:32px; border-radius:50%; margin-right:0.75rem; flex-shrink:0">
+                                        <span style="color:white; font-weight:700; font-size:0.9rem">3</span>
+                                    </div>
+                                    <strong style="color:#212529">Click "New MCP Key"</strong>
+                                </div>
+                                <p style="color:#6c757d; margin:0; padding-left:2.75rem; font-size:0.95rem">Enter a description (e.g. "Claude Desktop") and confirm your password.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-light" style="padding:1.25rem; border-radius:12px; height:100%">
+                                <div class="d-flex align-items-center" style="margin-bottom:0.75rem">
+                                    <div class="bg-primary d-flex align-items-center justify-content-center" style="width:32px; height:32px; border-radius:50%; margin-right:0.75rem; flex-shrink:0">
+                                        <span style="color:white; font-weight:700; font-size:0.9rem">4</span>
+                                    </div>
+                                    <strong style="color:#212529">Copy Your Configuration</strong>
+                                </div>
+                                <p style="color:#6c757d; margin:0; padding-left:2.75rem; font-size:0.95rem">The wizard shows your API key <strong>and</strong> ready-to-paste configs for each AI client. Copy and paste!</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-light" style="padding:1rem 1.25rem; border-radius:10px; margin-top:1.25rem">
+                        <p style="margin:0; color:#495057; font-size:0.95rem">
+                            <i class="fa fa-info-circle" style="color:#71639e; margin-right:0.5rem"></i>
+                            <strong>Every user</strong> generates their own key from their profile. The AI client inherits that user's Odoo permissions - they can only see and do what that user is allowed to.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mb-5 bg-primary" style="padding:3rem 2rem; border-radius:16px">
+            <div class="bg-white d-flex align-items-center justify-content-center" style="width:80px; height:80px; border-radius:50%; margin:0 auto 1.5rem">
+                <i class="fa fa-check-circle" style="font-size:40px; color:#71639e"></i>
+            </div>
+            <h3 style="color:#ffffff; font-weight:700; font-size:2rem; margin-bottom:1rem">That's It - You're Ready!</h3>
+            <p style="color:#f8f9fa; font-size:1.1rem; margin-bottom:1.5rem">Your MCP server is now live and ready to connect</p>
+            <div class="bg-white" style="padding:1rem 2rem; border-radius:12px; display:inline-block">
+                <span style="color:#71639e; font-size:1rem; font-weight:500; font-family:monospace">http://your-odoo-url/mcp</span>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Client Setup Guides -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Connect Your Favorite Client</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Works with Claude Desktop, Claude Code, Claude Cowork, Codex CLI, and any MCP-compatible client</p>
+
+        <!-- MCP Clients Cards -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-4 col-lg-2">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem; padding:8px">
+                            <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_claude_desktop.png?9203e76" alt="Claude Desktop" style="max-width:100%; object-fit:contain">
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.5rem; font-size:1rem">Claude Desktop</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">AI workflows</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem; padding:8px">
+                            <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_cursor.png?9203e76" alt="Cursor" style="max-width:100%; object-fit:contain">
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.5rem; font-size:1rem">Cursor</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">AI-first IDE</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem; padding:8px">
+                            <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_windsurf.png?9203e76" alt="Windsurf" style="max-width:100%; object-fit:contain">
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.5rem; font-size:1rem">Windsurf</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">Codeium IDE</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem; padding:8px">
+                            <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_vscode.png?9203e76" alt="VSCode" style="max-width:100%; object-fit:contain">
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.5rem; font-size:1rem">VSCode</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">With MCP extension</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem; padding:8px">
+                            <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_codex.png?9203e76" alt="Codex CLI" style="max-width:100%; object-fit:contain">
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.5rem; font-size:1rem">Codex CLI</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">Command line</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem; padding:8px">
+                            <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_claude_code.png?9203e76" alt="Claude Code" style="max-width:100%; object-fit:contain">
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.5rem; font-size:1rem">Claude Code</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">AI coding assistant</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 col-lg-2">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-3 text-center">
+                        <div class="bg-dark d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1rem; padding:8px">
+                            <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_claude_cowork.png?9203e76" alt="Claude Cowork" style="max-width:100%; object-fit:contain">
+                        </div>
+                        <h5 style="font-weight:700; color:#212529; margin-bottom:0.5rem; font-size:1rem">Claude Cowork</h5>
+                        <p style="color:#6c757d; font-size:0.8rem; margin-bottom:0">AI team workspace</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Setup Instructions -->
+        <h3 class="text-center mb-4" style="font-size:1.75rem; font-weight:700; color:#212529">Configuration Examples</h3>
+
+        <div class="row g-4">
+            <!-- Claude Desktop -->
+            <div class="col-12">
+                <div class="card border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center" style="margin-bottom:1.5rem">
+                            <div class="bg-dark d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem; padding:8px">
+                                <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_claude_desktop.png?9203e76" alt="Claude Desktop" style="max-width:100%; object-fit:contain">
+                            </div>
+                            <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin:0">Claude Desktop</h4>
+                        </div>
+
+                        <p style="margin-bottom:1rem; color:#495057"><strong>Step 1:</strong> Install mcp-remote package</p>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0 0 1.5rem 0; padding:1rem; border-radius:8px; font-size:0.875rem; font-family:monospace; border:none">npm install -g mcp-remote</pre>
+
+                        <p style="margin-bottom:0.75rem; color:#495057"><strong>Step 2:</strong> Add to config file</p>
+                        <p style="margin-bottom:0.5rem; font-size:0.9rem; color:#6c757d"><code class="bg-light" style="padding:0.2rem 0.4rem; border-radius:4px; color:#495057">~/.config/claude_desktop/claude_desktop_config.json</code> (Linux/macOS)<br>or <code class="bg-light" style="padding:0.2rem 0.4rem; border-radius:4px; color:#495057">%APPDATA%/Claude/claude_desktop_config.json</code> (Windows)</p>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1rem; border-radius:8px; font-size:0.875rem; font-family:monospace; border:none; white-space:pre">{
+  "mcpServers": {
+    "odoo": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "http://localhost:8069/mcp",
+               "--header", "Authorization: Bearer YOUR_API_KEY"],
+      "env": { "MCP_TRANSPORT": "streamable-http" }
+    }
+  }
+}</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Claude Code -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center" style=" margin-bottom:1.5rem">
+                            <div class="bg-dark d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem; padding:8px">
+                                <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_claude_code.png?9203e76" alt="Claude Code" style="max-width:100%; object-fit:contain">
+                            </div>
+                            <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin:0">Claude Code</h4>
+                        </div>
+
+                        <p style="margin-bottom:1rem; color:#495057">Run this command:</p>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1rem; border-radius:8px; font-size:0.875rem; font-family:monospace; border:none; white-space:pre">claude mcp add-json odoo '{
+  "type": "stdio",
+  "command": "npx",
+  "args": ["-y", "mcp-remote",
+    "http://localhost:8069/mcp",
+    "--header",
+    "Authorization: Bearer YOUR_API_KEY"],
+  "env": {"MCP_TRANSPORT": "streamable-http"}
+}'</pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Codex CLI -->
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center" style=" margin-bottom:1.5rem">
+                            <div class="bg-dark d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem; padding:8px">
+                                <img src="//apps.odoocdn.com/apps/assets/18.0/llm_mcp_server/client_codex.png?9203e76" alt="Codex CLI" style="max-width:100%; object-fit:contain">
+                            </div>
+                            <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin:0">Codex CLI</h4>
+                        </div>
+
+                        <p style="margin-bottom:1rem; color:#495057">Add to <code class="bg-light" style="padding:0.2rem 0.4rem; border-radius:4px; color:#495057">~/.codex/config.toml</code>:</p>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1rem; border-radius:8px; font-size:0.875rem; font-family:monospace; border:none; white-space:pre">experimental_use_rmcp_client = true
+
+[mcp_servers.odoo]
+url = "http://localhost:8069/mcp"
+http_headers.Authorization = "Bearer YOUR_API_KEY"</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <div style="color:#71639e; font-weight:600; font-size:1.05rem">
+                <i class="fa fa-book" style="margin-right:0.5rem"></i>Complete Setup Guide<br>
+                <code style="font-size:0.9rem; margin-top:0.5rem; display:inline-block">github.com/apexive/odoo-llm/blob/18.0/llm_mcp_server/README.md</code>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Developer Features -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Build Your Own AI Tools - It's That Easy</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">100% open source. Extend with custom tools using our simple decorator pattern.</p>
+
+        <div class="row g-4 mb-5">
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-code" style="font-size:32px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Dead Simple Decorator</h3>
+                        <p style="color:#495057; margin-bottom:1rem">Just add <code class="bg-light" style="padding:0.2rem 0.4rem; border-radius:4px; color:#71639e; font-weight:600">@llm_tool</code> to any Python method. That's it!</p>
+                        <pre class="bg-dark" style="color:#ffffff; margin:0; padding:1.25rem; border-radius:12px; border:none; white-space:pre; font-family:monospace; font-size:0.85rem; line-height:1.6">from odoo.addons.llm_tool.decorators import llm_tool
+
+class SaleOrder(models.Model):
+    _inherit = "sale.order"
+
+    @llm_tool(read_only_hint=True)
+    def get_pending_orders(self, customer_id: int):
+        """Get all pending orders"""
+        orders = self.search([
+            ('partner_id', '=', customer_id),
+            ('state', 'in', ['draft', 'sent'])
+        ])
+        return [{'id': o.id, 'name': o.name}
+                for o in orders]</pre>
+                        <div class="bg-light" style="padding:1rem; border-radius:8px; margin-top:1rem">
+                            <p style="color:#5b4c7d; margin:0; font-weight:600"><i class="fa fa-magic" style="margin-right:0.5rem"></i>Auto-registered! Tool appears instantly on next Odoo restart.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-battery-full" style="font-size:32px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Batteries Included</h3>
+                        <p style="color:#495057; margin-bottom:1.5rem">Complete CRUD operations through conversational AI - no coding required for end users</p>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px; text-align:center">
+                                    <i class="fa fa-search" style="font-size:28px; color:#71639e; margin-bottom:0.5rem"></i>
+                                    <h5 style="font-size:0.9rem; font-weight:700; color:#212529; margin-bottom:0.25rem">Search &amp; Find</h5>
+                                    <p style="font-size:0.8rem; color:#6c757d; margin:0">Query any record</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px; text-align:center">
+                                    <i class="fa fa-plus-circle" style="font-size:28px; color:#71639e; margin-bottom:0.5rem"></i>
+                                    <h5 style="font-size:0.9rem; font-weight:700; color:#212529; margin-bottom:0.25rem">Create Records</h5>
+                                    <p style="font-size:0.8rem; color:#6c757d; margin:0">Add new data</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px; text-align:center">
+                                    <i class="fa fa-edit" style="font-size:28px; color:#71639e; margin-bottom:0.5rem"></i>
+                                    <h5 style="font-size:0.9rem; font-weight:700; color:#212529; margin-bottom:0.25rem">Update Data</h5>
+                                    <p style="font-size:0.8rem; color:#6c757d; margin:0">Modify records</p>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px; text-align:center">
+                                    <i class="fa fa-info-circle" style="font-size:28px; color:#71639e; margin-bottom:0.5rem"></i>
+                                    <h5 style="font-size:0.9rem; font-weight:700; color:#212529; margin-bottom:0.25rem">Get Insights</h5>
+                                    <p style="font-size:0.8rem; color:#6c757d; margin:0">Explore structure</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-light" style="padding:1rem; border-radius:8px; margin-top:1rem">
+                            <p style="color:#5b4c7d; margin:0; font-weight:600"><i class="fa fa-lightbulb-o" style="margin-right:0.5rem"></i>See examples in <strong>llm_tool_demo</strong> module</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <div class="btn btn-lg btn-primary" style="font-weight:600; border-radius:50px; padding:1rem 3rem">
+                <i class="fa fa-github" style="margin-right:0.5rem"></i>GitHub Repository<br>
+                <span style="font-size:0.85rem; font-weight:400">github.com/apexive/odoo-llm</span>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Enterprise Features -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Enterprise-Grade Security</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Built with security and compliance in mind from day one</p>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-user-circle" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">User-Scoped API Keys</h3>
+                        <p style="color:#495057; margin-bottom:0">Each user brings their own API key with their exact Odoo permissions. No shared credentials, no data leaks - every request runs in the user's security context.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-shield" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Permission-Based Access</h3>
+                        <p style="color:#495057; margin-bottom:0">Every AI request respects Odoo's access control lists and record rules. Users only see and modify data they're authorized to access.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-key" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Revocable Tokens</h3>
+                        <p style="color:#495057; margin-bottom:0">Industry-standard bearer token authentication. API keys can be revoked instantly and have configurable expiration for enhanced security.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-globe" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Standards-Compliant</h3>
+                        <p style="color:#495057; margin-bottom:0">Built on the official Model Context Protocol (MCP) by Anthropic. Future-proof, vendor-neutral, and production-ready.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Compatible With -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Part of Apexive's Odoo LLM Ecosystem</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Seamlessly integrates with Apexive's complete AI toolkit for Odoo</p>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-comments" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Thread</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0">Have persistent AI conversations directly in Odoo with full context and history</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                            <i class="fa fa-user-circle-o" style="font-size:24px; color:#71639e"></i>
+                        </div>
+                        <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Assistant</h4>
+                        <p style="color:#495057; font-size:0.9rem; margin-bottom:0">Create specialized AI assistants for specific roles like sales, support, or accounting</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                                <i class="fa fa-book" style="font-size:24px; color:#71639e"></i>
+                            </div>
+                            <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Knowledge</h4>
+                            <p style="color:#495057; font-size:0.9rem; margin-bottom:0">Turn PDFs, images, webpages, and documents into AI-searchable knowledge base</p>
+                        </div>
+                    </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                                <i class="fa fa-android" style="font-size:24px; color:#71639e"></i>
+                            </div>
+                            <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Letta</h4>
+                            <p style="color:#495057; font-size:0.9rem; margin-bottom:0">AI agents that remember past conversations and learn from your interactions</p>
+                        </div>
+                    </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                                <i class="fa fa-picture-o" style="font-size:24px; color:#71639e"></i>
+                            </div>
+                            <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Generate</h4>
+                            <p style="color:#495057; font-size:0.9rem; margin-bottom:0">Generate marketing content, product descriptions, and images with AI</p>
+                        </div>
+                    </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                            <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-bottom:1rem">
+                                <i class="fa fa-wrench" style="font-size:24px; color:#71639e"></i>
+                            </div>
+                            <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0.75rem">LLM Tool</h4>
+                            <p style="color:#495057; font-size:0.9rem; margin-bottom:0">Extend AI capabilities with custom business logic in just a few lines of code</p>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Support Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Documentation &amp; Support</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Everything you need to get started and succeed</p>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-book" style="font-size:32px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Complete Documentation</h3>
+                        <p style="color:#495057; margin-bottom:1.5rem">Step-by-step guides, troubleshooting tips, and API reference included.</p>
+                        <div class="d-flex flex-column">
+                            <div class="bg-light" style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:0.75rem">
+                                <i class="fa fa-file-text-o" style="font-size:18px; color:#71639e; margin-right:0.5rem"></i>
+                                <strong>Setup Guide:</strong><br>
+                                <code style="font-size:0.85rem; margin-top:0.25rem; display:inline-block">github.com/apexive/odoo-llm</code>
+                            </div>
+                            <div class="bg-light" style="padding:0.75rem 1rem; border-radius:8px; margin-bottom:0.75rem">
+                                <i class="fa fa-globe" style="font-size:18px; color:#71639e; margin-right:0.5rem"></i>
+                                <strong>MCP Protocol:</strong><br>
+                                <code style="font-size:0.85rem; margin-top:0.25rem; display:inline-block">modelcontextprotocol.io</code>
+                            </div>
+                            <a href="https://www.odoo.com/documentation/18.0/developer/reference/external_api.html#api-keys" target="_blank" class="bg-light d-flex align-items-center" style="padding:0.75rem 1rem; border-radius:8px; text-decoration:none; color:#495057; margin-bottom:0">
+                                <i class="fa fa-key" style="font-size:20px; color:#71639e; margin-right:0.75rem"></i>
+                                <span style="font-weight:600">Odoo API Keys Guide</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-github" style="font-size:32px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin-bottom:1rem">Open Source</h3>
+                        <p style="color:#495057; margin-bottom:1.5rem">Full source code available on GitHub. Contribute, customize, or learn from the implementation.</p>
+                        <div class="bg-light" style="padding:1rem; border-radius:8px">
+                            <p style="color:#212529; margin-bottom:0.5rem"><strong>GitHub Repository:</strong></p>
+                            <code style="font-size:0.9rem; display:block; margin-bottom:0.75rem">github.com/apexive/odoo-llm</code>
+                            <p style="color:#495057; font-size:0.85rem; margin-bottom:0">View code, report issues, or join discussions</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -352,47 +908,30 @@
     </section>
 </div>
 
-<footer class="bg-light py-4 border-top">
+<!-- Footer -->
+<footer class="bg-primary" style="padding:3rem 2rem; border-radius:16px; margin:2rem 1rem">
     <div class="container">
-        <div class="row">
-            <div class="col-lg-6">
-                <h4>LLM Integration Base</h4>
-                <p>Developed by Apexive Solutions LLC</p>
-                <p>Licensed under <a href="https://www.gnu.org/licenses/lgpl-3.0.html" target="_blank">LGPL-3</a></p>
+        <div style="border-radius:12px; padding:2.5rem">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 style="font-weight:700; color:#ffffff; font-size:1.5rem; margin-bottom:0.75rem">LLM MCP Server for Odoo</h4>
+                    <p style="color:#f8f9fa; font-size:1rem; margin-bottom:1rem">Connect AI to your Odoo data</p>
+                    <p style="color:#e9d5ff; margin-bottom:0.25rem">Developed by <strong style="color:#ffffff">Apexive Solutions LLC</strong></p>
+                    <p style="color:#e0d4ec; font-size:0.9rem; margin-bottom:0">Licensed under LGPL-3 • © 2025 All rights reserved.</p>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="d-flex flex-column">
+                        <div class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; color:#71639e; font-weight:600; margin-bottom:0.75rem">
+                            <i class="fa fa-globe" style="font-size:18px; margin-right:0.5rem"></i>
+                            apexive.com
+                        </div>
+                        <a href="mailto:hello@apexive.com" class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; text-decoration:none; color:#71639e; font-weight:600; margin-bottom:0">
+                            <i class="fa fa-envelope" style="font-size:18px; margin-right:0.5rem"></i>
+                            hello@apexive.com
+                        </a>
+                    </div>
+                </div>
             </div>
-            <div class="col-lg-6 text-lg-end">
-                <p>For the latest updates and additional modules, visit:</p>
-                <a href="https://github.com/apexive/odoo-llm" class="btn btn-outline-primary">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-github me-2" viewBox="0 0 16 16">
-                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
-                    </svg>
-                    GitHub Repository
-                </a>
-            </div>
-        </div>
-        <div class="mt-4 pt-3 border-top text-center">
-            <p class="mb-0">© 2025 Apexive Solutions LLC. All rights reserved.</p>
         </div>
     </div>
 </footer>
-
-<script>
-    // Simple script to handle smooth scrolling for anchor links
-    document.addEventListener('DOMContentLoaded', function() {
-        const links = document.querySelectorAll('a[href^="#"]');
-        for (const link of links) {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    window.scrollTo({
-                        top: target.offsetTop - 70,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        }
-    });
-</script>
-</body>
-</html>

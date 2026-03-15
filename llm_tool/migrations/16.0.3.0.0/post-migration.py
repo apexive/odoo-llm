@@ -4,7 +4,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def migrate(cr, version):
+def migrate(cr, version):  # noqa: C901
     """
     Migration script to convert existing tool messages directly to body_json format.
 
@@ -37,8 +37,8 @@ def migrate(cr, version):
         tool_call_id,
         tool_call_definition,
         tool_call_result,
-        body,
-        llm_role,
+        _body,
+        _llm_role,
     ) in old_format_messages:
         try:
             # Create new tool data structure
@@ -128,7 +128,7 @@ def migrate(cr, version):
     intermediate_converted_count = 0
     intermediate_error_count = 0
 
-    for msg_id, body, llm_role in intermediate_format_messages:
+    for msg_id, body, _llm_role in intermediate_format_messages:
         try:
             # Skip messages that are already HTML (wrapped in <p> tags)
             if body.strip().startswith("<p>") or not body.strip().startswith("{"):
@@ -192,7 +192,7 @@ def migrate(cr, version):
 
     # These don't need body conversion, but we should validate the tool_calls JSON
     validated_count = 0
-    for msg_id, tool_calls, body in assistant_messages:
+    for msg_id, tool_calls, _body in assistant_messages:
         try:
             # Validate that tool_calls is valid JSON
             json.loads(tool_calls)

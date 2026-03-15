@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <!-- Patch Composer send button template to add stop button for LLM threads -->
+    <t
+    t-name="mail.Composer.sendButton"
+    t-inherit="mail.Composer.sendButton"
+    t-inherit-mode="extension"
+  >
+        <!-- Replace the send button with conditional rendering -->
+        <xpath
+      expr="//button[hasclass('o-mail-Composer-send')]"
+      position="replace"
+    >
+            <!-- Show stop button when streaming (LLM threads only) -->
+            <button
+        t-if="showStop"
+        class="o-mail-Composer-send btn btn-danger"
+        t-att-class="{
+                    'btn-sm': extended,
+                    'rounded-circle p-0': !extended,
+                    'me-2': env.inDiscussApp,
+                    'border-start-0': env.inDiscussApp and !props.composer.message,
+                    'border-0': props.composer.message,
+                }"
+        t-on-click="stopStreaming"
+        aria-label="Stop generation"
+      >
+                <i class="fa fa-fw fa-lg fa-stop" />
+            </button>
+
+            <!-- Show normal send button when not streaming -->
+            <button
+        t-else=""
+        class="o-mail-Composer-send btn"
+        t-att-class="{
+                    'btn-primary btn-sm': extended,
+                    'btn-link rounded-circle p-0': !extended,
+                    'me-2': env.inDiscussApp,
+                    'border-start-0': env.inDiscussApp and !props.composer.message,
+                    'border-0': props.composer.message,
+                }"
+        t-on-click="sendMessage"
+        t-att-disabled="isSendButtonDisabled"
+        t-att-aria-label="SEND_TEXT"
+      >
+                <t
+          t-if="thread and thread.model !== 'discuss.channel'"
+          t-out="SEND_TEXT"
+        />
+                <t t-else=""><i class="fa fa-fw fa-lg fa-paper-plane-o" /></t>
+            </button>
+        </xpath>
+    </t>
+</templates>

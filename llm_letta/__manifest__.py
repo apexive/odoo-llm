@@ -11,16 +11,14 @@
         • Support for both Letta Cloud and self-hosted servers
         • Real-time streaming responses
 
-        Requires Letta server v0.11.7+ and llm_mcp_server module.
+        Requires Letta server v0.16.0+ and llm_mcp_server module.
     """,
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",
     "category": "Technical",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.4",
     "depends": ["llm", "llm_thread", "llm_assistant", "llm_mcp_server"],
     "external_dependencies": {
-        # Note: Using forked version until https://github.com/letta-ai/letta-python/issues/25 is fixed
-        # Install with: pip install git+https://github.com/apexive/letta-python.git@main
         "python": ["letta-client"],
     },
     "data": [

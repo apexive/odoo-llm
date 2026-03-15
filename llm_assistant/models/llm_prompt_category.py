@@ -26,11 +26,7 @@ class LLMPromptCategory(models.Model):
         index=True,
         ondelete="cascade",
     )
-    # Disable unaccent for parent_path as it's not needed for ID-based paths.
-    parent_path = fields.Char(
-        index=True,
-        unaccent=False,
-    )
+    parent_path = fields.Char(index=True)
     child_ids = fields.One2many(
         "llm.prompt.category",
         "parent_id",

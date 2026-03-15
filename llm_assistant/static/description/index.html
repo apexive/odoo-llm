@@ -1,113 +1,380 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Assistant Module</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
-</head>
-<body>
-<div class="container py-4">
-    <img src="banner.jpeg" alt="LLM Assistant Banner" class="img-fluid mb-4" style="max-height: 300px; width: 100%; object-fit: cover;">
+<!-- Hero Section -->
+<section style="padding:4rem 0 3rem">
+    <div class="container">
+        <div class="text-center" style="max-width:800px; margin:0 auto">
+            <div style="display:inline-flex; padding:0.5rem 1.25rem; border-radius:50px; margin-bottom:2rem">
+                <i class="fa fa-user-circle" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                <span style="color:#71639e; font-weight:600; font-size:0.9rem">AI Assistants</span>
+            </div>
 
-    <h1 class="text-primary mb-4">LLM Assistant Module</h1>
+            <h1 style="font-size:3rem; font-weight:800; color:#212529; margin-bottom:1.5rem; line-height:1.2">
+                LLM Assistant Module
+            </h1>
 
-    <div class="bg-light p-3 rounded mb-4">
-        <p class="fw-bold">This module adds assistant capabilities to the LLM integration, allowing for specialized AI assistants with dedicated tools and configurations.</p>
+            <p style="font-size:1.25rem; color:#6c757d; margin-bottom:1rem; line-height:1.6">
+                Create and manage specialized AI assistants with dedicated tools and configurations.
+            </p>
+
+            <p style="font-size:1rem; color:#868e96; margin-bottom:2rem">
+                Build <strong style="color:#495057">purpose-built AI helpers</strong> for different use cases in Odoo
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap">
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-cog" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#5b4c7d; font-weight:600">Configurable</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-wrench" style="color:#17a2b8; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#0c5460; font-weight:600">Tool Support</span>
+                </div>
+                <div class="d-flex align-items-center" style="padding:0.75rem 1.5rem; border-radius:12px; margin:0.5rem">
+                    <i class="fa fa-github" style="color:#28a745; font-size:1.25rem; margin-right:0.5rem"></i>
+                    <span style="color:#155724; font-weight:600">Open Source</span>
+                </div>
+            </div>
+        </div>
     </div>
+</section>
 
-    <p>The LLM Assistant module extends the core LLM integration by providing a framework for creating and managing specialized AI assistants. Each assistant can have its own configuration, tools, and system prompts, enabling more targeted AI assistance for different use cases.</p>
+<div class="container my-5">
+    <!-- Overview Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-3" style="font-size:2.5rem; font-weight:700; color:#71639e">What is LLM Assistant?</h2>
+        <p class="text-center mb-5" style="font-size:1.2rem; color:#6c757d; font-weight:500">Specialized AI assistants for your Odoo workflows</p>
 
-    <h2 class="text-primary mt-5 mb-3">Key Features</h2>
-    <ul class="list-unstyled">
-        <li>✓ Create and manage specialized AI assistants</li>
-        <li>✓ Assign specific models and providers to each assistant</li>
-        <li>✓ Configure assistant-specific tools and capabilities</li>
-        <li>✓ Easily switch between assistants in the chat interface</li>
-        <li>✓ Customize system prompts for different use cases</li>
-    </ul>
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-10">
+                <div class="card border-0 shadow-sm" style="border-radius:16px; padding:2.5rem">
+                    <p style="font-size:1.15rem; color:#495057; line-height:1.9; margin-bottom:0; text-align:center">
+                        The LLM Assistant module extends the core LLM integration by providing a framework for creating and managing specialized AI assistants. Each assistant can have its own configuration, tools, and system prompts, enabling more targeted AI assistance for different use cases.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <h2 class="text-primary mt-5 mb-3">Assistant Management</h2>
-    <p>The module provides comprehensive assistant management capabilities:</p>
-    <ul>
-        <li>Create assistants with specific names and descriptions</li>
-        <li>Assign LLM providers and models to each assistant</li>
-        <li>Configure assistant-specific tools and capabilities</li>
-        <li>Set custom system prompts to guide assistant behavior</li>
-        <li>Organize assistants by categories or departments</li>
-    </ul>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
-    <h2 class="text-primary mt-5 mb-3">Chat Integration</h2>
-    <p>Seamlessly integrate assistants into the chat interface:</p>
-    <ul>
-        <li>Select assistants from a dropdown in the chat header</li>
-        <li>Switch between assistants during a conversation</li>
-        <li>Assistant settings automatically apply to the conversation</li>
-        <li>Visual indicators show which assistant is active</li>
-    </ul>
+    <!-- Key Features Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Key Features</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Everything you need to create specialized AI assistants</p>
 
-    <div class="alert alert-info mt-5">
-        <strong>Note:</strong> This module requires the base LLM integration module to be installed.
-    </div>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-plus-circle" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Create Specialized Assistants</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Build AI assistants tailored for specific tasks like customer support, sales, HR, or technical documentation.</p>
+                    </div>
+                </div>
+            </div>
 
-    <h2 class="text-primary mt-5 mb-3">Security</h2>
-    <p>The module implements robust security features:</p>
-    <ul>
-        <li>Role-based access control for assistant management</li>
-        <li>Regular users can use assistants but only managers can create/edit them</li>
-        <li>Company-specific assistant configurations</li>
-        <li>Audit logging for assistant usage</li>
-    </ul>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-sliders" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Assign Models &amp; Providers</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Configure specific LLM providers and models for each assistant to optimize performance and costs.</p>
+                    </div>
+                </div>
+            </div>
 
-    <h2 class="text-primary mt-5 mb-3">Prompt Template</h2>
-    <p>The module uses a structured prompt template with the following variables:</p>
-    <ul>
-        <li><strong>role:</strong> Defines the assistant's specific role (e.g., "Assistant Creator")</li>
-        <li><strong>goal:</strong> Describes the primary objective of the assistant</li>
-        <li><strong>background:</strong> Provides context and knowledge the assistant should have</li>
-        <li><strong>instructions:</strong> Detailed step-by-step guidance for the assistant</li>
-        <li><strong>footer:</strong> Additional important notes or reminders</li>
-    </ul>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-wrench" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Configure Tools &amp; Capabilities</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Attach specific tools to each assistant, giving them the ability to perform actions in Odoo.</p>
+                    </div>
+                </div>
+            </div>
 
-    <h2 class="text-primary mt-5 mb-3">Pre-configured Assistants</h2>
-    <p>The module includes the following pre-configured assistants:</p>
-    <ul>
-        <li><strong>Assistant Creator:</strong> Guides users through creating and configuring specialized AI assistants in Odoo, ensuring all required fields are properly set and appropriate tools are attached.</li>
-        <li><strong>Website Builder:</strong> Helps update website content, structure, and functionality within the Odoo system, implementing changes safely and methodically.</li>
-    </ul>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-file-text-o" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Custom System Prompts</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Define unique personalities and behaviors with customizable system prompts using template variables.</p>
+                    </div>
+                </div>
+            </div>
 
-    <h2 class="text-primary mt-5 mb-3">Use Cases</h2>
-    <p>Create specialized assistants for different departments and functions:</p>
-    <ul>
-        <li><strong>Customer Support Assistant:</strong> Trained to answer product questions and troubleshoot issues</li>
-        <li><strong>Sales Assistant:</strong> Configured to provide product recommendations and pricing information</li>
-        <li><strong>HR Assistant:</strong> Specialized in answering policy questions and onboarding information</li>
-        <li><strong>Technical Expert:</strong> Focused on providing technical documentation and code examples</li>
-    </ul>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-exchange" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Easy Assistant Switching</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Switch between assistants during conversations from the chat interface dropdown.</p>
+                    </div>
+                </div>
+            </div>
 
-    <h2 class="text-primary mt-5 mb-3">Configuration</h2>
-    <p>After installation:</p>
-    <ol>
-        <li>Navigate to LLM > Configuration > Assistants</li>
-        <li>Create new assistants with specific providers and models</li>
-        <li>Configure tools and system prompts for each assistant</li>
-        <li>Assign assistants to specific user groups if needed</li>
-    </ol>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-shield" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Role-Based Access Control</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:0">Regular users can use assistants while only managers can create and edit them.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <div class="alert alert-info mt-5">
-        <strong>Integration:</strong> This module extends the core LLM functionality with assistant capabilities that can be used across all Odoo modules.
-    </div>
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
 
-    <h2 class="text-primary mt-5 mb-3">Support</h2>
-    <p>For questions or support needs, please contact:</p>
-    <p><a href="https://github.com/apexive/odoo-llm" class="text-decoration-none">https://github.com/apexive/odoo-llm</a></p>
+    <!-- Use Cases Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Use Cases</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Create specialized assistants for different departments</p>
 
-    <p class="mt-4">For more information about Apexive Solutions LLC and our other projects, visit:</p>
-    <p><a href="https://github.com/apexive/odoo-llm" class="text-decoration-none">https://github.com/apexive/odoo-llm</a></p>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm bg-light" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <i class="fa fa-headphones" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:#5b4c7d">Customer Support</h3>
+                        <p style="color:#5b4c7d; margin-bottom:0; font-size:0.9rem">Answer product questions and troubleshoot issues.</p>
+                    </div>
+                </div>
+            </div>
 
-    <div class="text-muted mt-5 pt-3 border-top">
-        <p> 2025 Apexive Solutions LLC</p>
-    </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm bg-light" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <i class="fa fa-line-chart" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:#5b4c7d">Sales Assistant</h3>
+                        <p style="color:#5b4c7d; margin-bottom:0; font-size:0.9rem">Product recommendations and pricing information.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm bg-light" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <i class="fa fa-users" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:#5b4c7d">HR Assistant</h3>
+                        <p style="color:#5b4c7d; margin-bottom:0; font-size:0.9rem">Policy questions and onboarding information.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 col-lg-3">
+                <div class="card h-100 border-0 shadow-sm bg-light" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-primary d-flex align-items-center justify-content-center" style="width:64px; height:64px; border-radius:50%; margin:0 auto 1.5rem">
+                            <i class="fa fa-code" style="font-size:32px; color:#ffffff"></i>
+                        </div>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:#5b4c7d">Technical Expert</h3>
+                        <p style="color:#5b4c7d; margin-bottom:0; font-size:0.9rem">Documentation and code examples.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Technical Details -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Technical Details</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Requirements and dependencies</p>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <h4 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1.5rem">Module Information</h4>
+
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Dependencies:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">llm_thread, llm_tool</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Category:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">Productivity/LLM</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">Version:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">18.0.1.0.0</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <strong style="color:#495057">License:</strong>
+                                    <p style="margin:0.5rem 0 0 0; color:#6c757d">LGPL-3</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-light mt-4" style="padding:1.5rem; border-radius:12px">
+                            <h5 style="font-weight:700; color:#212529; margin-bottom:0.75rem">Configuration</h5>
+                            <p style="color:#6c757d; margin-bottom:0">Navigate to <strong>LLM &rarr; Configuration &rarr; Assistants</strong> to create and manage your AI assistants.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="my-5 bg-secondary" style="height:2px; border:none; opacity:0.5">
+
+    <!-- Related Modules Section -->
+    <section class="mb-5">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">Related Modules</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Build your complete AI ecosystem</p>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-puzzle-piece" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Base</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Core framework for AI integration. Required dependency for all LLM modules.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_thread" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-comments" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Thread</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Persistent chat conversations with streaming responses and message history.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_tool" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-wrench" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Tool</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Enable AI to execute Odoo functions with the @llm_tool decorator.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_openai" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-circle-o" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">OpenAI Provider</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Connect to OpenAI, Gemini, Grok, DeepSeek, and any OpenAI-compatible API.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_knowledge" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-book" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">LLM Knowledge</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">RAG-powered knowledge base with semantic search and document indexing.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-6 col-lg-4">
+                <a href="https://apps.odoo.com/apps/modules/18.0/llm_ollama" style="text-decoration:none">
+                    <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                        <div class="card-body p-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:48px; height:48px; border-radius:10px; margin-right:1rem">
+                                    <i class="fa fa-server" style="font-size:24px; color:#71639e"></i>
+                                </div>
+                                <h4 style="font-size:1.1rem; font-weight:700; color:#212529; margin-bottom:0">Ollama Provider</h4>
+                            </div>
+                            <p style="color:#6c757d; font-size:0.9rem; line-height:1.6; margin-bottom:0">Run open-source models locally with full privacy and no API costs.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
 </div>
-</body>
-</html>
+
+<!-- Footer -->
+<footer class="bg-primary" style="padding:3rem 2rem; border-radius:16px; margin:2rem 1rem">
+    <div class="container">
+        <div style="border-radius:12px; padding:2.5rem">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h4 style="font-weight:700; color:#ffffff; font-size:1.5rem; margin-bottom:0.75rem">LLM Assistant Module</h4>
+                    <p style="color:#f8f9fa; font-size:1rem; margin-bottom:1rem">Specialized AI assistants for Odoo</p>
+                    <p style="color:#e9d5ff; margin-bottom:0.25rem">Developed by <strong style="color:#ffffff">Apexive Solutions LLC</strong></p>
+                    <p style="color:#e0d4ec; font-size:0.9rem; margin-bottom:0">Licensed under LGPL-3 &bull; &copy; 2025 All rights reserved.</p>
+                </div>
+                <div class="col-md-4 mt-3 mt-md-0">
+                    <div class="d-flex flex-column">
+                        <div class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; color:#71639e; font-weight:600; margin-bottom:0.75rem">
+                            <i class="fa fa-github" style="font-size:18px; margin-right:0.5rem"></i>
+                            github.com/apexive/odoo-llm
+                        </div>
+                        <a href="mailto:hello@apexive.com" class="bg-white d-flex align-items-center justify-content-center" style="padding:0.875rem 1.5rem; border-radius:8px; text-decoration:none; color:#71639e; font-weight:600; margin-bottom:0">
+                            <i class="fa fa-envelope" style="font-size:18px; margin-right:0.5rem"></i>
+                            hello@apexive.com
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- ComfyUI Workflow Subcategory -->
+    <record id="category_comfyui" model="llm.prompt.category">
+        <field name="name">ComfyUI Workflow</field>
+        <field name="code">comfyui_workflow</field>
+        <field name="sequence">10</field>
+        <field name="parent_id" ref="llm_assistant.category_technical" />
+    </record>
+</odoo>

@@ -4,7 +4,7 @@ env:
 
 # See https://github.com/OCA/odoo-community.org/issues/37#issuecomment-470686449
 parserOptions:
-  ecmaVersion: 2020
+  ecmaVersion: 2022
 
 overrides:
   - files:
@@ -24,6 +24,7 @@ globals:
   openerp: readonly
   owl: readonly
   luxon: readonly
+  JSONEditor: readonly
 
 # Styling is handled by Prettier, so we only need to enable AST rules;
 # see https://github.com/OCA/maintainer-quality-tools/pull/618#issuecomment-558576890

@@ -9,20 +9,93 @@ _logger = logging.getLogger(__name__)
 class MailMessage(models.Model):
     _inherit = "mail.message"
 
-    def openai_format_message(self):
-        """Provider-specific formatting for OpenAI."""
+    def openai_format_message(self, is_multimodal=False, is_audio_model=False):
+        """Format message for OpenAI API.
+
+        Args:
+            is_multimodal: Whether the model supports images/PDFs
+            is_audio_model: Whether the model supports audio (gpt-4o-audio-preview)
+        """
         self.ensure_one()
         body = self.body
         if body:
             body = tools.html2plaintext(body)
 
         if self.is_llm_user_message()[self]:
-            formatted_message = {"role": "user"}
-            if body:
-                formatted_message["content"] = body
-            return formatted_message
+            texts = self._get_text_attachments()
 
-        elif self.is_llm_assistant_message()[self]:
+            # Only include images/PDFs if model supports multimodal
+            if is_multimodal:
+                images = self._get_image_attachments()
+                pdfs = self._get_pdf_attachments()
+            else:
+                images = []
+                pdfs = []
+
+            # Only include audio if model supports it
+            if is_audio_model:
+                audios = self._get_audio_attachments()
+            else:
+                audios = []
+
+            has_attachments = images or pdfs or texts or audios
+
+            if has_attachments:
+                content = []
+
+                text_parts = []
+                if body and body.strip():
+                    text_parts.append(body.strip())
+
+                for txt in texts:
+                    text_parts.append(f"--- {txt['name']} ---\n{txt['content']}")
+
+                if text_parts:
+                    content.append({"type": "text", "text": "\n\n".join(text_parts)})
+                elif images or pdfs or audios:
+                    content.append(
+                        {"type": "text", "text": "Please analyze these files."},
+                    )
+
+                for img in images:
+                    content.append(
+                        {
+                            "type": "image_url",
+                            "image_url": {
+                                "url": f"data:{img['mimetype']};base64,{img['data']}",
+                            },
+                        },
+                    )
+
+                for pdf in pdfs:
+                    content.append(
+                        {
+                            "type": "file",
+                            "file": {
+                                "filename": pdf["name"],
+                                "file_data": f"data:{pdf['mimetype']};base64,{pdf['data']}",
+                            },
+                        },
+                    )
+
+                for audio in audios:
+                    content.append(
+                        {
+                            "type": "input_audio",
+                            "input_audio": {
+                                "data": audio["data"],
+                                "format": audio["format"],
+                            },
+                        },
+                    )
+
+                return {"role": "user", "content": content}
+
+            if not body or not body.strip():
+                return None
+            return {"role": "user", "content": body}
+
+        if self.is_llm_assistant_message()[self]:
             formatted_message = {"role": "assistant"}
 
             formatted_message["content"] = body
@@ -44,18 +117,18 @@ class MailMessage(models.Model):
 
             return formatted_message
 
-        elif self.is_llm_tool_message()[self]:
+        if self.is_llm_tool_message()[self]:
             tool_data = self.body_json
             if not tool_data:
                 _logger.warning(
-                    f"OpenAI Format: Skipping tool message {self.id}: no tool data found."
+                    f"OpenAI Format: Skipping tool message {self.id}: no tool data found.",
                 )
                 return None
 
             tool_call_id = tool_data.get("tool_call_id")
             if not tool_call_id:
                 _logger.warning(
-                    f"OpenAI Format: Skipping tool message {self.id}: missing tool_call_id."
+                    f"OpenAI Format: Skipping tool message {self.id}: missing tool_call_id.",
                 )
                 return None
 
@@ -73,5 +146,4 @@ class MailMessage(models.Model):
                 "content": content,
             }
             return formatted_message
-        else:
-            return None
+        return None

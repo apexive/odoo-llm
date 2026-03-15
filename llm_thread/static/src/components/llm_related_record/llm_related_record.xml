@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates xml:space="preserve">
+    <t t-name="llm_thread.LLMRelatedRecord">
+        <div class="o_LLMRelatedRecord">
+            <!-- When record is linked -->
+            <t t-if="hasRelatedRecord">
+                <div class="btn-group" role="group">
+                    <!-- Open Record Button -->
+                    <button
+            class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2 py-1"
+            t-on-click="openRelatedRecord"
+            t-att-title="'Open ' + props.thread.res_model + ' #' + props.thread.res_id"
+            style="height: 32px;"
+            t-att-disabled="state.isLoading"
+          >
+                        <i
+              t-if="!state.isLoading"
+              t-attf-class="fa {{ getRecordIcon() }} text-primary"
+              aria-hidden="true"
+            />
+                        <i
+              t-if="state.isLoading"
+              class="fa fa-spinner fa-spin text-muted"
+              aria-hidden="true"
+            />
+                        <span
+              t-if="!isSmall"
+              class="text-truncate small"
+              style="max-width: 150px;"
+            >
+                            <t t-if="state.relatedRecordDisplayName">
+                                <t t-esc="state.relatedRecordDisplayName" />
+                            </t>
+                            <t t-elif="state.isLoading">
+                                Loading...
+                            </t>
+                            <t t-else="">
+                                <t t-esc="props.thread.res_model" /> #<t
+                  t-esc="props.thread.res_id"
+                />
+                            </t>
+                        </span>
+                    </button>
+
+                    <!-- Unlink Button (Desktop only) -->
+                    <button
+            t-if="!isSmall"
+            class="btn btn-sm btn-outline-danger px-2 py-1"
+            t-on-click="unlinkRecord"
+            title="Unlink this record from the chat"
+            style="height: 32px;"
+          >
+                        <i class="fa fa-unlink" aria-hidden="true" />
+                    </button>
+
+                    <!-- Mobile: Show unlink option in dropdown -->
+                    <div t-if="isSmall" class="dropdown">
+                        <button
+              class="btn btn-sm btn-outline-secondary dropdown-toggle-split px-2 py-1"
+              type="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+              style="height: 32px;"
+              title="Record options"
+            >
+                            <i class="fa fa-caret-down" aria-hidden="true" />
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a
+                  class="dropdown-item"
+                  href="#"
+                  t-on-click.prevent="unlinkRecord"
+                >
+                                    <i class="fa fa-unlink me-2 text-warning" />
+                                    Unlink Record
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </t>
+
+            <!-- When no record linked -->
+            <t t-else="">
+                <button
+          class="btn btn-sm btn-outline-secondary d-flex align-items-center gap-1 px-2 py-1"
+          t-on-click="openRecordPicker"
+          title="Link to a record"
+          style="height: 32px;"
+        >
+                    <i class="fa fa-plus text-muted" aria-hidden="true" />
+                    <span t-if="!isSmall" class="text-muted small">Link</span>
+                </button>
+            </t>
+        </div>
+    </t>
+</templates>

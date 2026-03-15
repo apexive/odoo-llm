@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_llm_resource_form" model="ir.ui.view">
+        <field name="name">llm.resource.form</field>
+        <field name="model">llm.resource</field>
+        <!-- Inherit the base view from llm_knowledge -->
+        <field name="inherit_id" ref="llm_knowledge.view_llm_resource_form" />
+        <field name="arch" type="xml">
+            <!-- Find the 'parser' field and add the 'provider_id' and 'model_id' after it -->
+            <xpath expr="//field[@name='parser']" position="after">
+                <div colspan="2" invisible="parser != 'mistral_ocr'">
+                    <p class="text-muted">
+                        <i
+            >Select a Mistral provider and OCR model. This parser currently processes PDF and common image attachments (ir.attachment).</i>
+                    </p>
+                </div>
+                <field
+          name="llm_provider_id"
+          invisible="parser != 'mistral_ocr'"
+          required="parser == 'mistral_ocr'"
+          options="{'no_create': True}"
+        />
+                <field
+          name="llm_model_id"
+          invisible="parser != 'mistral_ocr'"
+          required="parser == 'mistral_ocr'"
+          options="{'no_create': True}"
+          domain="[('provider_id', '=', llm_provider_id), ('model_use', '=', 'ocr')]"
+        />
+            </xpath>
+        </field>
+    </record>
+</odoo>

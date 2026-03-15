@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Resources Menu -->
+    <menuitem
+    id="menu_llm_resource"
+    name="Resources"
+    parent="llm.menu_llm_config"
+    action="action_llm_resource"
+    sequence="45"
+  />
+</odoo>

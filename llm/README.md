@@ -2,6 +2,105 @@
 
 The foundational module for integrating Large Language Models into Odoo. This base module provides the core infrastructure, provider abstraction, and enhanced messaging system that enables all other LLM modules in the ecosystem.
 
+**Module Type:** 📦 Infrastructure (Core Foundation)
+
+## Architecture
+
+```mermaid
+graph TD
+    subgraph External AI Clients
+        CD[Claude Desktop<br>Cursor · Windsurf]
+        CC[Claude Code<br>Codex CLI]
+    end
+
+    subgraph Odoo AI Chat
+        LA[llm_assistant]
+        LT[llm_thread]
+    end
+
+    CD -->|MCP Protocol| MCP
+    CC -->|MCP Protocol| MCP
+
+    LA --> LLM
+    LT --> LLM
+
+    MCP[llm_mcp_server<br>MCP Server for Odoo] --> LLM
+
+    LLM[⭐ llm — This Module ⭐<br>Provider Abstraction · Model Management<br>Enhanced mail.message · Security Framework]
+
+    LLM --> TOOL[llm_tool<br>Tool Framework + Generic CRUD Tools]
+    LLM --> PROV[AI Providers<br>llm_openai · llm_ollama<br>llm_mistral · ...]
+    LLM --> INFRA[Infrastructure<br>llm_store · llm_generate]
+
+    TOOL --> PACKS[Domain-Specific Tool Packs<br>llm_tool_account · 18 accounting tools<br>llm_tool_mis_builder · 44 MIS reporting tools<br>llm_tool_knowledge · RAG search tools<br>llm_tool_ocr_mistral · OCR via Mistral vision]
+
+    style LLM fill:#f9f8fc,stroke:#71639e,stroke-width:3px,color:#71639e
+    style MCP fill:#fff,stroke:#71639e,stroke-width:2px,color:#71639e
+    style TOOL fill:#fff,stroke:#71639e,stroke-width:2px,color:#71639e
+    style PACKS fill:#f9f8fc,stroke:#71639e,stroke-width:2px,color:#71639e
+    style PROV fill:#fff,stroke:#dee2e6,stroke-width:2px
+    style INFRA fill:#fff,stroke:#dee2e6,stroke-width:2px
+```
+
+## Installation
+
+### What to Install
+
+This module is **auto-installed** as a dependency. You typically don't install it directly. **Choose a setup below based on your use case.**
+
+### Common Setups
+
+| I want to...                                 | Install                                                 |
+| -------------------------------------------- | ------------------------------------------------------- |
+| **Use Claude/Cursor/Codex with Odoo (MCP)**  | `llm_mcp_server` (+ tool packs below)                   |
+| Chat with AI inside Odoo                     | `llm_assistant` + `llm_openai`                          |
+| Use local AI (privacy)                       | `llm_assistant` + `llm_ollama`                          |
+| Add RAG/knowledge base                       | Above + `llm_knowledge` + `llm_pgvector`                |
+| AI-powered accounting via MCP or chat        | `llm_tool_account` (+ `llm_mcp_server` for external AI) |
+| AI-powered financial reporting (MIS Builder) | `llm_tool_mis_builder` (+ `llm_mcp_server`)             |
+
+### MCP Server — Connect External AI Clients
+
+The **`llm_mcp_server`** module exposes all your Odoo tools to external AI clients via the [Model Context Protocol (MCP)](https://modelcontextprotocol.io/). This lets you use **Claude Desktop**, **Claude Code**, **Cursor**, **Windsurf**, **VS Code**, and **Codex CLI** to interact directly with your Odoo data.
+
+```bash
+odoo-bin -d your_db -i llm_mcp_server
+```
+
+After installing, each user generates their own API key from **My Profile → Account Security → New MCP Key**. The wizard provides ready-to-paste configurations for each client. See the [llm_mcp_server README](../llm_mcp_server/README.md) for full setup instructions.
+
+### Domain-Specific Tool Packs
+
+Install tool packs to give AI assistants (both in-Odoo and external MCP clients) specialized capabilities:
+
+| Module                     | Tools | Description                                                                |
+| -------------------------- | ----- | -------------------------------------------------------------------------- |
+| **`llm_tool_account`**     | 18    | Trial balance, journal entries, reconciliation, payments, tax reports, P&L |
+| **`llm_tool_mis_builder`** | 44    | KPI management, report computation, drill-down, variance analysis, trends  |
+| **`llm_tool_knowledge`**   | —     | RAG search, semantic retrieval, source citations from your knowledge base  |
+| **`llm_tool_ocr_mistral`** | 1     | Extract text from images and PDFs using Mistral AI vision models           |
+| **`llm_tool_demo`**        | 6     | Example tools showing `@llm_tool` decorator patterns for developers        |
+
+The base `llm_tool` module also includes 6 **generic CRUD tools** out of the box: `odoo_record_retriever`, `odoo_record_creator`, `odoo_record_updater`, `odoo_record_unlinker`, `odoo_model_method_executor`, and `odoo_model_inspector` — enabling AI to read, create, update, and delete records in any Odoo model.
+
+### This Module Provides
+
+- Provider abstraction framework
+- Model and publisher management
+- Enhanced `mail.message` with `llm_role` field
+- Security groups and access control
+- Base configuration menus
+
+### Modules That Depend on This
+
+| Category           | Modules                                                                                               |
+| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| **MCP Server**     | `llm_mcp_server`                                                                                      |
+| **Interfaces**     | `llm_assistant`, `llm_thread`                                                                         |
+| **Tool Framework** | `llm_tool` → `llm_tool_account`, `llm_tool_mis_builder`, `llm_tool_knowledge`, `llm_tool_ocr_mistral` |
+| **Providers**      | `llm_openai`, `llm_ollama`, `llm_mistral`, `llm_replicate`, `llm_fal_ai`                              |
+| **Infrastructure** | `llm_store`, `llm_generate`                                                                           |
+
 ## Overview
 
 The LLM Integration Base serves as the foundation for building AI-powered features across Odoo applications. It extends Odoo's core messaging system with AI-specific capabilities and provides a unified framework for connecting with various AI providers.
@@ -128,7 +227,7 @@ The new `llm_role` field provides dramatic performance improvements:
 ### Module Information
 
 - **Name**: LLM Integration Base
-- **Version**: 16.0.1.3.0
+- **Version**: 18.0.1.4.0
 - **Category**: Technical
 - **License**: LGPL-3
 - **Dependencies**: `mail`, `web`
@@ -171,6 +270,33 @@ Enhanced with LLM-specific fields:
 - `body_json`: Structured data for tool messages
 - Computed role from message subtypes
 - AI-specific email handling
+
+### Multimodal Attachments
+
+The module supports sending file attachments to LLM providers via enhanced mail.message:
+
+#### Supported File Types
+
+| Category      | Mimetypes                                                           |
+| ------------- | ------------------------------------------------------------------- |
+| **Images**    | JPEG, PNG, GIF, WebP                                                |
+| **Documents** | PDF                                                                 |
+| **Text**      | Plain text, Markdown, CSV, HTML, CSS, JavaScript, XML, Python, JSON |
+
+#### API Methods
+
+```python
+# Get formatted attachments from a message
+images = message._get_image_attachments()  # Returns list of base64 images
+pdfs = message._get_pdf_attachments()      # Returns list of base64 PDFs
+texts = message._get_text_attachments()    # Returns decoded text content
+
+# Prepare all attachments for multimodal LLM call
+attachments = message._prepare_multimodal_attachments(is_multimodal=True)
+# Returns: {"images": [...], "pdfs": [...], "texts": [...], "has_attachments": bool}
+```
+
+Non-multimodal models automatically skip images/PDFs while still processing text files.
 
 ### Database Schema
 
@@ -248,6 +374,7 @@ thread.message_post(
    ```
 
 2. **Implement Service Methods:**
+
    ```python
    def my_service_chat(self, messages, model=None, **kwargs):
        """Service-specific chat implementation"""
@@ -273,37 +400,29 @@ class CustomThread(models.Model):
         return super().message_post(**kwargs)
 ```
 
-## Migration Notes
-
-### From Previous Versions
-
-**Message Subtype Migration:**
-
-- Message subtypes moved from separate module to base module
-- Automatic migration preserves existing data
-- Performance improvements applied to existing messages
-
-**Role Field Migration:**
-
-- Automatic computation of `llm_role` for existing messages
-- Database migration creates indexes for performance
-- Backward compatibility maintained
-
-### Breaking Changes
-
-**Version 16.0.1.3.0:**
-
-- Moved message subtypes to base module
-- Added required `llm_role` field computation
-- Enhanced provider dispatch mechanism
-
 ## Related Modules
 
 Build complete AI solutions by combining with specialized modules:
 
-- **`llm_assistant`**: AI assistants with prompt management
+### External AI Integration
+
+- **`llm_mcp_server`**: MCP server exposing all Odoo tools to Claude Desktop, Claude Code, Cursor, Codex CLI, and any MCP-compatible client
+
+### Tool Packs
+
+- **`llm_tool`**: Tool framework with generic CRUD tools (retrieve, create, update, delete, inspect, execute)
+- **`llm_tool_account`**: 18 AI-powered accounting tools — trial balance, journal entries, reconciliation, payments, tax reports, P&L, period close
+- **`llm_tool_mis_builder`**: 44 tools for MIS Builder financial reporting — KPIs, periods, report computation, drill-down, variance analysis
+- **`llm_tool_knowledge`**: RAG tools for semantic search, knowledge retrieval, and source citations
+- **`llm_tool_ocr_mistral`**: OCR tool using Mistral vision models for invoices, receipts, scanned documents
+
+### Chat & Assistants
+
+- **`llm_assistant`**: AI assistants with custom prompts and personalities
 - **`llm_thread`**: Chat interfaces and conversation management
-- **`llm_tool`**: Function calling and Odoo integration
+
+### Infrastructure
+
 - **`llm_generate`**: Unified content generation API
 - **`llm_knowledge`**: RAG and knowledge base functionality
 - **`llm_store`**: Vector storage and similarity search

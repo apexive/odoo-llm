@@ -1,3 +1,34 @@
+18.0.4.1.1 (2025-12-03)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [FIX] Fixed concurrency issue in _register_function_tool by using savepoint
+
+18.0.4.1.0 (2025-11-28)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [IMP] Refactored _inject_tool_consent() to use _extract_content_text() helper from base provider (DRY)
+* [IMP] Simplified content format handling using shared helper method
+
+18.0.4.0.0 (2025-10-28)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [ADD] Decorator System - Introduced @llm_tool decorator for zero-boilerplate tool creation
+* [ADD] Auto-registration - Tools decorated with @llm_tool are automatically registered via _register_hook()
+* [ADD] Schema Generation - Automatic input schema generation from Python type hints using Pydantic
+* [ADD] Manual Schema Support - Optional manual schema override for methods without type hints
+* [ADD] Tool Metadata - Support for read_only_hint, idempotent_hint, destructive_hint, and open_world_hint annotations
+* [ADD] SQL Constraints - Added unique constraints for tool names and function tool (model, method) combinations
+* [ADD] Auto-update Control - Added auto_update field to control whether decorator changes overwrite manual edits
+* [ADD] Comprehensive Tests - Added 16 unit tests covering decorator functionality, schema generation, and constraints
+* [IMP] Tool Cleanup - Automatic deactivation of stale tools when decorated methods are removed from code
+* [IMP] Schema Reset - Enhanced action_reset_input_schema() to force regeneration from method signatures
+
+18.0.3.0.0 (2025-10-23)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [MIGRATION] Migrated to Odoo 18.0
+* [IMP] Updated views and manifest for compatibility
+
 16.0.3.0.0 (2025-07-04)
 ~~~~~~~~~~~~~~~~~~~~~~~
 

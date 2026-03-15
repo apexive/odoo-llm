@@ -27,11 +27,12 @@ patch(LLMThreadHeader.prototype, {
    */
   get availableAssistants() {
     if (!this.assistantStore?._assistantsLoaded) return [];
-    return Array.from(this.assistantStore.llmAssistants.values());
+    return Object.values(this.assistantStore.llmAssistants);
   },
 
   /**
    * Select assistant following existing update pattern
+   * @param {Object} assistant - Assistant object to select
    */
   async selectAssistant(assistant) {
     if (!this.assistantStore) return;

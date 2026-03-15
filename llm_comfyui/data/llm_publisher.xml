@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_publisher_comfyui" model="llm.publisher">
+        <field name="name">ComfyUI</field>
+        <field name="official" eval="True" />
+        <field name="frontier" eval="False" />
+        <field
+      name="description"
+    >ComfyUI is an advanced node-based UI for Stable Diffusion. It provides a powerful interface for creating complex AI image generation workflows with a focus on customization and control.</field>
+        <field
+      name="logo"
+      type="base64"
+      file="llm_comfyui/static/description/comfyui_logo.png"
+    />
+        <field name="meta">{
+            "website": "https://github.com/comfyanonymous/ComfyUI",
+            "founded": 2022,
+            "key_features": [
+                "Node-based UI for AI Image Generation",
+                "Stable Diffusion Integration",
+                "Custom Workflow Creation",
+                "Advanced Control over Generation Parameters",
+                "Extensible Plugin System"
+            ]
+        }</field>
+    </record>
+</odoo>

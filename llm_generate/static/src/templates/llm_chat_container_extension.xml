@@ -10,7 +10,10 @@
         <xpath expr="//div[hasclass('o-llm-composer-area')]" position="replace">
             <div class="o-llm-composer-area border-top p-3">
                 <!-- Check if this is a media generation model -->
-                <t t-set="isMediaGenModel" t-value="isMediaGenerationModel(activeThread)" />
+                <t
+          t-set="isMediaGenModel"
+          t-value="isMediaGenerationModel(activeThread)"
+        />
 
                 <!-- Media Generation Form - Show for generation models -->
                 <t t-if="isMediaGenModel">

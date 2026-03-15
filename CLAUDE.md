@@ -1,358 +1,217 @@
-# Odoo LLM Integration Modules - Project Context
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Overview
 
-This is a comprehensive suite of Odoo modules for integrating Large Language Models (LLMs) with Odoo ERP. The modules provide AI-powered features, knowledge management, and various LLM provider integrations.
-
-## Current Status
-
-- **Current Version**: Odoo 16.0
-- **Target Version**: Odoo 18.0
-- **Migration Status**: In Progress
-- **Main Branch**: 16.0
-- **Migration Branch**: 18.0-migration
-
-## Module Architecture
-
-### Core Modules
-
-1. **llm** - Base module providing core LLM functionality, models, and providers
-2. **llm_thread** - Thread management for LLM conversations
-3. **llm_tool** - Tool management and consent configuration for LLM operations
-4. **llm_assistant** - Assistant functionality with prompts, categories, and tags
-
-### Provider Modules
-
-- **llm_anthropic** - Anthropic Claude integration
-- **llm_openai** - OpenAI GPT integration
-- **llm_mistral** - Mistral AI integration
-- **llm_ollama** - Ollama local LLM integration
-- **llm_litellm** - LiteLLM proxy integration
-- **llm_replicate** - Replicate API integration
-- **llm_fal_ai** - Fal.ai integration
-
-### Knowledge Management
-
-- **llm_knowledge** - Core knowledge base with chunking and RAG
-- **llm_knowledge_automation** - Automated knowledge collection
-- **llm_knowledge_llama** - Llama-specific knowledge features
-- **llm_knowledge_mistral** - Mistral-specific knowledge features
-- **llm_tool_knowledge** - Tool-knowledge integration
-
-### Vector Storage
-
-- **llm_pgvector** - PostgreSQL vector storage
-- **llm_chroma** - Chroma vector database integration
-- **llm_qdrant** - Qdrant vector database integration
-
-### Generation & Processing
-
-- **llm_generate** - Content generation features
-- **llm_generate_job** - Job queue for generation tasks
-- **llm_training** - Training dataset management
-- **llm_comfyui** - ComfyUI integration
-- **llm_comfy_icu** - ComfyICU integration
-
-### Additional Features
-
-- **llm_document_page** - Document page integration
-- **llm_mcp** - Model Context Protocol server
-- **llm_store** - LLM marketplace/store functionality
-- **web_json_editor** - JSON editor widget
-
-## Migration to Odoo 18.0 - Key Changes
-
-### Critical Breaking Changes
-
-1. **tree → list**: All `<tree>` tags must be renamed to `<list>`
-2. **attrs → direct attributes**: Convert domain syntax to Python expressions
-3. **states → invisible**: Button states attribute replaced with invisible
-4. **name_get() → \_compute_display_name()**: Display name computation changed
-5. **message_format() removed**: Use Store system with `_to_store()` method instead
-6. **Registry import**: Use `from odoo.modules.registry import Registry` not `from odoo import registry`
-
-### Module-Specific Migration Requirements
-
-#### High Priority (Core + Heavy UI)
-
-- **llm**: Update manifest, migrate views (4 view files)
-- **llm_thread**: Migrate tree views in thread views
-- **llm_tool**: Migrate consent config and tool views
-- **llm_assistant**: Multiple view files with tree tags
-- **llm_knowledge**: Complex module with multiple views and wizards
-
-#### Medium Priority (Feature Modules)
-
-- **llm_mcp**: Has attrs attributes that need conversion
-- **llm_training**: Dataset and job views need migration
-- **llm_generate_job**: Queue and job views
-- **llm_pgvector**: Embedding views
-- **llm_store**: Store views
-- **llm_document_page**: Wizard attrs attributes
-- **llm_litellm**: Provider views with attrs
-
-#### Low Priority (Manifest Only)
-
-Provider modules with minimal UI:
-
-- llm_anthropic, llm_openai, llm_mistral, llm_ollama
-- llm_replicate, llm_fal_ai, llm_comfy_icu, llm_comfyui
-- llm_generate, llm_chroma, llm_qdrant
-- llm_knowledge_llama, llm_knowledge_mistral, llm_tool_knowledge
-
-## Testing Strategy
-
-1. Run individual module tests after each migration
-2. Test inter-module dependencies
-3. Validate all view rendering
-4. Check all workflows and actions
-5. Verify API compatibility
-
-## Code Quality Standards
-
-- Python 3.11+ compatibility
-- Ruff for linting and formatting
-- Pre-commit hooks configured
-- Type hints where applicable
+Odoo LLM Integration - A suite of Odoo 18.0 modules for integrating Large Language Models with Odoo ERP. Provides AI-powered chat, knowledge management (RAG), tool execution, and content generation.
 
 ## Development Commands
-
-### Testing
-
-```bash
-# Run all tests
-./run_tests.sh
-
-# Test specific module
-odoo-bin --test-enable --stop-after-init --test-tags=llm -d test_db -u llm
-```
 
 ### Code Quality
 
 ```bash
-# Format and lint
+# Format and lint Python
 ruff format . && ruff check . --fix --unsafe-fixes
 
-# Pre-commit
+# Run pre-commit hooks (includes ESLint, Prettier, Ruff)
 pre-commit run --all-files
 ```
 
-## Migration Progress Tracking
+### Testing
 
-### ✅ Completed (18.0 Compatible)
+```bash
+# Run tests for specific module(s)
+./run_tests.sh llm_replicate
 
-#### Core Modules - COMPLETED ✅
+# Run multiple modules
+./run_tests.sh "llm_replicate,llm_comfyui"
 
-1. **llm** - Base module providing core LLM functionality, models, and providers
+# With custom database and port
+./run_tests.sh llm_replicate my_test_db 8072
 
-   - ✅ Migrated to Odoo 18.0
-   - ✅ Updated manifests and dependencies
-   - ✅ Core LLM provider and model management
+# Direct odoo-bin command for single module
+odoo-bin --test-enable --stop-after-init --test-tags=llm -d test_db -u llm
+```
 
-2. **llm_thread** - Thread management for LLM conversations
+## Module Architecture
 
-   - ✅ Migrated to Odoo 18.0 mail system architecture
-   - ✅ Implemented proper `_init_messaging()` and `_thread_to_store()` methods
-   - ✅ Fixed message handling (tool messages, empty message filtering, squashing)
-   - ✅ Fixed HTML escaping issues in streaming messages
-   - ✅ Updated thread header components with proper fetchData() patterns
-   - ✅ Integrated with standard mail.store service patterns
+### Core Dependency Chain
 
-3. **llm_tool** - Tool management and consent configuration for LLM operations
+```
+llm (base) → llm_thread (chat) → llm_tool (actions) → llm_assistant (AI assistants)
+         ↘ llm_store (vector abstraction) → llm_knowledge (RAG) → llm_pgvector/chroma/qdrant
+         ↘ llm_generate (content generation) → llm_generate_job (async queue)
+```
 
-   - ✅ Migrated to Odoo 18.0
-   - ✅ Updated manifests and tool configuration views
-   - ✅ Tool consent and management functionality
+### Provider Modules
 
-4. **llm_assistant** - Assistant functionality with prompts and tools
-   - ✅ Migrated assistant dropdown UI with full functionality
-   - ✅ Implemented assistant selection and clearing
-   - ✅ Fixed UI reactivity issues with proper context binding
-   - ✅ Extended `_thread_to_store()` to handle assistant_id states
-   - ✅ Clean separation from llm_thread module following DRY principles
+All inherit from `llm.provider` and implement provider-specific API calls:
 
-#### Text/Chat Provider Modules - COMPLETED ✅
+- **Text/Chat**: `llm_openai`, `llm_ollama`, `llm_mistral`
+- **Image**: `llm_replicate`, `llm_fal_ai`, `llm_comfyui`, `llm_comfy_icu`
 
-1. **llm_openai** - OpenAI GPT integration
-   - ✅ Migrated to Odoo 18.0
-   - ✅ Updated manifests and dependencies
-2. **llm_anthropic** - Anthropic Claude integration
-   - ✅ Migrated to Odoo 18.0
-   - ✅ Updated manifests and dependencies
-3. **llm_mistral** - Mistral AI integration
-   - ✅ Migrated to Odoo 18.0
-   - ✅ Updated manifests and dependencies
-4. **llm_ollama** - Ollama local LLM integration
+## Odoo 18.0 Key Patterns
 
-   - ✅ Migrated to Odoo 18.0
-   - ✅ Updated manifests and dependencies
+### View Syntax (XML)
 
-5. **llm_litellm** - LiteLLM proxy integration
-   - ✅ Migrated to Odoo 18.0
-   - ✅ Updated manifests and dependencies
+```xml
+<!-- Use <list> not <tree> -->
+<list string="Records">...</list>
 
-### 🚧 In Progress
+<!-- Use direct attributes, not attrs -->
+<field name="x" invisible="not active"/>
 
-#### UI/UX Improvements
+<!-- Use invisible, not states for buttons -->
+<button invisible="state != 'draft'"/>
+```
 
-- 🔄 Make LLM components responsive/mobile friendly
-- 🔄 Fix auto scrolling for new messages in thread
-- 🔄 Investigate `_to_store` pattern in mail module for future use
+### Frontend Architecture
 
-### ⏳ Remaining Migration Tasks
-
-#### High Priority (Image Generation Providers)
-
-- **llm_replicate** - Replicate API integration (image generation)
-- **llm_fal_ai** - Fal.ai integration (image generation)
-- **llm_comfyui** - ComfyUI integration (image workflows)
-- **llm_comfy_icu** - ComfyICU integration
-
-#### Medium Priority (Knowledge & Advanced Features)
-
-- **llm_knowledge** - Knowledge base with chunking and RAG
-- **llm_knowledge_automation** - Automated knowledge collection
-- **llm_mcp** - Model Context Protocol server
-- **llm_generate** - Content generation features
-- **llm_generate_job** - Job queue for generation tasks
-- **llm_training** - Training dataset management
-
-#### Low Priority (Vector Storage & Extensions)
-
-- **llm_pgvector**, **llm_chroma**, **llm_qdrant** - Vector database integrations
-- **llm_document_page** - Document page integration
-- **llm_store** - LLM marketplace functionality
-- **web_json_editor** - JSON editor widget
-
-## Future Architecture Improvements
-
-### \_to_store Pattern Implementation
-
-**Priority**: Medium
-**Investigation needed**: Study how Odoo's mail module implements `_to_store()` methods for different models.
-
-**Potential Implementation**:
-
-- **llm.provider** - Standardize provider data serialization for frontend
-- **llm.model** - Consistent model data structure in mail.store
-- **llm.tool** - Tool data formatting for UI components
-- **llm.assistant** - Enhanced assistant data structure (already partially implemented)
-
-**Benefits**:
-
-- Consistent data format across all LLM models
-- Better integration with Odoo 18.0 mail.store patterns
-- Simplified frontend data access and reactivity
-- Reduced custom serialization logic
-
-**Research Tasks**:
-
-1. Analyze `mail.thread._to_store()` and related methods
-2. Study how different mail models extend the pattern
-3. Design unified approach for LLM model serialization
-4. Create base mixin for LLM models to inherit
-
-## Known Issues
-
-- Some modules may have additional hidden dependencies
-- Vector storage modules might need special attention for data migration
-- Job queue modules need careful testing for async operations
-
-## Odoo 18.0 Mail System Architecture (IMPORTANT)
-
-### Mail Store System
-
-- **USE** `mail.store` service for all message/thread operations
-- **REUSE** existing mail components, don't create separate messaging models
-- **PATCH** components conditionally using `@web/core/utils/patch`
-- The new system uses Record-based reactive architecture
-
-### Thread and Message Management
+**Odoo 18 replaced the frontend model system completely:**
 
 ```javascript
-// Correct Thread.get() format in Odoo 18.0
+// ❌ OLD (doesn't exist in 18.0)
+import { registerModel, registerPatch } from "@mail/model/model_core";
+
+// ✅ NEW - ES6 classes extending Record
+import { Record } from "@mail/core/common/record";
+import { patch } from "@web/core/utils/patch";
+import { rpc } from "@web/core/network/rpc";
+
+// Patch existing components
+patch(SomeComponent.prototype, {
+  setup() {
+    super.setup();
+    // ...
+  },
+});
+```
+
+### Mail Store Integration
+
+```javascript
+// Thread access
 mailStore.Thread.get({ model: "llm.thread", id: threadId });
 
-// Message insertion pattern
+// Message insertion (must also add to thread.messages for UI)
 mailStore.insert({ "mail.message": [messageData] }, { html: true });
-
-// IMPORTANT: Also add to thread.messages collection for UI updates
 if (!thread.messages.some((m) => m.id === message.id)) {
   thread.messages.push(message);
 }
 ```
 
-### Message Serialization
+### Backend Message Serialization
 
 ```python
-# Use Store system for message formatting
 from odoo.addons.mail.tools.discuss import Store
 
 def to_store_format(self, message):
     store = Store()
     message._to_store(store)
-    result = store.get_result()
-    return result['mail.message'][0]
+    return store.get_result()['mail.message'][0]
 ```
 
-### LLM-Specific Implementation
+### Removed APIs
 
-#### Service Setup
+- `name_get()` → use `_compute_display_name()` / `display_name` field
+- `message_format()` → use `_to_store()` with Store system
+- `from odoo import registry` → use `from odoo.modules.registry import Registry`
 
-```javascript
-export const llmStoreService = {
-  dependencies: ["orm", "bus_service", "mail.store", "notification"],
-  start(env, { orm, bus_service, "mail.store": mailStore, notification }) {
-    // mailStore is the standard Odoo mail.store service
-  },
-};
+## LLM Message Flow
+
+1. User sends message → `message_post()` with `llm_role="user"` → saved to DB
+2. `generate_messages()` called → `get_llm_messages()` retrieves history
+3. Full history passed to LLM provider → streaming response via EventSource
+4. Assistant messages processed through `_process_llm_body()` (markdown→HTML)
+5. Tool messages use `body_json` field, no HTML processing
+
+## Odoo App Store HTML Guidelines
+
+When editing `static/description/index.html` files:
+
+- Use HTML fragments only (no DOCTYPE, html, head, body)
+- No rgba() colors - hex only
+- No CSS transitions, transforms, animations, or linear-gradients
+- No inline JavaScript
+- Use Bootstrap 5 grid (container, row, col-\*)
+- Use inline styles for colors/typography
+
+See [ODOO_APP_STORE_HTML_GUIDE.md](./ODOO_APP_STORE_HTML_GUIDE.md) for details.
+
+## Coding Principles
+
+### DRY (Don't Repeat Yourself)
+
+- Extract shared logic into base classes or mixins (e.g., `llm.provider` base for all providers)
+- Use `_dispatch()` pattern for extensible behavior instead of duplicating logic
+- Common UI components go in base modules, extended via `patch()` in feature modules
+- Shared utilities belong in `llm` base module, not duplicated across provider modules
+
+### Odoo Best Practices
+
+- **Inherit, don't copy**: Use `_inherit` to extend models, don't duplicate code
+- **Use computed fields**: Prefer `@api.depends` over manual updates
+- **Recordsets over IDs**: Pass recordsets between methods, not raw IDs
+- **Context for options**: Use `self.with_context()` for optional behavior, not extra parameters
+- **SQL only when necessary**: Use ORM unless performance requires raw SQL (then add `_flush()`)
+- **Security by design**: Define proper access rules, use `sudo()` sparingly and explicitly
+- **Transactional safety**: Use `cr.savepoint()` for operations that might fail partially
+
+### Provider-Agnostic Code
+
+Keep core logic independent of specific LLM providers:
+
+```python
+# ✅ Good - provider-agnostic interface
+class LlmThread(models.Model):
+    def generate_messages(self):
+        return self.model_id.provider_id.chat(messages)  # Provider handles specifics
+
+# ❌ Bad - provider-specific code in core
+class LlmThread(models.Model):
+    def generate_messages(self):
+        if self.provider_id.provider == 'openai':
+            client = OpenAI(api_key=...)  # Don't do this in core!
 ```
 
-#### Safe Component Patching
+- All provider-specific logic lives in provider modules (`llm_openai`, `llm_ollama`, etc.)
+- Core modules define interfaces via abstract methods or dispatch hooks
+- Use `_dispatch(event_name, **kwargs)` for provider-specific transformations
+- External API clients are instantiated only in provider modules
 
-```javascript
-patch(Composer.prototype, {
-  setup() {
-    super.setup();
-    try {
-      this.llmStore = useService("llm.store");
-    } catch (error) {
-      this.llmStore = null; // Graceful fallback
-    }
-  },
-});
+### Extension Patterns
+
+```python
+# Base module defines hook
+class LlmProvider(models.Model):
+    def chat(self, messages, **kwargs):
+        messages = self._dispatch("normalize_messages", messages=messages)
+        return self._chat(messages, **kwargs)  # Abstract, implemented by providers
+
+# Provider module implements
+class LlmProviderOpenAI(models.Model):
+    _inherit = "llm.provider"
+
+    def _chat(self, messages, **kwargs):
+        # OpenAI-specific implementation
 ```
 
-#### Message Processing Rules
+## External Dependencies by Module
 
-- **User messages**: Plain text, no processing through `_process_llm_body()`
-- **Assistant messages**: Process through `_process_llm_body()` for markdown→HTML
-- **Tool messages**: Use `body_json` field, no HTML processing
+| Module                | Python Dependencies                   |
+| --------------------- | ------------------------------------- |
+| `llm_knowledge`       | requests, markdownify, PyMuPDF, numpy |
+| `llm_pgvector`        | pgvector, numpy                       |
+| `llm_chroma`          | chromadb-client, numpy                |
+| `llm_qdrant`          | qdrant-client                         |
+| `llm_knowledge_llama` | llama_index, nltk                     |
+| `llm_openai`          | openai                                |
+| `llm_ollama`          | ollama                                |
+| `llm_mistral`         | mistralai                             |
 
-#### Streaming Architecture
+## Code Style
 
-1. User message → `message_post()` → standard bus events
-2. AI response → EventSource streaming → custom handling in llm.store
-3. Messages inserted via `mailStore.insert()`
-4. Manually add to `thread.messages` collection for reactivity
-
-### Message History Flow for LLM
-
-1. User message posted with `llm_role="user"` → saved to DB
-2. `generate_messages()` called → `get_llm_messages()` retrieves all messages
-3. Full history including new user message passed to LLM
-
-### Common Pitfalls to Avoid
-
-- Don't use `message_format()` - it's removed in 18.0
-- Don't use `existingMessage.update()` for streaming - use `mailStore.insert()`
-- Don't forget to add messages to `thread.messages` collection
-- Don't process user messages as markdown/HTML
-- Don't use wrong Thread.get() format (array instead of object)
-
-## References
-
-- [MIGRATION_16_TO_18.md](./MIGRATION_16_TO_18.md) - Detailed migration guide
-- [LLM_THREAD_18_MIGRATION_GUIDE.md](./LLM_THREAD_18_MIGRATION_GUIDE.md) - LLM thread specific migration
-- Odoo 18.0 official documentation
-- Module interdependency graph (to be created)
+- Python: Ruff with Odoo-specific isort sections (odoo → odoo.addons → first-party)
+- JavaScript: ESLint with strict rules (no-shadow, valid-jsdoc, sort-imports)
+- Max complexity: Python 16, JavaScript 15

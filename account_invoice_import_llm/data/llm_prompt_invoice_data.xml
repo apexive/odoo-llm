@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Invoice Data Extraction Prompt (One-Shot for Automatic Decoder) -->
+    <record id="llm_prompt_invoice_extraction" model="llm.prompt">
+        <field name="name">Invoice Data Extraction (One-Shot)</field>
+        <field
+      name="description"
+    >One-shot prompt for extracting structured invoice data from OCR text. Returns JSON with vendor info, invoice details, and line items. Used by automatic decoder.</field>
+        <field name="format">json</field>
+        <field
+      name="template"
+    ><![CDATA[[
+  {
+    "type": "system",
+    "content": {{ ('You are a ' + role + '.\n\nYour goal is to ' + goal + '\n\nBackground: ' + background + '\n\nInstructions:\n' + instructions + '\n\n' + footer) | tojson }}
+  },
+  {
+    "type": "user",
+    "content": {{ ('Extract invoice data from the following OCR text and return ONLY the JSON object, no explanations or markdown:\n\n' + ocr_text) | tojson }}
+  }
+]]]></field>
+        <field
+      name="arguments_json"
+    ><![CDATA[{
+            "role": {
+                "type": "string",
+                "description": "The role of the assistant",
+                "required": true
+            },
+            "goal": {
+                "type": "string",
+                "description": "The primary goal",
+                "required": true
+            },
+            "background": {
+                "type": "string",
+                "description": "Background information",
+                "required": true
+            },
+            "instructions": {
+                "type": "string",
+                "description": "Specific extraction instructions",
+                "required": true
+            },
+            "footer": {
+                "type": "string",
+                "description": "Optional footer",
+                "required": false,
+                "default": ""
+            },
+            "ocr_text": {
+                "type": "string",
+                "description": "OCR extracted text from invoice (injected via dynamic defaults)",
+                "required": true
+            }
+        }]]></field>
+        <field name="active" eval="True" />
+    </record>
+</odoo>

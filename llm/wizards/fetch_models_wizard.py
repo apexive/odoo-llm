@@ -1,9 +1,5 @@
-import logging
-
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
-
-_logger = logging.getLogger(__name__)
 
 
 class ModelLine(models.TransientModel):
@@ -89,105 +85,6 @@ class FetchModelsWizard(models.TransientModel):
             wizard.modified_count = len(
                 wizard.line_ids.filtered(lambda record: record.status == "modified")
             )
-
-    @api.model
-    def default_get(self, fields_list):
-        """Fetch models and prepare wizard data"""
-        res = super().default_get(fields_list)
-
-        # Check for provider_id in context first (from model form)
-        default_provider_id = self._context.get("default_provider_id")
-        if default_provider_id:
-            provider = self.env["llm.provider"].browse(default_provider_id)
-            if not provider.exists():
-                raise UserError(_("Provider not found."))
-            res["provider_id"] = provider.id
-        # If no default_provider_id, try active_id (from provider form)
-        elif self._context.get("active_id"):
-            provider = self.env["llm.provider"].browse(self._context["active_id"])
-            if not provider.exists():
-                raise UserError(_("Provider not found."))
-            res["provider_id"] = provider.id
-        else:
-            return res
-
-        # Prepare model lines
-        lines = []
-        existing_models = {
-            model.name: model
-            for model in self.env["llm.model"].search(
-                [("provider_id", "=", res["provider_id"])]
-            )
-        }
-
-        # Fetch and process models
-        model_to_fetch = self._context.get("default_model_to_fetch")
-        models_data = []
-        if model_to_fetch:
-            models_data = provider.list_models(model_id=model_to_fetch)
-        else:
-            models_data = provider.list_models()
-
-        # Track models in this wizard to prevent duplicates
-        wizard_models = set()
-
-        for model_data in models_data:
-            details = model_data.get("details", {})
-            name = model_data.get("name") or details.get("id")
-
-            if not name:
-                continue
-
-            # Skip duplicates within this wizard (prevent constraint violation)
-            if name in wizard_models:
-                _logger.warning(
-                    f"Duplicate model '{name}' found in provider response, skipping duplicate"
-                )
-                continue
-            wizard_models.add(name)
-
-            # Determine model use and capabilities
-            capabilities = details.get("capabilities", ["chat"])
-            model_use = self._determine_model_use(name, capabilities)
-
-            # Check against existing models
-            existing = existing_models.get(name)
-            status = "new"
-            if existing:
-                status = "modified" if existing.details != details else "existing"
-
-            line_vals = {
-                "name": name,
-                "model_use": model_use,
-                "status": status,
-                "details": details,
-                "existing_model_id": existing.id if existing else False,
-                "selected": status in ["new", "modified"],
-            }
-
-            lines.append((0, 0, line_vals))
-
-        if lines:
-            res["line_ids"] = lines
-
-        return res
-
-    @api.model
-    def _determine_model_use(self, name, capabilities):
-        """Helper to determine model use based on name and capabilities
-
-        TODO: Move this logic to provider-level via provider.classify_model_use()
-        so each provider can implement their own model classification logic
-        based on their specific naming conventions and capabilities.
-        """
-        if (
-            any(cap in capabilities for cap in ["embedding", "text-embedding"])
-            or "embedding" in name.lower()
-        ):
-            return "embedding"
-        elif any(cap in capabilities for cap in ["multimodal", "vision"]):
-            return "multimodal"
-        return "chat"  # default
 
     def action_confirm(self):
         """Process selected models and create/update records"""

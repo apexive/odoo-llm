@@ -1,11 +1,9 @@
 /** @odoo-module **/
 
-import { Message } from "@mail/core/common/message";
-import { patch } from "@web/core/utils/patch";
 import { LLMToolMessage } from "../components/llm_tool_message/llm_tool_message";
-
-// Import Message model to patch it
+import { Message } from "@mail/core/common/message";
 import { Message as MessageModel } from "@mail/core/common/message_model";
+import { patch } from "@web/core/utils/patch";
 
 /**
  * PATCH 1: Message Component Static Properties
@@ -81,12 +79,15 @@ patch(Message.prototype, {
  * Patches the Message data model to handle LLM-specific isEmpty computation
  * This ensures LLM messages with tool calls or body_json are never filtered out
  * NOTE: This is NOT the component - this is the data model that holds message data
+ *
+ * v17: Uses get isEmpty() getter instead of computeIsEmpty() method
  */
 patch(MessageModel.prototype, {
   /**
-   * Override computeIsEmpty for LLM messages with tool calls or body_json
+   * Override isEmpty getter for LLM messages with tool calls or body_json
+   * @returns {Boolean} True if message is empty
    */
-  computeIsEmpty() {
+  get isEmpty() {
     // For LLM messages, apply custom logic
     if (this.model === "llm.thread") {
       // Assistant messages with tool calls are never empty
@@ -104,6 +105,6 @@ patch(MessageModel.prototype, {
     }
 
     // Use original computation for other messages
-    return super.computeIsEmpty();
+    return super.isEmpty;
   },
 });

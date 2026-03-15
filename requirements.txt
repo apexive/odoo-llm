@@ -1,12 +1,25 @@
 # generated from manifests external_dependencies
+PyMuPDF
+anthropic
+chromadb-client
 emoji
+fal_client
 jinja2
+jsonref
 jsonschema
-git+https://github.com/apexive/letta-python.git@f86647abeb09945a67ed19060b8c4bd16a4adb7f
+letta-client
+llama_index
 markdown2
+markdownify
 mcp
 mistralai
+nltk
+numpy
 ollama
 openai
+pgvector
 pydantic>=2.0.0
 pyyaml
+qdrant-client
+replicate
+requests

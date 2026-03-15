@@ -46,7 +46,7 @@ class LLMThreadController(http.Controller):
             llm_thread = env["llm.thread"].browse(int(thread_id))
             if not llm_thread.exists():
                 yield from cls._safe_yield(
-                    f"data: {json.dumps({'type': 'error', 'error': 'LLM Thread not found.'})}\n\n".encode()
+                    f"data: {json.dumps({'type': 'error', 'error': 'LLM Thread not found.'})}\n\n".encode(),
                 )
                 return
 
@@ -55,7 +55,7 @@ class LLMThreadController(http.Controller):
                 for response in llm_thread.generate(user_message_body, **kwargs):
                     json_data = json.dumps(response, default=str)
                     success = yield from cls._safe_yield(
-                        f"data: {json_data}\n\n".encode()
+                        f"data: {json_data}\n\n".encode(),
                     )
                     if not success:
                         client_connected = False
@@ -66,13 +66,13 @@ class LLMThreadController(http.Controller):
 
             except Exception as e:
                 _logger.exception(
-                    f"Error in llm_thread_generate for thread {thread_id}: {e}"
+                    f"Error in llm_thread_generate for thread {thread_id}: {e}",
                 )
                 # Lock will be automatically released by context manager
 
                 if client_connected:
                     success = yield from cls._safe_yield(
-                        f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n".encode()
+                        f"data: {json.dumps({'type': 'error', 'error': str(e)})}\n\n".encode(),
                     )
                     if not success:
                         client_connected = False
@@ -80,20 +80,35 @@ class LLMThreadController(http.Controller):
             finally:
                 if client_connected:
                     yield from cls._safe_yield(
-                        f"data: {json.dumps({'type': 'done'})}\n\n".encode()
+                        f"data: {json.dumps({'type': 'done'})}\n\n".encode(),
                     )
 
     @http.route("/llm/thread/generate", type="http", auth="user", csrf=True)
-    def llm_thread_generate(self, thread_id, message=None, **kwargs):
+    def llm_thread_generate(
+        self,
+        thread_id,
+        message=None,
+        attachment_ids=None,
+        **kwargs,
+    ):
         headers = {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
             "X-Accel-Buffering": "no",  # Disable nginx buffering
         }
-        user_message_body = message
+        parsed_attachment_ids = []
+        if attachment_ids:
+            parsed_attachment_ids = [
+                int(x) for x in attachment_ids.split(",") if x.strip().isdigit()
+            ]
         return Response(
             self._llm_thread_generate(
-                request.cr.dbname, request.env, thread_id, user_message_body, **kwargs
+                request.cr.dbname,
+                request.env,
+                thread_id,
+                message,
+                attachment_ids=parsed_attachment_ids,
+                **kwargs,
             ),
             direct_passthrough=True,
             headers=headers,

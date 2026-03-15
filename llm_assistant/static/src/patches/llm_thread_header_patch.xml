@@ -6,64 +6,62 @@
     t-inherit="llm_thread.LLMThreadHeader"
     t-inherit-mode="extension"
   >
-        <!-- Add assistant dropdown after tools dropdown -->
+        <!-- Add assistant dropdown to DESKTOP header (after tools dropdown) -->
         <xpath
-      expr="//Dropdown[contains(@t-if, 'availableTools')]"
+      expr="//div[hasclass('o-llm-thread-header')]//Dropdown[contains(@t-if, 'availableTools')]"
       position="after"
     >
-            <!-- Assistant Dropdown -->
-            <Dropdown t-if="availableAssistants.length > 0 or currentAssistant">
-                <button
-          class="btn btn-sm btn-outline-secondary dropdown-toggle"
-        >
+            <!-- Assistant Dropdown (v17 pattern: toggler slot + default slot) -->
+            <Dropdown t-if="availableAssistants.length > 0 or currentAssistant" togglerClass="'btn btn-sm btn-outline-secondary dropdown-toggle'">
+                <t t-set-slot="toggler">
                     <i class="fa fa-user me-1" />
                     <span
             t-if="currentAssistant"
             t-esc="currentAssistant.name"
           />
                     <span t-else="">No Assistant</span>
-                </button>
-                <t t-set-slot="content">
-                    <!-- Clear Assistant Option -->
-                    <t t-if="currentAssistant">
-                        <DropdownItem
+                </t>
+                <!-- Clear Assistant Option -->
+                <t t-if="currentAssistant">
+                    <DropdownItem
               onSelected="() => this.clearAssistant()"
               class="'text-danger'"
             >
-                            <i class="fa fa-times me-2" />
-                            Clear Assistant
-                        </DropdownItem>
-                        <div class="dropdown-divider" />
-                    </t>
+                        <i class="fa fa-times me-2" />
+                        Clear Assistant
+                    </DropdownItem>
+                    <div class="dropdown-divider" />
+                </t>
 
-                    <!-- Available Assistants -->
-                    <t
+                <!-- Available Assistants -->
+                <t
             t-foreach="availableAssistants"
             t-as="assistant"
             t-key="assistant.id"
           >
-                        <DropdownItem
+                    <DropdownItem
               onSelected="() => this.selectAssistant(assistant)"
             >
-                            <div class="d-flex align-items-center">
-                                <i
+                        <div class="d-flex align-items-center">
+                            <i
                   t-if="currentAssistant?.id === assistant.id"
                   class="fa fa-check me-2 text-success"
                 />
-                                <span t-esc="assistant.name" />
-                            </div>
-                        </DropdownItem>
-                    </t>
+                            <span t-esc="assistant.name" />
+                        </div>
+                    </DropdownItem>
+                </t>
 
-                    <!-- No Assistants Available -->
-                    <div
+                <!-- No Assistants Available -->
+                <div
             t-if="availableAssistants.length === 0"
             class="dropdown-item-text text-muted"
           >
-                        No assistants available
-                    </div>
-                </t>
+                    No assistants available
+                </div>
             </Dropdown>
         </xpath>
+
+        <!-- Mobile: No assistant dropdown in header - use form view via cog button instead -->
     </t>
 </templates>

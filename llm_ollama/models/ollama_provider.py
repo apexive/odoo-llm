@@ -25,6 +25,29 @@ class LLMProvider(models.Model):
         """Get Ollama client instance"""
         return ollama.Client(host=self.api_base or "http://localhost:11434")
 
+    def ollama_normalize_prepend_messages(self, prepend_messages):
+        """Normalize prepend_messages for Ollama format.
+
+        Converts OpenAI's list content format to plain strings:
+        {"content": [{"type": "text", "text": "..."}]} → {"content": "..."}
+
+        Args:
+            prepend_messages: List of message dicts to normalize
+
+        Returns:
+            List of message dicts with plain string content
+        """
+        if not prepend_messages:
+            return []
+
+        return [
+            {
+                "role": msg.get("role", "user"),
+                "content": self._extract_content_text(msg.get("content", "")),
+            }
+            for msg in prepend_messages
+        ]
+
     # Ollama specific implementation
     def ollama_format_tools(self, tools):
         """Format tools for Ollama"""
@@ -103,14 +126,44 @@ class LLMProvider(models.Model):
         model=None,
         stream=False,
         tools=None,
+        prepend_messages=None,
         **kwargs,
     ):
-        """Send chat messages using Ollama with tools support"""
+        """Send chat messages using Ollama with tools support.
+
+        Args:
+            messages: mail.message recordset to send
+            model: Optional specific model to use
+            stream: Whether to stream the response
+            tools: llm.tool recordset of available tools
+            prepend_messages: List of pre-formatted message dicts to prepend
+            **kwargs: Additional parameters (tool_choice is ignored - Ollama doesn't support it)
+
+        Returns:
+            Generator yielding response chunks if streaming, else complete response
+        """
         model = self.get_model(model, "chat")
 
-        params = self._prepare_chat_params(
-            model, messages, stream, tools=tools, **kwargs
-        )
+        # Format mail.message records for Ollama
+        formatted_messages = self.format_messages(messages)
+
+        # Prepend messages (system prompts, etc.) if provided
+        if prepend_messages:
+            formatted_messages = prepend_messages + formatted_messages
+
+        # Build params
+        params = {
+            "model": model.name,
+            "stream": stream,
+            "messages": formatted_messages,
+        }
+
+        # Add tools if provided (Ollama-specific formatting)
+        # Note: Ollama doesn't support tool_choice - it's OpenAI-specific
+        if tools:
+            formatted_tools = self.format_tools(tools)
+            if formatted_tools:
+                params["tools"] = formatted_tools
 
         response = self.client.chat(**params)
 

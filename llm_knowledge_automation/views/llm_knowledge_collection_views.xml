@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Extend Collection Form View -->
+    <record
+    id="view_llm_knowledge_collection_form_automation"
+    model="ir.ui.view"
+  >
+        <field name="name">llm.knowledge.collection.form.automation</field>
+        <field name="model">llm.knowledge.collection</field>
+        <field
+      name="inherit_id"
+      ref="llm_knowledge.view_llm_knowledge_collection_form"
+    />
+        <field name="arch" type="xml">
+            <!-- Add button to sync automated actions -->
+            <xpath expr="//header" position="inside">
+                <button
+          name="sync_automated_actions"
+          string="Sync Automated Actions"
+          type="object"
+          class="btn-primary"
+          invisible="domain_ids == []"
+          help="Create or update automated actions for this collection's domain filters"
+        />
+            </xpath>
+
+            <!-- Add automation tab to notebook -->
+            <xpath expr="//notebook" position="inside">
+                <page string="Automation" name="automation">
+                    <group>
+                        <field name="automated_sync" widget="boolean_toggle" />
+                        <field
+              name="auto_process_resources"
+              widget="boolean_toggle"
+              invisible="not automated_sync"
+            />
+                    </group>
+
+                    <div invisible="not automated_sync">
+                        <!-- Display automated actions -->
+                        <field name="automation_ids" readonly="1">
+                            <tree>
+                                <field name="name" />
+                                <field name="model_id" />
+                                <field name="trigger" />
+                                <field name="active" widget="boolean_toggle" />
+                            </tree>
+                        </field>
+                    </div>
+
+                    <div invisible="automated_sync">
+                        <div class="alert alert-info" role="alert">
+                            <p>Enable <strong
+                >Automated Sync</strong> to create automated actions that will keep this collection synchronized with its domain filters.</p>
+                            <p
+              >When enabled, knowledges will be automatically:</p>
+                            <ul>
+                                <li>Created when new records are added</li>
+                                <li
+                >Added to this collection when records match the domain filters</li>
+                                <li
+                >Removed from this collection when records no longer match</li>
+                                <li
+                >Deleted if they don't belong to any collection</li>
+                            </ul>
+                        </div>
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

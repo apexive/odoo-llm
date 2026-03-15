@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_resource_user,llm.resource.user,model_llm_resource,base.group_user,1,0,0,0
+access_llm_resource_manager,llm.resource.manager,model_llm_resource,llm.group_llm_manager,1,1,1,1
+access_llm_knowledge_chunk_user,llm.knowledge.chunk.user,model_llm_knowledge_chunk,base.group_user,1,0,0,0
+access_llm_knowledge_chunk_manager,llm.knowledge.chunk.manager,model_llm_knowledge_chunk,llm.group_llm_manager,1,1,1,1
+access_llm_knowledge_collection_user,llm.knowledge.collection.user,model_llm_knowledge_collection,base.group_user,1,0,0,0
+access_llm_knowledge_collection_manager,llm.knowledge.collection.manager,model_llm_knowledge_collection,llm.group_llm_manager,1,1,1,1
+access_llm_knowledge_domain_user,llm.knowledge.domain.user,model_llm_knowledge_domain,base.group_user,1,0,0,0
+access_llm_knowledge_domain_manager,llm.knowledge.domain.manager,model_llm_knowledge_domain,llm.group_llm_manager,1,1,1,1
+access_llm_create_rag_resource_wizard_manager,llm.create.rag.resource.wizard.manager,model_llm_create_rag_resource_wizard,llm.group_llm_manager,1,1,1,1
+access_llm_upload_resource_wizard_manager,llm.upload.resource.wizard.manager,model_llm_upload_resource_wizard,llm.group_llm_manager,1,1,1,1

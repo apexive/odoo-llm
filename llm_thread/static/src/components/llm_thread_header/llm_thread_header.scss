@@ -1,0 +1,51 @@
+.o-llm-thread-header {
+  min-height: 60px;
+
+  // Mobile: Reduced height and padding
+  @media (max-width: 767px) {
+    min-height: 48px;
+    padding: 0.5rem !important;
+
+    // Truncate thread name on mobile
+    h6 {
+      max-width: calc(100% - 50px); // Leave room for hamburger button
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  // Mobile controls dropdown styling
+  .o-llm-mobile-controls {
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--bs-secondary);
+    }
+
+    // Full-width dropdowns
+    .dropdown {
+      width: 100%;
+
+      button {
+        width: 100%;
+        text-align: left;
+        justify-content: space-between;
+      }
+    }
+
+    // Tool checkboxes
+    .form-check {
+      padding: 0.5rem;
+      margin: 0;
+
+      &:hover {
+        background-color: var(--bs-light);
+      }
+
+      .form-check-input {
+        margin-top: 0.25rem;
+      }
+    }
+  }
+}

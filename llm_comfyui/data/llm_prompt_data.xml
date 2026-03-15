@@ -1,0 +1,3455 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!-- ComfyUI Workflow Prompt Template -->
+    <record id="llm_prompt_comfyui_workflow" model="llm.prompt">
+        <field name="name">Sample ComfyUI Workflow Template</field>
+        <field
+      name="description"
+    >Sample Template for ComfyUI image generation workflow, it generates image based on prompt</field>
+        <field name="category_id" ref="llm_comfyui.category_comfyui" />
+        <field
+      name="tag_ids"
+      eval="[(6, 0, [ref('llm_assistant.tag_technical')])]"
+    />
+        <field
+      name="arguments_json"
+    ><![CDATA[{
+  "prompt": {
+    "type": "string",
+    "default": "A head and shoulders portrait shot of a young Belgian woman with green eyes. Her hair, styled in two Dutch braids, shines red, adding a warm contrast to her skin's pale complexion. The professional photo boasts a balanced exposure, making it look like it could be taken during the day or night with equal results. The headshot pose gives the image intimacy while maintaining a sense of connection to the viewer., Generate a portrait shot. Ensure ample headroom above the subject's head, leaving a noticeable space between the top of the head and the top edge of the image frame. The entire head must be fully visible and uncapped in the shot, with no part of the scalp or hair cropped off. masterpiece, amazingly fine details. very clear image.",
+    "description": "Prompt to describe the desired image",
+    "required": true
+  }
+}]]></field>
+        <field name="active" eval="True" />
+        <field
+      name="template"
+    ><![CDATA[{
+    "prompt": {
+        "1": {
+            "inputs": {
+                "unet_name": "flux1-dev-fp8-e4m3fn.safetensors",
+                "weight_dtype": "fp8_e4m3fn"
+            },
+            "class_type": "UNETLoader",
+            "_meta": {
+                "title": "Load Diffusion Model"
+            }
+        },
+        "2": {
+            "inputs": {
+                "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+                "clip_name2": "ViT-L-14-TEXT-detail-improved-hiT-GmP-TE-only-HF.safetensors",
+                "type": "flux",
+                "device": "default"
+            },
+            "class_type": "DualCLIPLoader",
+            "_meta": {
+                "title": "DualCLIPLoader"
+            }
+        },
+        "3": {
+            "inputs": {
+                "vae_name": "ae.safetensors"
+            },
+            "class_type": "VAELoader",
+            "_meta": {
+                "title": "Load VAE"
+            }
+        },
+        "5": {
+            "inputs": {
+                "conditioning": [
+                    "11",
+                    0
+                ]
+            },
+            "class_type": "ConditioningZeroOut",
+            "_meta": {
+                "title": "ConditioningZeroOut"
+            }
+        },
+        "6": {
+            "inputs": {
+                "seed": 317327564125655,
+                "steps": 30,
+                "cfg": 1,
+                "sampler_name": "dpmpp_2m",
+                "scheduler": "normal",
+                "denoise": 1,
+                "model": [
+                    "1",
+                    0
+                ],
+                "positive": [
+                    "11",
+                    0
+                ],
+                "negative": [
+                    "5",
+                    0
+                ],
+                "latent_image": [
+                    "7",
+                    0
+                ]
+            },
+            "class_type": "KSampler",
+            "_meta": {
+                "title": "KSampler"
+            }
+        },
+        "7": {
+            "inputs": {
+                "width": 768,
+                "height": 1024,
+                "batch_size": 1
+            },
+            "class_type": "EmptyLatentImage",
+            "_meta": {
+                "title": "Empty Latent Image"
+            }
+        },
+        "8": {
+            "inputs": {
+                "samples": [
+                    "6",
+                    0
+                ],
+                "vae": [
+                    "3",
+                    0
+                ]
+            },
+            "class_type": "VAEDecode",
+            "_meta": {
+                "title": "VAE Decode"
+            }
+        },
+        "9": {
+            "inputs": {
+                "images": [
+                    "8",
+                    0
+                ]
+            },
+            "class_type": "PreviewImage",
+            "_meta": {
+                "title": "Preview Image"
+            }
+        },
+        "11": {
+            "inputs": {
+                "clip_l": [
+                    "12",
+                    0
+                ],
+                "t5xxl": [
+                    "12",
+                    0
+                ],
+                "guidance": 2.6,
+                "clip": [
+                    "2",
+                    0
+                ]
+            },
+            "class_type": "CLIPTextEncodeFlux",
+            "_meta": {
+                "title": "CLIPTextEncodeFlux"
+            }
+        },
+        "12": {
+            "inputs": {
+                "text": "{{prompt}}"
+            },
+            "class_type": "ttN text",
+            "_meta": {
+                "title": "text"
+            }
+        }
+    }
+}]]></field>
+    </record>
+
+    <!-- ComfyUI Character Gen v1.0.0 Prompt Template -->
+    <record id="llm_prompt_comfyui_character_gen" model="llm.prompt">
+        <field name="name">ComfyUI Character Gen v1.0.0</field>
+        <field
+      name="description"
+    >Advanced character portrait generator with customizable attributes</field>
+        <field name="category_id" ref="llm_comfyui.category_comfyui" />
+        <field
+      name="tag_ids"
+      eval="[(6, 0, [ref('llm_assistant.tag_technical')])]"
+    />
+        <field
+      name="arguments_json"
+    ><![CDATA[{"character_description":{"type":"string","description":"Description of the character","default":"Wearning black t-shirt","required":true,"x-order":1},"style":{"type":"integer","minimum":1,"maximum":3,"default":3,"description":"Style of the portrait (1 = Fluxmania Clean, 2 = Anime, 3 = Realistic)","x-order":2,"required":true},"randomise_seeds":{"type":"boolean","default":false,"description":"Randomize seed values for each generation"},"gender":{"type":"string","enum":["-","Man","Woman"],"default":"Woman","description":"Gender of the subject","x-order":20},"age":{"type":"integer","minimum":18,"maximum":90,"default":28,"description":"Age of the subject","x-order":30},"nationality_1":{"type":"string","enum":["-","Afghan","Albanian","Algerian","Andorran","Angolan","Antiguans Barbudans","Argentine","Armenian","Australian","Austrian","Azerbaijani","Bahamian","Bahraini","Bangladeshi","Barbadian","Belarusian","Belgian","Belizean","Beninese","Bhutanese","Bolivian","Bosnian Herzegovinian","Brazilian","British","Bruneian","Bulgarian","Burkinabe","Burundian","Cambodian","Cameroonian","Canadian","Cape Verdian","Central African","Chadian","Chilean","Chinese","Colombian","Comoran","Congolese","Costa Rican","Croatian","Cuban","Cypriot","Czech","Danish","Djibouti","Dominican","Dutch","East Timorese","Ecuadorean","Egyptian","Emirian","Equatorial Guinean","Eritrean","Estonian","Ethiopian","Fijian","Filipino","Finnish","French","Gabonese","Gambian","Georgian","German","Ghanaian","Greek","Grenadian","Guatemalan","Guinean","Guyanese","Haitian","Herzegovinian","Honduran","Hungarian","Icelander","Indian","Indonesian","Iranian","Iraqi","Irish","Israeli","Italian","Ivorian","Jamaican","Japanese","Jordanian","Kazakhstani","Kenyan","Kiribati","North Korean","South Korean","Kuwaiti","Kyrgyz","Laotian","Latvian","Lebanese","Liberian","Libyan","Liechtensteiner","Lithuanian","Luxembourgish","Macedonian","Malagasy","Malawian","Malaysian","Maldivan","Malian","Maltese","Marshallese","Mauritanian","Mauritian","Mexican","Micronesian","Moldovan","Monegasque","Mongolian","Montenegrin","Moroccan","Mosotho","Motswana","Mozambican","Namibian","Nauruan","Nepalese","New Zealander","Ni-Vanuatu","Nicaraguan","Nigerian","Nigerien","Northern Irish","Norwegian","Omani","Pakistani","Palauan","Palestinian","Panamanian","Papua New Guinean","Paraguayan","Peruvian","Polish","Portuguese","Qatari","Romanian","Russian","Rwandan","Saint Lucian","Salvadoran","Samoan","San Marinese","Sao Tomean","Saudi","Scottish","Senegalese","Serbian","Seychellois","Sierra Leonean","Singaporean","Slovakian","Slovenian","Solomon Islander","Somali","South African","South Sudanese","Spanish","Sri Lankan","Sudanese","Surinamer","Swazi","Swedish","Swiss","Syrian","Tajikistani","Tanzanian","Thai","Togolese","Tongan","Trinidadian Tobagonian","Tunisian","Turkish","Turkmen","Tuvaluan","Ugandan","Ukrainian","Uruguayan","Uzbekistani","Venezuelan","Vietnamese","Welsh","Yemeni","Zambian","Zimbabwean"],"default":"Belgian","description":"Primary nationality of the subject","x-order":40},"eyes_color":{"type":"string","enum":["-","Brown","Blue","Green","Hazel","Gray","Amber","Red","Violet"],"default":"Green","description":"Eye color of the subject","x-order":60},"facial_expression":{"type":"string","enum":["-","Happy","Sad","Angry","Surprised","Fearful","Disgusted","Contemptuous","Excited","Nervous","Confused","Amused","Content","Disappointed","Bored","Relieved","In love","Shy","Envious","Proud","Cautious","Serious","Serene","Peaceful","Calm"],"default":"Content","description":"Facial expression of the subject","x-order":70},"hair_style":{"type":"string","enum":["-","Asymmetrical cut","Blunt cut","Bob cut","Braided bob","Buzz cut","Choppy cut","Curly bob","Curtain bangs","Faux hawk","Feathered cut","French bob","Layered cut","Long bob","Mohawk","Pixie cut","Shag cut","Side-swept bangs","Textured cut","Undercut","Wavy bob","Faux hawk short pixie","Brave short haircut with shaved sides","Tapered haricut wuth shaved side","Stacked bob","Lemonade braids","Middle part ponytails","Stitch braids","Deep side part","French braids","Box braids","Two dutch braids","Wavy cut with curtains bangs","Right side shaved","Sweeping pixie","Smooth lob","Long pixie","Sideswept pixie","Italian bob","Shullet"],"default":"Two dutch braids","description":"Hairstyle of the subject","x-order":90},"hair_color":{"type":"string","enum":["-","Black","Brown","Blonde","Red","Auburn","Chestnut","Gray","White","Salt and pepper"],"default":"Red","description":"Hair color of the subject","x-order":91},"beard":{"type":"string","enum":["-","Stubble Beard","Goatee","Full Beard","Van Dyke Beard","Soul Patch","Garibaldi Beard","Mutton Chops","Circle Beard","Corporate Beard","Balbo Beard","Ducktail Beard","Chinstrap Beard","Anchor Beard","Chevron Mustache","Horseshoe Mustache","Handlebar Mustache","Imperial Mustache","Pencil Mustache","Friendly Mutton Chops","Zappa Mustache"],"default":"-","description":"Beard style (for male subjects)","x-order":100},"body_type":{"type":"string","enum":["-","Underweight","Normal weight","Overweight","Obese"],"default":"-","description":"Body type of the subject","x-order":110},"light_type":{"type":"string","enum":["-","Natural sunlight","Soft ambient light","Harsh sunlight","Overcast sky","Sunset glow","Sunrise warmth","Twilight hues","Candlelight","Incandescent lighting","Fluorescent lighting","Moonlight","Dappled sunlight","Backlit silhouette","Spotlight","Rim lighting","Firelight","City streetlights","Studio lighting","Lantern light","Tungsten lighting","Cloudy day diffused light","Skylight","Golden hour light","Blue hour light","Flash photography","Stage lighting","Neon lights","Torchlight","Softbox lighting","Rim light","Lightning","Abstract light patterns"],"default":"Softbox lighting","description":"Type of lighting in the scene","x-order":140},"photorealism_improvement":{"type":"string","enum":["enable","disable"],"default":"enable","description":"Enable photorealism improvements","x-order":150},"client_id":{"type":"string","description":"Optional client ID for tracking the execution","default":""},"number":{"type":"integer","default":-1,"description":"Optional execution order, negative for front of queue"},"extra_data":{"type":"string","description":"Optional JSON string with extra data for plugins or custom use","default":"{}"}}]]></field>
+        <field name="active" eval="True" />
+        <field
+      name="template"
+    ><![CDATA[{
+   "prompt": {
+  "1": {
+    "inputs": {
+      "image": [
+        "361",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "2": {
+    "inputs": {
+      "image": [
+        "329",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "5": {
+    "inputs": {
+      "image": [
+        "323",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "153": {
+    "inputs": {
+      "lora_name": "anime_expressive.safetensors",
+      "strength_model": 0.7966656494140626,
+      "strength_clip": 1,
+      "query_tags": false,
+      "tags_out": false,
+      "print_tags": false,
+      "bypass": false,
+      "force_fetch": false,
+      "model": [
+        "374",
+        0
+      ],
+      "clip": [
+        "400",
+        1
+      ]
+    },
+    "class_type": "LoraLoaderTagsQuery",
+    "_meta": {
+      "title": "LoraLoaderTagsQuery"
+    }
+  },
+  "154": {
+    "inputs": {
+      "lora_name": "Animeniji_01.safetensors",
+      "strength_model": 1,
+      "strength_clip": 1,
+      "query_tags": false,
+      "tags_out": false,
+      "print_tags": false,
+      "bypass": false,
+      "force_fetch": false,
+      "model": [
+        "153",
+        0
+      ],
+      "clip": [
+        "153",
+        1
+      ],
+      "opt_prompt": [
+        "153",
+        2
+      ]
+    },
+    "class_type": "LoraLoaderTagsQuery",
+    "_meta": {
+      "title": "LoraLoaderTagsQuery"
+    }
+  },
+  "156": {
+    "inputs": {
+      "text": ", animeniji, anime, niji, 2D flat anime, NijiCreature, ",
+      "passthrough": [
+        "188",
+        2
+      ]
+    },
+    "class_type": "Textbox",
+    "_meta": {
+      "title": "TextPass"
+    }
+  },
+  "157": {
+    "inputs": {
+      "text": "",
+      "passthrough": [
+        "359",
+        2
+      ]
+    },
+    "class_type": "Textbox",
+    "_meta": {
+      "title": "TextPass"
+    }
+  },
+  "158": {
+    "inputs": {
+      "unet_name": "flux1-dev-fp8-e4m3fn.safetensors",
+      "weight_dtype": "fp8_e4m3fn"
+    },
+    "class_type": "UNETLoader",
+    "_meta": {
+      "title": "Dev Model"
+    }
+  },
+  "159": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": {
+      "title": "Load VAE"
+    }
+  },
+  "160": {
+    "inputs": {
+      "stop_at_clip_layer": -1,
+      "clip": [
+        "1035",
+        0
+      ]
+    },
+    "class_type": "CLIPSetLastLayer",
+    "_meta": {
+      "title": "CLIP Set Last Layer"
+    }
+  },
+  "167": {
+    "inputs": {
+      "max_shift": 0.7460000000000001,
+      "base_shift": 0.25000000000000006,
+      "width": 1024,
+      "height": 1024,
+      "model": [
+        "158",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingFlux",
+    "_meta": {
+      "title": "Model Sampling"
+    }
+  },
+  "184": {
+    "inputs": {
+      "text": "",
+      "anything": [
+        "358",
+        2
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "185": {
+    "inputs": {
+      "text": "",
+      "anything": [
+        "357",
+        2
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "186": {
+    "inputs": {
+      "model": [
+        "359",
+        0
+      ]
+    },
+    "class_type": "ModelPassThrough",
+    "_meta": {
+      "title": "ModelPass"
+    }
+  },
+  "187": {
+    "inputs": {
+      "model": [
+        "188",
+        0
+      ]
+    },
+    "class_type": "ModelPassThrough",
+    "_meta": {
+      "title": "ModelPass"
+    }
+  },
+  "188": {
+    "inputs": {
+      "lora_name": "Anime_Enhancer_flux_by_n0utis.safetensors",
+      "strength_model": 0.8,
+      "strength_clip": 1,
+      "query_tags": false,
+      "tags_out": false,
+      "print_tags": false,
+      "bypass": false,
+      "force_fetch": false,
+      "model": [
+        "154",
+        0
+      ],
+      "clip": [
+        "154",
+        1
+      ],
+      "opt_prompt": [
+        "154",
+        2
+      ]
+    },
+    "class_type": "LoraLoaderTagsQuery",
+    "_meta": {
+      "title": "LoraLoaderTagsQuery"
+    }
+  },
+  "189": {
+    "inputs": {
+      "text": "",
+      "anything": [
+        "154",
+        2
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "190": {
+    "inputs": {
+      "text": "",
+      "anything": [
+        "153",
+        2
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "191": {
+    "inputs": {
+      "text": "",
+      "anything": [
+        "188",
+        2
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "192": {
+    "inputs": {
+      "text": "",
+      "anything": [
+        "359",
+        2
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "208": {
+    "inputs": {
+      "model": [
+        "397",
+        0
+      ]
+    },
+    "class_type": "ModelPassThrough",
+    "_meta": {
+      "title": "ModelPass"
+    }
+  },
+  "211": {
+    "inputs": {
+      "value": {{style}}
+    },
+    "class_type": "JWInteger",
+    "_meta": {
+      "title": "Checkpoint Selector"
+    }
+  },
+  "214": {
+    "inputs": {
+      "model": [
+        "583",
+        0
+      ]
+    },
+    "class_type": "ModelPassThrough",
+    "_meta": {
+      "title": "ModelPass"
+    }
+  },
+  "280": {
+    "inputs": {
+      "text": "1080",
+      "anything": [
+        "977",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "IG Width"
+    }
+  },
+  "292": {
+    "inputs": {
+      "text": "TEST1"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Shape"
+    }
+  },
+  "293": {
+    "inputs": {
+      "text": "TEST2"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Shape"
+    }
+  },
+  "294": {
+    "inputs": {
+      "text": "TEST3"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Shape"
+    }
+  },
+  "297": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "JWInteger",
+    "_meta": {
+      "title": "Char Prompt Selector"
+    }
+  },
+  "299": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "JWInteger",
+    "_meta": {
+      "title": "IG Size Selector"
+    }
+  },
+  "302": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "JWInteger",
+    "_meta": {
+      "title": "Initial Latent Selector"
+    }
+  },
+  "308": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "TikTok Size Selector"
+    }
+  },
+  "309": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Auto-Prompting?"
+    }
+  },
+  "318": {
+    "inputs": {
+      "delimiter": ", ",
+      "clean_whitespace": "true",
+      "text_a": [
+        "589",
+        0
+      ],
+      "text_b": [
+        "364",
+        0
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "321": {
+    "inputs": {
+      "text": "8k"
+    },
+    "class_type": "Text Multiline",
+    "_meta": {
+      "title": "User Upload Lora Trigger"
+    }
+  },
+  "323": {
+    "inputs": {
+      "width": [
+        "362",
+        0
+      ],
+      "height": [
+        "362",
+        1
+      ],
+      "interpolation": "nearest",
+      "method": "keep proportion",
+      "condition": "always",
+      "multiple_of": 8,
+      "image": [
+        "395",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "326": {
+    "inputs": {
+      "positive": [
+        "356",
+        0
+      ],
+      "negative": [
+        "327",
+        0
+      ]
+    },
+    "class_type": "CondPassThrough",
+    "_meta": {
+      "title": "CondPassThrough"
+    }
+  },
+  "327": {
+    "inputs": {
+      "conditioning": [
+        "356",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "328": {
+    "inputs": {
+      "text": "64",
+      "anything": [
+        "329",
+        1
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "329": {
+    "inputs": {
+      "width": [
+        "330",
+        0
+      ],
+      "height": [
+        "330",
+        1
+      ],
+      "interpolation": "nearest",
+      "method": "fill / crop",
+      "condition": "always",
+      "multiple_of": 64,
+      "image": [
+        "355",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
+    }
+  },
+  "330": {
+    "inputs": {
+      "image": [
+        "355",
+        0
+      ]
+    },
+    "class_type": "Get Image Size",
+    "_meta": {
+      "title": "Get Image Size"
+    }
+  },
+  "331": {
+    "inputs": {
+      "text": "64",
+      "anything": [
+        "329",
+        2
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "342": {
+    "inputs": {
+      "seed": 507668957538784
+    },
+    "class_type": "Seed",
+    "_meta": {
+      "title": "Seed"
+    }
+  },
+  "343": {
+    "inputs": {
+      "delimiter": ", ",
+      "clean_whitespace": "true"
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "344": {
+    "inputs": {
+      "image": "tpose3.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "T-Pose"
+    }
+  },
+  "345": {
+    "inputs": {
+      "image": "tpose_01.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "T-Pose"
+    }
+  },
+  "346": {
+    "inputs": {
+      "image": "tpose2.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "T-Pose"
+    }
+  },
+  "347": {
+    "inputs": {
+      "value": 1
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Initial Prompt Selector"
+    }
+  },
+  "355": {
+    "inputs": {
+      "Queue on change": true,
+      "Edit": "bingo",
+      "canvas": "canvas_Image.png",
+      "mask": "mask_Image.png"
+    },
+    "class_type": "Canvas_Tab",
+    "_meta": {
+      "title": "Edit In Another Tab"
+    }
+  },
+  "356": {
+    "inputs": {
+      "text": "a detailed photograph of a beautiful blonde woman in a bikini on the beach next to a classic red car
+",
+      "clip": [
+        "400",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": {
+      "title": "CLIP Text Encode (Prompt)"
+    }
+  },
+  "357": {
+    "inputs": {
+      "lora_name": "aidmaRealisticSkin-FLUX-v0.1.safetensors",
+      "strength_model": 0.6,
+      "strength_clip": 1,
+      "query_tags": false,
+      "tags_out": false,
+      "print_tags": false,
+      "bypass": false,
+      "force_fetch": false,
+      "model": [
+        "374",
+        0
+      ],
+      "clip": [
+        "400",
+        1
+      ]
+    },
+    "class_type": "LoraLoaderTagsQuery",
+    "_meta": {
+      "title": "LoraLoaderTagsQuery"
+    }
+  },
+  "358": {
+    "inputs": {
+      "lora_name": "aidmaImageUprader-FLUX-v0.3.safetensors",
+      "strength_model": 0.45,
+      "strength_clip": 1,
+      "query_tags": false,
+      "tags_out": false,
+      "print_tags": false,
+      "bypass": false,
+      "force_fetch": false,
+      "model": [
+        "357",
+        0
+      ],
+      "clip": [
+        "357",
+        1
+      ],
+      "opt_prompt": [
+        "357",
+        2
+      ]
+    },
+    "class_type": "LoraLoaderTagsQuery",
+    "_meta": {
+      "title": "LoraLoaderTagsQuery"
+    }
+  },
+  "359": {
+    "inputs": {
+      "lora_name": "flux_realism_lora.safetensors",
+      "strength_model": 0.5,
+      "strength_clip": 1,
+      "query_tags": false,
+      "tags_out": false,
+      "print_tags": false,
+      "bypass": false,
+      "force_fetch": false,
+      "model": [
+        "358",
+        0
+      ],
+      "clip": [
+        "358",
+        1
+      ],
+      "opt_prompt": [
+        "358",
+        2
+      ]
+    },
+    "class_type": "LoraLoaderTagsQuery",
+    "_meta": {
+      "title": "LoraLoaderTagsQuery"
+    }
+  },
+  "361": {
+    "inputs": {
+      "image": "person-input.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "362": {
+    "inputs": {
+      "image": [
+        "395",
+        0
+      ]
+    },
+    "class_type": "Get Image Size",
+    "_meta": {
+      "title": "Get Image Size"
+    }
+  },
+  "364": {
+    "inputs": {
+      "text": "masterpiece, amazingly fine details. very clear image."
+    },
+    "class_type": "Text Multiline",
+    "_meta": {
+      "title": "Text"
+    }
+  },
+  "365": {
+    "inputs": {
+      "model": [
+        "167",
+        0
+      ]
+    },
+    "class_type": "ModelPassThrough",
+    "_meta": {
+      "title": "ModelPass"
+    }
+  },
+  "371": {
+    "inputs": {
+      "clip_name1": "t5-v1_1-xxl-encoder-Q8_0.gguf",
+      "clip_name2": "clip_l-for-gguf.safetensors",
+      "type": "flux"
+    },
+    "class_type": "DualCLIPLoaderGGUF",
+    "_meta": {
+      "title": "DualCLIPLoader (GGUF)"
+    }
+  },
+  "372": {
+    "inputs": {
+      "unet_name": "flux1-dev-Q8_0.gguf"
+    },
+    "class_type": "UnetLoaderGGUF",
+    "_meta": {
+      "title": "Unet Loader (GGUF)"
+    }
+  },
+  "373": {
+    "inputs": {
+      "max_shift": 0.7460000000000001,
+      "base_shift": 0.25000000000000006,
+      "width": 1024,
+      "height": 1024,
+      "model": [
+        "372",
+        0
+      ]
+    },
+    "class_type": "ModelSamplingFlux",
+    "_meta": {
+      "title": "Model Sampling"
+    }
+  },
+  "374": {
+    "inputs": {
+      "model": [
+        "400",
+        0
+      ]
+    },
+    "class_type": "ModelPassThrough",
+    "_meta": {
+      "title": "ModelPass"
+    }
+  },
+  "377": {
+    "inputs": {
+      "stop_at_clip_layer": -1,
+      "clip": [
+        "371",
+        0
+      ]
+    },
+    "class_type": "CLIPSetLastLayer",
+    "_meta": {
+      "title": "CLIP Set Last Layer"
+    }
+  },
+  "378": {
+    "inputs": {
+      "megapixel": "1.0",
+      "aspect_ratio": "1:1 (Perfect Square)",
+      "divisible_by": "8",
+      "custom_ratio": "1:1",
+      "custom_aspect_ratio": "1:1"
+    },
+    "class_type": "FluxResolutionNode",
+    "_meta": {
+      "title": "Square"
+    }
+  },
+  "379": {
+    "inputs": {
+      "value": 1080
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Landscape Post Width"
+    }
+  },
+  "380": {
+    "inputs": {
+      "value": 566
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Landscape Post Height"
+    }
+  },
+  "381": {
+    "inputs": {
+      "text": "A fashion photography collage, a split image with identical images of a"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Generate Character Text Input"
+    }
+  },
+  "385": {
+    "inputs": {
+      "text": "With expressive"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Generate Character Text Input"
+    }
+  },
+  "392": {
+    "inputs": {
+      "text": "african american woman dj on a beach"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "User prompt"
+    }
+  },
+  "394": {
+    "inputs": {
+      "text": "The final result will show all poses in a neat, equal split format, with each pose focused on a portrait, medium portrait, or full-body style.
+"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Generate Character Text Input"
+    }
+  },
+  "395": {
+    "inputs": {
+      "image": "standing_03.png"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "T-Pose"
+    }
+  },
+  "396": {
+    "inputs": {
+      "image": [
+        "395",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "397": {
+    "inputs": {
+      "PowerLoraLoaderHeaderWidget": {
+        "type": "PowerLoraLoaderHeaderWidget"
+      },
+      "lora_1": {
+        "on": true,
+        "lora": "aidmaMJv7-FLUX-v0.1.safetensors",
+        "strength": 0.26999999999999974
+      },
+      "lora_2": {
+        "on": true,
+        "lora": "FLUX-dev-lora-AntiBlur.safetensors",
+        "strength": 0.8499999999999998
+      },
+      "lora_3": {
+        "on": false,
+        "lora": "Flux\Eye_Detail_Flux_Lora_-_Inpainting.safetensors",
+        "strength": 0.8
+      },
+      "➕ Add Lora": "",
+      "model": [
+        "167",
+        0
+      ],
+      "clip": [
+        "160",
+        0
+      ]
+    },
+    "class_type": "Power Lora Loader (rgthree)",
+    "_meta": {
+      "title": "Power Lora Loader (rgthree)"
+    }
+  },
+  "400": {
+    "inputs": {
+      "PowerLoraLoaderHeaderWidget": {
+        "type": "PowerLoraLoaderHeaderWidget"
+      },
+      "lora_1": {
+        "on": true,
+        "lora": "aidmaMJv7-FLUX-v0.1.safetensors",
+        "strength": 0.4199999999999996
+      },
+      "lora_2": {
+        "on": true,
+        "lora": "FLUX-dev-lora-AntiBlur.safetensors",
+        "strength": 0.6999999999999995
+      },
+      "lora_3": {
+        "on": false,
+        "lora": "Flux\Eyes-000001.safetensors",
+        "strength": 0.8
+      },
+      "➕ Add Lora": "",
+      "model": [
+        "373",
+        0
+      ],
+      "clip": [
+        "377",
+        0
+      ]
+    },
+    "class_type": "Power Lora Loader (rgthree)",
+    "_meta": {
+      "title": "Power Lora Loader (rgthree)"
+    }
+  },
+  "483": {
+    "inputs": {
+      "text": "You are a master prompt engineer for FLUX.1 image generation. Your task is to enhance user prompts by incorporating selected style tags into a cohesive, detailed description.
+
+<structure>
+
+You will receive input in this format:
+\"[Longer initial prompt describing the image, subject, and details] || Style tags (use these tags to deduce the intended style of the image. You do not need to use them all, but use most if possible to influence the final prompt)\" [style tags list]
+
+</structure>
+
+<core_mission>
+
+Create a balanced prompt that preserves the user's detailed specifications while selectively incorporating style elements that enrich the prompt.
+
+</core_mission>
+
+<enhancement>
+
+1. **Prioritize the subject's specific details** - The subject, setting, and technical requirements take precedence over style tags
+
+2. **Select only the most relevant style tags** - Choose 4-7 style elements that best complement the user's vision rather than trying to include all tags
+
+3. **Integrate style elements subtly** - Weave selected style elements into your description without overwhelming the original concept:
+   - For visual styles (cinematic, low-poly): Incorporate as visual treatments
+   - For emotional styles (dark, magical): Add as atmospheric qualities without changing core content
+   - For technical styles (4K, highly detailed): Reinforce existing technical specifications
+
+** NEVER LET STYLE OVERWHELM CONTENT. The outputs should ALWAYS be in natural language format that is NOT overly verbose **
+
+</enhancement>
+
+<format>
+
+Create 2-3 paragraphs (512 tokens max) that flow naturally while integrating selected style elements.
+
+## CRITICAL RULES:
+1. NEVER acknowledge style tags directly in your output
+2. Preserve ALL technical specifications from the user (resolution, settings, etc.)
+3. Don't extend beyond 400 words without good reason
+4. Prioritize coherence over inclusion of all style tags
+5. Output ONLY the enhanced prompt with no explanations
+
+</format>
+
+Transform the input into a cohesive, balanced prompt that honors the user's vision while selectively incorporating complementary style elements."
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Instructions for Prompt Enhancement"
+    }
+  },
+  "486": {
+    "inputs": {
+      "console": false,
+      "display": true,
+      "prefix": [
+        "988",
+        0
+      ],
+      "any_value": [
+        "988",
+        0
+      ]
+    },
+    "class_type": "Show any [Crystools]",
+    "_meta": {
+      "title": "Send To Console/Display"
+    }
+  },
+  "488": {
+    "inputs": {
+      "prompt": [
+        "592",
+        0
+      ],
+      "debug": true,
+      "url": "http://127.0.0.1:11434",
+      "model": "llava-llama3:latest",
+      "system": [
+        "483",
+        0
+      ],
+      "seed": 1722238015,
+      "top_k": 95,
+      "top_p": 0.85,
+      "temperature": 0.8,
+      "num_predict": -1,
+      "tfs_z": 1,
+      "keep_alive": 5,
+      "keep_context": false,
+      "format": ""
+    },
+    "class_type": "OllamaGenerateAdvance",
+    "_meta": {
+      "title": "Prompt Enricher"
+    }
+  },
+  "491": {
+    "inputs": {
+      "text": "You are a master prompt engineer for FLUX.1 image generation. Your task is to enhance user prompts by incorporating selected style tags into a cohesive, detailed description.
+
+<structure>
+
+You will receive input in this format:
+\"[Longer initial prompt describing the image, subject, and details] || Style tags (use these tags to deduce the intended style of the image. You do not need to use them all, but use most if possible to influence the final prompt)\" [style tags list]
+
+</structure>
+
+<core_mission>
+
+Create a balanced prompt that preserves the user's detailed specifications while selectively incorporating style elements that enrich the prompt.
+
+</core_mission>
+
+<enhancement>
+
+1. **Prioritize the subject's specific details** - The subject, setting, and technical requirements take precedence over style tags
+
+2. **Select only the most relevant style tags** - Choose 4-7 style elements that best complement the user's vision rather than trying to include all tags
+
+3. **Integrate style elements subtly** - Weave selected style elements into your description without overwhelming the original concept:
+   - For visual styles (cinematic, low-poly): Incorporate as visual treatments
+   - For emotional styles (dark, magical): Add as atmospheric qualities without changing core content
+   - For technical styles (4K, highly detailed): Reinforce existing technical specifications
+
+** NEVER LET STYLE OVERWHELM CONTENT. The outputs should ALWAYS be in natural language format that is NOT overly verbose **
+
+</enhancement>
+
+<format>
+
+Create 2-3 paragraphs (512 tokens max) that flow naturally while integrating selected style elements.
+
+## CRITICAL RULES:
+1. NEVER acknowledge style tags directly in your output
+2. Preserve ALL technical specifications from the user (resolution, settings, etc.)
+3. Don't extend beyond 400 words without good reason
+4. Prioritize coherence over inclusion of all style tags
+5. Output ONLY the enhanced prompt with no explanations
+
+</format>
+
+Transform the input into a cohesive, balanced prompt that honors the user's vision while selectively incorporating complementary style elements."
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Ollama Instructions"
+    }
+  },
+  "495": {
+    "inputs": {
+      "styles": "fooocus_styles",
+      "select_styles": "Fooocus Enhance,Fooocus Masterpiece",
+      "positive": [
+        "392",
+        0
+      ]
+    },
+    "class_type": "easy stylesSelector",
+    "_meta": {
+      "title": "Styles Selector"
+    }
+  },
+  "512": {
+    "inputs": {
+      "styles": "fooocus_styles",
+      "select_styles": "Fooocus Masterpiece",
+      "positive": [
+        "576",
+        2
+      ]
+    },
+    "class_type": "easy stylesSelector",
+    "_meta": {
+      "title": "Styles Selector"
+    }
+  },
+  "513": {
+    "inputs": {
+      "anything": [
+        "534",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "Clean VRAM Used"
+    }
+  },
+  "514": {
+    "inputs": {
+      "Type": "None",
+      "Typeweight": 1,
+      "Character in the work": "None",
+      "Character in the workweight": 1,
+      "Face": "facial hair",
+      "Faceweight": 1,
+      "Rare hairstyle": "waterfall braid",
+      "Rare hairstyleweight": 1,
+      "Rare hairstyle man": "spiky hair",
+      "Rare hairstyle manweight": 1,
+      "Upper body decoration": "wings",
+      "Upper body decorationweight": 1,
+      "Lower body decoration": "leg tattoo",
+      "Lower body decorationweight": 1,
+      "Full body decoration": "shackles",
+      "Full body decorationweight": 1,
+      "Hair": "gradient hair",
+      "Hairweight": 1,
+      "Head accessories": "goggles on head",
+      "Head accessoriesweight": 1,
+      "Ears": "earrings",
+      "Earsweight": 1,
+      "Neck": "pendant",
+      "Neckweight": 1,
+      "Clothing": "None",
+      "Clothingweight": 1,
+      "Shoes and socks": "barefoot sandals",
+      "Shoes and socksweight": 1,
+      "random": "no",
+      "seed": -1110805071843088
+    },
+    "class_type": "EG_TSCDS_RW",
+    "_meta": {
+      "title": "Anime"
+    }
+  },
+  "523": {
+    "inputs": {
+      "text": "perfect portrait shot, (half-length portrait:1.0), (belgian  woman 28-years-old:1.5), (headshot pose:1.5), (green eyes:1.25), (two dutch braids hairstyle:1.25), (red hair:1.25), wearing a gold necklace. and a ruby crown, (skin details, skin texture:0.05), (skin pores:0.08), (skin imperfections:0.02), (tanned skin:0.13), (dimples:0.05), (skin pores:0.05), (eyes details:0.47), (iris details:0.52), (circular iris:0.79), (circular pupil:0.61), the head is not cropped on a neutral background, (professional photo, balanced photo, balanced exposure:1.2), (film grain:1.15)",
+      "passthrough": [
+        "581",
+        0
+      ]
+    },
+    "class_type": "Textbox",
+    "_meta": {
+      "title": "TextPass"
+    }
+  },
+  "528": {
+    "inputs": {
+      "text": "{{character_description}}"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Character Add Pos Prompts"
+    }
+  },
+  "529": {
+    "inputs": {
+      "text": ""
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Character Add Neg Prompts"
+    }
+  },
+  "532": {
+    "inputs": {
+      "text": "longbody, lowres, bad anatomy, bad hands, missing fingers, pubic hair,extra digit, fewer digits, cropped, worst quality, low quality",
+      "passthrough": [
+        "512",
+        1
+      ]
+    },
+    "class_type": "Textbox",
+    "_meta": {
+      "title": "TextPass"
+    }
+  },
+  "533": {
+    "inputs": {
+      "label": "Prompt Output",
+      "text": [
+        "534",
+        0
+      ]
+    },
+    "class_type": "Text to Console",
+    "_meta": {
+      "title": "Text to Console"
+    }
+  },
+  "534": {
+    "inputs": {
+      "text": "A young man with curly black hair and brown eyes stands in front of a light gray backdrop. His neutral expression is captivating as he looks directly at the viewer. He's dressed casually in a plain white t-shirt, adding to the simplicity of the scene. The soft, natural lighting accentuates his features and gives the image a dreamy quality. With the background slightly out of focus, our attention is drawn back to him, making him the undeniable focal point of this portrait.
+
+This image captures not just a person, but a moment in time - a snapshot of someone's life frozen for us to appreciate. The combination of the man's expression, his attire, and the lighting all come together to create a sense of warmth and intimacy that makes this more than just a picture; it's a story waiting to be told.",
+      "passthrough": [
+        "488",
+        0
+      ]
+    },
+    "class_type": "Textbox",
+    "_meta": {
+      "title": "TextPass"
+    }
+  },
+  "535": {
+    "inputs": {
+      "label": "Prompt Output",
+      "text": [
+        "532",
+        0
+      ]
+    },
+    "class_type": "Text to Console",
+    "_meta": {
+      "title": "Text to Console"
+    }
+  },
+  "536": {
+    "inputs": {
+      "anything": [
+        "534",
+        0
+      ]
+    },
+    "class_type": "Bjornulf_FreeVRAM",
+    "_meta": {
+      "title": "🧹 Free VRAM hack"
+    }
+  },
+  "537": {
+    "inputs": {
+      "anything": [
+        "988",
+        0
+      ]
+    },
+    "class_type": "Bjornulf_FreeVRAM",
+    "_meta": {
+      "title": "🧹 Free VRAM hack"
+    }
+  },
+  "567": {
+    "inputs": {
+      "shot": "Head and shoulders portrait",
+      "shot_weight": 1,
+      "gender": "Man",
+      "androgynous": 0,
+      "ugly": 0.19681055991242413,
+      "ordinary_face": 0.47179945755692365,
+      "age": "88",
+      "nationality_1": "Irish",
+      "nationality_2": "-",
+      "nationality_mix": 0.5,
+      "body_type": "Buff",
+      "body_type_weight": 1,
+      "eyes_color": "Heterochromia",
+      "eyes_shape": "Monolid Eyes Shape",
+      "lips_color": "-",
+      "lips_shape": "Closed Lips",
+      "facial_expression": "Content",
+      "facial_expression_weight": 1,
+      "face_shape": "Square with Sharp Jaw",
+      "face_shape_weight": 1,
+      "facial_asymmetry": 0,
+      "hair_style": "Faux hawk",
+      "hair_color": "Multicolored",
+      "hair_length": "Long",
+      "disheveled": 0,
+      "beard": "Goatee",
+      "beard_color": "Multicolored",
+      "active": true,
+      "seed": 990
+    },
+    "class_type": "PortraitMasterBaseCharacter",
+    "_meta": {
+      "title": "Base character"
+    }
+  },
+  "570": {
+    "inputs": {
+      "text": "african american woman dj on a beach",
+      "passthrough": [
+        "584",
+        0
+      ]
+    },
+    "class_type": "Textbox",
+    "_meta": {
+      "title": "TextPass"
+    }
+  },
+  "571": {
+    "inputs": {
+      "anything": [
+        "570",
+        0
+      ]
+    },
+    "class_type": "Bjornulf_FreeVRAM",
+    "_meta": {
+      "title": "🧹 Free VRAM hack"
+    }
+  },
+  "572": {
+    "inputs": {
+      "label": "Prompt Output",
+      "text": [
+        "570",
+        0
+      ]
+    },
+    "class_type": "Text to Console",
+    "_meta": {
+      "title": "Text to Console"
+    }
+  },
+  "576": {
+    "inputs": {
+      "model": "promptgen_large_v2.0",
+      "folder_path": "",
+      "caption_method": "tags",
+      "max_new_tokens": 77,
+      "num_beams": 4,
+      "random_prompt": "never",
+      "prefix_caption": "",
+      "suffix_caption": "",
+      "replace_tags": "",
+      "images": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "Miaoshouai_Tagger",
+    "_meta": {
+      "title": "🐾MiaoshouAI Tagger"
+    }
+  },
+  "579": {
+    "inputs": {
+      "action": "append",
+      "tidy_tags": "yes",
+      "text_a": "Style tags (use these tags to deduce the intended style of the image. You do not need to use them all, but use most if possible to influence the final prompt)\"",
+      "text_b": [
+        "495",
+        0
+      ],
+      "text_c": "\"",
+      "result": "Style tags (use these tags to deduce the intended style of the image. You do not need to use them all, but use most if possible to influence the final prompt)\", (masterpiece), (best quality), (ultra-detailed), african american woman dj on a beach, illustration, disheveled hair, detailed eyes, perfect composition, moist skin, intricate details, earrings, by wlop, \""
+    },
+    "class_type": "StringFunction|pysssss",
+    "_meta": {
+      "title": "String Function 🐍"
+    }
+  },
+  "580": {
+    "inputs": {
+      "prompt": [
+        "579",
+        0
+      ],
+      "debug": false,
+      "url": "http://127.0.0.1:11434",
+      "model": "llava-llama3:latest",
+      "system": [
+        "491",
+        0
+      ],
+      "seed": 336821398,
+      "top_k": 95,
+      "top_p": 0.85,
+      "temperature": 0.8,
+      "num_predict": -1,
+      "tfs_z": 1,
+      "keep_alive": 5,
+      "keep_context": false,
+      "format": ""
+    },
+    "class_type": "OllamaGenerateAdvance",
+    "_meta": {
+      "title": "Prompt Enricher"
+    }
+  },
+  "581": {
+    "inputs": {
+      "active_input": [
+        "297",
+        0
+      ],
+      "Input_1": [
+        "987",
+        0
+      ],
+      "Input_2": [
+        "567",
+        0
+      ],
+      "Input_3": [
+        "514",
+        0
+      ]
+    },
+    "class_type": "mulTextSwitch",
+    "_meta": {
+      "title": "MultiLine Text Switch🧸"
+    }
+  },
+  "583": {
+    "inputs": {
+      "select": [
+        "211",
+        0
+      ],
+      "model_1": [
+        "365",
+        0
+      ],
+      "model_2": [
+        "187",
+        0
+      ],
+      "model_3": [
+        "186",
+        0
+      ]
+    },
+    "class_type": "Model Switch (JPS)",
+    "_meta": {
+      "title": "Model Switch (JPS)"
+    }
+  },
+  "584": {
+    "inputs": {
+      "Input": [
+        "309",
+        0
+      ],
+      "text1": [
+        "392",
+        0
+      ],
+      "text2": [
+        "580",
+        0
+      ]
+    },
+    "class_type": "CR Text Input Switch",
+    "_meta": {
+      "title": "🔀 CR Text Input Switch"
+    }
+  },
+  "585": {
+    "inputs": {
+      "Input": [
+        "347",
+        0
+      ],
+      "text1": [
+        "523",
+        0
+      ],
+      "text2": [
+        "570",
+        0
+      ],
+      "text3": [
+        "534",
+        0
+      ]
+    },
+    "class_type": "CR Text Input Switch (4 way)",
+    "_meta": {
+      "title": "🔀 CR Text Input Switch (4 way)"
+    }
+  },
+  "588": {
+    "inputs": {
+      "text_0": "1man, solo, looking at viewer, simple background, black hair, brown eyes, white shirt, upper body, male focus, blurry, lips, grey background, portrait, curly hair, nose, realistic",
+      "text": [
+        "576",
+        2
+      ]
+    },
+    "class_type": "ShowText|pysssss",
+    "_meta": {
+      "title": "Show Text 🐍"
+    }
+  },
+  "589": {
+    "inputs": {
+      "Input": [
+        "211",
+        0
+      ],
+      "text1": [
+        "321",
+        0
+      ],
+      "text2": [
+        "156",
+        0
+      ],
+      "text3": [
+        "157",
+        0
+      ]
+    },
+    "class_type": "CR Text Input Switch (4 way)",
+    "_meta": {
+      "title": "🔀 CR Text Input Switch (4 way)"
+    }
+  },
+  "591": {
+    "inputs": {
+      "model": "promptgen_large_v2.0",
+      "folder_path": "",
+      "caption_method": "detailed",
+      "max_new_tokens": 512,
+      "num_beams": 4,
+      "random_prompt": "never",
+      "prefix_caption": "",
+      "suffix_caption": "",
+      "replace_tags": "",
+      "images": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "Miaoshouai_Tagger",
+    "_meta": {
+      "title": "🐾MiaoshouAI Tagger"
+    }
+  },
+  "592": {
+    "inputs": {
+      "delimiter": " || ",
+      "clean_whitespace": "true",
+      "text_a": [
+        "591",
+        2
+      ],
+      "text_b": [
+        "576",
+        2
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "594": {
+    "inputs": {
+      "text_0": "A close-up portrait of a young man with curly black hair and brown eyes. He has a neutral expression and is wearing a plain white t-shirt. The background is a simple, light gray color. The lighting is soft and natural, highlighting the man's features. The image has a slightly blurred effect, giving it a dreamy quality. The man is centered in the frame, with the background slightly out of focus.",
+      "text": [
+        "591",
+        2
+      ]
+    },
+    "class_type": "ShowText|pysssss",
+    "_meta": {
+      "title": "Show Text 🐍"
+    }
+  },
+  "622": {
+    "inputs": {
+      "text_0": "A fashion photography collage, a split image with identical images of a male African Pilot on a solid white background. Sharp, detailed photo.
+
+ With expressive green eyes, and their brown hair is styled in a  short cut The appearance and outfit remain the same in all poses. He is wearing a red and white striped pilot's uniform
+
+ The final result will show all poses in a neat, equal split format, with each pose focused on a portrait, medium portrait, or full-body style.
+",
+      "text": [
+        "639",
+        0
+      ]
+    },
+    "class_type": "ShowText|pysssss",
+    "_meta": {
+      "title": "Show Text 🐍"
+    }
+  },
+  "623": {
+    "inputs": {
+      "text": "male"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Gender"
+    }
+  },
+  "624": {
+    "inputs": {
+      "text": "on a solid white background. Sharp, detailed photo.
+
+"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Generate Character Text Input"
+    }
+  },
+  "625": {
+    "inputs": {
+      "text": "African"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Nationality"
+    }
+  },
+  "626": {
+    "inputs": {
+      "text": "Pilot"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Occupation"
+    }
+  },
+  "627": {
+    "inputs": {
+      "delimiter": " ",
+      "clean_whitespace": "false",
+      "text_a": [
+        "381",
+        0
+      ],
+      "text_b": [
+        "623",
+        0
+      ],
+      "text_c": [
+        "625",
+        0
+      ],
+      "text_d": [
+        "626",
+        0
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "628": {
+    "inputs": {
+      "delimiter": " ",
+      "clean_whitespace": "false",
+      "text_a": [
+        "627",
+        0
+      ],
+      "text_b": [
+        "624",
+        0
+      ],
+      "text_c": [
+        "385",
+        0
+      ],
+      "text_d": [
+        "629",
+        0
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "629": {
+    "inputs": {
+      "text": "green"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Eyes"
+    }
+  },
+  "630": {
+    "inputs": {
+      "text": "brown"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Hair"
+    }
+  },
+  "631": {
+    "inputs": {
+      "text": "eyes, and their"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Generate Character Text Input"
+    }
+  },
+  "632": {
+    "inputs": {
+      "text": "hair is styled in a "
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Generate Character Text Input"
+    }
+  },
+  "633": {
+    "inputs": {
+      "text": "The appearance and outfit remain the same in all poses."
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Generate Character Text Input"
+    }
+  },
+  "634": {
+    "inputs": {
+      "text": "short cut"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Occupation"
+    }
+  },
+  "635": {
+    "inputs": {
+      "delimiter": " ",
+      "clean_whitespace": "false",
+      "text_a": [
+        "628",
+        0
+      ],
+      "text_b": [
+        "631",
+        0
+      ],
+      "text_c": [
+        "630",
+        0
+      ],
+      "text_d": [
+        "632",
+        0
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "636": {
+    "inputs": {
+      "text": "He is wearing a red and white striped pilot's uniform
+
+"
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Generate Character Text Input"
+    }
+  },
+  "637": {
+    "inputs": {
+      "delimiter": " ",
+      "clean_whitespace": "false",
+      "text_a": [
+        "635",
+        0
+      ],
+      "text_b": [
+        "634",
+        0
+      ],
+      "text_c": [
+        "633",
+        0
+      ],
+      "text_d": [
+        "636",
+        0
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "639": {
+    "inputs": {
+      "delimiter": " ",
+      "clean_whitespace": "false",
+      "text_a": [
+        "637",
+        0
+      ],
+      "text_b": [
+        "394",
+        0
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "895": {
+    "inputs": {
+      "text": "perfect portrait shot, (half-length portrait:1.0), (belgian  woman 28-years-old:1.5), (headshot pose:1.5), (green eyes:1.25), (two dutch braids hairstyle:1.25), (red hair:1.25), wearing a gold necklace. and a ruby crown, (skin details, skin texture:0.05), (skin pores:0.08), (skin imperfections:0.02), (tanned skin:0.13), (dimples:0.05), (skin pores:0.05), (eyes details:0.47), (iris details:0.52), (circular iris:0.79), (circular pupil:0.61), the head is not cropped on a neutral background, (professional photo, balanced photo, balanced exposure:1.2), (film grain:1.15)",
+      "passthrough": [
+        "585",
+        0
+      ]
+    },
+    "class_type": "Textbox",
+    "_meta": {
+      "title": "TextPass"
+    }
+  },
+  "964": {
+    "inputs": {
+      "clip_l": [
+        "318",
+        0
+      ],
+      "t5xxl": [
+        "1199",
+        0
+      ],
+      "guidance": 1.8615813,
+      "clip": [
+        "400",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncodeFlux",
+    "_meta": {
+      "title": "Conditioning"
+    }
+  },
+  "967": {
+    "inputs": {
+      "positive": [
+        "964",
+        0
+      ],
+      "negative": [
+        "970",
+        0
+      ]
+    },
+    "class_type": "CondPassThrough",
+    "_meta": {
+      "title": "CondPassThrough"
+    }
+  },
+  "970": {
+    "inputs": {
+      "conditioning": [
+        "964",
+        0
+      ]
+    },
+    "class_type": "ConditioningZeroOut",
+    "_meta": {
+      "title": "ConditioningZeroOut"
+    }
+  },
+  "977": {
+    "inputs": {
+      "index": [
+        "299",
+        0
+      ],
+      "value0": [
+        "378",
+        0
+      ],
+      "value1": [
+        "379",
+        0
+      ],
+      "value2": [
+        "982",
+        0
+      ],
+      "value3": [
+        "984",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "IG Width"
+    }
+  },
+  "979": {
+    "inputs": {
+      "text": "1350",
+      "anything": [
+        "980",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "IG Height"
+    }
+  },
+  "980": {
+    "inputs": {
+      "index": [
+        "299",
+        0
+      ],
+      "value0": [
+        "378",
+        1
+      ],
+      "value1": [
+        "380",
+        0
+      ],
+      "value2": [
+        "983",
+        0
+      ],
+      "value3": [
+        "985",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "IG Height"
+    }
+  },
+  "981": {
+    "inputs": {
+      "width": [
+        "977",
+        0
+      ],
+      "height": [
+        "980",
+        0
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "982": {
+    "inputs": {
+      "value": 1080
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Portrait Post Width"
+    }
+  },
+  "983": {
+    "inputs": {
+      "value": 1350
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Portrait Post Height"
+    }
+  },
+  "984": {
+    "inputs": {
+      "value": 1080
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Stories Width"
+    }
+  },
+  "985": {
+    "inputs": {
+      "value": 1920
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Stories Height"
+    }
+  },
+  "987": {
+    "inputs": {
+      "shot": "Half-length portrait",
+      "shot_weight": 1.0000000000000002,
+      "gender": "{{gender}}",
+      "age": {{age}},
+      "nationality_1": "{{nationality_1}}",
+      "nationality_2": "-",
+      "nationality_mix": 0,
+      "body_type": "{{body_type}}",
+      "body_type_weight": 0,
+      "model_pose": "Headshot Pose",
+      "eyes_color": "{{eyes_color}}",
+      "facial_expression": "{{facial_expression}}",
+      "facial_expression_weight": 0,
+      "face_shape": "Oval",
+      "face_shape_weight": 0,
+      "facial_asymmetry": 0,
+      "hair_style": "{{hair_style}}",
+      "hair_color": "{{hair_color}}",
+      "disheveled": 0,
+      "beard": "{{beard}}",
+      "skin_details": 0.05000000000000001,
+      "skin_pores": 0.08000000000000002,
+      "dimples": 0.05000000000000001,
+      "freckles": 0,
+      "moles": 0.05000000000000001,
+      "skin_imperfections": 0.020000000000000004,
+      "skin_acne": 0,
+      "tanned_skin": 0.13000000000000003,
+      "eyes_details": 0.4700000000000001,
+      "iris_details": 0.5200000000000001,
+      "circular_iris": 0.7900000000000001,
+      "circular_pupil": 0.6100000000000001,
+      "light_type": "{{light_type}}",
+      "light_direction": "top-right",
+      "light_weight": 0,
+      "photorealism_improvement": "{{photorealism_improvement}}",
+      "prompt_start": "Perfect portrait shot",
+      "prompt_additional": [
+        "528",
+        0
+      ],
+      "prompt_end": "The head is not cropped on a neutral background",
+      "negative_prompt": [
+        "529",
+        0
+      ]
+    },
+    "class_type": "easy portraitMaster",
+    "_meta": {
+      "title": "Portrait Master"
+    }
+  },
+  "988": {
+    "inputs": {
+      "prompt": [
+        "585",
+        0
+      ],
+      "debug": true,
+      "url": "http://127.0.0.1:11434",
+      "model": "llava-llama3:latest",
+      "system": [
+        "989",
+        0
+      ],
+      "seed": 1294857822,
+      "top_k": 95,
+      "top_p": 0.85,
+      "temperature": 0.8,
+      "num_predict": -1,
+      "tfs_z": 1,
+      "keep_alive": 5,
+      "keep_context": false,
+      "format": ""
+    },
+    "class_type": "OllamaGenerateAdvance",
+    "_meta": {
+      "title": "Prompt Enricher"
+    }
+  },
+  "989": {
+    "inputs": {
+      "text": "You are a master prompt engineer for FLUX.1 image generation. Your task is to enhance user prompts by incorporating selected style tags into a cohesive, detailed description of a head and shoulders portrait shot.
+
+<structure>
+
+You will receive input in CSV format with weighted averages signifying importance.
+Your goal is to take the tags and create the perfect Naturalistic Language prompt for Flux without being overly verbose, or too descriptive with flowery language. You do not need to use them all, but use most if possible to influence the final prompt)\" [style tags list]
+
+</structure>
+
+<core_mission>
+
+Create a balanced prompt that preserves the user's detailed specifications while selectively incorporating style elements that enrich the prompt, and maintaining the head and shoulders camera shot.
+
+</core_mission>
+
+<enhancement>
+
+1. **Prioritize the subject's specific details** - The subject, setting, and technical requirements take precedence over style tags
+
+2. **Select only the most relevant style tags** - Choose 4-7 style elements that best complement the user's vision rather than trying to include all tags
+
+3. **Integrate style elements subtly** - Weave selected style elements into your description without overwhelming the original concept:
+   - For visual styles (cinematic, low-poly): Incorporate as visual treatments
+   - For emotional styles (dark, magical): Add as atmospheric qualities without changing core content
+   - For technical styles (4K, highly detailed): Reinforce existing technical specifications
+
+** NEVER LET STYLE OVERWHELM CONTENT. The outputs should ALWAYS be in natural language format that is NOT overly verbose **
+
+</enhancement>
+
+<format>
+
+Create 2-3 paragraphs (512 tokens max) that flow naturally while integrating selected style elements.
+
+</format>
+
+<critical_rules>
+
+1. NEVER acknowledge style tags, or include notes directly in your output. NEVER say \"Here's a prompt that ...\"
+2. Preserve ALL technical specifications from the user (resolution, settings, etc.)
+3. Don't extend beyond 400 words without good reason
+4. Prioritize coherence over inclusion of all style tags
+5. Output ONLY the enhanced prompt with no explanations, or additional commentary
+
+6. Begin EVERY output with \"A head and shoulders portrait shot of ...\"
+
+</critical_rules>
+
+Transform the input into a cohesive, balanced prompt that honors the user's vision while selectively incorporating complementary style elements, and maintaining the clear head room necessary for a beautiful portrait photo."
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "Instructions for Prompt Enhancement"
+    }
+  },
+  "990": {
+    "inputs": {
+      "text": "A head and shoulders portrait shot of a 28-year-old woman with green eyes, red hair styled in two Dutch braids, wearing a gold necklace and a ruby crown. The subject is not cropped on a neutral background, exhibiting professional-quality photo exposure and grain that enhances the natural beauty of her appearance.",
+      "anything": [
+        "988",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "1025": {
+    "inputs": {
+      "guidance": 2.8000000000000003,
+      "conditioning": [
+        "967",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "1026": {
+    "inputs": {
+      "seed": 226137911703180,
+      "steps": 30,
+      "cfg": 1,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "214",
+        0
+      ],
+      "positive": [
+        "1025",
+        0
+      ],
+      "negative": [
+        "967",
+        1
+      ],
+      "latent_image": [
+        "1102",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "1029": {
+    "inputs": {
+      "samples": [
+        "1026",
+        0
+      ],
+      "vae": [
+        "159",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "1030": {
+    "inputs": {
+      "anything": [
+        "1029",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "Clean VRAM Used"
+    }
+  },
+  "1031": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "1029",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "1035": {
+    "inputs": {
+      "clip_name1": "clipLCLIPGFullFP32_zer0intVisionCLIPL.safetensors",
+      "clip_name2": "clipLCLIPGFullFP32_zer0intVisionCLIPL.safetensors",
+      "type": "flux",
+      "device": "default"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": {
+      "title": "DualCLIPLoader"
+    }
+  },
+  "1041": {
+    "inputs": {
+      "image": [
+        "1029",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "1045": {
+    "inputs": {
+      "text": "1080",
+      "anything": [
+        "1048",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "TikTok Width"
+    }
+  },
+  "1046": {
+    "inputs": {
+      "text": "1920",
+      "anything": [
+        "1047",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "TikTok Height"
+    }
+  },
+  "1047": {
+    "inputs": {
+      "index": [
+        "308",
+        0
+      ],
+      "value0": [
+        "1051",
+        1
+      ],
+      "value1": [
+        "1053",
+        0
+      ],
+      "value2": [
+        "1055",
+        0
+      ],
+      "value3": [
+        "1057",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "TikTok Height Values"
+    }
+  },
+  "1048": {
+    "inputs": {
+      "index": [
+        "308",
+        0
+      ],
+      "value0": [
+        "1051",
+        0
+      ],
+      "value1": [
+        "1052",
+        0
+      ],
+      "value2": [
+        "1054",
+        0
+      ],
+      "value3": [
+        "1056",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "TikTok Width Values"
+    }
+  },
+  "1051": {
+    "inputs": {
+      "megapixel": "1.0",
+      "aspect_ratio": "1:1 (Perfect Square)",
+      "divisible_by": "8",
+      "custom_ratio": "1:1",
+      "custom_aspect_ratio": "1:1"
+    },
+    "class_type": "FluxResolutionNode",
+    "_meta": {
+      "title": "Square"
+    }
+  },
+  "1052": {
+    "inputs": {
+      "value": 1920
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Landscape Post Width"
+    }
+  },
+  "1053": {
+    "inputs": {
+      "value": 1080
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Landscape Post Height"
+    }
+  },
+  "1054": {
+    "inputs": {
+      "value": 1080
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Portrait Post Width"
+    }
+  },
+  "1055": {
+    "inputs": {
+      "value": 1920
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Portrait Post Height"
+    }
+  },
+  "1056": {
+    "inputs": {
+      "value": 1080
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Stories Width"
+    }
+  },
+  "1057": {
+    "inputs": {
+      "value": 1920
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Stories Height"
+    }
+  },
+  "1058": {
+    "inputs": {
+      "width": [
+        "1048",
+        0
+      ],
+      "height": [
+        "1047",
+        0
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "1060": {
+    "inputs": {
+      "text": "1080",
+      "anything": [
+        "1063",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Twitter Width"
+    }
+  },
+  "1061": {
+    "inputs": {
+      "text": "1350",
+      "anything": [
+        "1062",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Twitter Height"
+    }
+  },
+  "1062": {
+    "inputs": {
+      "index": [
+        "1076",
+        0
+      ],
+      "value0": [
+        "1064",
+        1
+      ],
+      "value1": [
+        "1069",
+        0
+      ],
+      "value2": [
+        "1071",
+        0
+      ],
+      "value3": [
+        "1066",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "Twitter Height Values"
+    }
+  },
+  "1063": {
+    "inputs": {
+      "index": [
+        "1076",
+        0
+      ],
+      "value0": [
+        "1064",
+        0
+      ],
+      "value1": [
+        "1068",
+        0
+      ],
+      "value2": [
+        "1070",
+        0
+      ],
+      "value3": [
+        "1065",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "Twitter Width Values"
+    }
+  },
+  "1064": {
+    "inputs": {
+      "megapixel": "1.0",
+      "aspect_ratio": "1:1 (Perfect Square)",
+      "divisible_by": "8",
+      "custom_ratio": "1:1",
+      "custom_aspect_ratio": "1:1"
+    },
+    "class_type": "FluxResolutionNode",
+    "_meta": {
+      "title": "Square"
+    }
+  },
+  "1065": {
+    "inputs": {
+      "value": 1500
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Cover Photo Width"
+    }
+  },
+  "1066": {
+    "inputs": {
+      "value": 500
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Cover Photo Height"
+    }
+  },
+  "1067": {
+    "inputs": {
+      "width": [
+        "1063",
+        0
+      ],
+      "height": [
+        "1062",
+        0
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "1068": {
+    "inputs": {
+      "value": 1600
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Landscape Post Width"
+    }
+  },
+  "1069": {
+    "inputs": {
+      "value": 900
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Landscape Post Height"
+    }
+  },
+  "1070": {
+    "inputs": {
+      "value": 1080
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Portrait Post Width"
+    }
+  },
+  "1071": {
+    "inputs": {
+      "value": 1350
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Portrait Post Height"
+    }
+  },
+  "1076": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Twitter Size Selector"
+    }
+  },
+  "1079": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "LinkedIn Size Selector"
+    }
+  },
+  "1081": {
+    "inputs": {
+      "text": "627",
+      "anything": [
+        "1084",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "LinkedIn Width"
+    }
+  },
+  "1082": {
+    "inputs": {
+      "text": "1200",
+      "anything": [
+        "1083",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "LinkedIn Height"
+    }
+  },
+  "1083": {
+    "inputs": {
+      "index": [
+        "1079",
+        0
+      ],
+      "value0": [
+        "1085",
+        1
+      ],
+      "value1": [
+        "1090",
+        0
+      ],
+      "value2": [
+        "1092",
+        0
+      ],
+      "value3": [
+        "1093",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "LinkedIn Height Values"
+    }
+  },
+  "1084": {
+    "inputs": {
+      "index": [
+        "1079",
+        0
+      ],
+      "value0": [
+        "1085",
+        0
+      ],
+      "value1": [
+        "1089",
+        0
+      ],
+      "value2": [
+        "1091",
+        0
+      ],
+      "value3": [
+        "1094",
+        0
+      ]
+    },
+    "class_type": "easy anythingIndexSwitch",
+    "_meta": {
+      "title": "LinkedIn Width Values"
+    }
+  },
+  "1085": {
+    "inputs": {
+      "megapixel": "1.0",
+      "aspect_ratio": "1:1 (Perfect Square)",
+      "divisible_by": "8",
+      "custom_ratio": "1:1",
+      "custom_aspect_ratio": "1:1"
+    },
+    "class_type": "FluxResolutionNode",
+    "_meta": {
+      "title": "Square"
+    }
+  },
+  "1086": {
+    "inputs": {
+      "width": [
+        "1084",
+        0
+      ],
+      "height": [
+        "1083",
+        0
+      ],
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "1089": {
+    "inputs": {
+      "value": 1200
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Landscape Post Width"
+    }
+  },
+  "1090": {
+    "inputs": {
+      "value": 627
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Landscape Post Height"
+    }
+  },
+  "1091": {
+    "inputs": {
+      "value": 627
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Portrait Post Width"
+    }
+  },
+  "1092": {
+    "inputs": {
+      "value": 1200
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Portrait Post Height"
+    }
+  },
+  "1093": {
+    "inputs": {
+      "value": 191
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Cover Photo Height"
+    }
+  },
+  "1094": {
+    "inputs": {
+      "value": 1128
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Cover Photo Width"
+    }
+  },
+  "1102": {
+    "inputs": {
+      "select": [
+        "302",
+        0
+      ],
+      "latent_1": [
+        "1058",
+        0
+      ],
+      "latent_2": [
+        "1067",
+        0
+      ],
+      "latent_3": [
+        "981",
+        0
+      ],
+      "latent_4": [
+        "1086",
+        0
+      ],
+      "latent_5": [
+        "1103",
+        0
+      ]
+    },
+    "class_type": "Latent Switch (JPS)",
+    "_meta": {
+      "title": "Latent Switch (JPS)"
+    }
+  },
+  "1103": {
+    "inputs": {
+      "width": 512,
+      "height": 512,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "User Select"
+    }
+  },
+  "1106": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "1111",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "1107": {
+    "inputs": {
+      "guidance": 2.8000000000000003,
+      "conditioning": [
+        "967",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "1110": {
+    "inputs": {
+      "seed": 885201131774348,
+      "steps": 30,
+      "cfg": 1,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "214",
+        0
+      ],
+      "positive": [
+        "1107",
+        0
+      ],
+      "negative": [
+        "967",
+        1
+      ],
+      "latent_image": [
+        "1102",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "1111": {
+    "inputs": {
+      "samples": [
+        "1110",
+        0
+      ],
+      "vae": [
+        "159",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "1112": {
+    "inputs": {
+      "anything": [
+        "1111",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "Clean VRAM Used"
+    }
+  },
+  "1113": {
+    "inputs": {
+      "image": [
+        "1111",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "1115": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "1120",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "1116": {
+    "inputs": {
+      "guidance": 3.1,
+      "conditioning": [
+        "967",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "1119": {
+    "inputs": {
+      "seed": 1084953574308676,
+      "steps": 30,
+      "cfg": 1,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "214",
+        0
+      ],
+      "positive": [
+        "1116",
+        0
+      ],
+      "negative": [
+        "967",
+        1
+      ],
+      "latent_image": [
+        "1102",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "1120": {
+    "inputs": {
+      "samples": [
+        "1119",
+        0
+      ],
+      "vae": [
+        "159",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "1121": {
+    "inputs": {
+      "anything": [
+        "1120",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "Clean VRAM Used"
+    }
+  },
+  "1122": {
+    "inputs": {
+      "image": [
+        "1120",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "1124": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "1129",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "1125": {
+    "inputs": {
+      "guidance": 3.2,
+      "conditioning": [
+        "967",
+        0
+      ]
+    },
+    "class_type": "FluxGuidance",
+    "_meta": {
+      "title": "FluxGuidance"
+    }
+  },
+  "1128": {
+    "inputs": {
+      "seed": 190927547458665,
+      "steps": 30,
+      "cfg": 1,
+      "sampler_name": "dpmpp_2m",
+      "scheduler": "sgm_uniform",
+      "denoise": 1,
+      "model": [
+        "214",
+        0
+      ],
+      "positive": [
+        "1125",
+        0
+      ],
+      "negative": [
+        "967",
+        1
+      ],
+      "latent_image": [
+        "1102",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "1129": {
+    "inputs": {
+      "samples": [
+        "1128",
+        0
+      ],
+      "vae": [
+        "159",
+        0
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "1130": {
+    "inputs": {
+      "anything": [
+        "1129",
+        0
+      ]
+    },
+    "class_type": "easy cleanGpuUsed",
+    "_meta": {
+      "title": "Clean VRAM Used"
+    }
+  },
+  "1131": {
+    "inputs": {
+      "image": [
+        "1129",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "1149": {
+    "inputs": {
+      "value": 2
+    },
+    "class_type": "easy int",
+    "_meta": {
+      "title": "Img2Upscale"
+    }
+  },
+  "1198": {
+    "inputs": {
+      "text": "masterpiece, amazingly fine details. very clear image.",
+      "anything": [
+        "318",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "1199": {
+    "inputs": {
+      "delimiter": ", ",
+      "clean_whitespace": "true",
+      "text_a": [
+        "988",
+        0
+      ],
+      "text_b": [
+        "1209",
+        0
+      ],
+      "text_c": [
+        "318",
+        0
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "1200": {
+    "inputs": {
+      "text": "A head and shoulders portrait shot of a 28-year-old woman with green eyes, red hair styled in two Dutch braids, wearing a gold necklace and a ruby crown. The subject is not cropped on a neutral background, exhibiting professional-quality photo exposure and grain that enhances the natural beauty of her appearance., Generate a portrait shot. Ensure ample headroom above the subject's head, leaving a noticeable space between the top of the head and the top edge of the image frame. The entire head must be fully visible and uncapped in the shot, with no part of the scalp or hair cropped off., masterpiece, amazingly fine details. very clear image.",
+      "anything": [
+        "1199",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "1204": {
+    "inputs": {
+      "image": "sandine_a_brazilian_urban_young_adult_male_appearing_to_be_betw_b0d8e0e3-f503-4206-bfbb-9dd888d3e2c3.webp"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "1205": {
+    "inputs": {
+      "image": [
+        "1204",
+        0
+      ]
+    },
+    "class_type": "ImagePass",
+    "_meta": {
+      "title": "ImagePass"
+    }
+  },
+  "1209": {
+    "inputs": {
+      "text": "Generate a portrait shot. Ensure ample headroom above the subject's head, leaving a noticeable space between the top of the head and the top edge of the image frame. The entire head must be fully visible and uncapped in the shot, with no part of the scalp or hair cropped off."
+    },
+    "class_type": "ttN text",
+    "_meta": {
+      "title": "text"
+    }
+  }
+},
+   "randomise_seeds": {{randomise_seeds}},
+   "client_id": "{{client_id}}",
+   "number": {{number}},
+   "extra_data": "{{extra_data}}"
+}]]></field>
+    </record>
+</odoo>

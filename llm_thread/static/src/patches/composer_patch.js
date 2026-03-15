@@ -1,8 +1,10 @@
 /** @odoo-module **/
 
+import { _t } from "@web/core/l10n/translation";
 import { Composer } from "@mail/core/common/composer";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
+import { useState } from "@odoo/owl";
 
 /**
  * Patch Composer to handle LLM threads
@@ -13,9 +15,9 @@ patch(Composer.prototype, {
   setup() {
     super.setup();
 
-    // Initialize LLM store in setup - safe to access services here
+    // Initialize LLM store in setup - wrap with useState for reactivity (like Odoo does)
     try {
-      this.llmStore = useService("llm.store");
+      this.llmStore = useState(useService("llm.store"));
     } catch (error) {
       // LLM service might not be available, that's ok
       console.warn("LLM store service not available:", error.message);
@@ -35,37 +37,48 @@ patch(Composer.prototype, {
    * Check if this LLM thread is currently streaming
    */
   get isStreaming() {
+    // Normal mail threads are never "streaming"
     if (!this.isLLMThread || !this.llmStore) {
-      return false; // Normal mail threads are never "streaming"
+      return false;
     }
     return this.llmStore.getStreamingStatus() || false;
   },
 
-  /**
-   * Override sendMessage for LLM threads only
-   */
+  get showStop() {
+    if (this.isLLMThread) {
+      return this.isStreaming;
+    }
+
+    return false;
+  },
+
   async sendMessage() {
-    // For LLM threads, use our custom logic
     if (this.isLLMThread && this.llmStore) {
-      const content = this.props.composer.text?.trim();
-      if (!content) return;
+      // v17: textInputContent instead of .text
+      const content = this.props.composer.textInputContent?.trim();
+      const attachments = this.props.composer.attachments || [];
+      const attachmentIds = attachments.map((att) => att.id);
+
+      if (!content && attachmentIds.length === 0) {
+        return;
+      }
 
       const threadId = this.props.composer.thread.id;
 
-      // Clear composer immediately for better UX
-      this.props.composer.clear();
+      // v17: No clear() method on composer, reset manually
+      this.props.composer.textInputContent = "";
+      this.props.composer.attachments = [];
 
-      // Send through LLM store
-      await this.llmStore.sendLLMMessage(threadId, content);
+      await this.llmStore.sendLLMMessage(threadId, content, attachmentIds);
       return;
     }
 
-    // For all other threads, use original mail behavior
     return super.sendMessage();
   },
 
   /**
    * Override onKeydown to handle LLM-specific shortcuts
+   * @param {KeyboardEvent} ev - Keyboard event
    */
   onKeydown(ev) {
     // LLM-specific handling
@@ -109,11 +122,26 @@ patch(Composer.prototype, {
    */
   get placeholder() {
     if (this.isLLMThread) {
-      return this.isStreaming ? "AI is responding..." : "Ask anything...";
+      return this.isStreaming
+        ? _t("AI is responding...")
+        : _t("Ask anything...");
     }
 
     // Use original placeholder for regular mail
-    return super.placeholder || "Write a message...";
+    return super.placeholder || _t("Write a message...");
+  },
+
+  /**
+   * Hide composer avatar/sidebar for LLM threads
+   * This removes the empty 42px column on the left
+   */
+  get showComposerAvatar() {
+    if (this.isLLMThread) {
+      return false;
+    }
+
+    // Use original logic for regular mail
+    return super.showComposerAvatar;
   },
 
   /**
@@ -121,7 +149,8 @@ patch(Composer.prototype, {
    */
   get isDisabled() {
     if (this.isLLMThread) {
-      return this.isStreaming || !this.props.composer.text?.trim();
+      // v17: textInputContent instead of .text
+      return this.isStreaming || !this.props.composer.textInputContent?.trim();
     }
 
     // Use original disabled logic for regular mail

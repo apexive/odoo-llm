@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Add Vector Stores to the LLM > Configuration menu -->
+    <menuitem
+    id="menu_llm_store"
+    name="Vector Stores"
+    action="llm_store_action"
+    parent="llm.menu_llm_config"
+    sequence="50"
+  />
+</odoo>

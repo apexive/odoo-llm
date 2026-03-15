@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Tree View -->
+    <record id="view_llm_knowledge_chunk_tree" model="ir.ui.view">
+        <field name="name">llm.knowledge.chunk.tree</field>
+        <field name="model">llm.knowledge.chunk</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name" />
+                <field name="resource_id" />
+                <field name="sequence" widget="handle" />
+                <field name="collection_ids" widget="many2many_tags" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="view_llm_knowledge_chunk_form" model="ir.ui.view">
+        <field name="name">llm.knowledge.chunk.form</field>
+        <field name="model">llm.knowledge.chunk</field>
+        <field name="arch" type="xml">
+            <form string="Knowledge Chunk">
+                <sheet>
+                    <group>
+                        <field name="resource_id" />
+                        <field name="sequence" />
+                        <field name="content" />
+                        <field name="metadata" widget="json_widget" />
+                        <field name="collection_ids" widget="many2many_tags" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View -->
+    <record id="view_llm_knowledge_chunk_search" model="ir.ui.view">
+        <field name="name">llm.knowledge.chunk.search</field>
+        <field name="model">llm.knowledge.chunk</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="embedding" />
+                <field name="name" />
+                <field name="content" />
+                <field name="resource_id" />
+                <field name="collection_ids" />
+
+                <!-- Similarity threshold filters -->
+                <separator string="Similarity Threshold" />
+                <filter
+          string="High Similarity (0.75)"
+          name="similarity_high"
+          context="{'search_min_similarity': 0.75}"
+        />
+                <filter
+          string="Medium Similarity (0.5)"
+          name="similarity_medium"
+          context="{'search_min_similarity': 0.5}"
+        />
+                <filter
+          string="Low Similarity (0.25)"
+          name="similarity_low"
+          context="{'search_min_similarity': 0.25}"
+        />
+
+                <!-- Vector search operator filters -->
+                <separator string="Search Method" />
+                <filter
+          string="Cosine Similarity(&lt;=&gt;)"
+          name="operator_cosine"
+          context="{'search_vector_operator': '&lt;=&gt;'}"
+        />
+                <filter
+          string="Euclidean Distance(&lt;-&gt;)"
+          name="operator_euclidean"
+          context="{'search_vector_operator': '&lt;-&gt;'}"
+        />
+                <filter
+          string="Inner Product(&lt;#&gt;)"
+          name="operator_inner_product"
+          context="{'search_vector_operator': '&lt;#&gt;'}"
+        />
+            </search>
+        </field>
+    </record>
+
+    <!-- Special Form View for Chunk Detail Popup -->
+    <record id="view_llm_knowledge_chunk_detail_form" model="ir.ui.view">
+        <field name="name">llm.knowledge.chunk.detail.form</field>
+        <field name="model">llm.knowledge.chunk</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <form string="Chunk Detail">
+                <sheet>
+                    <group>
+                        <field name="name" readonly="1" />
+                        <field name="resource_id" readonly="1" />
+                        <field name="sequence" readonly="1" />
+                    </group>
+                    <group>
+                        <field
+              name="collection_ids"
+              widget="many2many_tags"
+              readonly="1"
+            />
+                    </group>
+                    <group string="Content">
+                        <field name="content" readonly="1" nolabel="1" />
+                    </group>
+                    <group string="Metadata" invisible="not metadata">
+                        <field
+              name="metadata"
+              widget="json_widget"
+              readonly="1"
+              nolabel="1"
+            />
+                    </group>
+<!--                    &lt;!&ndash; Show embeddings through the one2many relationship &ndash;&gt;-->
+<!--                    <group string="Embeddings" attrs="{'invisible': [('embedding_ids', '=', [])]}">-->
+<!--                        <field name="embedding_ids" readonly="1" nolabel="1">-->
+<!--                            <tree>-->
+<!--                                <field name="embedding_model_id"/>-->
+<!--                            </tree>-->
+<!--                        </field>-->
+<!--                    </group>-->
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+
+    <!-- Action -->
+    <record id="action_llm_knowledge_chunk" model="ir.actions.act_window">
+        <field name="name">Knowledge Chunks</field>
+        <field name="res_model">llm.knowledge.chunk</field>
+        <field name="view_mode">tree,form</field>
+        <field name="context">{'search_default_similarity_medium': 1}</field>
+        <field name="help" type="html">
+            <p
+        class="o_view_nocontent_smiling_face"
+      >No knowledge chunks found</p>
+            <p
+      >Knowledge chunks are segments of resources used for RAG (Retrieval Augmented Generation).</p>
+        </field>
+    </record>
+</odoo>

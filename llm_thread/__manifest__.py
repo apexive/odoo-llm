@@ -32,7 +32,7 @@ Use cases include customer support automation, data analysis, training assistanc
 Contact: support@apexive.com
     """,
     "category": "Productivity, Discuss",
-    "version": "18.0.1.3.0",
+    "version": "17.0.1.4.5",
     "depends": ["base", "mail", "web", "llm", "llm_tool"],
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",
@@ -54,12 +54,20 @@ Contact: support@apexive.com
             # Thread Header component with provider/model/tool selections
             "llm_thread/static/src/components/llm_thread_header/llm_thread_header.js",
             "llm_thread/static/src/components/llm_thread_header/llm_thread_header.xml",
+            "llm_thread/static/src/components/llm_thread_header/llm_thread_header.scss",
+            # Related Record component for linking threads to Odoo records
+            "llm_thread/static/src/components/llm_related_record/llm_related_record.js",
+            "llm_thread/static/src/components/llm_related_record/llm_related_record.xml",
+            "llm_thread/static/src/components/llm_related_record/llm_related_record.scss",
+            "llm_thread/static/src/components/llm_related_record/llm_record_picker_dialog.js",
+            "llm_thread/static/src/components/llm_related_record/llm_record_picker_dialog.xml",
             # Tool Message component for displaying tool results
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.js",
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.xml",
             "llm_thread/static/src/components/llm_tool_message/llm_tool_message.scss",
             # Patches - Safe extensions of mail components with conditional LLM logic
             "llm_thread/static/src/patches/composer_patch.js",
+            "llm_thread/static/src/patches/composer_patch.xml",
             "llm_thread/static/src/patches/thread_patch.js",
             "llm_thread/static/src/patches/thread_model_patch.js",
             "llm_thread/static/src/patches/chatter_patch.js",
@@ -70,6 +78,7 @@ Contact: support@apexive.com
             "llm_thread/static/src/templates/llm_chat_client_action.xml",
             # Client Actions - Following Odoo 18.0 patterns
             "llm_thread/static/src/client_actions/llm_chat_client_action.js",
+            "llm_thread/static/src/client_actions/open_chatter_action.js",
         ],
     },
     "images": [

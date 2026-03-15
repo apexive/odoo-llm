@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Add "New MCP Key" button to user preferences (Account Security page) -->
+    <record id="view_users_form_mcp_key" model="ir.ui.view">
+        <field name="name">res.users.form.mcp.key</field>
+        <field name="model">res.users</field>
+        <field name="inherit_id" ref="base.view_users_form_simple_modif" />
+        <field name="arch" type="xml">
+            <!-- Add button next to "New API Key" in API Keys group -->
+            <xpath expr="//button[@name='api_key_wizard']" position="after">
+                <button
+          name="action_new_mcp_key"
+          type="object"
+          string="New MCP Key"
+          class="btn btn-secondary ms-2"
+          title="Generate an API key with ready-to-use MCP client configurations"
+        />
+            </xpath>
+        </field>
+    </record>
+</odoo>

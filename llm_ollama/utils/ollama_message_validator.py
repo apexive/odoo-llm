@@ -121,7 +121,7 @@ class OllamaMessageValidator:
                 if tool_name:
                     self.tool_response_map[tool_name] = {"index": i, "message": msg}
 
-    def remove_orphaned_tool_messages(self):
+    def remove_orphaned_tool_messages(self):  # noqa: C901
         """
         Remove tool messages that don't have matching tool calls or are followed by
         user messages (but preserve tool messages followed by assistant messages).

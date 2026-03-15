@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_publisher_fal_ai" model="llm.publisher">
+        <field name="name">fal.ai</field>
+        <field name="official" eval="True" />
+        <field name="frontier" eval="True" />
+        <field name="description">
+            fal.ai is a generative media platform for developers, offering lightning-fast inference capabilities for AI-powered image, video, and audio generation. Founded in 2021, fal.ai aims to amplify and expand human creativity by providing scalable and cost-effective AI infrastructure.
+        </field>
+        <field
+      name="logo"
+      type="base64"
+      file="llm_fal_ai/static/description/falai_logo.png"
+    />
+        <field name="meta">
+            {
+                "website": "https://fal.ai",
+                "founded": 2021,
+                "headquarters": "San Francisco, California",
+                "key_products": ["FLUX", "MiniMax", "AuraFlow", "Kling", "Whisper"]
+            }
+        </field>
+    </record>
+</odoo>

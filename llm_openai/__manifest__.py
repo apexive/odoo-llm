@@ -8,15 +8,13 @@
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",
     "category": "Technical",
-    "version": "18.0.1.1.3",
+    "version": "17.0.1.4.0",
     "depends": ["llm", "llm_tool", "llm_training"],
     "external_dependencies": {
         "python": ["openai"],
     },
     "data": [
         "data/llm_publisher.xml",
-        "data/llm_provider.xml",
-        "data/llm_model.xml",
     ],
     "images": [
         "static/description/banner.jpeg",

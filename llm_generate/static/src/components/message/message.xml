@@ -7,17 +7,37 @@
     t-inherit-mode="extension"
   >
         <!-- Target the content area where message body is displayed -->
-        <xpath expr="//div[hasclass('o-mail-Message-content')]" position="inside">
+        <xpath
+      expr="//div[hasclass('o-mail-Message-content')]"
+      position="inside"
+    >
             <!-- Add generation parameters display for user messages with generation data -->
-            <t t-if="message.isLLMUserGenerationMessage">
+            <t t-if="isLLMUserGenerationMessage">
                 <!-- Generation Parameters Summary -->
                 <div class="o_llm_generation_params mt-2 small border-top pt-2">
                     <details>
                         <summary class="text-muted" style="cursor: pointer;">
+                            <i class="fa fa-cube me-1" />
                             <strong>Generation Input</strong>
                         </summary>
-                        <pre class="bg-light p-1 rounded small mt-1"><code
-                t-esc="message.generationDataFormatted"
+                        <pre class="bg-light p-2 rounded small mt-2 mb-0"><code
+                t-esc="generationDataFormatted"
+              /></pre>
+                    </details>
+                </div>
+            </t>
+
+            <!-- Add generation output display for assistant messages with generation data -->
+            <t t-if="isLLMAssistantGenerationMessage">
+                <!-- Generation Output Summary -->
+                <div class="o_llm_generation_output mt-2 small border-top pt-2">
+                    <details>
+                        <summary class="text-muted" style="cursor: pointer;">
+                            <i class="fa fa-cogs me-1" />
+                            <strong>Generation Output Data</strong>
+                        </summary>
+                        <pre class="bg-light p-2 rounded small mt-2 mb-0"><code
+                t-esc="generationOutputFormatted"
               /></pre>
                     </details>
                 </div>

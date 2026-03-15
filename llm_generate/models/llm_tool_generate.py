@@ -1,9 +1,7 @@
-import logging
 from typing import Any
 
 from odoo import api, models
-
-_logger = logging.getLogger(__name__)
+from odoo.exceptions import UserError
 
 
 class LLMToolGenerate(models.Model):
@@ -20,31 +18,25 @@ class LLMToolGenerate(models.Model):
         """Generate content using the specified model and inputs."""
         self.ensure_one()
 
-        try:
-            model = self.env["llm.model"].browse(int(model_id))
-            if not model.exists():
-                return {"error": f"Model {model_id} not found"}
+        model = self.env["llm.model"].browse(int(model_id))
+        if not model.exists():
+            raise UserError(f"Model with ID {model_id} not found")
 
-            # Use model's generate method - now returns tuple (output_data, urls)
-            output_data, urls = model.generate(inputs)
+        # Use model's generate method - returns tuple (output_data, urls)
+        output_data, urls = model.generate(inputs)
 
-            # Get the existing tool message from context
-            tool_message = self.env.context.get("message")
+        # Get the existing tool message from context
+        tool_message = self.env.context.get("message")
 
-            # Use message method to process URLs and create attachments
-            markdown_content, attachments = tool_message.process_generation_urls(urls)
+        # Use message method to process URLs and create attachments
+        markdown_content, attachments = tool_message.process_generation_urls(urls)
 
-            return {
-                "success": True,
-                "output_data": output_data,
-                "urls": [
-                    {"url": att.url, "content_type": att.mimetype}
-                    for att in attachments
-                ],
-                "markdown": markdown_content,
-                "content_count": len(urls),
-            }
-
-        except Exception as e:
-            _logger.error(f"Error in content generation: {e}")
-            return {"error": f"Generation failed: {str(e)}", "success": False}
+        return {
+            "success": True,
+            "output_data": output_data,
+            "urls": [
+                {"url": att.url, "content_type": att.mimetype} for att in attachments
+            ],
+            "markdown": markdown_content,
+            "content_count": len(urls),
+        }

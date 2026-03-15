@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Process with AI Button Reliability**: Replaced unreliable bus notification with client action pattern (2025-12-02)
+
+  - Bus/WebSocket notifications failed on cloud deployments with code 1006 connection issues
+  - New approach uses `ir.actions.client` to navigate and open AI chat reliably
+  - Added `pendingOpenInChatter` state to `llm.store` service for cross-navigation state
+  - Removed redundant bus subscription code from chatter patch
+  - Affected modules: `llm_assistant` (18.0.1.5.3), `llm_thread` (18.0.1.4.3)
+
+- **Module Dependency Issue**: Fixed `prompt_id` field being referenced in `llm_thread` module without dependency on `llm_assistant` (2025-11-26)
+  - Moved `prompt_id` serialization from `llm_thread/models/llm_thread.py` to `llm_assistant/models/llm_thread.py`
+  - `llm_thread` can now be installed standalone without `llm_assistant`
+  - `prompt_id` handling in `_thread_to_store()` now properly resides in the module that defines the field
+
 ### Added
 
 - **Tool Event System**: Real-time tool execution tracking with streaming events (2025-01-12)

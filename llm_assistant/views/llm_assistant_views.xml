@@ -5,7 +5,7 @@
         <field name="name">llm.assistant.tree</field>
         <field name="model">llm.assistant</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="code" />
                 <field name="res_model" />
@@ -19,7 +19,7 @@
                 <field name="is_default" widget="boolean_toggle" />
                 <field name="thread_count" />
                 <field name="active" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -225,7 +225,7 @@
                         </page>
                         <page string="Related Threads" name="related_threads">
                             <field name="thread_ids" readonly="1">
-                                <list>
+                                <tree>
                                     <field name="name" />
                                     <field name="user_id" />
                                     <field name="write_date" />
@@ -235,7 +235,7 @@
                     type="object"
                     class="btn btn-primary btn-sm"
                   />
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -342,7 +342,7 @@
     <record id="action_llm_assistant" model="ir.actions.act_window">
         <field name="name">Assistants</field>
         <field name="res_model">llm.assistant</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="search_view_id" ref="view_llm_assistant_search" />
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

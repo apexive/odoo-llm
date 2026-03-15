@@ -1,9 +1,8 @@
-# Note: Using forked letta-client until streaming issue is fixed
-# See: https://github.com/letta-ai/letta-python/issues/25
+# Note: Using letta-client SDK (Stainless-generated)
 from letta_client import Letta
-from letta_client.types import MessageCreate, StreamableHttpServerConfig
+from letta_client.types import CreateStreamableHTTPMcpServerParam, MessageCreateParam
 
-from odoo import api, models
+from odoo import _, api, models
 from odoo.exceptions import UserError
 
 
@@ -18,19 +17,31 @@ class LLMProvider(models.Model):
     def letta_get_client(self):
         """Get Letta client instance"""
         if not self.api_base:
-            raise UserError("API base URL is required for Letta connection")
+            raise UserError(
+                _(
+                    "Please configure the API base URL in the provider settings to connect to Letta."
+                )
+            )
 
         # Simple unified initialization for both local and cloud
         return Letta(
             base_url=self.api_base,
-            token=self.api_key,  # Will be None for local, which is fine
+            api_key=self.api_key,
         )
+
+    def letta_normalize_prepend_messages(self, prepend_messages):
+        """Normalize prepend_messages for Letta.
+
+        Letta agents maintain their own conversation history,
+        so we just pass through the messages unchanged.
+        """
+        return prepend_messages or []
 
     def letta_models(self, model_id=None):
         """List available models from Letta"""
         client = self.letta_get_client()
         models_response = client.models.list()
-        embedding_models_response = client.models.listembeddingmodels()
+        embedding_models_response = client.models.embeddings.list()
 
         models = []
 
@@ -146,24 +157,34 @@ class LLMProvider(models.Model):
         thread_id = thread_context.get("id")
 
         if not thread_id:
-            raise UserError("Thread ID is required for Letta chat")
+            raise UserError(
+                _(
+                    "Unable to start chat. Please try again from an active conversation thread."
+                )
+            )
 
         # Get thread record and ensure it has a Letta agent
         thread_record = self.env["llm.thread"].browse(thread_id)
         if not thread_record.exists():
-            raise UserError(f"Thread {thread_id} not found")
+            raise UserError(
+                _("The conversation could not be found. It may have been deleted.")
+            )
 
         agent_id = thread_record.ensure_letta_agent()
 
         # Extract latest user message - Letta agents maintain their own history
         latest_message = messages[-1] if messages else None
         if not latest_message:
-            raise UserError("No messages provided")
+            raise UserError(_("Please enter a message before sending."))
 
         # Use the standard dispatch to format the message
         formatted_message = self._dispatch("format_message", record=latest_message)
         if not formatted_message or not formatted_message.get("content"):
-            raise UserError("Could not format message content")
+            raise UserError(
+                _(
+                    "Your message could not be processed. Please try rephrasing and sending again."
+                )
+            )
 
         user_content = formatted_message["content"]
 
@@ -186,20 +207,19 @@ class LLMProvider(models.Model):
         server_name = mcp_config.name
 
         # Check if server already exists
-        servers = client.tools.list_mcp_servers()
+        servers = client.mcp_servers.list()
 
         # Check if our server is already registered
         server_exists = False
         for server in servers:
-            if isinstance(server, str):
-                if server == server_name:
+            # Server list returns dict with server_name as key
+            if isinstance(server, dict):
+                if server_name in server:
                     server_exists = True
                     break
-            else:
-                # Server object has server_name attribute
-                if hasattr(server, "server_name") and server.server_name == server_name:
-                    server_exists = True
-                    break
+            elif hasattr(server, "server_name") and server.server_name == server_name:
+                server_exists = True
+                break
 
         if server_exists:
             return True
@@ -208,10 +228,9 @@ class LLMProvider(models.Model):
         server_url = mcp_config.get_mcp_server_url()
 
         # Create the proper MCP server config using Letta client types
-        mcp_config = StreamableHttpServerConfig(
-            server_name=server_name,
+        config_param = CreateStreamableHTTPMcpServerParam(
             server_url=server_url,
-            type="streamable_http",
+            mcp_server_type="streamable_http",
             custom_headers={
                 # Letta will replace this template with API key from environment variables
                 "Authorization": "Bearer {{ ODOO_API_KEY | system-api-key }}",
@@ -219,7 +238,7 @@ class LLMProvider(models.Model):
         )
 
         # Register the MCP server using the correct API
-        client.tools.add_mcp_server(request=mcp_config)
+        client.mcp_servers.create(config=config_param, server_name=server_name)
         return True
 
     def letta_attach_tool(self, agent_id, tool_name):
@@ -234,35 +253,40 @@ class LLMProvider(models.Model):
         mcp_config = mcp_config_model.get_active_config()
         server_name = mcp_config.name
 
-        # Get available MCP tools to verify tool exists
-        mcp_tools = client.tools.list_mcp_tools_by_server(mcp_server_name=server_name)
-
-        # Check if tool exists in MCP server
-        tool_exists = False
-        for tool in mcp_tools:
-            if tool.name == tool_name:
-                tool_exists = True
+        # Get MCP server ID from server name
+        servers = client.mcp_servers.list()
+        mcp_server_id = None
+        for server in servers:
+            if hasattr(server, "server_name") and server.server_name == server_name:
+                mcp_server_id = server.id
                 break
 
-        if not tool_exists:
-            raise UserError(f"Tool '{tool_name}' not found in Odoo MCP server")
+        if not mcp_server_id:
+            raise UserError(
+                _("MCP server '%s' not found. Please ensure it is properly configured.")
+                % server_name
+            )
 
-        # Register the tool with Letta from the MCP server using correct API
-        client.tools.add_mcp_tool(mcp_server_name=server_name, mcp_tool_name=tool_name)
-
-        # Get the registered tool ID
-        registered_tools = client.tools.list()
+        # In the new SDK, MCP tools are auto-synced to the global tools registry
+        # We don't need to check the MCP server endpoint as it's just a view
+        # Instead, we look directly in the global tools list
+        all_tools = client.tools.list()
         tool_id = None
-        for tool in registered_tools:
-            if tool.name == tool_name:
+        for tool in all_tools:
+            if hasattr(tool, "name") and tool.name == tool_name:
                 tool_id = tool.id
                 break
 
         if not tool_id:
-            raise UserError(f"Could not find registered tool '{tool_name}' ID")
+            raise UserError(
+                _(
+                    "The tool '%s' could not be found in the tools registry. Please try refreshing the MCP server."
+                )
+                % tool_name
+            )
 
-        # Attach tool to agent
-        attach_response = client.agents.tools.attach(agent_id, tool_id)
+        # Attach tool to agent (tool_id is positional, agent_id is keyword-only)
+        attach_response = client.agents.tools.attach(tool_id, agent_id=agent_id)
         return attach_response
 
     def letta_detach_tool(self, agent_id, tool_name):
@@ -284,10 +308,17 @@ class LLMProvider(models.Model):
 
         # Get tool ID from the Tool object
         if not tool_to_detach.id:
-            raise UserError(f"Could not get tool ID for '{tool_name}'")
+            raise UserError(
+                _(
+                    "Could not deactivate the tool '%s'. Please try again or contact your administrator."
+                )
+                % tool_name
+            )
 
-        # Detach tool from agent
-        detach_response = client.agents.tools.detach(agent_id, tool_to_detach.id)
+        # Detach tool from agent (tool_id is positional, agent_id is keyword-only)
+        detach_response = client.agents.tools.detach(
+            tool_to_detach.id, agent_id=agent_id
+        )
         return detach_response
 
     def letta_sync_agent_tools(self, agent_id, tool_records):
@@ -352,10 +383,11 @@ class LLMProvider(models.Model):
     def _letta_stream_agent_response(self, client, agent_id, user_content):
         """Stream response from Letta agent."""
 
-        stream = client.agents.messages.create_stream(
+        stream = client.agents.messages.create(
             agent_id=agent_id,
-            messages=[MessageCreate(role="user", content=user_content)],
-            stream_tokens=True,
+            messages=[MessageCreateParam(role="user", content=user_content)],
+            streaming=True,
+            stream_tokens=True,  # Enable token-level streaming for real-time updates
         )
 
         response_content = ""
@@ -364,12 +396,24 @@ class LLMProvider(models.Model):
             # Check if chunk has message_type attribute (Letta's streaming format)
             if hasattr(chunk, "message_type"):
                 message_type = getattr(chunk, "message_type", None)
+                content = getattr(chunk, "content", None)
+
+                # Extract text content from content attribute (could be string or list)
+                content_text = ""
+                if isinstance(content, str):
+                    content_text = content
+                elif isinstance(content, list) and len(content) > 0:
+                    # Content is a list of content parts, extract text from each
+                    for part in content:
+                        if isinstance(part, dict) and "text" in part:
+                            content_text += part["text"]
+                        elif hasattr(part, "text"):
+                            content_text += part.text
 
                 # Handle assistant message chunks
-                if message_type == "assistant_message" and hasattr(chunk, "content"):
-                    if chunk.content:
-                        response_content += chunk.content
-                        yield {"content": chunk.content}
+                if message_type == "assistant_message" and content_text:
+                    response_content += content_text
+                    yield {"content": content_text}
 
         # Yield final response
         yield {"content": "", "finish_reason": "stop"}
@@ -380,10 +424,10 @@ class LLMProvider(models.Model):
         # For non-streaming, we'll collect the full response
         response_content = ""
 
-        stream = client.agents.messages.create_stream(
+        stream = client.agents.messages.create(
             agent_id=agent_id,
-            messages=[MessageCreate(role="user", content=user_content)],
-            stream_tokens=False,  # Even non-streaming uses the stream API
+            messages=[MessageCreateParam(role="user", content=user_content)],
+            streaming=False,
         )
 
         for chunk in stream:

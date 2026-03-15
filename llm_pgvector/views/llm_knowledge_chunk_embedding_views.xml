@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Tree View for Chunk Embeddings -->
+    <record id="view_llm_knowledge_chunk_embedding_tree" model="ir.ui.view">
+        <field name="name">llm.knowledge.chunk.embedding.tree</field>
+        <field name="model">llm.knowledge.chunk.embedding</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="chunk_id" />
+                <field name="embedding_model_id" />
+                <field name="resource_id" />
+                <field name="collection_ids" widget="many2many_tags" />
+            </tree>
+        </field>
+    </record>
+
+    <!-- Form View for Chunk Embeddings -->
+    <record id="view_llm_knowledge_chunk_embedding_form" model="ir.ui.view">
+        <field name="name">llm.knowledge.chunk.embedding.form</field>
+        <field name="model">llm.knowledge.chunk.embedding</field>
+        <field name="arch" type="xml">
+            <form string="Knowledge Chunk Embedding">
+                <sheet>
+                    <group>
+                        <field name="chunk_id" />
+                        <field
+              name="embedding_model_id"
+              options="{'no_create': True}"
+            />
+                        <field name="resource_id" readonly="1" />
+                        <field
+              name="collection_ids"
+              widget="many2many_tags"
+              readonly="1"
+            />
+                    </group>
+                    <group string="Embedding Data" name="embedding_data">
+                        <field name="embedding" readonly="1" />
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- Search View for Chunk Embeddings -->
+    <record id="view_llm_knowledge_chunk_embedding_search" model="ir.ui.view">
+        <field name="name">llm.knowledge.chunk.embedding.search</field>
+        <field name="model">llm.knowledge.chunk.embedding</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="chunk_id" />
+                <field name="embedding_model_id" />
+                <field name="resource_id" />
+                <field name="collection_ids" />
+                <group expand="0" string="Group By">
+                    <filter
+            string="Embedding Model"
+            name="group_by_model"
+            domain="[]"
+            context="{'group_by':'embedding_model_id'}"
+          />
+                    <filter
+            string="Resource"
+            name="group_by_resource"
+            domain="[]"
+            context="{'group_by':'resource_id'}"
+          />
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Action for Chunk Embeddings -->
+    <record
+    id="action_llm_knowledge_chunk_embedding"
+    model="ir.actions.act_window"
+  >
+        <field name="name">Chunk Embeddings</field>
+        <field name="res_model">llm.knowledge.chunk.embedding</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p
+        class="o_view_nocontent_smiling_face"
+      >No chunk embeddings found</p>
+            <p
+      >Chunk embeddings store vector representations of knowledge chunks for semantic search.</p>
+        </field>
+    </record>
+</odoo>

@@ -266,8 +266,13 @@ class LLMPrompt(models.Model):
             # Text format doesn't need validation
         except (json.JSONDecodeError, yaml.YAMLError) as e:
             raise ValidationError(
-                _("Rendered template doesn't match %s format: %s")
-                % (self.format.upper(), str(e))
+                _(
+                    "The rendered template is not valid %s.\n\n"
+                    "Please check your template syntax and ensure it produces valid %s "
+                    "output after variable substitution.\n\n"
+                    "Error: %s"
+                )
+                % (self.format.upper(), self.format.upper(), str(e))
             ) from e
 
     def get_prompt_data(self):
@@ -362,9 +367,15 @@ class LLMPrompt(models.Model):
                 messages = list(self._parse_dict_messages(json.loads(rendered_content)))
             else:
                 raise ValidationError(
-                    _("Unsupported template format: %s") % self.format
+                    _(
+                        "The template format '%s' is not supported. "
+                        "Please use Text, YAML, or JSON format."
+                    )
+                    % self.format
                 )
-        except Exception as e:
+        except ValidationError:
+            raise
+        except (json.JSONDecodeError, yaml.YAMLError) as e:
             _logger.error(
                 "Error parsing %s rendered content for prompt %s: %s",
                 self.format,
@@ -372,8 +383,16 @@ class LLMPrompt(models.Model):
                 str(e),
             )
             raise ValidationError(
-                _("Error parsing %s rendered content: %s") % (self.format, str(e))
-            )
+                _(
+                    "Could not parse the rendered %s content. The template may have "
+                    "syntax errors or produce invalid output.\n\n"
+                    "Tips:\n"
+                    "• For YAML: Check indentation and special characters\n"
+                    "• For JSON: Ensure quotes and brackets are balanced\n\n"
+                    "Details: %s"
+                )
+                % (self.format.upper(), str(e))
+            ) from e
 
         return messages
 
@@ -482,7 +501,13 @@ class LLMPrompt(models.Model):
         # Check for required arguments
         for arg_name, arg_schema in schema.items():
             if arg_schema.get("required", False) and arg_name not in arguments:
-                raise ValidationError(_("Missing required argument: %s") % arg_name)
+                raise ValidationError(
+                    _(
+                        "The required argument '%s' is missing. "
+                        "Please provide a value for this argument before running the prompt."
+                    )
+                    % arg_name
+                )
 
     @api.model
     def _extract_arguments_from_template(self, template_content):

@@ -11,13 +11,15 @@ import { useService } from "@web/core/utils/hooks";
 patch(Thread.prototype, {
   setup() {
     super.setup();
-    this._llmStore = null;
+    // v17: useService must be called in setup(), not lazily
+    try {
+      this._llmStore = useService("llm.store");
+    } catch (error) {
+      this._llmStore = null;
+    }
   },
 
   get llmStore() {
-    if (!this._llmStore && this.isLLMThread) {
-      this._llmStore = useService("llm.store");
-    }
     return this._llmStore;
   },
 
@@ -38,6 +40,8 @@ patch(Thread.prototype, {
 
   /**
    * Override getMessageClass to add LLM-specific styling
+   * @param {Object} message - Message object
+   * @returns {String} CSS class names for the message
    */
   getMessageClass(message) {
     let className = super.getMessageClass ? super.getMessageClass(message) : "";
@@ -56,6 +60,8 @@ patch(Thread.prototype, {
 
   /**
    * Override message rendering for LLM threads
+   * @param {Object} message - Message object
+   * @returns {String} Rendered message HTML
    */
   renderMessage(message) {
     if (this.isLLMThread) {
@@ -108,15 +114,18 @@ patch(Thread.prototype, {
   /**
    * Override isSquashed to prevent squashing messages with different LLM roles
    * This ensures user, assistant, and tool messages appear in separate bubbles
+   * @param {Object} msg - Current message
+   * @param {Object} prevMsg - Previous message
+   * @returns {Boolean} Whether messages should be squashed together
    */
   isSquashed(msg, prevMsg) {
     // For LLM threads, don't squash messages with different roles
     if (this.isLLMThread && prevMsg && msg.llm_role && prevMsg.llm_role) {
       if (msg.llm_role === prevMsg.llm_role) {
-        return true; // Different LLM roles should not be squashed
+        // Different LLM roles should not be squashed
+        return true;
       }
-        return false;
-
+      return false;
     }
 
     // Use original squashing logic for everything else

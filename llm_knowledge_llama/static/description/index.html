@@ -1,0 +1,440 @@
+<section style="padding:4rem 0 3rem">
+    <div class="container">
+        <div class="text-center" style="max-width:800px; margin:0 auto">
+            <div style="display:inline-flex; padding:0.5rem 1.25rem; border-radius:50px; margin-bottom:2rem">
+                <i class="fa fa-sitemap" style="color:#71639e; font-size:1.25rem; margin-right:0.5rem"></i>
+                <span style="color:#71639e; font-weight:600; font-size:0.9rem">Advanced RAG Chunking</span>
+            </div>
+
+            <h1 style="font-size:3rem; font-weight:800; color:#212529; margin-bottom:1.5rem; line-height:1.2">
+                Smart Chunking for<br>
+                <span style="color:#71639e">Better AI Answers</span>
+            </h1>
+
+            <p style="font-size:1.25rem; color:#6c757d; margin-bottom:2rem; line-height:1.6">
+                Upgrade your RAG pipeline with LlamaIndex's advanced chunking. Parse markdown while preserving structure, create semantic chunks, and get more accurate AI retrieval.
+            </p>
+
+            <div class="d-flex justify-content-center gap-3" style="margin-bottom:3rem">
+                <a href="#how-it-works" class="btn btn-primary" style="background-color:#71639e; border-color:#71639e; padding:0.75rem 2rem; font-weight:600; border-radius:8px">
+                    See How It Works
+                </a>
+            </div>
+
+            <div class="row g-4" style="margin-top:2rem">
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center justify-content-center flex-column">
+                        <i class="fa fa-code" style="font-size:2rem; color:#71639e; margin-bottom:0.5rem"></i>
+                        <div style="font-size:1.75rem; font-weight:700; color:#212529">Markdown</div>
+                        <div style="color:#6c757d">Structure Preserved</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center justify-content-center flex-column">
+                        <i class="fa fa-cubes" style="font-size:2rem; color:#71639e; margin-bottom:0.5rem"></i>
+                        <div style="font-size:1.75rem; font-weight:700; color:#212529">Semantic</div>
+                        <div style="color:#6c757d">Chunking</div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex align-items-center justify-content-center flex-column">
+                        <i class="fa fa-bullseye" style="font-size:2rem; color:#71639e; margin-bottom:0.5rem"></i>
+                        <div style="font-size:1.75rem; font-weight:700; color:#212529">Better</div>
+                        <div style="color:#6c757d">Retrieval</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Problem/Solution -->
+<section class="mb-5" style="background-color:#f8f9fa; padding:4rem 0">
+    <div class="container">
+        <h2 class="text-center mb-5" style="font-size:2.5rem; font-weight:700; color:#212529">Why Basic Chunking Fails</h2>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border-danger h-100" style="border-width:2px; border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fa fa-times-circle" style="font-size:2rem; color:#dc3545; margin-right:1rem"></i>
+                            <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin:0">Basic Chunking</h3>
+                        </div>
+                        <ul style="color:#6c757d; font-size:0.95rem; line-height:1.8; margin-bottom:0">
+                            <li>Splits at arbitrary character limits (500, 1000 chars)</li>
+                            <li>Breaks in the middle of sentences or code blocks</li>
+                            <li>Loses markdown structure (headers, lists, formatting)</li>
+                            <li>Creates chunks without semantic meaning</li>
+                            <li>AI retrieves incomplete or broken context</li>
+                            <li>Poor accuracy for technical documentation</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-success h-100" style="border-width:2px; border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <i class="fa fa-check-circle" style="font-size:2rem; color:#28a745; margin-right:1rem"></i>
+                            <h3 style="font-size:1.5rem; font-weight:700; color:#212529; margin:0">LlamaIndex Chunking</h3>
+                        </div>
+                        <ul style="color:#6c757d; font-size:0.95rem; line-height:1.8; margin-bottom:0">
+                            <li>Understands markdown structure (headers, lists, code)</li>
+                            <li>Splits at natural semantic boundaries</li>
+                            <li>Preserves complete sections with their context</li>
+                            <li>Creates meaningful, self-contained chunks</li>
+                            <li>AI retrieves accurate, complete information</li>
+                            <li>Optimized for technical and structured content</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="mb-5" id="how-it-works">
+    <div class="container">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">How It Works</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d; max-width:700px; margin:0 auto">LlamaIndex analyzes your markdown documents and creates intelligent chunks that preserve structure and semantic meaning</p>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1.5rem">
+                            <span style="font-size:1.5rem; font-weight:700; color:#71639e">1</span>
+                        </div>
+                        <h4 style="font-weight:700; color:#212529; margin-bottom:1rem">Parse Markdown</h4>
+                        <p style="color:#6c757d; font-size:0.9rem; line-height:1.6">LlamaIndex analyzes document structure: headers, lists, code blocks, paragraphs</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1.5rem">
+                            <span style="font-size:1.5rem; font-weight:700; color:#71639e">2</span>
+                        </div>
+                        <h4 style="font-weight:700; color:#212529; margin-bottom:1rem">Identify Boundaries</h4>
+                        <p style="color:#6c757d; font-size:0.9rem; line-height:1.6">Find natural semantic boundaries: section breaks, topic changes, complete thoughts</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1.5rem">
+                            <span style="font-size:1.5rem; font-weight:700; color:#71639e">3</span>
+                        </div>
+                        <h4 style="font-weight:700; color:#212529; margin-bottom:1rem">Create Chunks</h4>
+                        <p style="color:#6c757d; font-size:0.9rem; line-height:1.6">Split into self-contained chunks that preserve context and structure</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4 text-center">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin:0 auto 1.5rem">
+                            <span style="font-size:1.5rem; font-weight:700; color:#71639e">4</span>
+                        </div>
+                        <h4 style="font-weight:700; color:#212529; margin-bottom:1rem">Better Retrieval</h4>
+                        <p style="color:#6c757d; font-size:0.9rem; line-height:1.6">AI finds complete, accurate context leading to better answers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Visual Example -->
+<section class="mb-5" style="background-color:#f8f9fa; padding:4rem 0">
+    <div class="container">
+        <h2 class="text-center mb-4" style="font-size:2.5rem; font-weight:700; color:#71639e">See The Difference</h2>
+        <p class="text-center mb-5" style="font-size:1.1rem; color:#6c757d">Same markdown document, two different chunking approaches</p>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <h4 class="mb-3" style="font-weight:700; color:#dc3545">
+                    <i class="fa fa-times-circle"></i> Basic Chunking
+                </h4>
+                <div class="card border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-dark" style="padding:1.5rem; border-radius:8px; font-family:monospace; font-size:0.85rem; color:#e9ecef">
+<div style="margin-bottom:1rem"># Installation Guide</div>
+<div style="margin-bottom:1rem">To install the package, run:</div>
+<div style="margin-bottom:1rem; color:#4ade80">pip install mypacka<span style="color:#dc3545">&larr; BROKEN</span></div>
+                        </div>
+                        <div class="alert alert-danger mt-3 mb-0" style="font-size:0.85rem; border-radius:8px">
+                            <strong>Problem:</strong> Split mid-sentence at 500 char limit. Lost context and broke code example.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h4 class="mb-3" style="font-weight:700; color:#28a745">
+                    <i class="fa fa-check-circle"></i> LlamaIndex Chunking
+                </h4>
+                <div class="card border-0 shadow-sm" style="border-radius:12px">
+                    <div class="card-body p-4">
+                        <div class="bg-dark" style="padding:1.5rem; border-radius:8px; font-family:monospace; font-size:0.85rem; color:#e9ecef">
+<div style="margin-bottom:1rem"># Installation Guide</div>
+<div style="margin-bottom:1rem">To install the package, run:</div>
+<div style="margin-bottom:1rem; color:#4ade80">pip install mypackage</div>
+<div style="margin-bottom:0">This will install all dependencies.</div>
+                        </div>
+                        <div class="alert alert-success mt-3 mb-0" style="font-size:0.85rem; border-radius:8px">
+                            <strong>Success:</strong> Complete section preserved. Code block intact. Full context maintained.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Key Features -->
+<section class="mb-5">
+    <div class="container">
+        <h2 class="text-center mb-5" style="font-size:2.5rem; font-weight:700; color:#71639e">Key Features</h2>
+
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-file-code-o" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Markdown Parsing</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7">Understands markdown structure: headers, lists, code blocks, tables. Preserves formatting and hierarchy.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-puzzle-piece" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Semantic Chunking</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7">Splits at natural boundaries, not arbitrary character limits. Each chunk is a complete, meaningful unit.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-bullseye" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Better Accuracy</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7">AI retrieves complete context with full sentences, code examples, and relevant sections intact.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-cogs" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">LlamaIndex Integration</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7">Powered by LlamaIndex's proven node parsing algorithms used by thousands of RAG applications.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-book" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Documentation Optimized</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7">Designed for technical docs, API references, knowledge bases, and structured content.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="bg-light d-flex align-items-center justify-content-center" style="width:56px; height:56px; border-radius:12px; margin-bottom:1.5rem">
+                            <i class="fa fa-plug" style="font-size:28px; color:#71639e"></i>
+                        </div>
+                        <h3 style="font-size:1.25rem; font-weight:700; color:#212529; margin-bottom:1rem">Drop-in Upgrade</h3>
+                        <p style="color:#6c757d; font-size:0.95rem; line-height:1.7">Works with your existing LLM Knowledge setup. Install and your chunking automatically improves.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Use Cases -->
+<section class="mb-5" style="background-color:#f8f9fa; padding:4rem 0">
+    <div class="container">
+        <h2 class="text-center mb-5" style="font-size:2.5rem; font-weight:700; color:#71639e">Perfect For</h2>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fa fa-code" style="font-size:2rem; color:#71639e; margin-right:1.5rem"></i>
+                            <div>
+                                <h4 style="font-weight:700; color:#212529; margin-bottom:1rem">Technical Documentation</h4>
+                                <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:1rem">
+                                    API docs, developer guides, installation instructions. Preserve code examples, command snippets, and configuration blocks.
+                                </p>
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <p style="margin:0; font-size:0.85rem; color:#495057"><strong>Example:</strong> "How do I install the SDK?" &rarr; AI returns complete installation section with all commands intact</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fa fa-book" style="font-size:2rem; color:#71639e; margin-right:1.5rem"></i>
+                            <div>
+                                <h4 style="font-weight:700; color:#212529; margin-bottom:1rem">Knowledge Bases</h4>
+                                <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:1rem">
+                                    Company wikis, training materials, process documentation. Maintain hierarchical structure and complete procedures.
+                                </p>
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <p style="margin:0; font-size:0.85rem; color:#495057"><strong>Example:</strong> "What's our deployment process?" &rarr; AI retrieves entire step-by-step procedure with all sub-steps</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fa fa-graduation-cap" style="font-size:2rem; color:#71639e; margin-right:1.5rem"></i>
+                            <div>
+                                <h4 style="font-weight:700; color:#212529; margin-bottom:1rem">Educational Content</h4>
+                                <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:1rem">
+                                    Tutorials, courses, learning materials. Keep examples and explanations together for better comprehension.
+                                </p>
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <p style="margin:0; font-size:0.85rem; color:#495057"><strong>Example:</strong> "Explain recursion" &rarr; AI shows complete concept with code example and explanation in one chunk</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100" style="border-radius:16px">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-start">
+                            <i class="fa fa-file-text-o" style="font-size:2rem; color:#71639e; margin-right:1.5rem"></i>
+                            <div>
+                                <h4 style="font-weight:700; color:#212529; margin-bottom:1rem">Structured Reports</h4>
+                                <p style="color:#6c757d; font-size:0.95rem; line-height:1.7; margin-bottom:1rem">
+                                    Research papers, specifications, long-form content. Preserve section organization and maintain context across subsections.
+                                </p>
+                                <div class="bg-light" style="padding:1rem; border-radius:8px">
+                                    <p style="margin:0; font-size:0.85rem; color:#495057"><strong>Example:</strong> "What were the Q3 findings?" &rarr; AI retrieves complete quarterly section with all data points</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Installation -->
+<section class="mb-5">
+    <div class="container">
+        <h2 class="text-center mb-5" style="font-size:2.5rem; font-weight:700; color:#71639e">Get Started</h2>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-sm" style="border-radius:16px">
+                    <div class="card-body p-5">
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:40px; height:40px; border-radius:8px; margin-right:1rem">
+                                    <span style="font-weight:700; color:#71639e">1</span>
+                                </div>
+                                <h4 style="font-weight:700; color:#212529; margin:0">Install Python Dependencies</h4>
+                            </div>
+                            <div class="bg-dark" style="padding:1rem; border-radius:8px; margin-left:3.5rem">
+                                <code style="color:#4ade80; font-family:monospace">pip install llama_index nltk</code>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:40px; height:40px; border-radius:8px; margin-right:1rem">
+                                    <span style="font-weight:700; color:#71639e">2</span>
+                                </div>
+                                <h4 style="font-weight:700; color:#212529; margin:0">Install Module in Odoo</h4>
+                            </div>
+                            <p style="color:#6c757d; margin-left:3.5rem; margin-bottom:0">
+                                Apps &rarr; Search "LLM Knowledge LlamaIndex" &rarr; Install
+                            </p>
+                        </div>
+
+                        <div class="mb-0">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-light d-flex align-items-center justify-content-center" style="width:40px; height:40px; border-radius:8px; margin-right:1rem">
+                                    <span style="font-weight:700; color:#71639e">3</span>
+                                </div>
+                                <h4 style="font-weight:700; color:#212529; margin:0">Automatic Upgrade</h4>
+                            </div>
+                            <p style="color:#6c757d; margin-left:3.5rem; margin-bottom:0">
+                                Your existing knowledge collections now use LlamaIndex chunking. Process new resources to see improved accuracy.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="alert alert-info mt-4" style="border-radius:12px; border-color:#71639e; background-color:#f8f4fc">
+                    <div class="d-flex align-items-start">
+                        <i class="fa fa-info-circle" style="font-size:1.5rem; color:#71639e; margin-right:1rem; margin-top:0.25rem"></i>
+                        <div>
+                            <h5 style="font-weight:700; color:#71639e; margin-bottom:0.5rem">Requirements</h5>
+                            <p style="margin:0; color:#495057">Requires <strong>LLM Knowledge</strong> module. Works with any vector store (pgvector, Qdrant, Chroma).</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<section style="background-color:#212529; color:#ffffff; padding:3rem 0">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h4 style="font-weight:700; margin-bottom:1rem">LLM Knowledge LlamaIndex</h4>
+                <p style="color:#adb5bd; margin-bottom:1.5rem">Advanced RAG chunking for better AI retrieval accuracy</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <h5 style="font-weight:600; margin-bottom:1rem">Need Help?</h5>
+                <p style="margin-bottom:0.5rem">
+                    <i class="fa fa-envelope" style="margin-right:0.5rem"></i>
+                    <span style="color:#adb5bd">Email: </span>
+                    <span style="color:#71639e">info@apexive.com</span>
+                </p>
+                <p style="margin-bottom:0">
+                    <i class="fa fa-github" style="margin-right:0.5rem"></i>
+                    <span style="color:#adb5bd">GitHub: </span>
+                    <span style="color:#71639e">github.com/apexive/odoo-llm</span>
+                </p>
+            </div>
+        </div>
+    </div>
+</section>

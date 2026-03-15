@@ -1,0 +1,46 @@
+.o_LLMRelatedRecord {
+  display: inline-block;
+
+  .btn-group {
+    .btn {
+      white-space: nowrap;
+
+      &:hover {
+        z-index: 1;
+      }
+    }
+
+    .text-truncate {
+      display: inline-block;
+      vertical-align: middle;
+    }
+  }
+}
+
+.o_RecordPickerDialog {
+  .record-results {
+    .list-group-item {
+      cursor: pointer;
+      transition: background-color 0.15s ease-in-out;
+
+      &:hover {
+        background-color: var(--bs-light);
+      }
+
+      &.active {
+        background-color: var(--bs-primary);
+        color: var(--bs-white);
+        border-color: var(--bs-primary);
+
+        .text-muted {
+          color: rgba(255, 255, 255, 0.7) !important;
+        }
+      }
+    }
+  }
+
+  .spinner-border {
+    width: 1rem;
+    height: 1rem;
+  }
+}

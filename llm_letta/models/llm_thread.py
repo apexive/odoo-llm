@@ -1,7 +1,7 @@
 import logging
 from datetime import datetime, timedelta
 
-from odoo import api, fields, models
+from odoo import _, api, fields, models
 from odoo.exceptions import UserError
 
 # Import render_template from llm_assistant utils
@@ -144,13 +144,12 @@ class LLMThread(models.Model):
                 )
 
             modify_params = {
-                "agent_id": thread.external_id,
                 "model": thread.model_id.name,
             }
             if system_instruction:
                 modify_params["system"] = system_instruction
 
-            client.agents.modify(**modify_params)
+            client.agents.update(thread.external_id, **modify_params)
         else:
             # No agent exists - create one
             agent_id = self._create_letta_agent(thread)
@@ -254,8 +253,14 @@ class LLMThread(models.Model):
         embedding = thread.provider_id.letta_get_embedding_model()
         if not embedding:
             raise UserError(
-                f"No embedding models found for Letta provider '{thread.provider_id.name}'. "
-                "Please run 'Fetch Models' first to import available embedding models."
+                _(
+                    "No embedding models are configured for the Letta provider '%s'.\n\n"
+                    "To fix this:\n"
+                    "1. Go to LLM → Configuration → Providers\n"
+                    "2. Select the '%s' provider\n"
+                    "3. Click 'Fetch Models' to import available models"
+                )
+                % (thread.provider_id.name, thread.provider_id.name)
             )
 
         # Build full configuration
@@ -351,14 +356,16 @@ class LLMThread(models.Model):
         self.ensure_one()
 
         if self.provider_id.service != "letta":
-            raise UserError("This thread is not configured for Letta provider")
+            raise UserError(
+                _("This action is only available for Letta-powered conversations.")
+            )
 
         agent_id = self.external_id
 
         # Verify agent exists in Letta
         if agent_id:
             client = self.provider_id.letta_get_client()
-            client.agents.retrieve(agent_id=agent_id)
+            client.agents.retrieve(agent_id)
             return agent_id
 
         # Create new agent if needed
@@ -367,7 +374,12 @@ class LLMThread(models.Model):
             if agent_id:
                 self.external_id = agent_id
             else:
-                raise UserError("Failed to create Letta agent for this thread")
+                raise UserError(
+                    _(
+                        "Could not initialize the AI assistant for this conversation. "
+                        "Please check the provider configuration or contact your administrator."
+                    )
+                )
 
         return agent_id
 
@@ -376,10 +388,17 @@ class LLMThread(models.Model):
         self.ensure_one()
 
         if self.provider_id.service != "letta":
-            raise UserError("This action is only available for Letta threads")
+            raise UserError(
+                _("This action is only available for Letta-powered conversations.")
+            )
 
         if not self.external_id:
-            raise UserError("No Letta agent found for this thread")
+            raise UserError(
+                _(
+                    "The AI assistant for this conversation is not available. "
+                    "Please refresh or start a new conversation."
+                )
+            )
 
         self.provider_id.letta_sync_agent_tools(self.external_id, self.tool_ids)
         return {

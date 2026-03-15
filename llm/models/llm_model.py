@@ -82,14 +82,7 @@ class LLMModel(models.Model):
 
     def action_open_fetch_this_model_wizard(self):
         self.ensure_one()
-        return {
-            "type": "ir.actions.act_window",
-            "name": f"Fetch Update for {self.name}",
-            "res_model": "llm.fetch.models.wizard",
-            "view_mode": "form",
-            "target": "new",
-            "context": {
-                "default_provider_id": self.provider_id.id,
-                "default_model_to_fetch": self.name,
-            },
-        }
+        # Call the provider's action_fetch_models with context for specific model
+        return self.provider_id.with_context(
+            default_model_to_fetch=self.name
+        ).action_fetch_models()
