@@ -645,29 +645,23 @@ class LLMThread(models.Model):
     # STORE INTEGRATION - For mail.store compatibility
     # ============================================================================
 
-    def _thread_to_store(self, store, **kwargs):
-        """Extend base _thread_to_store to include LLM-specific fields."""
-        super()._thread_to_store(store, **kwargs)
-
-        # Add LLM-specific thread data
+    def _thread_to_store_info(self):
+        """Get LLM thread data as list of dicts for frontend consumption."""
+        result = []
         for thread in self:
-            # Build the data dict with only the fields we need
             thread_data = {
                 "id": thread.id,
                 "model": "llm.thread",
-                "name": thread.name,  # Essential for UI display
-                "write_date": thread.write_date,  # For sorting in thread list
-                "channel_type": "llm_chat",  # Custom type for LLM threads
+                "name": thread.name,
+                "write_date": str(thread.write_date) if thread.write_date else False,
+                "channel_type": "llm_chat",
             }
 
-            # Related record fields (for linking threads to Odoo records)
-            # Use res_model to avoid conflict with "model": "llm.thread"
             if thread.model:
                 thread_data["res_model"] = thread.model
             if thread.res_id:
                 thread_data["res_id"] = thread.res_id
 
-            # Add LLM-specific fields using proper Store.one/Store.many format
             if thread.provider_id:
                 thread_data["provider_id"] = {
                     "id": thread.provider_id.id,
@@ -688,7 +682,8 @@ class LLMThread(models.Model):
                     for tool in thread.tool_ids
                 ]
 
-            store.add("mail.thread", thread_data)
+            result.append(thread_data)
+        return result
 
     @api.ondelete(at_uninstall=False)
     def _unlink_llm_thread(self):

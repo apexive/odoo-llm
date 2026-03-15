@@ -5,7 +5,7 @@
             <field name="name">llm.generation.queue.tree</field>
             <field name="model">llm.generation.queue</field>
             <field name="arch" type="xml">
-                <list
+                <tree
         decoration-success="queue_health == 'healthy'"
         decoration-warning="queue_health == 'warning'"
         decoration-danger="queue_health == 'critical'"
@@ -21,7 +21,7 @@
                     <field name="total_jobs_today" />
                     <field name="success_rate" widget="percentage" />
                     <field name="last_processed_at" />
-                </list>
+                </tree>
             </field>
         </record>
 
@@ -173,7 +173,7 @@
                   readonly="1"
                   nolabel="1"
                 >
-                                    <list
+                                    <tree
                     decoration-info="state == 'queued'"
                     decoration-warning="state == 'running'"
                     decoration-success="state == 'completed'"
@@ -189,7 +189,7 @@
                       widget="float_time"
                     />
                                         <field name="retry_count" />
-                                    </list>
+                                    </tree>
                                 </field>
                                 </group>
                             </page>
@@ -257,7 +257,7 @@
                     <field name="max_concurrent_jobs" />
                     <field name="success_rate" />
                     <templates>
-                        <t t-name="card">
+                        <t t-name="kanban-box">
                             <div class="oe_kanban_card oe_kanban_global_click">
                                 <div class="oe_kanban_content">
                                     <div class="row">
@@ -330,7 +330,7 @@
         <record id="action_llm_generation_queue" model="ir.actions.act_window">
             <field name="name">Generation Queues</field>
             <field name="res_model">llm.generation.queue</field>
-            <field name="view_mode">list,kanban,form</field>
+            <field name="view_mode">tree,kanban,form</field>
             <field name="view_id" ref="view_llm_generation_queue_tree" />
             <field
       name="search_view_id"

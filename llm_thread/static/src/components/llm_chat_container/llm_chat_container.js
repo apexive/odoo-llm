@@ -23,6 +23,7 @@ export class LLMChatContainer extends Component {
     this.llmStore = useState(useService("llm.store"));
     this.mailStore = useState(useService("mail.store"));
     this.action = useService("action");
+    this.orm = useService("orm");
     this.ui = useState(useService("ui")); // Wrap with useState to make it reactive
 
     // Reference to the scrollable thread container for proper jump-to-present behavior
@@ -211,14 +212,13 @@ export class LLMChatContainer extends Component {
       },
       {
         onClose: async () => {
-          // Refresh thread data after closing form
-          await this.activeThread.fetchData([
-            "name",
-            "provider_id",
-            "model_id",
-            "tool_ids",
-            "assistant_id",
+          // v17: Refresh thread data after closing form by re-reading from ORM
+          const threadData = await this.orm.read("llm.thread", [this.activeThread.id], [
+            "name", "provider_id", "model_id",
           ]);
+          if (threadData.length > 0) {
+            Object.assign(this.activeThread, threadData[0]);
+          }
         },
       }
     );

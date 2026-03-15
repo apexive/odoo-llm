@@ -84,14 +84,14 @@ https://example.com/document2.html"
                 readonly="1"
               >
                                  <!-- Tree displays llm.resource fields -->
-                                <list>
+                                <tree>
                                     <field name="name" />
                                     <field name="res_model" />
                                     <field name="res_id" />
                                     <field name="state" />
                                      <!-- Add chunk_count if desired -->
                                     <!-- <field name="chunk_count"/> -->
-                                </list>
+                                </tree>
                             </field>
                         </group>
                     </div>

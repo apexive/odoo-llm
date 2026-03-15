@@ -1,6 +1,6 @@
 {
     "name": "LLM Tool Website",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": "Productivity/LLM",
     "summary": "31 AI-powered website tools: pages, content, media, menus, "
     "SEO, redirects, visitor analytics, and configuration",

@@ -60,7 +60,7 @@ export class LLMThreadHeader extends Component {
 
     // Return provider from our Map or directly from thread if available
     return (
-      this.llmStore.llmProviders?.get(providerId) ||
+      this.llmStore.llmProviders?.[providerId] ||
       this.activeThread.provider_id
     );
   }
@@ -77,14 +77,14 @@ export class LLMThreadHeader extends Component {
     if (!modelId) return null;
 
     // Return model from our Map or directly from thread if available
-    return this.llmStore.llmModels?.get(modelId) || this.activeThread.model_id;
+    return this.llmStore.llmModels?.[modelId] || this.activeThread.model_id;
   }
 
   /**
    * Get available providers
    */
   get availableProviders() {
-    return Array.from(this.llmStore.llmProviders.values());
+    return Object.values(this.llmStore.llmProviders);
   }
 
   /**
@@ -94,7 +94,7 @@ export class LLMThreadHeader extends Component {
     if (!this.currentProvider) return [];
 
     // Filter models by provider
-    const models = Array.from(this.llmStore.llmModels.values()).filter(
+    const models = Object.values(this.llmStore.llmModels).filter(
       (model) => {
         const modelProviderId = Array.isArray(model.provider_id)
           ? model.provider_id[0]
@@ -126,9 +126,9 @@ export class LLMThreadHeader extends Component {
     return toolIds
       .map((tool) => {
         if (typeof tool === "object" && tool.id) {
-          return this.llmStore.llmTools?.get(tool.id) || tool;
+          return this.llmStore.llmTools?.[tool.id] || tool;
         }
-        return this.llmStore.llmTools?.get(tool);
+        return this.llmStore.llmTools?.[tool];
       })
       .filter(Boolean);
   }
@@ -138,7 +138,7 @@ export class LLMThreadHeader extends Component {
    */
   get availableTools() {
     return this.llmStore.llmTools
-      ? Array.from(this.llmStore.llmTools.values())
+      ? Object.values(this.llmStore.llmTools)
       : [];
   }
 
@@ -180,7 +180,8 @@ export class LLMThreadHeader extends Component {
       });
 
       // Reload thread data using proper fetchData pattern
-      await this.activeThread.fetchData(["name"]);
+      // v17: fetchData doesn't support custom fields, update thread directly
+      this.activeThread.name = this.state.pendingName.trim();
 
       this.state.isEditingName = false;
       this.state.pendingName = "";
@@ -232,7 +233,7 @@ export class LLMThreadHeader extends Component {
       this.state.isLoadingUpdate = true;
 
       // Get default model for this provider
-      const models = Array.from(this.llmStore.llmModels.values()).filter(
+      const models = Object.values(this.llmStore.llmModels).filter(
         (m) => m.provider_id[0] === provider.id
       );
       const defaultModel = models.find((m) => m.is_default) || models[0];
@@ -248,8 +249,11 @@ export class LLMThreadHeader extends Component {
       // Update via ORM
       await this.orm.write("llm.thread", [this.activeThread.id], updateData);
 
-      // Reload thread data using proper fetchData pattern
-      await this.activeThread.fetchData(["provider_id", "model_id"]);
+      // v17: Update thread data locally after ORM write
+      this.activeThread.provider_id = { id: provider.id, name: provider.name };
+      if (defaultModel) {
+        this.activeThread.model_id = { id: defaultModel.id, name: defaultModel.name };
+      }
     } catch (error) {
       this.notification.add(
         _t("Could not change the AI provider. Please try again."),
@@ -280,8 +284,8 @@ export class LLMThreadHeader extends Component {
         model_id: model.id,
       });
 
-      // Reload thread data using proper fetchData pattern
-      await this.activeThread.fetchData(["model_id"]);
+      // v17: Update thread data locally after ORM write
+      this.activeThread.model_id = { id: model.id, name: model.name };
 
       // Clear search
       this.state.modelSearchQuery = "";
@@ -340,8 +344,7 @@ export class LLMThreadHeader extends Component {
       // Immediately update local state to ensure UI reflects change
       this.activeThread.tool_ids = newToolIds;
 
-      // Reload thread data using proper fetchData pattern
-      await this.activeThread.fetchData(["tool_ids"]);
+      // v17: Local state already updated above (this.activeThread.tool_ids = newToolIds)
     } catch (error) {
       this.notification.add(
         _t("Could not update the enabled tools. Please try again."),

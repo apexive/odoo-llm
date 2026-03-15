@@ -5,7 +5,12 @@ from pgvector import Vector
 from pgvector.psycopg2 import register_vector
 
 from odoo import fields, tools
-from odoo.tools.misc import SENTINEL, Sentinel
+
+# v17: SENTINEL doesn't exist, use a simple sentinel object
+class _Sentinel:
+    pass
+
+SENTINEL = _Sentinel()
 
 _logger = logging.getLogger(__name__)
 
@@ -27,7 +32,7 @@ class PgVector(fields.Field):
     }
 
     def __init__(
-        self, string: str | Sentinel = SENTINEL, dimension: int | None = None, **kwargs
+        self, string=SENTINEL, dimension=None, **kwargs
     ):
         super().__init__(string=string, dimension=dimension, **kwargs)
 

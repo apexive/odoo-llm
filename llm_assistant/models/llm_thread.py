@@ -159,32 +159,32 @@ class LLMThread(models.Model):
 
         return thread, assistant, None
 
-    def _thread_to_store(self, store, **kwargs):
-        """Extend base _thread_to_store to include assistant_id and prompt_id."""
-        super()._thread_to_store(store, **kwargs)
+    def _thread_to_store_info(self):
+        """Extend base _thread_to_store_info to include assistant_id and prompt_id."""
+        result = super()._thread_to_store_info()
 
-        # Always add assistant_id and prompt_id to thread data (either value or False)
-        for thread in self:
-            thread_data = {
-                "id": thread.id,
-                "model": "llm.thread",
-                "assistant_id": {
+        # Add assistant_id and prompt_id to each thread data dict
+        for thread, thread_data in zip(self, result):
+            thread_data["assistant_id"] = (
+                {
                     "id": thread.assistant_id.id,
                     "name": thread.assistant_id.name,
                     "model": "llm.assistant",
                 }
                 if thread.assistant_id
-                else False,
-                # prompt_id is defined in this module, so handle it here
-                "prompt_id": {
+                else False
+            )
+            thread_data["prompt_id"] = (
+                {
                     "id": thread.prompt_id.id,
                     "name": thread.prompt_id.name,
                     "model": "llm.prompt",
                 }
                 if thread.prompt_id
-                else False,
-            }
-            store.add("mail.thread", thread_data)
+                else False
+            )
+
+        return result
 
     def _extract_message_content(self, message):
         """Extract text content from a message regardless of format"""

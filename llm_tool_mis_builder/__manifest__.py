@@ -1,6 +1,6 @@
 {
     "name": "LLM Tool MIS Builder",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": "Productivity/LLM",
     "summary": "44 AI-powered tools for MIS Builder: create KPIs, configure periods, "
     "compute reports, drill down, and analyze variances through natural language",

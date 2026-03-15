@@ -5,7 +5,7 @@
         <field name="name">llm.tool.tree</field>
         <field name="model">llm.tool</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="implementation" />
                 <field name="title" optional="show" />
@@ -14,7 +14,7 @@
                 <field name="requires_user_consent" />
                 <field name="read_only_hint" optional="hide" />
                 <field name="destructive_hint" optional="hide" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -175,7 +175,7 @@
     <record id="action_llm_tool" model="ir.actions.act_window">
         <field name="name">LLM Tools</field>
         <field name="res_model">llm.tool</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_active': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

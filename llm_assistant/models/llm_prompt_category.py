@@ -75,7 +75,7 @@ class LLMPromptCategory(models.Model):
 
     @api.constrains("parent_id")
     def _check_category_recursion(self):
-        if self._has_cycle():
+        if not self._check_recursion():
             raise models.ValidationError(
                 _("Error! You cannot create recursive categories.")
             )

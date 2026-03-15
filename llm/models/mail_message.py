@@ -228,15 +228,19 @@ class MailMessage(models.Model):
         return {message: message.llm_role == role for message in self}
 
     def to_store_format(self):
-        """Convert message to store format compatible with Odoo 18.0. Used by frontend js components"""
+        """Convert message to store format for frontend js components."""
         self.ensure_one()
-        from odoo.addons.mail.tools.discuss import Store
+        result = self.message_format()[0]
 
-        store = Store()
-        self._to_store(store)
-        result = store.get_result()
+        # Add LLM-specific fields that message_format doesn't include
+        if hasattr(self, "llm_role") and self.llm_role:
+            result["llm_role"] = self.llm_role
+        if hasattr(self, "user_vote"):
+            result["user_vote"] = self.user_vote
+        if hasattr(self, "body_json") and self.body_json:
+            result["body_json"] = self.body_json
 
-        return result["mail.message"][0]
+        return result
 
     def _get_attachments_by_mimetype(self, mimetypes):
         """Get attachments filtered by mimetype.

@@ -8,7 +8,9 @@ import { useService } from "@web/core/utils/hooks";
 
 /**
  * LLM Chat Client Action - Main entry point for LLM chat functionality
- * Follows Odoo 18.0 client action pattern similar to DiscussClientAction
+ *
+ * v17 adaptations:
+ * - Uses messagingService.isReady instead of mailStore.isReady
  */
 export class LLMChatClientAction extends Component {
   static components = { LLMChatContainer };
@@ -18,6 +20,7 @@ export class LLMChatClientAction extends Component {
   setup() {
     this.llmStore = useState(useService("llm.store"));
     this.mailStore = useState(useService("mail.store"));
+    this.messaging = useService("mail.messaging");
     this.orm = useService("orm");
     this.notification = useService("notification");
 
@@ -30,22 +33,14 @@ export class LLMChatClientAction extends Component {
     });
   }
 
-  /**
-   * Initialize LLM chat based on action context
-   * Similar to how DiscussClientAction handles thread restoration
-   * @param {Object} props - Component props
-   */
   async initializeLLMChat(props) {
     try {
-      // Wait for both mailStore and llmStore to be ready
-      // mailStore.isReady ensures threads are loaded via init_messaging
-      // llmStore.isReady ensures providers, models, tools are loaded
-      await Promise.all([this.mailStore.isReady, this.llmStore.isReady]);
+      // v17: Use messagingService.isReady + llmStore.isReady
+      await Promise.all([this.messaging.isReady, this.llmStore.isReady]);
 
       const activeId = this.getActiveId(props);
 
       if (!activeId) {
-        // No specific context, load user's recent threads
         await this.loadUserThreads();
         return;
       }
@@ -53,7 +48,6 @@ export class LLMChatClientAction extends Component {
       if (activeId.startsWith("llm.thread_")) {
         await this.handleThreadSelection(activeId);
       } else {
-        // Open form to create new LLM thread for the referenced record
         await this.openCreateThreadForm(props);
       }
     } catch (error) {
@@ -65,11 +59,6 @@ export class LLMChatClientAction extends Component {
     }
   }
 
-  /**
-   * Get active ID from action context, similar to DiscussClientAction
-   * @param {Object} props - Component props
-   * @returns {String|null} Active ID or null
-   */
   getActiveId(props) {
     return (
       props.action.context?.active_id ??
@@ -78,10 +67,6 @@ export class LLMChatClientAction extends Component {
     );
   }
 
-  /**
-   * Handle thread selection from activeId
-   * @param {String} activeId - Active ID string in format "llm.thread_123"
-   */
   async handleThreadSelection(activeId) {
     const threadId = parseInt(activeId.split("_")[1], 10);
     const existingThread = this.mailStore.Thread.get({
@@ -109,19 +94,10 @@ export class LLMChatClientAction extends Component {
     await this.selectLLMThread(threadId);
   }
 
-  /**
-   * Select an existing LLM thread - delegates to service
-   * @param {Number} threadId - Thread ID to select
-   */
   async selectLLMThread(threadId) {
-    // Use the consolidated service method
     await this.llmStore.selectThread(threadId);
   }
 
-  /**
-   * Open llm.thread form to create new thread for a specific record
-   * @param {Object} props - Component props
-   */
   async openCreateThreadForm(props) {
     try {
       const context = props.action.context || {};
@@ -136,7 +112,6 @@ export class LLMChatClientAction extends Component {
         views: [[false, "form"]],
         target: "new",
         context: {
-          // No default_name - backend will generate it from record.display_name
           default_model: resModel,
           default_res_id: resId,
         },
@@ -152,19 +127,13 @@ export class LLMChatClientAction extends Component {
     }
   }
 
-  /**
-   * Load user's existing LLM threads
-   */
   async loadUserThreads() {
     try {
-      // Threads are automatically loaded via init_messaging
-      // Just get the most recent one from mailStore
       const threads = this.llmStore.llmThreadList;
 
       if (threads.length > 0) {
         await this.selectLLMThread(threads[0].id);
       }
-      // No auto-creation - let user create threads via form
     } catch (error) {
       console.error("Error loading user threads:", error);
       this.notification.add(
@@ -176,16 +145,11 @@ export class LLMChatClientAction extends Component {
     }
   }
 
-  /**
-   * Cleanup when component is destroyed
-   */
   cleanup() {
-    // Stop any streaming
     this.llmStore.destroy();
   }
 }
 
-// Register client action
 registry
   .category("actions")
   .add("llm_thread.chat_client_action", LLMChatClientAction);

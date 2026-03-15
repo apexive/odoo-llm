@@ -5,12 +5,12 @@
         <field name="name">llm.knowledge.chunk.tree</field>
         <field name="model">llm.knowledge.chunk</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="resource_id" />
                 <field name="sequence" widget="handle" />
                 <field name="collection_ids" widget="many2many_tags" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -118,9 +118,9 @@
 <!--                    &lt;!&ndash; Show embeddings through the one2many relationship &ndash;&gt;-->
 <!--                    <group string="Embeddings" attrs="{'invisible': [('embedding_ids', '=', [])]}">-->
 <!--                        <field name="embedding_ids" readonly="1" nolabel="1">-->
-<!--                            <list>-->
+<!--                            <tree>-->
 <!--                                <field name="embedding_model_id"/>-->
-<!--                            </list>-->
+<!--                            </tree>-->
 <!--                        </field>-->
 <!--                    </group>-->
                 </sheet>
@@ -133,7 +133,7 @@
     <record id="action_llm_knowledge_chunk" model="ir.actions.act_window">
         <field name="name">Knowledge Chunks</field>
         <field name="res_model">llm.knowledge.chunk</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_similarity_medium': 1}</field>
         <field name="help" type="html">
             <p

@@ -61,13 +61,13 @@
         <field name="name">llm.model.view.tree</field>
         <field name="model">llm.model</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="provider_id" />
                 <field name="model_use" />
                 <field name="default" />
                 <field name="active" invisible="1" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -111,7 +111,7 @@
     <record id="llm_model_action" model="ir.actions.act_window">
         <field name="name">LLM Models</field>
         <field name="res_model">llm.model</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="context">{'active_test': False}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

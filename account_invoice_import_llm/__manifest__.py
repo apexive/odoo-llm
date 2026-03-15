@@ -6,7 +6,7 @@
         Extracts invoice data from PDFs and images when embedded XML is not available.
     """,
     "category": "Accounting/AI",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "depends": [
         "account_invoice_import",  # OCA invoice import wizard
         "llm_assistant",  # LLM infrastructure

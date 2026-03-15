@@ -88,11 +88,11 @@
                 name="dataset_ids"
                 readonly="state != 'draft'"
               >
-                                <list>
+                                <tree>
                                     <field name="name" />
                                     <field name="file_count" />
                                     <field name="example_count" />
-                                </list>
+                                </tree>
                             </field>
                         </page>
                         <page string="Description" name="description">
@@ -144,7 +144,7 @@
         <field name="name">llm.training.job.view.tree</field>
         <field name="model">llm.training.job</field>
         <field name="arch" type="xml">
-            <list
+            <tree
         decoration-info="state in ('draft', 'validating', 'preparing')"
         decoration-primary="state in ('queued', 'training')"
         decoration-success="state == 'completed'"
@@ -157,7 +157,7 @@
                 <field name="state" />
                 <field name="estimated_cost" />
                 <field name="active" invisible="1" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -226,7 +226,7 @@
     <record id="llm_training_job_action" model="ir.actions.act_window">
         <field name="name">LLM Training Jobs</field>
         <field name="res_model">llm.training.job</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first training job!

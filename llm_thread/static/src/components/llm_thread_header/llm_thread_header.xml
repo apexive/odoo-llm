@@ -61,134 +61,123 @@
                     <i class="fa fa-spinner fa-spin text-muted" />
                 </t>
 
-                <!-- Provider Dropdown -->
-                <Dropdown>
-                    <button
-            class="btn btn-sm btn-outline-secondary dropdown-toggle"
-          >
+                <!-- Provider Dropdown (v17 pattern: toggler slot + default slot) -->
+                <Dropdown togglerClass="'btn btn-sm btn-outline-secondary dropdown-toggle'">
+                    <t t-set-slot="toggler">
                         <i class="fa fa-cloud me-1" />
                         <span
               t-if="currentProvider"
               t-esc="currentProvider.name"
             />
                         <span t-else="">Select Provider</span>
-                    </button>
-                    <t t-set-slot="content">
-                        <t
+                    </t>
+                    <t
               t-foreach="availableProviders"
               t-as="provider"
               t-key="provider.id"
             >
-                            <DropdownItem
+                        <DropdownItem
                 onSelected="() => this.selectProvider(provider)"
                 class="{'active': currentProvider?.id === provider.id}"
               >
-                                <span t-esc="provider.name" />
-                            </DropdownItem>
-                        </t>
-                        <div
+                            <span t-esc="provider.name" />
+                        </DropdownItem>
+                    </t>
+                    <div
               t-if="availableProviders.length === 0"
               class="dropdown-item-text text-muted"
             >
-                            No providers available
-                        </div>
-                    </t>
+                        No providers available
+                    </div>
                 </Dropdown>
 
-                <!-- Model Dropdown -->
-                <Dropdown t-if="currentProvider">
-                    <button
-            class="btn btn-sm btn-outline-secondary dropdown-toggle"
-          >
+                <!-- Model Dropdown (v17 pattern) -->
+                <Dropdown t-if="currentProvider" togglerClass="'btn btn-sm btn-outline-secondary dropdown-toggle'">
+                    <t t-set-slot="toggler">
                         <i class="fa fa-cube me-1" />
                         <span t-if="currentModel" t-esc="currentModel.name" />
                         <span t-else="">Select Model</span>
-                    </button>
-                    <t t-set-slot="content">
-                        <!-- Search Input -->
-                        <div class="px-3 py-2">
-                            <div class="input-group input-group-sm">
-                                <input
+                    </t>
+                    <!-- Search Input -->
+                    <div class="px-3 py-2">
+                        <div class="input-group input-group-sm">
+                            <input
                   type="text"
                   class="form-control"
                   placeholder="Search models..."
                   t-model="state.modelSearchQuery"
                   t-on-input="onModelSearchInput"
                 />
-                                <button
+                            <button
                   t-if="state.modelSearchQuery"
                   class="btn btn-outline-secondary"
                   t-on-click="clearModelSearch"
                 >
-                                    <i class="fa fa-times" />
-                                </button>
-                            </div>
+                                <i class="fa fa-times" />
+                            </button>
                         </div>
-                        <div class="dropdown-divider" />
+                    </div>
+                    <div class="dropdown-divider" />
 
-                        <!-- Model List -->
-                        <div style="max-height: 300px; overflow-y: auto;">
-                            <t
+                    <!-- Model List -->
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <t
                 t-foreach="availableModels"
                 t-as="model"
                 t-key="model.id"
               >
-                                <DropdownItem
+                            <DropdownItem
                   onSelected="() => this.selectModel(model)"
                   class="{'active': currentModel?.id === model.id}"
                 >
-                                    <div
+                                <div
                     class="d-flex justify-content-between align-items-center"
                   >
-                                        <span t-esc="model.name" />
-                                        <t t-if="model.is_default">
-                                            <span
+                                    <span t-esc="model.name" />
+                                    <t t-if="model.is_default">
+                                        <span
                         class="badge bg-primary ms-2"
                       >Default</span>
-                                        </t>
-                                    </div>
-                                </DropdownItem>
-                            </t>
-                            <div
+                                    </t>
+                                </div>
+                            </DropdownItem>
+                        </t>
+                        <div
                 t-if="availableModels.length === 0"
                 class="dropdown-item-text text-muted"
               >
-                                <t t-if="state.modelSearchQuery">
-                                    No models found matching "<t
+                            <t t-if="state.modelSearchQuery">
+                                No models found matching "<t
                     t-esc="state.modelSearchQuery"
                   />"
-                                </t>
-                                <t t-else="">
-                                    No models available for this provider
-                                </t>
-                            </div>
+                            </t>
+                            <t t-else="">
+                                No models available for this provider
+                            </t>
                         </div>
-                    </t>
+                    </div>
                 </Dropdown>
 
-                <!-- Tools Dropdown -->
-                <Dropdown t-if="availableTools.length > 0">
-                    <button
-            class="btn btn-sm btn-outline-secondary dropdown-toggle"
-          >
+                <!-- Tools Dropdown (v17 pattern) -->
+                <Dropdown t-if="availableTools.length > 0" togglerClass="'btn btn-sm btn-outline-secondary dropdown-toggle'">
+                    <t t-set-slot="toggler">
                         <i class="fa fa-wrench me-1" />
                         Tools
                         <t t-if="currentTools.length > 0">
                             (<t t-esc="currentTools.length" />)
                         </t>
-                    </button>
-                    <t t-set-slot="content">
-                        <div
+                    </t>
+                    <div
               style="max-height: 300px; overflow-y: auto; min-width: 250px;"
             >
-                            <t
+                        <t
                 t-foreach="availableTools"
                 t-as="tool"
                 t-key="tool.id"
               >
-                                <div class="dropdown-item">
-                                    <div class="form-check">
-                                        <input
+                            <div class="dropdown-item">
+                                <div class="form-check">
+                                    <input
                       type="checkbox"
                       class="form-check-input"
                       t-att-id="'tool_' + tool.id"
@@ -196,24 +185,23 @@
                       t-att-disabled="state.isLoadingUpdate"
                       t-on-change="() => this.toggleTool(tool)"
                     />
-                                        <label
+                                    <label
                       class="form-check-label w-100"
                       t-att-for="'tool_' + tool.id"
                       t-att-class="{'text-muted': state.isLoadingUpdate}"
                     >
-                                            <span t-esc="tool.name" />
-                                        </label>
-                                    </div>
+                                        <span t-esc="tool.name" />
+                                    </label>
                                 </div>
-                            </t>
-                            <div
+                            </div>
+                        </t>
+                        <div
                 t-if="availableTools.length === 0"
                 class="dropdown-item-text text-muted"
               >
-                                No tools available
-                            </div>
+                            No tools available
                         </div>
-                    </t>
+                    </div>
                 </Dropdown>
             </div>
         </div>

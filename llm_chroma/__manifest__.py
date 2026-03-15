@@ -11,7 +11,7 @@
         - Vector search with similarity functions
     """,
     "category": "Technical",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",
     "depends": ["llm", "llm_knowledge", "llm_store"],

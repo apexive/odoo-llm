@@ -1,6 +1,6 @@
 {
     "name": "LLM Content Generation",
-    "version": "18.0.2.0.0",
+    "version": "17.0.2.0.0",
     "category": "Productivity/Discuss",
     "summary": "Content generation capabilities for LLM models",
     "description": """

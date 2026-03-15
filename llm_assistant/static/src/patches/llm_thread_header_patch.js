@@ -27,7 +27,7 @@ patch(LLMThreadHeader.prototype, {
    */
   get availableAssistants() {
     if (!this.assistantStore?._assistantsLoaded) return [];
-    return Array.from(this.assistantStore.llmAssistants.values());
+    return Object.values(this.assistantStore.llmAssistants);
   },
 
   /**

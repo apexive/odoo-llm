@@ -11,13 +11,15 @@ import { useService } from "@web/core/utils/hooks";
 patch(Thread.prototype, {
   setup() {
     super.setup();
-    this._llmStore = null;
+    // v17: useService must be called in setup(), not lazily
+    try {
+      this._llmStore = useService("llm.store");
+    } catch (error) {
+      this._llmStore = null;
+    }
   },
 
   get llmStore() {
-    if (!this._llmStore && this.isLLMThread) {
-      this._llmStore = useService("llm.store");
-    }
     return this._llmStore;
   },
 

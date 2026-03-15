@@ -2,7 +2,6 @@
 
 import { llmStoreService } from "@llm_thread/services/llm_store_service";
 import { patch } from "@web/core/utils/patch";
-import { rpc } from "@web/core/network/rpc";
 
 /**
  * Minimal patch to add assistant functionality to existing LLM store
@@ -11,13 +10,13 @@ import { rpc } from "@web/core/network/rpc";
 patch(llmStoreService, {
   start(env, services) {
     const llmStore = super.start(env, services);
-    const { orm, notification } = services;
+    const { orm, notification, "mail.store": mailStore } = services;
 
     // Store the original getDataLoaders method
     const originalGetDataLoaders = llmStore.getDataLoaders.bind(llmStore);
 
     // Add assistant-specific properties directly
-    llmStore.llmAssistants = new Map();
+    llmStore.llmAssistants = {};
     llmStore._assistantsLoaded = false;
 
     // Define currentAssistant getter with proper context binding
@@ -28,7 +27,7 @@ patch(llmStoreService, {
 
         const assistantId =
           activeThread.assistant_id?.id || activeThread.assistant_id;
-        const assistant = this.llmAssistants.get(assistantId);
+        const assistant = this.llmAssistants[assistantId];
 
         return assistant || activeThread.assistant_id;
       },
@@ -47,7 +46,7 @@ patch(llmStoreService, {
           );
 
           assistants.forEach((assistant) => {
-            this.llmAssistants.set(assistant.id, assistant);
+            this.llmAssistants[assistant.id] = assistant;
           });
           this._assistantsLoaded = true;
         } catch (error) {
@@ -66,8 +65,8 @@ patch(llmStoreService, {
         }
 
         try {
-          // Use RPC endpoint instead of direct ORM call for better separation of concerns
-          const result = await rpc("/llm/thread/set_assistant", {
+          // v17: Use jsonrpc instead of rpc import (doesn't exist in v17)
+          const result = await env.services.rpc("/llm/thread/set_assistant", {
             thread_id: activeThread.id,
             assistant_id: assistantId,
           });
@@ -77,14 +76,19 @@ patch(llmStoreService, {
             return;
           }
 
-          // Reuse existing fetchData pattern to refresh thread data
-          await activeThread.fetchData([
-            "assistant_id",
-            "provider_id",
-            "model_id",
-            "tool_ids",
-            "prompt_id",
+          // v17: Refresh thread data by re-reading from server
+          // fetchData is on threadService, not thread, and doesn't support custom fields
+          // Instead, read the updated thread data directly
+          const threadData = await orm.read("llm.thread", [activeThread.id], [
+            "name", "provider_id", "model_id", "tool_ids",
           ]);
+          if (threadData.length > 0) {
+            mailStore.Thread.insert({
+              id: activeThread.id,
+              model: "llm.thread",
+              ...threadData[0],
+            });
+          }
         } catch (error) {
           console.error("Error selecting assistant:", error);
           notification.add("Failed to update assistant", { type: "danger" });

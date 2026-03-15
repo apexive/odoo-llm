@@ -1,6 +1,6 @@
 {
     "name": "LLM Generate Job",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": "Artificial Intelligence",
     "summary": "Generation Job Management and Queue System for LLM Providers",
     "description": """

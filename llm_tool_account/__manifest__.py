@@ -1,6 +1,6 @@
 {
     "name": "LLM Tool Account",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "category": "Productivity/LLM",
     "summary": "18 AI-powered accounting tools for CPAs: trial balance, tax reports, "
     "journal entries, reconciliation, payments, and period close",

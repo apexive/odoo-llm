@@ -13,7 +13,7 @@
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",
     "category": "Technical",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "depends": ["llm"],
     "data": [
         "security/ir.model.access.csv",

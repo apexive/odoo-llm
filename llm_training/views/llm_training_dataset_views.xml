@@ -60,13 +60,13 @@
               invisible="not job_ids"
             >
                             <field name="job_ids">
-                                <list>
+                                <tree>
                                     <field name="name" />
                                     <field name="provider_id" />
                                     <field name="base_model_id" />
                                     <field name="state" />
                                     <field name="estimated_cost" />
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -81,12 +81,12 @@
         <field name="name">llm.training.dataset.view.tree</field>
         <field name="model">llm.training.dataset</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="file_count" />
                 <field name="example_count" />
                 <field name="active" invisible="1" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -110,7 +110,7 @@
     <record id="llm_training_dataset_action" model="ir.actions.act_window">
         <field name="name">LLM Training Datasets</field>
         <field name="res_model">llm.training.dataset</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
                 Create your first training dataset!

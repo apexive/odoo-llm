@@ -7,7 +7,7 @@
         image searchable in your knowledge base with automatic OCR processing.
     """,
     "category": "Technical",
-    "version": "18.0.1.0.0",
+    "version": "17.0.1.0.0",
     "depends": ["llm_knowledge", "llm_mistral", "llm_tool"],
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",

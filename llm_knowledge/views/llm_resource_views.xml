@@ -20,7 +20,7 @@
                 <field name="chunk_count" />
                 <field name="collection_ids" />
                 <templates>
-                    <t t-name="card">
+                    <t t-name="kanban-box">
                         <div t-attf-class="oe_kanban_global_click">
                             <div class="oe_kanban_card">
                                 <div class="o_kanban_record_top">
@@ -297,7 +297,7 @@
                 name="chunk_ids"
                 context="{'default_resource_id': id}"
               >
-                                <list>
+                                <tree>
                                     <field name="sequence" widget="handle" />
                                     <field name="name" />
                                     <field
@@ -305,7 +305,7 @@
                     widget="json_preview"
                     optional="show"
                   />
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -320,7 +320,7 @@
         <field name="name">llm.resource.tree</field>
         <field name="model">llm.resource</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="model_id" />
                 <field name="res_id" />
@@ -328,7 +328,7 @@
                 <field name="state" />
                 <field name="chunk_count" />
                 <field name="lock_date" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -401,12 +401,12 @@
     <record id="action_llm_resource" model="ir.actions.act_window">
         <field name="name">Resources</field>
         <field name="res_model">llm.resource</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">kanban,tree,form</field>
         <field
       name="view_ids"
       eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_llm_resource_kanban')}),
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_llm_resource_tree')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_llm_resource_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_llm_resource_form')})]"
     />
         <field name="search_view_id" ref="view_llm_resource_search" />
@@ -423,7 +423,7 @@
         <field name="name">llm.resource.document.tree</field>
         <field name="model">llm.resource</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="model_id" />
                 <field
@@ -433,7 +433,7 @@
         />
                 <field name="state" />
                 <field name="chunk_count" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -455,13 +455,13 @@
     <record id="action_llm_knowledge_document" model="ir.actions.act_window">
         <field name="name">Documents</field>
         <field name="res_model">llm.resource</field>
-        <field name="view_mode">kanban,list,form</field>
+        <field name="view_mode">kanban,tree,form</field>
         <!-- Use the specific views -->
         <field
       name="view_ids"
       eval="[(5, 0, 0),
             (0, 0, {'view_mode': 'kanban', 'view_id': ref('view_llm_resource_document_kanban')}),
-            (0, 0, {'view_mode': 'list', 'view_id': ref('view_llm_resource_document_tree')}),
+            (0, 0, {'view_mode': 'tree', 'view_id': ref('view_llm_resource_document_tree')}),
             (0, 0, {'view_mode': 'form', 'view_id': ref('view_llm_resource_form')})]"
     />
         <field name="domain">[('collection_ids', '!=', False)]</field>

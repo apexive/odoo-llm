@@ -5,7 +5,7 @@
             <field name="name">llm.generation.job.tree</field>
             <field name="model">llm.generation.job</field>
             <field name="arch" type="xml">
-                <list
+                <tree
         decoration-info="state == 'queued'"
         decoration-warning="state == 'running'"
         decoration-success="state == 'completed'"
@@ -24,7 +24,7 @@
                     <field name="completed_at" />
                     <field name="duration" widget="float_time" />
                     <field name="retry_count" />
-                </list>
+                </tree>
             </field>
         </record>
 
@@ -264,7 +264,7 @@
                     <field name="can_cancel" />
                     <field name="can_retry" />
                     <templates>
-                        <t t-name="card">
+                        <t t-name="kanban-box">
                             <div class="oe_kanban_card oe_kanban_global_click">
                                 <div class="oe_kanban_content">
                                     <div class="row">
@@ -330,7 +330,7 @@
         <record id="action_llm_generation_job" model="ir.actions.act_window">
             <field name="name">Generation Jobs</field>
             <field name="res_model">llm.generation.job</field>
-            <field name="view_mode">list,kanban,form</field>
+            <field name="view_mode">tree,kanban,form</field>
             <field name="view_id" ref="view_llm_generation_job_tree" />
             <field name="search_view_id" ref="view_llm_generation_job_search" />
             <field name="context">{'search_default_my_jobs': 1}</field>

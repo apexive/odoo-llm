@@ -43,27 +43,24 @@ class MailMessage(models.Model):
         # Call parent method with modified domain
         return super()._message_fetch(domain, search_term, before, after, around, limit)
 
-    def _extras_to_store(self, store, format_reply):
-        """Add LLM-specific fields to the message store."""
-        super()._extras_to_store(store, format_reply)
+    def _message_format_extras(self, format_reply):
+        """Add LLM-specific fields to the message format."""
+        self.ensure_one()
+        vals = super()._message_format_extras(format_reply)
 
-        for message in self:
-            data = {}
+        # Add LLM-specific fields
+        if hasattr(self, "llm_role") and self.llm_role:
+            vals["llm_role"] = self.llm_role
+            # Set is_note=True for LLM messages to get the right bubble style
+            vals["is_note"] = True
 
-            # Add LLM-specific fields
-            if hasattr(message, "llm_role") and message.llm_role:
-                data["llm_role"] = message.llm_role
-                # Set is_note=True for LLM messages to get the right bubble style
-                data["is_note"] = True
+        if hasattr(self, "user_vote"):
+            vals["user_vote"] = self.user_vote
 
-            if hasattr(message, "user_vote"):
-                data["user_vote"] = message.user_vote
+        if hasattr(self, "body_json") and self.body_json:
+            vals["body_json"] = self.body_json
 
-            if hasattr(message, "body_json") and message.body_json:
-                data["body_json"] = message.body_json
-
-            if data:  # Only add to store if we have data
-                store.add(message, data)
+        return vals
 
     def set_user_vote(self, vote_value):
         """Sets the user vote on this message, performing validation checks."""

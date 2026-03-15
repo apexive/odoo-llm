@@ -54,7 +54,8 @@ patch(Composer.prototype, {
 
   async sendMessage() {
     if (this.isLLMThread && this.llmStore) {
-      const content = this.props.composer.text?.trim();
+      // v17: textInputContent instead of .text
+      const content = this.props.composer.textInputContent?.trim();
       const attachments = this.props.composer.attachments || [];
       const attachmentIds = attachments.map((att) => att.id);
 
@@ -64,7 +65,9 @@ patch(Composer.prototype, {
 
       const threadId = this.props.composer.thread.id;
 
-      this.props.composer.clear();
+      // v17: No clear() method on composer, reset manually
+      this.props.composer.textInputContent = "";
+      this.props.composer.attachments = [];
 
       await this.llmStore.sendLLMMessage(threadId, content, attachmentIds);
       return;
@@ -146,7 +149,8 @@ patch(Composer.prototype, {
    */
   get isDisabled() {
     if (this.isLLMThread) {
-      return this.isStreaming || !this.props.composer.text?.trim();
+      // v17: textInputContent instead of .text
+      return this.isStreaming || !this.props.composer.textInputContent?.trim();
     }
 
     // Use original disabled logic for regular mail

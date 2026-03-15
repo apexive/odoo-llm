@@ -39,12 +39,12 @@
                     <div invisible="not automated_sync">
                         <!-- Display automated actions -->
                         <field name="automation_ids" readonly="1">
-                            <list>
+                            <tree>
                                 <field name="name" />
                                 <field name="model_id" />
                                 <field name="trigger" />
                                 <field name="active" widget="boolean_toggle" />
-                            </list>
+                            </tree>
                         </field>
                     </div>
 

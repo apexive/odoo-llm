@@ -83,7 +83,7 @@ export class LLMMediaForm extends Component {
     const modelId = this.thread?.model_id?.id || this.thread?.model_id;
     if (!modelId) return null;
 
-    return this.llmStore.llmModels.get(modelId);
+    return this.llmStore.llmModels[modelId];
   }
 
   get composer() {

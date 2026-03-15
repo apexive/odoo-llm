@@ -1,6 +1,6 @@
 {
     "name": "LLM Tool RAG",
-    "version": "18.0.1.0.1",
+    "version": "17.0.1.0.1",
     "category": "Productivity/Tools",
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",

@@ -172,14 +172,14 @@
         <field name="name">llm.mcp.server.config.view.list</field>
         <field name="model">llm.mcp.server.config</field>
         <field name="arch" type="xml">
-            <list>
+            <tree>
                 <field name="name" />
                 <field name="version" />
                 <field name="latest_protocol_version" />
                 <field name="all_supported_protocol_versions" />
                 <field name="active" />
                 <field name="write_date" />
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -211,7 +211,7 @@
     <record id="llm_mcp_server_config_action" model="ir.actions.act_window">
         <field name="name">MCP Server Configuration</field>
         <field name="res_model">llm.mcp.server.config</field>
-        <field name="view_mode">list,form</field>
+        <field name="view_mode">tree,form</field>
         <field name="context">{'search_default_active': 1}</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">

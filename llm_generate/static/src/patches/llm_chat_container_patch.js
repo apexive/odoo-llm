@@ -28,7 +28,7 @@ patch(LLMChatContainer.prototype, {
       return false;
     }
 
-    const model = this.llmStore.llmModels.get(modelId);
+    const model = this.llmStore.llmModels[modelId];
     if (!model) {
       return false;
     }

@@ -1,6 +1,7 @@
 /** @odoo-module **/
 
-import { Chatter } from "@mail/chatter/web_portal/chatter";
+// v17: Chatter import path is different from v18
+import { Chatter } from "@mail/core/web/chatter";
 import { LLMChatContainer } from "@llm_thread/components/llm_chat_container/llm_chat_container";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
@@ -11,13 +12,18 @@ Object.assign(Chatter.components, { LLMChatContainer });
 
 /**
  * Patch Chatter to add AI Chat functionality
- * Adds AI button to chatter topbar and inline AI chat mode
+ *
+ * v17 adaptations:
+ * - Import from @mail/core/web/chatter
+ * - Use store.discuss.thread = thread instead of thread.setAsDiscussThread()
+ * - Use threadService.fetchData() instead of thread.fetchData()
  */
 patch(Chatter.prototype, {
   setup() {
     super.setup();
     this.orm = useService("orm");
     this.notification = useService("notification");
+    this.threadService = useService("mail.thread");
 
     // Add LLM chat state
     Object.assign(this.state, {
@@ -25,11 +31,10 @@ patch(Chatter.prototype, {
       llmThreadId: null,
     });
 
-    // React to AI chat state changes - the "Odoo way" using OWL
+    // React to AI chat state changes
     useEffect(
       () => {
         if (this.state.isChattingWithLLM) {
-          // AI chat just opened, focus the composer
           this.focusComposerWhenReady();
         }
       },
@@ -42,11 +47,6 @@ patch(Chatter.prototype, {
     });
   },
 
-  /**
-   * Check for pending AI chat open from client action.
-   * This is more reliable than bus notifications which can fail on cloud deployments.
-   * Called on component mount.
-   */
   async checkPendingAIChatOpen() {
     const llmStore = this.env.services["llm.store"];
     if (!llmStore) {
@@ -62,55 +62,44 @@ patch(Chatter.prototype, {
       return;
     }
 
-    // If AI chat is already open, don't do anything
     if (this.state.isChattingWithLLM) {
       return;
     }
 
-    // Set the thread ID directly (thread already created by backend)
     this.state.llmThreadId = pending.threadId;
 
-    // Set the LLM thread as the active discuss thread
+    // v17: Insert thread and set on discuss directly
     const llmThread = this.store.Thread.insert({
       model: "llm.thread",
       id: pending.threadId,
+      isLoaded: true,
     });
 
-    // Initialize discuss if needed and set thread
     if (!this.store.discuss) {
       this.store.discuss = {};
     }
     this.store.discuss.thread = llmThread;
 
-    // Fetch thread data
-    await llmThread.fetchData(["messages"]);
+    // v17: Use threadService.fetchData() instead of thread.fetchData()
+    await this.threadService.fetchData(llmThread, ["messages"]);
 
-    // Open AI chat mode
     this.state.isChattingWithLLM = true;
 
-    // Auto-trigger generation if requested
     if (pending.autoGenerate) {
       await llmStore.startLLMStreaming(pending.threadId, null);
     }
   },
 
-  /**
-   * Focus the composer when it's ready
-   * Called by useEffect when AI chat state changes to true
-   */
   focusComposerWhenReady() {
-    // Wait for OWL rendering to complete (Odoo pattern)
     requestAnimationFrame(() => {
-      // Step 1: Scroll the chatter into view (form view scroll)
       const chatterEl = this.rootRef?.el;
       if (chatterEl) {
         chatterEl.scrollIntoView({
           behavior: "smooth",
-          block: "nearest", // Don't unnecessarily scroll if already visible
+          block: "nearest",
         });
       }
 
-      // Step 2: Find and focus the composer (chatter internal scroll)
       const composerSelectors = [
         ".o-mail-Composer-input",
         ".o-llm-composer-area textarea",
@@ -120,7 +109,6 @@ patch(Chatter.prototype, {
         .find((el) => el !== null);
 
       if (composer) {
-        // Wait a bit for chatter scroll to settle, then scroll composer
         setTimeout(() => {
           composer.scrollIntoView({
             behavior: "smooth",
@@ -132,50 +120,37 @@ patch(Chatter.prototype, {
     });
   },
 
-  /**
-   * Check if current record supports LLM chat
-   * Can be extended to support specific models or conditions
-   *
-   * @returns {Boolean}
-   */
   get shouldShowAIButton() {
     return this.props.threadModel && this.props.threadId;
   },
 
-  /**
-   * Toggle AI Chat mode - replaces chatter content with LLM chat
-   */
   async onAIChatClick() {
     if (!this.shouldShowAIButton) return;
 
     if (this.state.isChattingWithLLM) {
-      // Exit AI chat mode
       this.state.isChattingWithLLM = false;
       this.state.llmThreadId = null;
 
-      // Clear discuss thread
       if (this.store.discuss) {
         this.store.discuss.thread = undefined;
       }
     } else {
-      // Enter AI chat mode - find or create thread
       try {
         const threadId = await this.ensureLLMThread();
         if (threadId) {
-          // Set the LLM thread as the active discuss thread
           const llmThread = this.store.Thread.insert({
             model: "llm.thread",
             id: threadId,
+            isLoaded: true,
           });
 
-          // Initialize discuss if needed and set thread
           if (!this.store.discuss) {
             this.store.discuss = {};
           }
           this.store.discuss.thread = llmThread;
 
-          // Fetch thread data
-          await llmThread.fetchData(["messages"]);
+          // v17: Use threadService.fetchData() instead of thread.fetchData()
+          await this.threadService.fetchData(llmThread, ["messages"]);
 
           this.state.isChattingWithLLM = true;
           this.state.llmThreadId = threadId;
@@ -189,13 +164,7 @@ patch(Chatter.prototype, {
     }
   },
 
-  /**
-   * Find existing LLM thread for current record or create new one
-   *
-   * @returns {Promise<Number|null>} Thread ID
-   */
   async ensureLLMThread() {
-    // Search for existing thread linked to this record
     const existingThreads = await this.orm.searchRead(
       "llm.thread",
       [
@@ -210,7 +179,6 @@ patch(Chatter.prototype, {
       return existingThreads[0].id;
     }
 
-    // Try to find default chat model
     let modelId = null;
     let providerId = null;
 
@@ -229,7 +197,6 @@ patch(Chatter.prototype, {
       modelId = defaultModels[0].id;
       providerId = defaultModels[0].provider_id[0];
     } else {
-      // Fallback: Get first provider and its first chat model
       const providers = await this.orm.searchRead(
         "llm.provider",
         [["active", "=", true]],
@@ -265,7 +232,6 @@ patch(Chatter.prototype, {
       modelId = models[0].id;
     }
 
-    // Create new thread with provider and model - name will be auto-generated by backend
     const threadIds = await this.orm.create("llm.thread", [
       {
         model: this.props.threadModel,
@@ -275,7 +241,6 @@ patch(Chatter.prototype, {
       },
     ]);
 
-    // Orm.create returns array of IDs, extract first one
     return Array.isArray(threadIds) ? threadIds[0] : threadIds;
   },
 });
