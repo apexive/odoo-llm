@@ -385,7 +385,7 @@ class LLMProvider(models.Model):
 
         return model_info
 
-    def ollama_format_messages(self, messages, system_prompt=None):
+    def ollama_format_messages(self, messages, system_prompt=None, model=None):
         """Format messages for Ollama API
 
         Args:
