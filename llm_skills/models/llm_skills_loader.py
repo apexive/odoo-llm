@@ -232,7 +232,7 @@ class LLMSkillsLoader(models.Model):
         ], limit=1)
 
         if skill:
-            if skill.content_hash == content_hash:
+            if skill.content_hash == content_hash and self._skill_has_chunk(skill):
                 return name, False
             skill.write({
                 "description": description,
@@ -332,6 +332,23 @@ class LLMSkillsLoader(models.Model):
             resource.collection_ids = [(4, self.collection_id.id)]
 
         return resource
+
+    def _skill_has_chunk(self, skill) -> bool:
+        """Return True if a chunk already exists for this skill in the collection."""
+        SkillModel = self.env["ir.model"].search(
+            [("model", "=", "llm.skill")], limit=1
+        )
+        if not SkillModel:
+            return False
+        resource = self.env["llm.resource"].search([
+            ("model_id", "=", SkillModel.id),
+            ("res_id", "=", skill.id),
+        ], limit=1)
+        if not resource:
+            return False
+        return bool(self.env["llm.knowledge.chunk"].search(
+            [("resource_id", "=", resource.id)], limit=1
+        ))
 
     def _deactivate_removed_skills(self, found_names: set):
         """
