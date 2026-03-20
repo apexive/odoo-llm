@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='tool_ids']/.." position="after">
                 <group string="Skills">
-                    <field name="technical_skills_collection_id" options="{'no_create': True}" />
+                    <field name="skills_collection_id" options="{'no_create': True}" />
                 </group>
             </xpath>
         </field>

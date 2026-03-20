@@ -1,20 +1,22 @@
 {
     "name": "LLM Skills",
-    "version": "18.0.1.0.1",
+    "version": "18.0.2.0.0",
     "category": "Technical",
-    "summary": "Skill documents for LLM assistants — filesystem-loaded, RAG-retrieved",
+    "summary": "Skill documents for LLM assistants — description-indexed, progressive disclosure",
     "description": """
-        Provides infrastructure for loading versioned skill documents from the
-        filesystem into llm.knowledge.collection on Odoo boot/upgrade.
+        Filesystem-loaded skill documents for LLM assistants.
 
-        Skills are markdown files with YAML frontmatter. On boot/upgrade,
-        changed files are re-embedded; unchanged files are skipped via SHA-256
-        content hash comparison.
+        Skills are SKILL.md files in per-skill directories with YAML frontmatter.
+        On boot/upgrade, only the description field is embedded (one vector per skill).
+        The LLM uses a two-stage approach: odoo_skill_searcher returns a short
+        manifest (name + description), then odoo_skill_reader loads full content
+        on demand.
 
-        - llm.skill.document: Odoo model that holds skill markdown content
-        - llm.skills.loader: scans a directory and syncs skill documents into a collection
-        - technical_skill_retriever: @llm_tool that the LLM calls to look up patterns
-        - llm.assistant: extended with technical_skills_collection_id
+        - llm.skill: holds skill name, description, and full content body
+        - llm.skills.loader: scans a directory and syncs skills into a collection
+        - odoo_skill_searcher: @llm_tool — returns top-4 skill manifest for a query
+        - odoo_skill_reader: @llm_tool — loads full skill content by name
+        - llm.assistant: extended with skills_collection_id
     """,
     "author": "Apexive Solutions LLC / Kajandé",
     "website": "https://github.com/apexive/odoo-llm",
@@ -22,12 +24,10 @@
     "depends": [
         "llm_knowledge",
         "llm_tool",
-        "llm_tool_knowledge",
         "llm_assistant",
         "llm_pgvector",
         "llm_ollama",
         "llm_anthropic",
-        "llm_mcp_server",
     ],
     "external_dependencies": {
         "python": ["pyyaml"],
@@ -37,8 +37,9 @@
         "data/llm_tool_data.xml",
         "data/llm_provider_data.xml",
         "data/llm_store_data.xml",
+        "data/llm_loader_data.xml",
         "data/llm_admin_assistant_data.xml",
-        "views/llm_skill_document_views.xml",
+        "views/llm_skill_views.xml",
         "views/llm_skills_loader_views.xml",
         "views/llm_assistant_views.xml",
         "views/menu.xml",

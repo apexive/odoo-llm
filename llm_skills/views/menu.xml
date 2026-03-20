@@ -17,10 +17,10 @@
     />
 
     <menuitem
-        id="menu_llm_skill_documents"
-        name="Documents"
+        id="menu_llm_skill_list"
+        name="Skills"
         parent="menu_llm_skills"
-        action="action_llm_skill_document"
+        action="action_llm_skill"
         sequence="20"
     />
 </odoo>

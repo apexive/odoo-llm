@@ -12,27 +12,27 @@ _logger = logging.getLogger(__name__)
 
 class LLMSkillsLoader(models.Model):
     """
-    Maps a filesystem directory of skill .md files to an llm.knowledge.collection.
+    Maps a filesystem directory of skill subdirectories to an llm.knowledge.collection.
 
-    On every Odoo boot/upgrade, all loaders with auto_sync_on_boot=True are
-    triggered via _register_hook(). Each loader scans its skills_path recursively,
-    compares file content hashes against stored values, and only re-processes
-    files that have changed. Files removed from disk are deactivated.
-
-    The public interface is action_sync() — this is the method called by:
-    - The UI "Sync Now" button
-    - _register_hook() on boot/upgrade
-    - llm_skills_webhook (future) on git push events
-
-    Skill file format (.md with YAML frontmatter):
+    Each subdirectory must contain a SKILL.md file with YAML frontmatter:
         ---
-        id: unique-stable-id
-        title: Human readable title
-        tags: [tag1, tag2]
-        odoo_models: [res.partner, account.move]
-        tools: [odoo_record_retriever]
+        name: skill-name
+        description: >
+          Use when...
         ---
-        # Skill content in markdown...
+        # Full instructions...
+
+    On every Odoo boot/upgrade, loaders with auto_sync_on_boot=True are triggered
+    via _register_hook(). Each loader scans its skills_path for SKILL.md files,
+    compares content hashes, and only re-embeds changed skills. Skills whose
+    directories no longer exist on disk are deactivated.
+
+    Embedding strategy:
+    - One llm.knowledge.chunk per skill, content = description text
+    - One llm.resource per skill (minimal holder, no pipeline processing)
+    - Embedding via collection.embed_resources(specific_resource_ids=[...])
+
+    The public interface is action_sync() — called by the UI button and _register_hook().
     """
 
     _name = "llm.skills.loader"
@@ -52,7 +52,7 @@ class LLMSkillsLoader(models.Model):
         required=True,
         ondelete="restrict",
         tracking=True,
-        help="Knowledge collection where skill documents will be loaded.",
+        help="Knowledge collection where skill descriptions will be embedded.",
     )
 
     skills_path = fields.Char(
@@ -60,7 +60,8 @@ class LLMSkillsLoader(models.Model):
         required=True,
         tracking=True,
         help=(
-            "Path to the directory containing skill .md files. Scanned recursively.\n"
+            "Path to the directory containing skill subdirectories. "
+            "Each subdirectory must have a SKILL.md file.\n"
             "Accepts absolute paths or paths relative to any configured addons directory.\n"
             "Example (absolute): /opt/odoo/addons/my_module/skills\n"
             "Example (relative): my_module/skills"
@@ -83,40 +84,33 @@ class LLMSkillsLoader(models.Model):
     skill_count = fields.Integer(
         string="Skills Loaded",
         compute="_compute_skill_count",
-        help="Number of active skill resources currently in the target collection.",
+        help="Number of active skills currently managed by this loader.",
     )
 
-    @api.depends("collection_id")
     def _compute_skill_count(self):
         for loader in self:
-            if loader.collection_id:
-                loader.skill_count = self.env["llm.resource"].search_count([
-                    ("collection_ids", "in", loader.collection_id.id),
-                    ("skill_external_id", "!=", False),
-                ])
-            else:
-                loader.skill_count = 0
+            loader.skill_count = self.env["llm.skill"].search_count([
+                ("loader_id", "=", loader.id),
+                ("active", "=", True),
+            ])
 
     # -------------------------------------------------------------------------
     # Public interface
     # -------------------------------------------------------------------------
 
-    def action_open_skill_documents(self):
+    def action_open_skills(self):
         self.ensure_one()
         return {
             "type": "ir.actions.act_window",
-            "name": "Skill Documents",
-            "res_model": "llm.skill.document",
+            "name": "Skills",
+            "res_model": "llm.skill",
             "view_mode": "list,form",
             "domain": [("loader_id", "=", self.id)],
             "context": {"default_loader_id": self.id},
         }
 
     def action_sync(self):
-        """
-        Public sync trigger. Called by UI button, _register_hook, and
-        llm_skills_webhook. Syncs all selected loaders.
-        """
+        """Public sync trigger. Called by UI button and _register_hook."""
         for loader in self:
             loader._sync_skills()
         return {
@@ -142,9 +136,9 @@ class LLMSkillsLoader(models.Model):
         """
         Full sync for this loader:
         1. Resolve and validate skills_path
-        2. Scan all .md files recursively
-        3. Create/update llm.skill.document + llm.resource for changed files
-        4. Deactivate resources for files no longer on disk
+        2. Scan subdirectories for SKILL.md files
+        3. Upsert llm.skill + chunk + embedding for changed skills
+        4. Deactivate skills whose directories no longer exist
         5. Update last_sync timestamp
         """
         self.ensure_one()
@@ -152,7 +146,7 @@ class LLMSkillsLoader(models.Model):
         resolved = self._resolve_skills_path()
         if not resolved:
             _logger.error(
-                "llm_skills [%s]: skills_path '%s' could not be resolved or does not exist.",
+                "llm_skills [%s]: skills_path '%s' could not be resolved.",
                 self.name,
                 self.skills_path,
             )
@@ -165,178 +159,208 @@ class LLMSkillsLoader(models.Model):
             self.collection_id.name,
         )
 
-        # Ensure the vector store collection exists before adding resources
         try:
             self.collection_id.create_vector_collection()
         except Exception:
-            pass  # Collection may already exist — not an error
+            pass  # May already exist
 
-        found_skill_ids = set()
+        found_names = set()
         synced = 0
         skipped = 0
 
-        for md_file in sorted(resolved.rglob("*.md")):
-            skill_id, changed = self._sync_skill_file(md_file)
-            if skill_id:
-                found_skill_ids.add(skill_id)
+        for skill_dir in sorted(resolved.iterdir()):
+            if not skill_dir.is_dir():
+                continue
+            skill_md = skill_dir / "SKILL.md"
+            if not skill_md.exists():
+                continue
+            name, changed = self._sync_skill_dir(skill_dir, skill_md)
+            if name:
+                found_names.add(name)
                 if changed:
                     synced += 1
                 else:
                     skipped += 1
 
-        self._deactivate_removed_skills(found_skill_ids)
+        self._deactivate_removed_skills(found_names)
         self.last_sync = fields.Datetime.now()
 
         _logger.info(
-            "llm_skills [%s]: done — %d synced, %d unchanged, collection '%s'",
+            "llm_skills [%s]: done — %d synced, %d unchanged",
             self.name,
             synced,
             skipped,
-            self.collection_id.name,
         )
 
-    def _sync_skill_file(self, md_file: Path):
+    def _sync_skill_dir(self, skill_dir: Path, skill_md: Path):
         """
-        Sync a single skill .md file.
-
-        Steps:
-        1. Read file and compute SHA-256 hash
-        2. Parse YAML frontmatter for metadata
-        3. Find or create the llm.skill.document record
-        4. If content unchanged, skip (return changed=False)
-        5. If new or changed, update skill document + reset resource for re-processing
-        6. Create llm.resource pointing to the skill document if it doesn't exist
+        Sync a single skill directory.
 
         Returns:
-            (skill_id: str, changed: bool)
-            skill_id is None if the file could not be processed.
+            (name: str, changed: bool)
+            name is None if the file could not be processed.
         """
         self.ensure_one()
 
         try:
-            raw_content = md_file.read_text(encoding="utf-8")
+            raw_content = skill_md.read_text(encoding="utf-8")
         except Exception as e:
             _logger.error(
-                "llm_skills [%s]: cannot read file '%s': %s", self.name, md_file, e
+                "llm_skills [%s]: cannot read '%s': %s", self.name, skill_md, e
             )
             return None, False
 
         content_hash = hashlib.sha256(raw_content.encode()).hexdigest()
-        frontmatter, _body = self._parse_frontmatter(raw_content)
+        frontmatter, body = self._parse_frontmatter(raw_content)
 
-        skill_id = frontmatter.get("id") or md_file.stem
-        title = frontmatter.get("title") or skill_id
-        tags = ", ".join(frontmatter.get("tags") or [])
-        odoo_models = ", ".join(frontmatter.get("odoo_models") or [])
+        name = frontmatter.get("name") or skill_dir.name
+        description = frontmatter.get("description") or ""
+        if isinstance(description, str):
+            description = description.strip()
 
-        # Find existing skill document for this loader + skill_id
-        SkillDoc = self.env["llm.skill.document"]
-        skill_doc = SkillDoc.search([
-            ("skill_id", "=", skill_id),
+        if not description:
+            _logger.warning(
+                "llm_skills [%s]: skill '%s' has no description — skipping embedding.",
+                self.name,
+                name,
+            )
+
+        Skill = self.env["llm.skill"]
+        skill = Skill.search([
+            ("name", "=", name),
             ("loader_id", "=", self.id),
         ], limit=1)
 
-        if skill_doc:
-            if skill_doc.content_hash == content_hash:
-                # Nothing changed — skip
-                return skill_id, False
-            # Content changed — update document, reset resource for re-processing
-            skill_doc.write({
-                "name": title,
-                "content": raw_content,
+        if skill:
+            if skill.content_hash == content_hash:
+                return name, False
+            skill.write({
+                "description": description,
+                "content": body,
+                "source_path": str(skill_dir),
                 "content_hash": content_hash,
-                "tags": tags,
-                "odoo_models": odoo_models,
                 "active": True,
             })
-            # Reset the linked resource so it goes through the pipeline again
-            resource = self._get_resource_for_skill(skill_doc)
-            if resource:
-                resource.write({
-                    "name": title,
-                    "state": "draft",
-                    "skill_content_hash": content_hash,
-                    # Re-apply skill chunk overrides in case collection defaults changed
-                    **self.env["llm.resource"]._skill_chunk_overrides(),
-                })
-                resource.process_resource()
-            _logger.info("llm_skills [%s]: updated skill '%s'", self.name, skill_id)
+            if description:
+                self._upsert_skill_chunk(skill)
+            _logger.info("llm_skills [%s]: updated skill '%s'", self.name, name)
         else:
-            # New skill — create document record first, then resource
-            skill_doc = SkillDoc.create({
-                "name": title,
-                "skill_id": skill_id,
-                "content": raw_content,
+            skill = Skill.create({
+                "name": name,
+                "description": description,
+                "content": body,
+                "source_path": str(skill_dir),
                 "content_hash": content_hash,
-                "tags": tags,
-                "odoo_models": odoo_models,
                 "loader_id": self.id,
             })
-            self._create_resource_for_skill(skill_doc, title, content_hash)
-            _logger.info("llm_skills [%s]: created skill '%s'", self.name, skill_id)
+            if description:
+                self._upsert_skill_chunk(skill)
+            _logger.info("llm_skills [%s]: created skill '%s'", self.name, name)
 
-        return skill_id, True
+        return name, True
 
-    def _create_resource_for_skill(self, skill_doc, title: str, content_hash: str):
+    def _upsert_skill_chunk(self, skill):
         """
-        Create an llm.resource pointing to an llm.skill.document record.
-        The resource uses (model_id, res_id) to reference the skill document,
-        consistent with how all llm.resource records work.
+        Ensure exactly one llm.knowledge.chunk exists for this skill with
+        content = skill.description, then embed it via the collection.
+
+        Flow:
+        1. Find or create a minimal llm.resource pointing to the skill
+        2. Delete existing chunks (to force re-embedding on update)
+        3. Create one chunk with content = description
+        4. Call collection.embed_resources to generate and store the vector
         """
-        SkillDocModel = self.env["ir.model"].search(
-            [("model", "=", "llm.skill.document")], limit=1
-        )
-        if not SkillDocModel:
+        resource = self._get_or_create_resource(skill)
+
+        # Delete existing chunks so we re-embed fresh on update
+        existing_chunks = self.env["llm.knowledge.chunk"].search([
+            ("resource_id", "=", resource.id),
+        ])
+        if existing_chunks:
+            existing_chunks.unlink()
+
+        self.env["llm.knowledge.chunk"].create({
+            "resource_id": resource.id,
+            "content": skill.description,
+            "sequence": 1,
+            "metadata": {"skill_name": skill.name},
+        })
+
+        try:
+            self.collection_id.embed_resources(
+                specific_resource_ids=[resource.id]
+            )
+        except Exception as e:
             _logger.error(
-                "llm_skills [%s]: ir.model record for 'llm.skill.document' not found.",
+                "llm_skills [%s]: embedding failed for skill '%s': %s",
                 self.name,
+                skill.name,
+                e,
+            )
+
+    def _get_or_create_resource(self, skill):
+        """
+        Find or create a minimal llm.resource pointing to the given llm.skill.
+
+        The resource is a holder that satisfies llm.knowledge.chunk.resource_id
+        FK constraint. It is not processed through the pipeline — state stays
+        'done' and chunking is done manually by _upsert_skill_chunk.
+        """
+        SkillModel = self.env["ir.model"].search(
+            [("model", "=", "llm.skill")], limit=1
+        )
+        if not SkillModel:
+            _logger.error(
+                "llm_skills [%s]: ir.model for 'llm.skill' not found.", self.name
             )
             return None
 
-        resource = self.env["llm.resource"].create({
-            "name": title,
-            "model_id": SkillDocModel.id,
-            "res_id": skill_doc.id,
-            "skill_external_id": skill_doc.skill_id,
-            "skill_content_hash": content_hash,
-            "collection_ids": [(4, self.collection_id.id)],
-        })
-        resource.process_resource()
-        return resource
-
-    def _get_resource_for_skill(self, skill_doc):
-        """Find the llm.resource that points to a given llm.skill.document record."""
-        SkillDocModel = self.env["ir.model"].search(
-            [("model", "=", "llm.skill.document")], limit=1
-        )
-        if not SkillDocModel:
-            return None
-        return self.env["llm.resource"].search([
-            ("model_id", "=", SkillDocModel.id),
-            ("res_id", "=", skill_doc.id),
+        resource = self.env["llm.resource"].search([
+            ("model_id", "=", SkillModel.id),
+            ("res_id", "=", skill.id),
         ], limit=1)
 
-    def _deactivate_removed_skills(self, found_skill_ids: set):
+        if not resource:
+            resource = self.env["llm.resource"].create({
+                "name": skill.name,
+                "model_id": SkillModel.id,
+                "res_id": skill.id,
+                "state": "done",
+                "collection_ids": [(4, self.collection_id.id)],
+            })
+        elif self.collection_id.id not in resource.collection_ids.ids:
+            resource.collection_ids = [(4, self.collection_id.id)]
+
+        return resource
+
+    def _deactivate_removed_skills(self, found_names: set):
         """
-        Archive skill documents (and their resources) whose .md files
-        no longer exist on disk. This keeps the collection consistent
-        with the filesystem state.
+        Archive skills whose directories no longer exist on disk.
+        Deletes the corresponding chunk (and pgvector embedding) via unlink().
         """
-        stale_docs = self.env["llm.skill.document"].search([
+        stale = self.env["llm.skill"].search([
             ("loader_id", "=", self.id),
-            ("skill_id", "not in", list(found_skill_ids)),
+            ("name", "not in", list(found_names)),
             ("active", "=", True),
         ])
-        for doc in stale_docs:
+        for skill in stale:
             _logger.info(
                 "llm_skills [%s]: deactivating removed skill '%s'",
                 self.name,
-                doc.skill_id,
+                skill.name,
             )
-            resource = self._get_resource_for_skill(doc)
-            if resource:
-                resource.write({"active": False})
-            doc.write({"active": False})
+            SkillModel = self.env["ir.model"].search(
+                [("model", "=", "llm.skill")], limit=1
+            )
+            if SkillModel:
+                resource = self.env["llm.resource"].search([
+                    ("model_id", "=", SkillModel.id),
+                    ("res_id", "=", skill.id),
+                ], limit=1)
+                if resource:
+                    # Unlink cascades to chunks, which cleans up embeddings
+                    resource.unlink()
+            skill.write({"active": False})
 
     # -------------------------------------------------------------------------
     # Path resolution
@@ -344,21 +368,15 @@ class LLMSkillsLoader(models.Model):
 
     def _resolve_skills_path(self) -> Path | None:
         """
-        Resolve self.skills_path to an absolute Path object.
-
-        Supports:
-        - Absolute paths: /opt/odoo/addons/my_module/skills
-        - Addons-relative paths: my_module/skills
-          (tried against each directory in the Odoo addons path)
-
+        Resolve self.skills_path to an absolute Path.
+        Supports absolute paths or paths relative to any configured addons dir.
         Returns None if the path cannot be resolved to an existing directory.
         """
         p = Path(self.skills_path)
         if p.is_absolute():
             return p if p.is_dir() else None
 
-        # Try relative to each configured addons path
-        for addons_dir in [p.strip() for p in config.get('addons_path', '').split(',') if p.strip()]:
+        for addons_dir in [d.strip() for d in config.get("addons_path", "").split(",") if d.strip()]:
             candidate = Path(addons_dir) / p
             if candidate.is_dir():
                 return candidate
@@ -372,19 +390,10 @@ class LLMSkillsLoader(models.Model):
     @staticmethod
     def _parse_frontmatter(content: str) -> tuple:
         """
-        Parse YAML frontmatter from markdown content.
-
-        Expected format:
-            ---
-            id: skill-id
-            title: Skill title
-            tags: [tag1, tag2]
-            ---
-            # Markdown body...
+        Parse YAML frontmatter from SKILL.md content.
 
         Returns:
             (frontmatter_dict, body_str)
-            frontmatter_dict is empty dict if no valid frontmatter found.
         """
         if not content.startswith("---"):
             return {}, content
@@ -407,15 +416,7 @@ class LLMSkillsLoader(models.Model):
     def _register_hook(self):
         """
         Called by Odoo on every server start and module upgrade.
-
-        1. Auto-discovers skills/ directories in all installed addons and
-           creates loader records for them (idempotent). This means no addon
-           needs to depend on llm_skills — just ship a skills/ directory and
-           it will be picked up automatically.
-        2. Triggers sync for all loaders with auto_sync_on_boot=True.
-
-        Failures on individual loaders are caught and logged — one broken
-        loader does not block others or prevent Odoo from starting.
+        Auto-discovers skills/ directories and triggers sync for all loaders.
         """
         super()._register_hook()
         self._auto_discover_skill_loaders()
@@ -432,17 +433,9 @@ class LLMSkillsLoader(models.Model):
     def _auto_discover_skill_loaders(self):
         """
         Scan all installed addon directories for a skills/ subdirectory.
-        For each one found, auto-create an llm.skills.loader record if no
-        loader already exists for that path.
-
-        All auto-discovered loaders are assigned to the default
-        'Odoo Technical Skills' collection (llm_skills.llm_collection_meta_skills).
-        To use a different collection, edit the loader record manually in the UI.
-
-        If the default collection doesn't exist yet (fresh DB, no embedding model),
-        discovery is skipped silently and retried on next boot/upgrade.
+        Auto-create llm.skills.loader records for newly found paths.
+        All auto-discovered loaders use the default 'Odoo Technical Skills' collection.
         """
-        # Resolve default collection
         collection = self.env.ref(
             "llm_skills.llm_collection_meta_skills", raise_if_not_found=False
         )
@@ -453,11 +446,9 @@ class LLMSkillsLoader(models.Model):
             )
             return
 
-        # Build index of already-registered paths to avoid duplicates
         existing_paths = set(self.search([]).mapped("skills_path"))
 
-        # Scan every addon directory Odoo knows about
-        addon_paths = [p.strip() for p in config.get('addons_path', '').split(',') if p.strip()]
+        addon_paths = [p.strip() for p in config.get("addons_path", "").split(",") if p.strip()]
         for addons_dir in addon_paths:
             addons_dir = Path(addons_dir)
             if not addons_dir.is_dir():
@@ -468,7 +459,6 @@ class LLMSkillsLoader(models.Model):
                 skills_dir = module_dir / "skills"
                 if not skills_dir.is_dir():
                     continue
-                # Check the module is actually installed
                 module_name = module_dir.name
                 installed = self.env["ir.module.module"].search(
                     [("name", "=", module_name), ("state", "=", "installed")],
@@ -487,7 +477,8 @@ class LLMSkillsLoader(models.Model):
                 })
                 existing_paths.add(skills_path)
                 _logger.info(
-                    "llm_skills: auto-discovered skills/ in '%s' → "
-                    "created loader '%s' (id=%s)",
-                    module_name, loader.name, loader.id,
+                    "llm_skills: auto-discovered skills/ in '%s' → loader '%s' (id=%s)",
+                    module_name,
+                    loader.name,
+                    loader.id,
                 )

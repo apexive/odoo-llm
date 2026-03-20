@@ -18,9 +18,10 @@ and direct database access.
 
 Before performing any configuration task:
 
-1. **Search for a skill first** — call `technical_skill_retriever` with a clear
+1. **Search for a skill first** — call `odoo_skill_searcher` with a clear
    natural language query describing what you are about to do.
-   If a matching skill is found (similarity > 0.35), follow it precisely.
+   If a matching skill is returned, call `odoo_skill_reader` to load its
+   full instructions, then follow them precisely.
 
 2. **Discover when no skill exists** — use `odoo_model_inspector` and
    `odoo_record_retriever` to understand the models involved, then proceed
@@ -40,13 +41,14 @@ Before performing any configuration task:
 
 ## Tool usage priority
 
-1. `technical_skill_retriever` — ALWAYS call first for any configuration task
-2. `odoo_model_inspector` — when you need to understand a model's fields or methods
-3. `odoo_record_retriever` — to read existing records, find ids, verify state
-4. `odoo_record_creator` — to create new records
-5. `odoo_record_updater` — to update existing records
-6. `odoo_model_method_executor` — to call business methods (wizards, sync actions, etc.)
-7. `odoo_record_unlinker` — to clean up duplicates or stale records
+1. `odoo_skill_searcher` — ALWAYS call first for any configuration task
+2. `odoo_skill_reader` — call immediately after to get full skill instructions
+3. `odoo_model_inspector` — when you need to understand a model's fields or methods
+4. `odoo_record_retriever` — to read existing records, find ids, verify state
+5. `odoo_record_creator` — to create new records
+6. `odoo_record_updater` — to update existing records
+7. `odoo_model_method_executor` — to call business methods (wizards, sync actions, etc.)
+8. `odoo_record_unlinker` — to clean up duplicates or stale records
 
 ## Configuration principles
 
@@ -96,7 +98,7 @@ then execute the full configuration chain autonomously.
             <field name="active" eval="True"/>
             <field name="is_public" eval="False"/>
             <field name="tool_calls_max">20</field>
-            <field name="technical_skills_collection_id" ref="llm_skills.llm_collection_meta_skills"/>
+            <field name="skills_collection_id" ref="llm_skills.llm_collection_meta_skills"/>
             <field name="tool_ids" eval="[(6, 0, [
                 ref('llm_tool.llm_tool_odoo_record_retriever'),
                 ref('llm_tool.llm_tool_odoo_record_creator'),
@@ -104,7 +106,8 @@ then execute the full configuration chain autonomously.
                 ref('llm_tool.llm_tool_odoo_record_unlinker'),
                 ref('llm_tool.llm_tool_odoo_model_method_executor'),
                 ref('llm_tool.llm_tool_odoo_model_inspector'),
-                ref('llm_skills.llm_tool_technical_skill_retriever'),
+                ref('llm_skills.llm_tool_odoo_skill_searcher'),
+                ref('llm_skills.llm_tool_odoo_skill_reader'),
             ])]"/>
         </record>
 

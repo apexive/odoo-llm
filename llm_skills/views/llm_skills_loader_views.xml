@@ -25,7 +25,7 @@
                 </header>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                        <button name="action_open_skill_documents"
+                        <button name="action_open_skills"
                                 type="object"
                                 class="oe_stat_button"
                                 icon="fa-file-text-o">
