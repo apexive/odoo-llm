@@ -304,7 +304,7 @@ class LLMSkillsLoader(models.Model):
 
         The resource is a holder that satisfies llm.knowledge.chunk.resource_id
         FK constraint. It is not processed through the pipeline — state stays
-        'done' and chunking is done manually by _upsert_skill_chunk.
+        'ready' and chunking is done manually by _upsert_skill_chunk.
         """
         SkillModel = self.env["ir.model"].search(
             [("model", "=", "llm.skill")], limit=1
