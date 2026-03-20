@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List view ──────────────────────────────────────────────────────── -->
+    <record id="llm_mcp_client_server_view_list" model="ir.ui.view">
+        <field name="name">llm.mcp.client.server.list</field>
+        <field name="model">llm.mcp.client.server</field>
+        <field name="arch" type="xml">
+            <list string="MCP Servers">
+                <field name="name"/>
+                <field name="transport"/>
+                <field name="url" optional="show"/>
+                <field name="command" optional="show"/>
+                <field name="sync_status"
+                       decoration-success="sync_status == 'ok'"
+                       decoration-danger="sync_status == 'error'"
+                       decoration-muted="sync_status == 'never'"
+                       widget="badge"/>
+                <field name="last_sync_date"/>
+                <field name="tool_count" string="Tools"/>
+                <field name="active" column_invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view ──────────────────────────────────────────────────────── -->
+    <record id="llm_mcp_client_server_view_form" model="ir.ui.view">
+        <field name="name">llm.mcp.client.server.form</field>
+        <field name="model">llm.mcp.client.server</field>
+        <field name="arch" type="xml">
+            <form string="MCP Server">
+                <header>
+                    <button name="action_test_connection"
+                            string="Test Connection"
+                            type="object"
+                            class="btn-secondary"/>
+                    <button name="action_sync_tools"
+                            string="Sync Tools"
+                            type="object"
+                            class="btn-primary"/>
+                    <field name="sync_status" widget="statusbar"
+                           statusbar_visible="never,ok,error"/>
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_tools"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-wrench">
+                            <field name="tool_count" widget="statinfo" string="Tools"/>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="My MCP Server"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Transport">
+                            <field name="transport"/>
+                            <field name="timeout"/>
+                        </group>
+                        <group string="Sync Status">
+                            <field name="last_sync_date" readonly="1"/>
+                            <field name="sync_error" readonly="1"
+                                   invisible="sync_status != 'error'"/>
+                        </group>
+                    </group>
+
+                    <!-- HTTP fields -->
+                    <group string="HTTP Connection"
+                           invisible="transport != 'http'">
+                        <field name="url"
+                               placeholder="https://mcp.example.com/mcp"
+                               required="transport == 'http'"/>
+                        <field name="auth_type"/>
+                        <field name="token"
+                               password="True"
+                               invisible="auth_type != 'bearer'"
+                               required="auth_type == 'bearer'"/>
+                    </group>
+
+                    <!-- Stdio fields -->
+                    <group string="Stdio Process"
+                           invisible="transport != 'stdio'">
+                        <field name="command"
+                               placeholder="npx"
+                               required="transport == 'stdio'"/>
+                        <field name="args"
+                               placeholder="-y @upstash/context7-mcp"/>
+                        <field name="env_vars"
+                               placeholder="OPENAI_API_KEY=sk-...&#10;NODE_ENV=production"/>
+                    </group>
+
+                    <group string="Description">
+                        <field name="description" nolabel="1"
+                               placeholder="What tools does this server provide?"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Synced Tools" name="tools">
+                            <field name="tool_ids" readonly="1"
+                                   domain="[('implementation', '=', 'mcp_client')]">
+                                <list>
+                                    <field name="name"/>
+                                    <field name="mcp_tool_name"/>
+                                    <field name="description"/>
+                                    <field name="active"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Action ─────────────────────────────────────────────────────────── -->
+    <record id="action_llm_mcp_client_server" model="ir.actions.act_window">
+        <field name="name">MCP Servers</field>
+        <field name="res_model">llm.mcp.client.server</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Connect your first external MCP server
+            </p>
+            <p>
+                Add an HTTP endpoint or a local stdio command, then click
+                <b>Sync Tools</b> to import its tools into your AI assistants.
+            </p>
+        </field>
+    </record>
+
+</odoo>

@@ -345,6 +345,9 @@ class LLMThread(models.Model):
         - Limits to the most recent N messages for context window management
         - Uses efficient database queries with proper indexing
         - Excludes error messages (is_error=True) from context
+        - Sanitizes the window to remove orphaned tool_result blocks that
+          would cause Anthropic HTTP 400 errors when their tool_use is
+          outside the window (see _sanitize_message_window).
 
         Args:
             limit (int): Maximum number of recent messages to retrieve (default: 25)
@@ -371,12 +374,105 @@ class LLMThread(models.Model):
                 limit=limit,
             )
             # 2. Sort them chronologically for LLM context (ASC order)
-            return recent_messages.sorted(lambda m: (m.create_date, m.write_date, m.id))
-        # If no limit, get all messages in chronological order
-        return self.env["mail.message"].search(
-            domain,
-            order="create_date ASC, write_date ASC, id ASC",
-        )
+            messages = recent_messages.sorted(
+                lambda m: (m.create_date, m.write_date, m.id)
+            )
+        else:
+            # If no limit, get all messages in chronological order
+            messages = self.env["mail.message"].search(
+                domain,
+                order="create_date ASC, write_date ASC, id ASC",
+            )
+
+        return self._sanitize_message_window(messages)
+
+    def _sanitize_message_window(self, messages):
+        """Remove messages from the start of the window that would cause orphan errors.
+
+        When the context window is limited (e.g. limit=25), the oldest fetched
+        message might be a tool_result whose corresponding tool_use was cut off.
+        Anthropic strictly requires every tool_result to have a preceding
+        tool_use in the same request — sending an orphaned tool_result causes:
+            HTTP 400 "unexpected tool_use_id found in tool_result blocks"
+
+        Strategy:
+        1. Collect all tool_use IDs present in assistant messages in the window.
+        2. Collect all tool_result IDs present in tool messages in the window.
+        3. Walk forward from the start, dropping:
+           - tool messages whose tool_call_id has no matching tool_use in window
+           - assistant messages at the very start whose tool_use blocks have no
+             matching tool_result in window (incomplete cycle, would confuse API)
+        4. Stop as soon as the first valid message is found.
+
+        Args:
+            messages: mail.message recordset in chronological order
+
+        Returns:
+            mail.message recordset with orphaned leading messages removed
+        """
+        if not messages:
+            return messages
+
+        # Build set of tool_use IDs present in assistant messages within window
+        tool_use_ids_in_window = set()
+        for msg in messages:
+            if msg.llm_role == "assistant":
+                for tc in (msg.body_json or {}).get("tool_calls", []):
+                    if tc.get("id"):
+                        tool_use_ids_in_window.add(tc["id"])
+
+        # Build set of tool_result IDs present in tool messages within window
+        tool_result_ids_in_window = set()
+        for msg in messages:
+            if msg.llm_role == "tool":
+                tc_id = (msg.body_json or {}).get("tool_call_id")
+                if tc_id:
+                    tool_result_ids_in_window.add(tc_id)
+
+        messages_list = list(messages)
+
+        while messages_list:
+            first = messages_list[0]
+
+            # Drop tool messages whose tool_use was cut off by the window limit
+            if first.llm_role == "tool":
+                tc_id = (first.body_json or {}).get("tool_call_id")
+                if tc_id and tc_id not in tool_use_ids_in_window:
+                    _logger.debug(
+                        "Dropping orphaned tool_result message %s "
+                        "(tool_call_id %s has no matching tool_use in window)",
+                        first.id,
+                        tc_id,
+                    )
+                    messages_list.pop(0)
+                    continue
+
+            # Drop assistant messages at the start whose tool_use cycle is incomplete
+            # (tool_use present but no tool_result in window → API would stall)
+            if first.llm_role == "assistant":
+                tool_calls = (first.body_json or {}).get("tool_calls", [])
+                if tool_calls:
+                    unresolved = [
+                        tc for tc in tool_calls
+                        if tc.get("id") not in tool_result_ids_in_window
+                    ]
+                    if unresolved:
+                        _logger.debug(
+                            "Dropping assistant message %s at window start: "
+                            "%d tool_use block(s) have no tool_result in window",
+                            first.id,
+                            len(unresolved),
+                        )
+                        messages_list.pop(0)
+                        continue
+
+            # First message is clean — stop trimming
+            break
+
+        if not messages_list:
+            return self.env["mail.message"]
+
+        return self.env["mail.message"].browse([m.id for m in messages_list])
 
     def get_latest_llm_message(self):
         """Get the most recent LLM message for flow control.
@@ -422,6 +518,22 @@ class LLMThread(models.Model):
 
         return False
 
+    def _notify_bus(self, event_type, message):
+        """Hook for subclasses to push bus notifications during generation.
+
+        Called on each streaming event (message_create, message_chunk,
+        message_update) so that server-side generation can update connected
+        clients in real time without SSE.
+
+        Override in subclasses to push bus notifications as needed.
+        Default is a no-op so existing SSE-based flow is unaffected.
+
+        Args:
+            event_type (str): 'message_create', 'message_chunk', or 'message_update'
+            message (mail.message): the message record being created/updated
+        """
+        pass
+
     def _handle_streaming_response(self, stream_response):
         """Handle streaming response from LLM provider with tool call processing."""
         message = None
@@ -436,12 +548,14 @@ class LLMThread(models.Model):
                     llm_role="assistant",
                     author_id=False,
                 )
+                self._notify_bus("message_create", message)
                 yield {"type": "message_create", "message": message.to_store_format()}
 
             # Handle content streaming
             if chunk.get("content"):
                 accumulated_content += chunk["content"]
                 message.write({"body": self._process_llm_body(accumulated_content)})
+                self._notify_bus("message_chunk", message)
                 yield {"type": "message_chunk", "message": message.to_store_format()}
 
             # Collect tool calls for processing
@@ -461,25 +575,23 @@ class LLMThread(models.Model):
             body_json = {"tool_calls": collected_tool_calls}
 
             if not message:
-                # Create assistant message with body_json (handled by message_post override)
                 message = self.message_post(
                     body="",  # Empty body for tool-only responses
                     body_json=body_json,
                     llm_role="assistant",
                     author_id=False,
                 )
-                # Commit to ensure message is saved before tool execution
                 self.env.cr.commit()
+                self._notify_bus("message_create", message)
                 yield {"type": "message_create", "message": message.to_store_format()}
             else:
-                # Update existing message with tool calls
                 message.write({"body_json": body_json})
-                # Commit to ensure update is saved
                 self.env.cr.commit()
+                self._notify_bus("message_update", message)
                 yield {"type": "message_update", "message": message.to_store_format()}
         elif message and accumulated_content:
-            # Final update for assistant message without tool calls
             message.write({"body": self._process_llm_body(accumulated_content)})
+            self._notify_bus("message_update", message)
             yield {"type": "message_update", "message": message.to_store_format()}
 
         return message
