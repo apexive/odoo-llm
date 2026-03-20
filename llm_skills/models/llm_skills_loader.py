@@ -325,7 +325,7 @@ class LLMSkillsLoader(models.Model):
                 "name": skill.name,
                 "model_id": SkillModel.id,
                 "res_id": skill.id,
-                "state": "done",
+                "state": "ready",
                 "collection_ids": [(4, self.collection_id.id)],
             })
         elif self.collection_id.id not in resource.collection_ids.ids:
