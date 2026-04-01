@@ -434,9 +434,23 @@ class LLMSkillsLoader(models.Model):
         """
         Called by Odoo on every server start and module upgrade.
         Auto-discovers skills/ directories and triggers sync for all loaders.
+
+        Uses a transaction-scoped advisory lock so only one worker process runs
+        the boot sync. Other workers skip silently — they share the same DB state
+        so the single sync covers everyone.
         """
         super()._register_hook()
         self._auto_discover_skill_loaders()
+
+        # Only one worker should run the boot sync. Without this, concurrent
+        # workers race to UPDATE the same llm_skills_loader rows, causing a
+        # PostgreSQL serialization error that aborts the transaction and fails
+        # registry loading.
+        self.env.cr.execute("SELECT pg_try_advisory_xact_lock(853271649)")
+        if not self.env.cr.fetchone()[0]:
+            _logger.debug("llm_skills: boot sync skipped (another worker holds the lock)")
+            return
+
         loaders = self.search([("auto_sync_on_boot", "=", True)])
         for loader in loaders:
             try:
