@@ -173,10 +173,12 @@ class LLMProvider(models.Model):
         # Run the model (returns iterator in Replicate 1.0+)
         result = self.client.run(model_name, input=inputs)
 
-        # For non-streaming, collect all results from the iterator
-        # This ensures the iterator isn't exhausted before URL extraction
+        # Materialize true iterators, but preserve single file outputs. Some
+        # Replicate models return a FileOutput-like object that is itself
+        # iterable over bytes/chunks; blindly wrapping it in list(result)
+        # explodes one media file into hundreds of bogus "outputs".
         if not stream:
-            result = list(result)
+            result = self._replicate_prepare_result_for_extraction(result)
 
         # Extract URLs with metadata from the result
         urls = self._replicate_extract_urls_with_metadata(result)
@@ -193,6 +195,28 @@ class LLMProvider(models.Model):
             return self._replicate_stream_media_result(output_data, urls)
         else:
             return (output_data, urls)
+
+    def _replicate_prepare_result_for_extraction(self, result):
+        """Normalize Replicate output before URL extraction.
+
+        Keep single file output objects intact even if they are iterable, and
+        only materialize genuine iterators/generators into lists.
+        """
+        if result is None:
+            return None
+
+        if hasattr(result, "url") or isinstance(result, (str, bytes, bytearray)):
+            return result
+
+        if isinstance(result, (list, tuple, dict)):
+            return result
+
+        try:
+            iter(result)
+        except TypeError:
+            return result
+
+        return list(result)
 
     def _replicate_stream_media_result(self, output_data, urls):
         """Stream media generation results
@@ -250,6 +274,11 @@ class LLMProvider(models.Model):
             ".gif": "image/gif",
             ".webp": "image/webp",
             ".mp4": "video/mp4",
+            ".mp3": "audio/mpeg",
+            ".wav": "audio/wav",
+            ".flac": "audio/flac",
+            ".ogg": "audio/ogg",
+            ".m4a": "audio/mp4",
         }
 
         content_type = "application/octet-stream"
