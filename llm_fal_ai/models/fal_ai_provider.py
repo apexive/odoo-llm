@@ -1,6 +1,9 @@
 import json
 import logging
 import os
+from urllib.error import HTTPError, URLError
+from urllib.parse import urlencode
+from urllib.request import Request, urlopen
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
@@ -143,115 +146,125 @@ class LLMProvider(models.Model):
             raise UserError(_(f"FAL AI streaming failed: {str(e)}")) from e
 
     def fal_ai_models(self, model_id=None):
-        """Retrieves the list of available models on fal.ai."""
-        # Currently, fal.ai does not provide an endpoint to list models
-        # Hardcoded known models with details including schemas
-        models = [
-            {
-                "id": "fal-ai/flux/dev",
-                "name": "fal-ai/flux/dev",
-                "description": "FLUX.1 [dev] - High-quality image generation model",
-                "capabilities": ["image_generation"],
-                "details": {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "prompt": {
-                                "type": "string",
-                                "description": "Description of the image to generate",
-                                "title": "Prompt",
-                            },
-                            "negative_prompt": {
-                                "type": "string",
-                                "description": "Elements to avoid in the generated image",
-                                "title": "Negative Prompt",
-                                "default": "",
-                            },
-                            "image_size": {
-                                "type": "string",
-                                "description": "Size of the generated image",
-                                "enum": [
-                                    "square",
-                                    "portrait",
-                                    "landscape",
-                                    "landscape_16_9",
-                                    "landscape_4_3",
-                                ],
-                                "default": "square",
-                                "title": "Image Size",
-                            },
-                            "num_images": {
-                                "type": "integer",
-                                "description": "Number of images to generate",
-                                "minimum": 1,
-                                "maximum": 4,
-                                "default": 1,
-                                "title": "Image Quantity",
-                            },
-                            "seed": {
-                                "type": "integer",
-                                "description": "Seed for reproducibility",
-                                "default": 42,
-                                "title": "Seed",
-                            },
-                        },
-                        "required": ["prompt"],
-                    },
-                    "output_schema": {
-                        "type": "array",
-                        "items": {"type": "string", "format": "uri"},
-                        "title": "Generated Images",
-                    },
-                },
-            },
-            {
-                "id": "fal-ai/lcm",
-                "name": "fal-ai/lcm",
-                "description": "Latent Consistency Model - Fast image generation",
-                "capabilities": ["image_generation"],
-                "details": {
-                    "input_schema": {
-                        "type": "object",
-                        "properties": {
-                            "prompt": {
-                                "type": "string",
-                                "description": "Description of the image to generate",
-                                "title": "Prompt",
-                            },
-                            "negative_prompt": {
-                                "type": "string",
-                                "description": "Elements to avoid in the generated image",
-                                "title": "Negative Prompt",
-                                "default": "",
-                            },
-                            "image_size": {
-                                "type": "string",
-                                "description": "Size of the generated image",
-                                "enum": ["square", "portrait", "landscape"],
-                                "default": "square",
-                                "title": "Image Size",
-                            },
-                            "num_inference_steps": {
-                                "type": "integer",
-                                "description": "Number of inference steps",
-                                "minimum": 1,
-                                "maximum": 8,
-                                "default": 4,
-                                "title": "Inference Steps",
-                            },
-                        },
-                        "required": ["prompt"],
-                    },
-                    "output_schema": {
-                        "type": "array",
-                        "items": {"type": "string", "format": "uri"},
-                        "title": "Generated Images",
-                    },
-                },
-            },
-        ]
+        """Retrieve available Fal model endpoints from the platform API."""
+        self.ensure_one()
 
-        return models
+        for raw_model in self._fal_ai_fetch_models(model_id=model_id):
+            parsed = self._fal_ai_parse_model(raw_model)
+            if parsed:
+                yield parsed
+
+    def _fal_ai_fetch_models(self, model_id=None):
+        """Fetch Fal model metadata from the platform API."""
+        base_url = (self.api_base or "https://api.fal.ai/v1").rstrip("/")
+        models_url = base_url if base_url.endswith("/models") else f"{base_url}/models"
+
+        params = [("status", "active")]
+        if model_id:
+            params.append(("endpoint_id", model_id))
+        else:
+            params.append(("limit", "10"))
+        params.append(("expand", "openapi-3.0"))
+
+        cursor = None
+        while True:
+            current_params = list(params)
+            if cursor:
+                current_params.append(("cursor", cursor))
+
+            url = f"{models_url}?{urlencode(current_params, doseq=True)}"
+            request = Request(
+                url,
+                headers={
+                    "Authorization": f"Key {self.api_key}",
+                    "Accept": "application/json",
+                },
+            )
+
+            try:
+                with urlopen(request, timeout=30) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+            except HTTPError as e:
+                body = e.read().decode("utf-8", errors="ignore")
+                raise UserError(
+                    _(
+                        "Fal.ai model fetch failed with HTTP %s: %s",
+                    )
+                    % (e.code, body or e.reason)
+                ) from e
+            except URLError as e:
+                raise UserError(
+                    _("Fal.ai model fetch failed: %s") % (e.reason or str(e))
+                ) from e
+
+            for raw_model in payload.get("models", []):
+                yield raw_model
+
+            if model_id:
+                break
+
+            cursor = payload.get("next_cursor")
+            if not cursor or not payload.get("has_more"):
+                break
+
+    def _fal_ai_parse_model(self, raw_model):
+        """Normalize a Fal platform model record into the Odoo import format."""
+        endpoint_id = raw_model.get("endpoint_id")
+        if not endpoint_id:
+            return None
+
+        metadata = raw_model.get("metadata") or {}
+        category = (metadata.get("category") or "").lower()
+        capabilities = self._fal_ai_capabilities_from_category(category, endpoint_id)
+
+        details = self.serialize_model_data(raw_model)
+        details["capabilities"] = capabilities
+        details["category"] = category
+        details["description"] = metadata.get("description", "")
+
+        openapi_schema = raw_model.get("openapi")
+        if openapi_schema:
+            input_schema = (
+                openapi_schema.get("components", {})
+                .get("schemas", {})
+                .get("Input")
+            )
+            output_schema = (
+                openapi_schema.get("components", {})
+                .get("schemas", {})
+                .get("Output")
+            )
+            if input_schema:
+                details["input_schema"] = input_schema
+            if output_schema:
+                details["output_schema"] = output_schema
+
+        return {
+            "id": endpoint_id,
+            "name": endpoint_id,
+            "details": details,
+        }
+
+    def _fal_ai_capabilities_from_category(self, category, endpoint_id):
+        """Map Fal model categories to Odoo provider capabilities."""
+        name = endpoint_id.lower()
+
+        if any(token in category for token in ["image", "inpaint", "upscale"]):
+            return ["image_generation"]
+
+        if any(
+            token in category
+            for token in ["video", "audio", "music", "speech", "3d", "training"]
+        ):
+            return ["generation"]
+
+        if any(token in name for token in ["image", "flux", "lcm"]):
+            return ["image_generation"]
+
+        if any(token in name for token in ["video", "audio", "music", "speech", "3d"]):
+            return ["generation"]
+
+        return ["generation"]
 
     def fal_ai_format_generation_response(self, raw_response, output_schema):
         """Format the raw generation response according to the output processing config
