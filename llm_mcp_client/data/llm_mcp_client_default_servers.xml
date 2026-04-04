@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- Context7 — up-to-date library docs via stdio/npx -->
+    <record id="mcp_server_context7" model="llm.mcp.client.server">
+        <field name="name">Context7</field>
+        <field name="transport">stdio</field>
+        <field name="command">npx</field>
+        <field name="args">-y @upstash/context7-mcp</field>
+        <field name="description">
+Provides up-to-date documentation and code examples for any library or framework.
+Use the resolve-library-id tool first to get a library ID, then use get-library-docs
+to fetch current docs — bypassing LLM training cutoffs entirely.
+
+Tools:
+  • resolve-library-id  — resolve a package name to a Context7 library ID
+  • get-library-docs    — fetch current docs for a library ID
+        </field>
+        <field name="timeout">60</field>
+        <field name="active" eval="True"/>
+    </record>
+
+
+    <!-- Claude Code — run Claude Code as a one-shot agent from within Odoo assistants -->
+    <record id="mcp_server_claude_code" model="llm.mcp.client.server">
+        <field name="name">Claude Code</field>
+        <field name="transport">stdio</field>
+        <field name="command">claude-code-mcp</field>
+        <field name="args"></field>
+        <field name="env_vars">CLAUDE_CLI_PATH=/usr/local/bin/claude
+MCP_CLAUDE_DEBUG=false
+HOME=/root
+CLAUDE_HOME=/root/.claude</field>
+        <field name="description">
+Runs Claude Code in one-shot mode as a sub-agent.
+Exposes a single `claude_code` tool that accepts a natural-language prompt
+and executes it with full Claude Code capabilities (file edits, bash, git, search, etc.)
+using --dangerously-skip-permissions.
+
+Repo layout inside the container:
+  /workspace/ordomatics  — Ordomatics project root (docker-compose, scripts, .git)
+  /workspace/odoo-llm    — odoo-llm module repo (.git, all modules)
+  /workspace/whatsapp    — whatsapp module repo (.git, all modules)
+  /mnt/odoo-llm          — same as /workspace/odoo-llm (Odoo addons path)
+  /mnt/whatsapp          — same as /workspace/whatsapp (Odoo addons path)
+
+Always pass the relevant working directory in your prompt,
+e.g. "Your work folder is /workspace/odoo-llm\n\n..."
+        </field>
+        <field name="timeout">120</field>
+        <field name="active" eval="True"/>
+    </record>
+
+</odoo>

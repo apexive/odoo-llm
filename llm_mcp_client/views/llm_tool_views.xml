@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Extend the existing llm.tool form to show MCP client fields -->
+    <record id="llm_tool_view_form_mcp_client" model="ir.ui.view">
+        <field name="name">llm.tool.form.mcp_client</field>
+        <field name="model">llm.tool</field>
+        <field name="inherit_id" ref="llm_tool.view_llm_tool_form"/>
+        <field name="arch" type="xml">
+            <field name="implementation" position="after">
+                <field name="mcp_server_id"
+                       invisible="implementation != 'mcp_client'"
+                       required="implementation == 'mcp_client'"/>
+                <field name="mcp_tool_name"
+                       invisible="implementation != 'mcp_client'"
+                       required="implementation == 'mcp_client'"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Also show mcp_server_id in the list view -->
+    <record id="llm_tool_view_list_mcp_client" model="ir.ui.view">
+        <field name="name">llm.tool.list.mcp_client</field>
+        <field name="model">llm.tool</field>
+        <field name="inherit_id" ref="llm_tool.view_llm_tool_tree"/>
+        <field name="arch" type="xml">
+            <field name="implementation" position="after">
+                <field name="mcp_server_id" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+</odoo>

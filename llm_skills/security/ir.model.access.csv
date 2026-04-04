@@ -1,0 +1,7 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_skill_user,llm.skill.user,model_llm_skill,base.group_user,1,0,0,0
+access_llm_skill_manager,llm.skill.manager,model_llm_skill,llm.group_llm_manager,1,1,1,1
+access_llm_skill_reference_user,llm.skill.reference.user,model_llm_skill_reference,base.group_user,1,0,0,0
+access_llm_skill_reference_manager,llm.skill.reference.manager,model_llm_skill_reference,llm.group_llm_manager,1,1,1,1
+access_llm_skills_loader_user,llm.skills.loader.user,model_llm_skills_loader,base.group_user,1,0,0,0
+access_llm_skills_loader_manager,llm.skills.loader.manager,model_llm_skills_loader,llm.group_llm_manager,1,1,1,1

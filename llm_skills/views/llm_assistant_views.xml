@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_llm_assistant_form_skills" model="ir.ui.view">
+        <field name="name">llm.assistant.form.skills</field>
+        <field name="model">llm.assistant</field>
+        <field name="inherit_id" ref="llm_assistant.view_llm_assistant_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='tool_ids']/.." position="after">
+                <group string="Skills">
+                    <field name="skills_collection_id" options="{'no_create': True}" />
+                </group>
+            </xpath>
+        </field>
+    </record>
+</odoo>

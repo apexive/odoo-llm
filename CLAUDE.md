@@ -51,6 +51,68 @@ All inherit from `llm.provider` and implement provider-specific API calls:
 - **Text/Chat**: `llm_openai`, `llm_ollama`, `llm_mistral`
 - **Image**: `llm_replicate`, `llm_fal_ai`, `llm_comfyui`, `llm_comfy_icu`
 
+## Skills System (`llm_skills`)
+
+Skills are procedural how-to guides that assistants retrieve at runtime via semantic search. They replace the need for assistants to "know" every configuration procedure upfront.
+
+### Two-Stage Progressive Disclosure
+
+Retrieval is split into two tools to avoid dumping full skill content into context on every call:
+
+1. **`odoo_skill_searcher`** — embeds the query, searches `llm.knowledge.chunk` (description vectors), returns top-4 matches as `[{name, description}]`
+2. **`odoo_skill_reader`** — loads full `SKILL.md` body by name from `llm.skill.content`
+
+### Filesystem Layout
+
+Each skill is a directory under a module's `skills/` folder:
+
+```
+<module>/
+  skills/
+    <skill-name>/
+      SKILL.md          # required — frontmatter + body
+      <ref-files>       # optional supporting files (future)
+```
+
+`SKILL.md` must have YAML frontmatter with `name` and `description`:
+
+```markdown
+---
+name: skill-name
+description: >
+  Use when the user asks to... Trigger on: X, Y, Z.
+---
+
+# Full procedural instructions here
+```
+
+The `description` is what gets embedded (not the full content). Write it as a trigger specification — what situations and phrases should match this skill.
+
+### Auto-Discovery
+
+On every Odoo boot, `llm.skills.loader._register_hook()` scans all installed addon directories for a `skills/` subdirectory and auto-creates an `llm.skills.loader` record for each new one. No manual registration needed — just add a `skills/` directory to any installed module.
+
+### Embedding Strategy
+
+- One `llm.knowledge.chunk` per skill, `content = description`
+- One minimal `llm.resource` per skill (state=`ready`, no pipeline processing)
+- Change detection via SHA-256 hash of full `SKILL.md` — only re-embeds on change
+- Embeddings stored in the `Odoo Technical Skills` collection (pgvector)
+
+### Adding Skills to a New Module
+
+1. Create `<module>/skills/<skill-name>/SKILL.md`
+2. Install or upgrade the module — auto-discovery handles the rest
+3. No Python/XML changes needed
+
+### Key Models
+
+| Model | Purpose |
+|---|---|
+| `llm.skills.loader` | Maps a `skills/` directory to a collection; runs sync on boot |
+| `llm.skill` | One record per skill — name, description, content, hash |
+| `llm.knowledge.chunk` | One chunk per skill holding the description vector |
+
 ## Odoo 18.0 Key Patterns
 
 ### View Syntax (XML)

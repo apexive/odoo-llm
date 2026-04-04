@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <!--
+        Ollama provider: ensures it exists with nomic-embed-text registered.
+        api_base defaults to http://host.docker.internal:11434.
+        Override via: Settings > Technical > System Parameters > llm_skills.ollama_api_base
+    -->
+    <function model="llm.provider" name="_setup_ollama_provider"/>
+
+    <!--
+        Anthropic provider: ensures it exists with key Claude models registered.
+        API key resolved from (in priority order):
+          1. ANTHROPIC_API_KEY environment variable
+          2. ir.config_parameter: llm_skills.anthropic_api_key
+          3. Already set on the provider record
+    -->
+    <function model="llm.provider" name="_setup_anthropic_provider"/>
+</odoo>

@@ -1,12 +1,19 @@
 import json
 import logging
+import time
 
-from anthropic import Anthropic
+from anthropic import Anthropic, APIStatusError
 
 from odoo import _, api, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
+
+# Retry configuration for transient Anthropic API errors (e.g. overloaded_error)
+_RETRY_STATUS_CODES = {529}          # 529 = overloaded
+_RETRY_ERROR_TYPES = {"overloaded_error"}
+_MAX_RETRIES = 4
+_RETRY_BASE_DELAY = 2.0              # seconds — doubles each attempt: 2, 4, 8, 16
 
 
 class LLMProvider(models.Model):
@@ -111,13 +118,82 @@ class LLMProvider(models.Model):
             return self._anthropic_stream_response(params)
         return self._anthropic_process_response(params)
 
+    # =========================================================================
+    # RETRY LOGIC
+    # =========================================================================
+
+    def _anthropic_is_retryable(self, exc):
+        """Return True if the exception is a transient Anthropic error worth retrying.
+
+        Retryable conditions:
+        - HTTP 529 (overloaded_error): Anthropic servers temporarily at capacity
+        - HTTP 529 is the canonical status for overload; the SDK raises APIStatusError
+        """
+        if isinstance(exc, APIStatusError):
+            if exc.status_code in _RETRY_STATUS_CODES:
+                return True
+            body = getattr(exc, "body", {}) or {}
+            error_type = (body.get("error") or {}).get("type", "")
+            if error_type in _RETRY_ERROR_TYPES:
+                return True
+        return False
+
+    def _anthropic_call_with_retry(self, fn, *args, **kwargs):
+        """Call fn(*args, **kwargs) with exponential backoff on retryable errors.
+
+        Retries up to _MAX_RETRIES times with delays of 2, 4, 8, 16 seconds.
+        Non-retryable errors are re-raised immediately without any delay.
+
+        Args:
+            fn: Callable to invoke (e.g. self.client.messages.create)
+            *args / **kwargs: Forwarded to fn
+
+        Returns:
+            Whatever fn returns on success
+
+        Raises:
+            The last exception if all retries are exhausted, or the original
+            exception immediately if it is not retryable.
+        """
+        last_exc = None
+        for attempt in range(_MAX_RETRIES + 1):
+            try:
+                return fn(*args, **kwargs)
+            except Exception as exc:
+                if not self._anthropic_is_retryable(exc):
+                    raise
+                last_exc = exc
+                if attempt < _MAX_RETRIES:
+                    delay = _RETRY_BASE_DELAY * (2 ** attempt)
+                    _logger.warning(
+                        "Anthropic overloaded (attempt %d/%d) — retrying in %.0fs: %s",
+                        attempt + 1,
+                        _MAX_RETRIES,
+                        delay,
+                        exc,
+                    )
+                    time.sleep(delay)
+                else:
+                    _logger.error(
+                        "Anthropic still overloaded after %d retries — giving up: %s",
+                        _MAX_RETRIES,
+                        exc,
+                    )
+        raise last_exc
+
+    # =========================================================================
+    # RESPONSE HANDLERS
+    # =========================================================================
+
     def _anthropic_process_response(self, params):
         """Process non-streaming response from Anthropic.
 
         Returns:
             dict: {"content": str} and/or {"tool_calls": list} and/or {"thinking": str}
         """
-        response = self.client.messages.create(**params)
+        response = self._anthropic_call_with_retry(
+            self.client.messages.create, **params
+        )
         result = {}
         thinking_content = []
 
@@ -148,10 +224,19 @@ class LLMProvider(models.Model):
     def _anthropic_stream_response(self, params):
         """Process streaming response from Anthropic.
 
+        Retries on overloaded_error before opening the stream.  Once the
+        stream is open we do not retry mid-stream (partial output would be
+        lost), so the retry only wraps the initial connection attempt.
+
         Yields:
             dict: {"content": str} or {"tool_calls": list} or {"thinking": str}
         """
-        with self.client.messages.stream(**params) as stream:
+        # Retry only the stream *open* — use a lambda so we get a fresh context mgr
+        stream_ctx = self._anthropic_call_with_retry(
+            lambda: self.client.messages.stream(**params)
+        )
+
+        with stream_ctx as stream:
             tool_calls = {}
             current_thinking = ""
 
@@ -274,10 +359,41 @@ class LLMProvider(models.Model):
 
         return formatted_messages
 
+    def _content_has_tool_result(self, content):
+        """Check if message content contains tool_result blocks.
+
+        Anthropic requires that tool_result blocks are never merged with plain
+        text or other content in the same user message — doing so breaks the
+        strict tool_use ↔ tool_result pairing and causes HTTP 400 errors.
+
+        Args:
+            content: Message content (str or list of content blocks)
+
+        Returns:
+            bool: True if content contains any tool_result block
+        """
+        if isinstance(content, list):
+            return any(
+                isinstance(block, dict) and block.get("type") == "tool_result"
+                for block in content
+            )
+        return False
+
     def _anthropic_merge_consecutive_user_messages(self, messages):
         """Merge consecutive user messages as required by Anthropic API.
 
-        Anthropic requires alternating user/assistant messages.
+        Anthropic requires strictly alternating user/assistant turns.
+
+        IMPORTANT — tool_result isolation rule:
+        A tool_result block must appear in a user message that immediately
+        follows the assistant message containing the matching tool_use block.
+        If we merge a tool_result user message with the next plain-text user
+        message, Anthropic sees the tool_use_id in a context where there is
+        no preceding tool_use, and returns:
+            HTTP 400 "unexpected tool_use_id found in tool_result blocks"
+
+        Fix: never merge any message that contains (or would receive)
+        tool_result blocks — keep them as separate user turns.
         """
         if not messages:
             return []
@@ -287,6 +403,12 @@ class LLMProvider(models.Model):
             if merged and merged[-1]["role"] == msg["role"] == "user":
                 prev_content = merged[-1]["content"]
                 curr_content = msg["content"]
+
+                # Never merge when either side carries tool_result blocks
+                if self._content_has_tool_result(prev_content) or \
+                        self._content_has_tool_result(curr_content):
+                    merged.append(msg)
+                    continue
 
                 if isinstance(prev_content, str) and isinstance(curr_content, str):
                     merged[-1]["content"] = prev_content + "\n" + curr_content

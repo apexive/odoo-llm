@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="view_llm_skills_loader_list" model="ir.ui.view">
+        <field name="name">llm.skills.loader.list</field>
+        <field name="model">llm.skills.loader</field>
+        <field name="arch" type="xml">
+            <list string="Skills Loaders">
+                <field name="name" />
+                <field name="collection_id" />
+                <field name="skills_path" />
+                <field name="skill_count" string="Skills" />
+                <field name="last_sync" />
+                <field name="auto_sync_on_boot" optional="show" />
+            </list>
+        </field>
+    </record>
+
+    <record id="view_llm_skills_loader_form" model="ir.ui.view">
+        <field name="name">llm.skills.loader.form</field>
+        <field name="model">llm.skills.loader</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_sync" string="Sync Now" type="object" class="btn-primary" />
+                </header>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_open_skills"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-file-text-o">
+                            <field name="skill_count" widget="statinfo" string="Skills" />
+                        </button>
+                    </div>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="e.g. Kajande Technical Skills" />
+                        </h1>
+                    </div>
+                    <group>
+                        <group string="Configuration">
+                            <field name="collection_id" />
+                            <field name="skills_path" placeholder="/opt/odoo/addons/my_module/skills" />
+                            <field name="auto_sync_on_boot" widget="boolean_toggle" />
+                        </group>
+                        <group string="Status">
+                            <field name="last_sync" />
+                        </group>
+                    </group>
+                </sheet>
+                <chatter />
+            </form>
+        </field>
+    </record>
+
+    <record id="action_llm_skills_loader" model="ir.actions.act_window">
+        <field name="name">Skills Loaders</field>
+        <field name="res_model">llm.skills.loader</field>
+        <field name="view_mode">list,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">No skills loaders configured yet.</p>
+            <p>Create a loader to map a directory of skill .md files to a knowledge collection.</p>
+        </field>
+    </record>
+</odoo>

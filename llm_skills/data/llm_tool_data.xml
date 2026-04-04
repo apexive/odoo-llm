@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_tool_odoo_skill_searcher" model="llm.tool">
+        <field name="name">odoo_skill_searcher</field>
+        <field name="description">Search for available Odoo skills by describing what you need to accomplish. Returns a short manifest of the most relevant skills (name + description). Call this first when you need guidance on an unfamiliar task. Call with empty query to list all available skills.</field>
+        <field name="implementation">odoo_skill_searcher</field>
+        <field name="active" eval="True" />
+        <field name="default" eval="False" />
+        <field name="requires_user_consent" eval="False" />
+    </record>
+
+    <record id="llm_tool_odoo_skill_reader" model="llm.tool">
+        <field name="name">odoo_skill_reader</field>
+        <field name="description">Load the full instructions of an Odoo skill by name. Call this after odoo_skill_searcher to get the complete guidance for a skill before executing it.</field>
+        <field name="implementation">odoo_skill_reader</field>
+        <field name="active" eval="True" />
+        <field name="default" eval="False" />
+        <field name="requires_user_consent" eval="False" />
+    </record>
+</odoo>

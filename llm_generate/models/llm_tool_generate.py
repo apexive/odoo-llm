@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from odoo import api, models
@@ -18,6 +19,13 @@ class LLMToolGenerate(models.Model):
         """Generate content using the specified model and inputs."""
         self.ensure_one()
 
+        # LLMs sometimes serialize dicts as JSON strings — coerce transparently
+        if isinstance(inputs, str):
+            try:
+                inputs = json.loads(inputs)
+            except (ValueError, TypeError):
+                pass
+
         model = self.env["llm.model"].browse(int(model_id))
         if not model.exists():
             raise UserError(f"Model with ID {model_id} not found")
@@ -35,7 +43,8 @@ class LLMToolGenerate(models.Model):
             "success": True,
             "output_data": output_data,
             "urls": [
-                {"url": att.url, "content_type": att.mimetype} for att in attachments
+                {"url": att.url, "content_type": att.mimetype, "attachment_id": att.id}
+                for att in attachments
             ],
             "markdown": markdown_content,
             "content_count": len(urls),
