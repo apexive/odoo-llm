@@ -353,7 +353,7 @@ class LLMProvider(models.Model):
                 )
                 return urls
 
-            # If not training output, check for standard image generation patterns
+            # If not training output, check for standard media generation patterns
             elif "images" in result:
                 _logger.info(
                     "FAL.AI URL EXTRACTION - Processing standard image generation with 'images' key"
@@ -366,6 +366,22 @@ class LLMProvider(models.Model):
                         _logger.info(
                             f"FAL.AI URL EXTRACTION - Image {i+1} extracted: {json.dumps(url_data, indent=2)}"
                         )
+            elif any(key in result for key in ("image", "audio", "video")):
+                media_keys = [key for key in ("image", "audio", "video") if key in result]
+                _logger.info(
+                    f"FAL.AI URL EXTRACTION - Processing media container keys: {media_keys}"
+                )
+                for key in media_keys:
+                    value = result[key]
+                    items = value if isinstance(value, list) else [value]
+                    for i, item in enumerate(items):
+                        url_data = self._fal_ai_extract_single_url_with_metadata(item)
+                        if url_data:
+                            url_data.setdefault("filename", f"{key}_{i + 1}")
+                            urls.append(url_data)
+                            _logger.info(
+                                f"FAL.AI URL EXTRACTION - {key} {i+1} extracted: {json.dumps(url_data, indent=2)}"
+                            )
             else:
                 _logger.info(
                     "FAL.AI URL EXTRACTION - No 'images' key found, checking for other URL fields"
