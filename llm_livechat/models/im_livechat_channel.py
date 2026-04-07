@@ -42,6 +42,7 @@ class ImLivechatChannel(models.Model):
         widget remains visible 24/7.
         """
         super()._compute_available_operator_ids()
+        admin_user = self.env.ref("base.user_admin", raise_if_not_found=False)
         for channel in self:
             if (
                 channel.llm_auto_reply
@@ -53,3 +54,7 @@ class ImLivechatChannel(models.Model):
                 # widget instead of the currently logged-in user.
                 if channel.user_ids:
                     channel.available_operator_ids = channel.user_ids[:1]
+                # No human operators online – fall back to admin as a virtual
+                # placeholder so the channel is treated as available.
+                if admin_user:
+                    channel.available_operator_ids = admin_user
