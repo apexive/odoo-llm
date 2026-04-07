@@ -89,11 +89,6 @@ EMOJI_MAP = {
     ":house:": "🏠",
     ":test_tube:": "🧪",
     ":microscope:": "🔬",
-    ':flexed_biceps:': '💪',
-    ':muscle:': '💪',
-    ':handshake:': '🤝',
-    ':money_bag:': '💰',
-    ':smilingfacewithsmilingeyes:': '😊',
 }
 
 
