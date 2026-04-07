@@ -25,6 +25,7 @@ Features:
     ],
     "data": [
         "views/im_livechat_channel_views.xml",
+        "data/ir_cron.xml",
     ],
     "installable": True,
     "auto_install": False,
