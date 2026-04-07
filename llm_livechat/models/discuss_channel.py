@@ -2,6 +2,9 @@ import logging
 
 from odoo import fields, models
 
+# Import simple emoji converter
+from .mail_message import _convert_emoji_codes
+
 _logger = logging.getLogger(__name__)
 
 
@@ -73,11 +76,16 @@ class DiscussChannel(models.Model):
                         final_body = body
 
             if final_body:
-                self.message_post(
-                    body=final_body,
+                # Simple emoji conversion
+                formatted_body = _convert_emoji_codes(final_body)
+
+                # Use context to prevent re-triggering
+                self.with_context(llm_response=True).message_post(
+                    body=formatted_body,
                     message_type="comment",
                     subtype_xmlid="mail.mt_comment",
                 )
+                _logger.info("LLM greeting posted to channel %s", self.id)
 
         except Exception as e:
             _logger.error(
