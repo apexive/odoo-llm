@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="im_livechat_channel_view_form_inherit_llm" model="ir.ui.view">
+        <field name="name">im.livechat.channel.form.inherit.llm</field>
+        <field name="model">im_livechat.channel</field>
+        <field name="inherit_id" ref="im_livechat.im_livechat_channel_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="AI Assistant" name="ai_assistant">
+                    <group>
+                        <group string="Assistant Configuration">
+                            <field name="llm_assistant_id" options="{'no_create': True}"/>
+                            <field name="llm_auto_reply"/>
+                        </group>
+                        <group string="Behavior Settings">
+                            <field name="llm_delay" invisible="not llm_auto_reply"/>
+                            <field name="llm_greeting_enabled" invisible="not llm_assistant_id"/>
+                        </group>
+                    </group>
+                    <div class="alert alert-info" role="alert" invisible="not llm_auto_reply">
+                        <strong>Note:</strong> The AI assistant will automatically respond to
+                        visitor messages. Human operators can still join the conversation at any
+                        time and take over.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="llm_assistant_id">
+                        <strong>Setup Required:</strong> Please configure an LLM assistant in the
+                        <a href="/web#model=llm.assistant&amp;view_type=kanban">LLM Assistants</a>
+                        menu first.
+                    </div>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
