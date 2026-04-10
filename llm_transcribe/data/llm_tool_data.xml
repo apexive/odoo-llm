@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo noupdate="1">
+    <record id="llm_tool_odoo_transcribe" model="llm.tool">
+        <field name="name">odoo_transcribe</field>
+        <field name="implementation">odoo_transcribe</field>
+        <field
+            name="description"
+        ><![CDATA[
+Transcribe audio using a specified transcription model. This tool mirrors odoo_generate but targets speech-to-text workflows.
+
+Parameters:
+    model_id: The ID of the llm.model to use for transcription (must have model_use='transcription')
+    inputs: A dictionary containing parameters according to the model's input_schema (for example {"attachment_ids": [1, 2], "language": "fr"})
+
+Returns:
+    A dictionary containing:
+    - success: Boolean indicating if the transcription was successful
+    - output_data: Provider and model metadata
+    - results: List of result objects, one per attachment, including transcript text or an error
+    - markdown: Ready-to-use markdown summary of the transcription output
+    - content_count: Number of processed attachments
+]]></field>
+        <field name="default" eval="True" />
+        <field name="active" eval="True" />
+        <field name="requires_user_consent" eval="False" />
+        <field name="read_only_hint" eval="True" />
+    </record>
+</odoo>

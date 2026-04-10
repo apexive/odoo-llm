@@ -37,6 +37,7 @@ class LLMModel(models.Model):
             ("completion", "Completion"),
             ("chat", "Chat"),
             ("multimodal", "Multimodal"),
+            ("transcription", "Transcription"),
             ("generation", "Generic binary generation"),
             ("image_generation", "Image Generation"),
         ]
@@ -78,6 +79,26 @@ class LLMModel(models.Model):
         """
         return self.provider_id.generate(
             input_data, model=self, stream=stream, **kwargs
+        )
+
+    def transcribe_audio(
+        self,
+        data,
+        filename,
+        mimetype,
+        prompt=None,
+        language=None,
+        **kwargs,
+    ):
+        """Transcribe audio content using this model."""
+        return self.provider_id.transcribe_audio(
+            data=data,
+            filename=filename,
+            mimetype=mimetype,
+            model=self,
+            prompt=prompt,
+            language=language,
+            **kwargs,
         )
 
     def action_open_fetch_this_model_wizard(self):

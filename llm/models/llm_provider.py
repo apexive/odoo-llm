@@ -154,6 +154,28 @@ class LLMProvider(models.Model):
         """Generate embeddings using this provider"""
         return self._dispatch("embedding", texts, model=model)
 
+    def transcribe_audio(
+        self,
+        data,
+        filename,
+        mimetype,
+        model=None,
+        prompt=None,
+        language=None,
+        **kwargs,
+    ):
+        """Transcribe audio content using this provider."""
+        return self._dispatch(
+            "transcribe_audio",
+            data=data,
+            filename=filename,
+            mimetype=mimetype,
+            model=model,
+            prompt=prompt,
+            language=language,
+            **kwargs,
+        )
+
     def generate(self, input_data, model=None, stream=False, **kwargs):
         """Generate content using this provider
 
@@ -286,7 +308,7 @@ class LLMProvider(models.Model):
             - "multimodal"/"vision": Image/vision understanding
             - "completion": Text completion
             - "function_calling": Tool/function support
-            Provider-specific: "ocr", "image_generation", etc.
+            Provider-specific: "ocr", "image_generation", "transcription", etc.
 
         Example Override:
             ```python
@@ -311,6 +333,14 @@ class LLMProvider(models.Model):
             or "embedding" in name.lower()
         ):
             return "embedding"
+
+        if any(
+            cap in capabilities
+            for cap in ["transcription", "speech_to_text", "speech-to-text", "stt"]
+        ) or any(
+            token in name.lower() for token in ["transcribe", "transcription", "whisper"]
+        ):
+            return "transcription"
 
         # Priority 2: Multimodal models (advanced capability)
         if any(cap in capabilities for cap in ["multimodal", "vision"]):

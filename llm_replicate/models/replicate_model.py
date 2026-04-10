@@ -34,4 +34,7 @@ class LLMModel(models.Model):
         self.ensure_one()
         if self.replicate_version and self.replicate_version.strip():
             return f"{self.name}:{self.replicate_version.strip()}"
+        latest_version = (self.details or {}).get("latest_version", {}).get("id")
+        if latest_version:
+            return f"{self.name}:{latest_version}"
         return None

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_model_view_form_inherit_transcription" model="ir.ui.view">
+        <field name="name">llm.model.form.inherit.transcription</field>
+        <field name="model">llm.model</field>
+        <field name="inherit_id" ref="llm.llm_model_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <div
+          class="alert alert-info mt-3"
+          role="alert"
+          invisible="model_use != 'transcription'"
+        >
+                    <h5>Transcription Schema Configuration</h5>
+                    <p>For transcription models, define <code>input_schema</code> and <code>output_schema</code> in the details JSON field above.</p>
+                    <p><strong>Example:</strong></p>
+                    <pre>{
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "attachment_ids": {
+        "type": "array",
+        "items": {"type": "integer"},
+        "description": "Attachment IDs of audio files to transcribe"
+      },
+      "prompt": {"type": "string"},
+      "language": {"type": "string"}
+    },
+    "required": ["attachment_ids"]
+  },
+  "output_schema": {
+    "type": "array",
+    "items": {
+      "type": "object",
+      "properties": {
+        "attachment_id": {"type": "integer"},
+        "attachment_name": {"type": "string"},
+        "mimetype": {"type": "string"},
+        "provider": {"type": "string"},
+        "model": {"type": "string"},
+        "language": {"type": "string"},
+        "duration": {"type": ["number", "null"]},
+        "transcript": {"type": "string"},
+        "error": {"type": "string"}
+      }
+    }
+  }
+}</pre>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

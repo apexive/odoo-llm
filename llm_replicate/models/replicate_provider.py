@@ -1,4 +1,5 @@
 import logging
+import base64
 
 import jsonref
 import replicate
@@ -10,6 +11,26 @@ _logger = logging.getLogger(__name__)
 
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
+
+    REPLICATE_TRANSCRIPTION_FIELD_CANDIDATES = (
+        "audio",
+        "audio_file",
+        "file",
+        "input_audio",
+        "media",
+        "audio_url",
+        "file_url",
+    )
+
+    REPLICATE_PROMPT_FIELD_CANDIDATES = (
+        "prompt",
+        "initial_prompt",
+    )
+
+    REPLICATE_LANGUAGE_FIELD_CANDIDATES = (
+        "language",
+        "language_code",
+    )
 
     @api.model
     def _get_available_services(self):
@@ -83,17 +104,58 @@ class LLMProvider(models.Model):
     def _replicate_parse_model(self, model):
         details = self.serialize_model_data(model.dict())
         capabilities = []
-        if "chat" in model.id.lower() or "llm" in model.id.lower():
+        model_id_lower = model.id.lower()
+        if "chat" in model_id_lower or "llm" in model_id_lower:
             capabilities.append("chat")
-        if "embedding" in model.id.lower():
+        if "embedding" in model_id_lower:
             capabilities.append("embedding")
-        if any(kw in model.id.lower() for kw in ["vision", "image", "multimodal"]):
+        if any(kw in model_id_lower for kw in ["vision", "image", "multimodal"]):
             capabilities.append("multimodal")
+        if any(kw in model_id_lower for kw in ["transcribe", "transcription", "whisper"]):
+            capabilities.append("transcription")
         return {
             "id": model.id,
             "name": model.id,
             "details": details,
             "capabilities": capabilities or ["image_generation"],
+        }
+
+    def replicate_should_generate_transcription_schema(self, model_record):
+        return self.replicate_should_generate_io_schema(model_record)
+
+    def replicate_generate_transcription_schema(self, model_record):
+        return self.replicate_generate_io_schema(model_record)
+
+    def replicate_transcribe_audio(
+        self,
+        data,
+        filename,
+        mimetype,
+        model=None,
+        prompt=None,
+        language=None,
+        **kwargs,
+    ):
+        """Transcribe audio with a Replicate transcription model."""
+        model = self.get_model(model, "transcription")
+        model_name = model._replicate_model_name_with_version() or model.name
+
+        inputs = self._replicate_build_transcription_inputs(
+            model=model,
+            data=data,
+            filename=filename,
+            mimetype=mimetype,
+            prompt=prompt,
+            language=language,
+        )
+        result = self.client.run(model_name, input=inputs)
+        parsed = self._replicate_parse_transcription_output(result)
+
+        return {
+            "text": parsed.get("text", ""),
+            "language": parsed.get("language"),
+            "duration": parsed.get("duration"),
+            "model": model.name,
         }
 
     def replicate_should_generate_io_schema(self, model_record):
@@ -217,6 +279,96 @@ class LLMProvider(models.Model):
             return result
 
         return list(result)
+
+    def _replicate_build_transcription_inputs(
+        self,
+        model,
+        data,
+        filename,
+        mimetype,
+        prompt=None,
+        language=None,
+    ):
+        schema = ((model.details or {}).get("input_schema") or {}).get("properties", {})
+        inputs = {}
+        data_uri = f"data:{mimetype or 'application/octet-stream'};base64,{base64.b64encode(data).decode()}"
+
+        for field_name in self.REPLICATE_TRANSCRIPTION_FIELD_CANDIDATES:
+            if field_name in schema:
+                inputs[field_name] = data_uri
+                break
+        else:
+            inputs["audio"] = data_uri
+
+        if "filename" in schema:
+            inputs["filename"] = filename
+        elif "file_name" in schema:
+            inputs["file_name"] = filename
+
+        if prompt:
+            for field_name in self.REPLICATE_PROMPT_FIELD_CANDIDATES:
+                if field_name in schema:
+                    inputs[field_name] = prompt
+                    break
+            else:
+                inputs["prompt"] = prompt
+
+        if language:
+            for field_name in self.REPLICATE_LANGUAGE_FIELD_CANDIDATES:
+                if field_name in schema:
+                    inputs[field_name] = language
+                    break
+            else:
+                inputs["language"] = language
+
+        return inputs
+
+    def _replicate_parse_transcription_output(self, result):
+        result = self._replicate_prepare_result_for_extraction(result)
+
+        if isinstance(result, str):
+            return {"text": result, "language": None, "duration": None}
+
+        if isinstance(result, (list, tuple)):
+            if len(result) == 1:
+                return self._replicate_parse_transcription_output(result[0])
+            return {
+                "text": "\n".join(str(item) for item in result if item is not None),
+                "language": None,
+                "duration": None,
+            }
+
+        if isinstance(result, dict):
+            text = self._replicate_extract_transcription_text(result)
+            return {
+                "text": text or "",
+                "language": result.get("language") or result.get("detected_language"),
+                "duration": result.get("duration") or result.get("audio_duration"),
+            }
+
+        return {"text": str(result), "language": None, "duration": None}
+
+    def _replicate_extract_transcription_text(self, payload):
+        for key in (
+            "text",
+            "transcript",
+            "transcription",
+            "output",
+            "result",
+            "prediction",
+        ):
+            value = payload.get(key)
+            if isinstance(value, str):
+                return value
+            if isinstance(value, dict):
+                nested = self._replicate_extract_transcription_text(value)
+                if nested:
+                    return nested
+            if isinstance(value, list):
+                parts = [str(item) for item in value if isinstance(item, (str, int, float))]
+                if parts:
+                    return "\n".join(parts)
+        return ""
 
     def _replicate_stream_media_result(self, output_data, urls):
         """Stream media generation results

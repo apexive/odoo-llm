@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import base64
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -21,6 +22,25 @@ except ImportError:
 
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
+
+    FAL_TRANSCRIPTION_FIELD_CANDIDATES = (
+        "audio_url",
+        "audio",
+        "file_url",
+        "file",
+        "media_url",
+        "input_audio",
+    )
+
+    FAL_PROMPT_FIELD_CANDIDATES = (
+        "prompt",
+        "initial_prompt",
+    )
+
+    FAL_LANGUAGE_FIELD_CANDIDATES = (
+        "language",
+        "language_code",
+    )
 
     webhook_url = fields.Char(
         string="Webhook URL", help="URL where FAL.AI will send completion notifications"
@@ -52,6 +72,44 @@ class LLMProvider(models.Model):
     def fal_ai_embedding(self, texts, model=None):
         """FAL AI doesn't support embeddings directly"""
         raise UserError(_("FAL AI provider does not support embedding functionality"))
+
+    def fal_ai_transcribe_audio(
+        self,
+        data,
+        filename,
+        mimetype,
+        model=None,
+        prompt=None,
+        language=None,
+        **kwargs,
+    ):
+        """Transcribe audio with a Fal.ai transcription model."""
+        self.ensure_one()
+        client = self.fal_ai_get_client()
+
+        model = self.get_model(model, "transcription")
+        inputs = self._fal_ai_build_transcription_inputs(
+            model=model,
+            data=data,
+            filename=filename,
+            mimetype=mimetype,
+            prompt=prompt,
+            language=language,
+        )
+
+        try:
+            result = client.run(model.name, arguments=inputs)
+        except Exception as e:
+            _logger.error(f"Error in FAL AI transcription: {e}")
+            raise UserError(_(f"FAL AI transcription failed: {str(e)}")) from e
+
+        parsed = self._fal_ai_parse_transcription_output(result)
+        return {
+            "text": parsed.get("text", ""),
+            "language": parsed.get("language"),
+            "duration": parsed.get("duration"),
+            "model": model.name,
+        }
 
     def fal_ai_generate(self, input_data, model=None, stream=False, **kwargs):
         """Generate content using FAL AI
@@ -245,9 +303,24 @@ class LLMProvider(models.Model):
             "details": details,
         }
 
+    def fal_ai_should_generate_transcription_schema(self, model_record):
+        return False
+
+    def fal_ai_generate_transcription_schema(self, model_record):
+        return model_record.details
+
     def _fal_ai_capabilities_from_category(self, category, endpoint_id):
         """Map Fal model categories to Odoo provider capabilities."""
         name = endpoint_id.lower()
+
+        if any(
+            token in category
+            for token in ["speech-to-text", "speech_to_text", "transcription", "stt"]
+        ):
+            return ["transcription"]
+
+        if any(token in name for token in ["transcribe", "transcription", "whisper", "stt"]):
+            return ["transcription"]
 
         if any(token in category for token in ["image", "inpaint", "upscale"]):
             return ["image_generation"]
@@ -265,6 +338,94 @@ class LLMProvider(models.Model):
             return ["generation"]
 
         return ["generation"]
+
+    def _fal_ai_build_transcription_inputs(
+        self,
+        model,
+        data,
+        filename,
+        mimetype,
+        prompt=None,
+        language=None,
+    ):
+        schema = ((model.details or {}).get("input_schema") or {}).get("properties", {})
+        inputs = {}
+        data_uri = f"data:{mimetype or 'application/octet-stream'};base64,{base64.b64encode(data).decode()}"
+
+        for field_name in self.FAL_TRANSCRIPTION_FIELD_CANDIDATES:
+            if field_name in schema:
+                inputs[field_name] = data_uri
+                break
+        else:
+            inputs["audio_url"] = data_uri
+
+        if "filename" in schema:
+            inputs["filename"] = filename
+        elif "file_name" in schema:
+            inputs["file_name"] = filename
+
+        if prompt:
+            for field_name in self.FAL_PROMPT_FIELD_CANDIDATES:
+                if field_name in schema:
+                    inputs[field_name] = prompt
+                    break
+            else:
+                inputs["prompt"] = prompt
+
+        if language:
+            for field_name in self.FAL_LANGUAGE_FIELD_CANDIDATES:
+                if field_name in schema:
+                    inputs[field_name] = language
+                    break
+            else:
+                inputs["language"] = language
+
+        return inputs
+
+    def _fal_ai_parse_transcription_output(self, result):
+        if isinstance(result, str):
+            return {"text": result, "language": None, "duration": None}
+
+        if isinstance(result, list):
+            if len(result) == 1:
+                return self._fal_ai_parse_transcription_output(result[0])
+            return {
+                "text": "\n".join(str(item) for item in result if item is not None),
+                "language": None,
+                "duration": None,
+            }
+
+        if isinstance(result, dict):
+            text = self._fal_ai_extract_transcription_text(result)
+            return {
+                "text": text or "",
+                "language": result.get("language") or result.get("detected_language"),
+                "duration": result.get("duration") or result.get("audio_duration"),
+            }
+
+        return {"text": str(result), "language": None, "duration": None}
+
+    def _fal_ai_extract_transcription_text(self, payload):
+        for key in (
+            "text",
+            "transcript",
+            "transcription",
+            "output",
+            "result",
+            "prediction",
+        ):
+            value = payload.get(key)
+            if isinstance(value, str):
+                return value
+            if isinstance(value, dict):
+                nested = self._fal_ai_extract_transcription_text(value)
+                if nested:
+                    return nested
+            if isinstance(value, list):
+                parts = [str(item) for item in value if isinstance(item, (str, int, float))]
+                if parts:
+                    return "\n".join(parts)
+        return ""
 
     def fal_ai_format_generation_response(self, raw_response, output_schema):
         """Format the raw generation response according to the output processing config

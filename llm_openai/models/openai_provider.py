@@ -26,6 +26,51 @@ OPENAI_TO_ODOO_STATE_MAPPING = {
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
 
+    OPENAI_TRANSCRIPTION_PATTERNS = (
+        "transcribe",
+        "whisper",
+    )
+
+    OPENAI_TRANSCRIPTION_INPUT_SCHEMA = {
+        "type": "object",
+        "properties": {
+            "attachment_ids": {
+                "type": "array",
+                "items": {"type": "integer"},
+                "description": "Attachment IDs of audio files to transcribe",
+            },
+            "prompt": {
+                "type": "string",
+                "description": "Optional prompt to guide transcription",
+            },
+            "language": {
+                "type": "string",
+                "description": "Optional ISO-639-1 language hint",
+            },
+        },
+        "required": ["attachment_ids"],
+        "additionalProperties": False,
+    }
+
+    OPENAI_TRANSCRIPTION_OUTPUT_SCHEMA = {
+        "type": "array",
+        "items": {
+            "type": "object",
+            "properties": {
+                "attachment_id": {"type": "integer"},
+                "attachment_name": {"type": "string"},
+                "mimetype": {"type": "string"},
+                "provider": {"type": "string"},
+                "model": {"type": "string"},
+                "language": {"type": ["string", "null"]},
+                "duration": {"type": ["number", "null"]},
+                "transcript": {"type": "string"},
+                "error": {"type": "string"},
+            },
+            "additionalProperties": True,
+        },
+    }
+
     @api.model
     def _get_available_services(self):
         services = super()._get_available_services()
@@ -34,6 +79,79 @@ class LLMProvider(models.Model):
     def openai_get_client(self):
         """Get OpenAI client instance"""
         return OpenAI(api_key=self.api_key, base_url=self.api_base or None)
+
+    def openai_get_default_transcription_model(self):
+        """Get the preferred OpenAI transcription model name."""
+        self.ensure_one()
+
+        preferred_names = [
+            "gpt-4o-mini-transcribe",
+            "gpt-4o-transcribe",
+            "whisper-1",
+        ]
+        provider_models = self.model_ids.filtered(lambda model: model.active)
+
+        for preferred_name in preferred_names:
+            model = provider_models.filtered(lambda record: record.name == preferred_name)
+            if model:
+                return model[0].name
+
+        return preferred_names[0]
+
+    def openai_transcribe_audio(
+        self,
+        data,
+        filename,
+        mimetype,
+        model=None,
+        model_name=None,
+        prompt=None,
+        language=None,
+    ):
+        """Transcribe audio bytes with the OpenAI audio transcription API."""
+        self.ensure_one()
+
+        audio_file = io.BytesIO(data)
+        audio_file.name = filename or "audio.bin"
+
+        params = {
+            "model": (
+                model.name
+                if model
+                else model_name or self.openai_get_default_transcription_model()
+            ),
+            "file": (audio_file.name, audio_file, mimetype or "application/octet-stream"),
+        }
+        if prompt:
+            params["prompt"] = prompt
+        if language:
+            params["language"] = language
+
+        response = self.client.audio.transcriptions.create(**params)
+
+        return {
+            "text": getattr(response, "text", "") or "",
+            "language": getattr(response, "language", None) or None,
+            "duration": getattr(response, "duration", None) or None,
+            "model": params["model"],
+        }
+
+    def _determine_model_use(self, name, capabilities):
+        if any(token in name.lower() for token in self.OPENAI_TRANSCRIPTION_PATTERNS):
+            return "transcription"
+        return super()._determine_model_use(name, capabilities)
+
+    def openai_should_generate_transcription_schema(self, model_record):
+        details = model_record.details or {}
+        return model_record.model_use == "transcription" and not details.get(
+            "input_schema"
+        )
+
+    def openai_generate_transcription_schema(self, model_record):
+        details = dict(model_record.details or {})
+        details["input_schema"] = self.OPENAI_TRANSCRIPTION_INPUT_SCHEMA
+        details["output_schema"] = self.OPENAI_TRANSCRIPTION_OUTPUT_SCHEMA
+        model_record.write({"details": details})
 
     def openai_normalize_prepend_messages(self, prepend_messages):
         """Normalize prepend_messages for OpenAI format.
@@ -383,6 +501,8 @@ class LLMProvider(models.Model):
 
         if "text-embedding" in model_id_lower or "embedding" in model_id_lower:
             capabilities = ["embedding"]
+        elif any(p in model_id_lower for p in self.OPENAI_TRANSCRIPTION_PATTERNS):
+            capabilities = ["transcription"]
         elif any(p in model_id_lower for p in self.OPENAI_VISION_PATTERNS):
             capabilities = ["chat", "multimodal"]
 
