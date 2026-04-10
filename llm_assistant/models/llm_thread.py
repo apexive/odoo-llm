@@ -261,6 +261,8 @@ class LLMThread(models.Model):
             if last_message.llm_role in ("user", "tool"):
                 if self.model_id.model_use in ("image_generation", "generation"):
                     last_message = yield from self._generate_response(last_message)
+                elif self.model_id.model_use == "transcription":
+                    last_message = yield from self._transcribe_response(last_message)
                 else:
                     # Generate assistant response
                     last_message = yield from self._generate_assistant_response()
@@ -284,6 +286,9 @@ class LLMThread(models.Model):
         return last_message
 
     def _generate_response(self, last_message):
+        raise NotImplementedError
+
+    def _transcribe_response(self, last_message):
         raise NotImplementedError
 
     def _generate_assistant_response(self):
