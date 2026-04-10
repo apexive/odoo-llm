@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Main Transcription Menu (under LLM root menu) -->
+        <menuitem
+    id="menu_llm_transcription_root"
+    name="Transcription"
+    parent="llm.menu_llm_root"
+    sequence="15"
+  />
+
+        <!-- Transcription Jobs Menu -->
+        <menuitem
+    id="menu_llm_transcription_job"
+    name="Jobs"
+    parent="menu_llm_transcription_root"
+    action="action_llm_transcription_job"
+    sequence="10"
+  />
+
+        <!-- Transcription Queues Menu -->
+        <menuitem
+    id="menu_llm_transcription_queue"
+    name="Queues"
+    parent="menu_llm_transcription_root"
+    action="action_llm_transcription_queue"
+    sequence="20"
+  />
+</odoo>

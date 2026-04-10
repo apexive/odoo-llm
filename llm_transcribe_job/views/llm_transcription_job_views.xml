@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Transcription Job Tree View -->
+        <record id="view_llm_transcription_job_tree" model="ir.ui.view">
+            <field name="name">llm.transcription.job.tree</field>
+            <field name="model">llm.transcription.job</field>
+            <field name="arch" type="xml">
+                <list
+        decoration-info="state == 'queued'"
+        decoration-warning="state == 'running'"
+        decoration-success="state == 'completed'"
+        decoration-danger="state == 'failed'"
+        decoration-muted="state == 'cancelled'"
+      >
+                    <field name="display_name" />
+                    <field name="thread_id" />
+                    <field name="provider_id" />
+                    <field name="model_id" />
+                    <field name="state" widget="badge" />
+                    <field name="user_id" />
+                    <field name="create_date" />
+                    <field name="queued_at" />
+                    <field name="started_at" />
+                    <field name="completed_at" />
+                    <field name="duration" widget="float_time" />
+                    <field name="retry_count" />
+                </list>
+            </field>
+        </record>
+
+        <!-- Transcription Job Form View -->
+        <record id="view_llm_transcription_job_form" model="ir.ui.view">
+            <field name="name">llm.transcription.job.form</field>
+            <field name="model">llm.transcription.job</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button
+            name="action_queue"
+            string="Queue"
+            type="object"
+            invisible="state != 'draft'"
+            class="btn-primary"
+          />
+                        <button
+            name="action_start"
+            string="Start"
+            type="object"
+            invisible="state != 'queued'"
+            class="btn-primary"
+          />
+                        <button
+            name="action_cancel"
+            string="Cancel"
+            type="object"
+            invisible="not can_cancel"
+            class="btn-secondary"
+          />
+                        <button
+            name="action_retry"
+            string="Retry"
+            type="object"
+            invisible="not can_retry"
+            class="btn-warning"
+          />
+                        <button
+            name="check_status"
+            string="Check Status"
+            type="object"
+            invisible="state != 'running'"
+            class="btn-info"
+          />
+                        <field name="state" widget="statusbar" />
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button
+              class="oe_stat_button"
+              type="object"
+              name="action_open_thread"
+              icon="fa-comments"
+            >
+                                <div class="o_stat_info">
+                                    <span class="o_stat_text">Thread</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div class="oe_title">
+                            <h1><field name="display_name" /></h1>
+                        </div>
+
+                        <group>
+                            <group string="Job Information">
+                                <field name="thread_id" />
+                                <field name="provider_id" />
+                                <field name="model_id" />
+                                <field name="user_id" />
+                                <field
+                name="external_job_id"
+                invisible="not external_job_id"
+              />
+                            </group>
+                            <group string="Status">
+                                <field name="is_active" />
+                                <field name="can_retry" />
+                                <field name="can_cancel" />
+                                <field name="retry_count" />
+                                <field name="max_retries" />
+                            </group>
+                        </group>
+
+                        <group>
+                            <group string="Timing">
+                                <field name="create_date" />
+                                <field name="queued_at" />
+                                <field name="started_at" />
+                                <field name="completed_at" />
+                                <field name="duration" widget="float_time" />
+                                <field
+                name="queue_duration"
+                widget="float_time"
+              />
+                            </group>
+                            <group string="Messages">
+                                <field name="input_message_id" />
+                                <field name="output_message_id" />
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page string="Transcription Inputs" name="inputs">
+                                <field
+                name="transcription_inputs"
+                widget="json_editor"
+              />
+                            </page>
+                            <page string="Provider Data" name="provider_data">
+                                <field
+                name="provider_data"
+                widget="json_editor"
+              />
+                            </page>
+                            <page
+              string="Error Details"
+              name="error"
+              invisible="not error_message"
+            >
+                                <field name="error_message" widget="text" />
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter />
+                </form>
+            </field>
+        </record>
+
+        <!-- Transcription Job Search View -->
+        <record id="view_llm_transcription_job_search" model="ir.ui.view">
+            <field name="name">llm.transcription.job.search</field>
+            <field name="model">llm.transcription.job</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="display_name" />
+                    <field name="thread_id" />
+                    <field name="provider_id" />
+                    <field name="model_id" />
+                    <field name="user_id" />
+                    <field name="external_job_id" />
+
+                    <!-- Replace is_active filter with state-based active filter -->
+                    <filter
+          string="Active"
+          name="active"
+          domain="[('state', 'in', ['queued', 'running'])]"
+        />
+                    <filter
+          string="Queued"
+          name="queued"
+          domain="[('state', '=', 'queued')]"
+        />
+                    <filter
+          string="Running"
+          name="running"
+          domain="[('state', '=', 'running')]"
+        />
+                    <filter
+          string="Completed"
+          name="completed"
+          domain="[('state', '=', 'completed')]"
+        />
+                    <filter
+          string="Failed"
+          name="failed"
+          domain="[('state', '=', 'failed')]"
+        />
+                    <!-- Remove can_retry filter if it's also a computed field without store=True -->
+                    <!-- <filter string="Can Retry" name="can_retry" domain="[('can_retry', '=', True)]"/> -->
+
+                    <separator />
+                    <filter
+          string="My Jobs"
+          name="my_jobs"
+          domain="[('user_id', '=', uid)]"
+        />
+                    <filter
+          string="Today"
+          name="today"
+          domain="[('create_date', '>=', context_today().strftime('%Y-%m-%d'))]"
+        />
+                    <filter
+          string="This Week"
+          name="this_week"
+          domain="[('create_date', '>=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"
+        />
+
+                    <group expand="0" string="Group By">
+                        <filter
+            string="State"
+            name="group_by_state"
+            domain="[]"
+            context="{'group_by': 'state'}"
+          />
+                        <filter
+            string="Provider"
+            name="group_by_provider"
+            domain="[]"
+            context="{'group_by': 'provider_id'}"
+          />
+                        <filter
+            string="Model"
+            name="group_by_model"
+            domain="[]"
+            context="{'group_by': 'model_id'}"
+          />
+                        <filter
+            string="User"
+            name="group_by_user"
+            domain="[]"
+            context="{'group_by': 'user_id'}"
+          />
+                        <filter
+            string="Creation Date"
+            name="group_by_date"
+            domain="[]"
+            context="{'group_by': 'create_date'}"
+          />
+                    </group>
+                </search>
+            </field>
+        </record>
+        <!-- Transcription Job Kanban View -->
+        <record id="view_llm_transcription_job_kanban" model="ir.ui.view">
+            <field name="name">llm.transcription.job.kanban</field>
+            <field name="model">llm.transcription.job</field>
+            <field name="arch" type="xml">
+                <kanban default_group_by="state" class="o_kanban_small_column">
+                    <field name="state" />
+                    <field name="provider_id" />
+                    <field name="model_id" />
+                    <field name="user_id" />
+                    <field name="duration" />
+                    <field name="retry_count" />
+                    <field name="can_cancel" />
+                    <field name="can_retry" />
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_card oe_kanban_global_click">
+                                <div class="oe_kanban_content">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <strong><field
+                        name="display_name"
+                      /></strong>
+                                        </div>
+                                        <div class="col-6 text-right">
+                                            <span
+                      t-att-class="'badge badge-' + (record.state.raw_value == 'completed' ? 'success' : record.state.raw_value == 'failed' ? 'danger' : record.state.raw_value == 'running' ? 'warning' : 'info')"
+                    >
+                                                <field name="state" />
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <i
+                      class="fa fa-cube"
+                      title="Model"
+                    /> <field name="model_id" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <i
+                      class="fa fa-user"
+                      title="User"
+                    /> <field name="user_id" />
+                                        </div>
+                                    </div>
+                                    <div
+                  class="row"
+                  t-if="record.duration.raw_value > 0"
+                >
+                                        <div class="col-12">
+                                            <i
+                      class="fa fa-clock-o"
+                      title="Duration"
+                    /> <field name="duration" widget="float_time" />
+                                        </div>
+                                    </div>
+                                    <div
+                  class="row"
+                  t-if="record.retry_count.raw_value > 0"
+                >
+                                        <div class="col-12">
+                                            <i
+                      class="fa fa-repeat"
+                    /> Retry <field name="retry_count" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Transcription Job Action -->
+        <record id="action_llm_transcription_job" model="ir.actions.act_window">
+            <field name="name">Transcription Jobs</field>
+            <field name="res_model">llm.transcription.job</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="view_id" ref="view_llm_transcription_job_tree" />
+            <field name="search_view_id" ref="view_llm_transcription_job_search" />
+            <field name="context">{'search_default_my_jobs': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No transcription jobs yet!
+                </p>
+                <p>
+                    Transcription jobs are created automatically when you use LLM threads with queue-based transcription.
+                    They help manage and monitor the transcription process across different LLM providers.
+                </p>
+            </field>
+        </record>
+</odoo>
