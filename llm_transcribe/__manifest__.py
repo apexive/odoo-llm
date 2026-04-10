@@ -9,8 +9,11 @@
     "category": "Technical/AI",
     "version": "18.0.2.0.0",
     "depends": [
-        "llm_tool",
         "llm",
+        "llm_thread",
+        "llm_tool",
+        "llm_assistant",
+        "web_json_editor",
     ],
     "author": "Apexive Solutions LLC",
     "website": "https://github.com/apexive/odoo-llm",

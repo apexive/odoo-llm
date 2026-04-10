@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Transcription Queue Tree View -->
+        <record id="view_llm_transcription_queue_tree" model="ir.ui.view">
+            <field name="name">llm.transcription.queue.tree</field>
+            <field name="model">llm.transcription.queue</field>
+            <field name="arch" type="xml">
+                <list
+        decoration-success="queue_health == 'healthy'"
+        decoration-warning="queue_health == 'warning'"
+        decoration-danger="queue_health == 'critical'"
+        decoration-muted="queue_health == 'disabled'"
+      >
+                    <field name="display_name" />
+                    <field name="model_id" />
+                    <field name="enabled" widget="boolean_toggle" />
+                    <field name="queue_health" widget="badge" />
+                    <field name="current_running_jobs" />
+                    <field name="queued_jobs_count" />
+                    <field name="max_concurrent_jobs" />
+                    <field name="total_jobs_today" />
+                    <field name="success_rate" widget="percentage" />
+                    <field name="last_processed_at" />
+                </list>
+            </field>
+        </record>
+
+        <!-- Transcription Queue Form View -->
+        <record id="view_llm_transcription_queue_form" model="ir.ui.view">
+            <field name="name">llm.transcription.queue.form</field>
+            <field name="model">llm.transcription.queue</field>
+            <field name="arch" type="xml">
+                <form>
+                    <header>
+                        <button
+            name="action_enable"
+            string="Enable"
+            type="object"
+            invisible="enabled"
+            class="btn-success"
+          />
+                        <button
+            name="action_disable"
+            string="Disable"
+            type="object"
+            invisible="not enabled"
+            class="btn-warning"
+          />
+                        <button
+            name="action_process_queue"
+            string="Process Queue"
+            type="object"
+            class="btn-primary"
+          />
+                        <button
+            name="action_clear_queue"
+            string="Clear Queue"
+            type="object"
+            class="btn-danger"
+            confirm="Are you sure you want to cancel all queued jobs?"
+          />
+                        <button
+            name="action_retry_failed_jobs"
+            string="Retry Failed Jobs"
+            type="object"
+            class="btn-info"
+          />
+                        <field name="queue_health" widget="statusbar" />
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box">
+                            <button
+              class="oe_stat_button"
+              type="object"
+              name="action_view_jobs"
+              icon="fa-tasks"
+            >
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="current_running_jobs" />
+                                    </span>
+                                    <span class="o_stat_text">Running</span>
+                                </div>
+                            </button>
+                            <button
+              class="oe_stat_button"
+              type="object"
+              name="action_view_jobs"
+              icon="fa-clock-o"
+            >
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="queued_jobs_count" />
+                                    </span>
+                                    <span class="o_stat_text">Queued</span>
+                                </div>
+                            </button>
+                            <button
+              class="oe_stat_button"
+              type="object"
+              name="action_view_jobs"
+              icon="fa-check"
+            >
+                                <div class="o_field_widget o_stat_info">
+                                    <span class="o_stat_value">
+                                        <field name="total_jobs_today" />
+                                    </span>
+                                    <span class="o_stat_text">Today</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div class="oe_title">
+                            <h1><field name="display_name" /></h1>
+                        </div>
+
+                        <group>
+                            <group string="Configuration">
+                                <field name="model_id" />
+                                <field name="enabled" />
+                                <field name="max_concurrent_jobs" />
+                                <field name="auto_retry_failed" />
+                                <field
+                name="retry_delay_minutes"
+                invisible="not auto_retry_failed"
+              />
+                            </group>
+                            <group string="Status">
+                                <field name="queue_health" />
+                                <field name="current_running_jobs" />
+                                <field name="queued_jobs_count" />
+                                <field name="total_jobs_today" />
+                                <field name="last_processed_at" />
+                            </group>
+                        </group>
+
+                        <group string="Performance Metrics">
+                            <group>
+                                <field
+                name="avg_queue_time"
+                widget="float_time"
+              />
+                                <field
+                name="avg_processing_time"
+                widget="float_time"
+              />
+                            </group>
+                            <group>
+                                <field
+                name="success_rate"
+                widget="percentage"
+              />
+                            </group>
+                        </group>
+
+                        <notebook>
+                            <page string="Jobs" name="jobs">
+                                <field name="model_id" invisible="1" />
+                                <!-- Jobs will be shown via a separate action -->
+                                <group>
+                                    <button
+                  name="action_view_jobs"
+                  string="View All Jobs"
+                  type="object"
+                  class="btn-primary"
+                />
+                                </group>
+                                <!-- Recent jobs preview -->
+                                <group string="Recent Jobs">
+                                    <field
+                  name="recent_job_ids"
+                  domain="[('model_id', '=', model_id)]"
+                  readonly="1"
+                  nolabel="1"
+                >
+                                    <list
+                    decoration-info="state == 'queued'"
+                    decoration-warning="state == 'running'"
+                    decoration-success="state == 'completed'"
+                    decoration-danger="state == 'failed'"
+                  >
+                                        <field name="display_name" />
+                                        <field name="thread_id" />
+                                        <field name="state" widget="badge" />
+                                        <field name="user_id" />
+                                        <field name="create_date" />
+                                        <field
+                      name="duration"
+                      widget="float_time"
+                    />
+                                        <field name="retry_count" />
+                                    </list>
+                                </field>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Transcription Queue Search View -->
+        <record id="view_llm_transcription_queue_search" model="ir.ui.view">
+            <field name="name">llm.transcription.queue.search</field>
+            <field name="model">llm.transcription.queue</field>
+            <field name="arch" type="xml">
+                <search>
+                    <field name="display_name" />
+                    <field name="model_id" />
+
+                    <!-- Only use stored fields in domains -->
+                    <filter
+          string="Enabled"
+          name="enabled"
+          domain="[('enabled', '=', True)]"
+        />
+                    <filter
+          string="Disabled"
+          name="disabled"
+          domain="[('enabled', '=', False)]"
+        />
+                    <filter
+          string="Recently Processed"
+          name="recent"
+          domain="[('last_processed_at', '!=', False)]"
+        />
+
+                    <group expand="0" string="Group By">
+                        <filter
+            string="Model"
+            name="group_by_model"
+            domain="[]"
+            context="{'group_by': 'model_id'}"
+          />
+                        <filter
+            string="Enabled Status"
+            name="group_by_enabled"
+            domain="[]"
+            context="{'group_by': 'enabled'}"
+          />
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- Transcription Queue Kanban View -->
+        <record id="view_llm_transcription_queue_kanban" model="ir.ui.view">
+            <field name="name">llm.transcription.queue.kanban</field>
+            <field name="model">llm.transcription.queue</field>
+            <field name="arch" type="xml">
+                <kanban class="o_kanban_mobile">
+                    <field name="model_id" />
+                    <field name="enabled" />
+                    <field name="queue_health" />
+                    <field name="current_running_jobs" />
+                    <field name="queued_jobs_count" />
+                    <field name="max_concurrent_jobs" />
+                    <field name="success_rate" />
+                    <templates>
+                        <t t-name="card">
+                            <div class="oe_kanban_card oe_kanban_global_click">
+                                <div class="oe_kanban_content">
+                                    <div class="row">
+                                        <div class="col-8">
+                                            <strong><field
+                        name="display_name"
+                      /></strong>
+                                        </div>
+                                        <div class="col-4 text-right">
+                                            <span
+                      t-att-class="'badge badge-' + (record.queue_health.raw_value == 'healthy' ? 'success' : record.queue_health.raw_value == 'critical' ? 'danger' : record.queue_health.raw_value == 'warning' ? 'warning' : 'secondary')"
+                    >
+                                                <field name="queue_health" />
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <i
+                      class="fa fa-brain"
+                      title="Model"
+                    /> <field name="model_id" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <i
+                      class="fa fa-play"
+                      title="Running Jobs"
+                    /> <field name="current_running_jobs" />/<field
+                      name="max_concurrent_jobs"
+                    />
+                                        </div>
+                                        <div class="col-6">
+                                            <i
+                      class="fa fa-clock-o"
+                      title="Queued Jobs"
+                    /> <field name="queued_jobs_count" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <i
+                      class="fa fa-chart-line"
+                      title="Success Rate"
+                    /> <field name="success_rate" widget="percentage" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <span
+                      t-if="record.enabled.raw_value"
+                      class="badge badge-success"
+                    >Enabled</span>
+                                            <span
+                      t-if="!record.enabled.raw_value"
+                      class="badge badge-danger"
+                    >Disabled</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </field>
+        </record>
+
+        <!-- Transcription Queue Action -->
+        <record id="action_llm_transcription_queue" model="ir.actions.act_window">
+            <field name="name">Transcription Queues</field>
+            <field name="res_model">llm.transcription.queue</field>
+            <field name="view_mode">list,kanban,form</field>
+            <field name="view_id" ref="view_llm_transcription_queue_tree" />
+            <field
+      name="search_view_id"
+      ref="view_llm_transcription_queue_search"
+    />
+            <field name="context">{'search_default_enabled': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No transcription queues configured yet!
+                </p>
+                <p>
+                    Transcription queues are automatically created for each LLM model when needed.
+                    They help manage concurrent transcription jobs and provide performance monitoring.
+                </p>
+            </field>
+        </record>
+</odoo>
