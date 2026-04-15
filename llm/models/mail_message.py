@@ -255,6 +255,11 @@ class MailMessage(models.Model):
             lambda att: att.mimetype and att.mimetype in mimetypes and att.datas,
         )
 
+    # Max pixel dimension when sending images to the LLM for vision/understanding.
+    # Does NOT affect the original attachment — generation providers (fal.ai, Replicate)
+    # always receive the original binary via _resolve_attachment_inputs.
+    _LLM_IMAGE_MAX_PX = 1568
+
     def _get_image_attachments(self):
         """Get image attachments with validated mimetype from magic bytes.
 
@@ -262,41 +267,35 @@ class MailMessage(models.Model):
         The mimetype is detected from the actual image content, not from Odoo's
         stored mimetype, to ensure compatibility with strict API validators
         like Anthropic Claude.
+
+        Images are downsampled to _LLM_IMAGE_MAX_PX on the longest side before
+        encoding. A 3 MB WhatsApp photo is otherwise ~700K tokens as base64.
         """
         images = []
         for att in self._get_attachments_by_mimetype(SUPPORTED_IMAGE_MIMETYPES):
             try:
                 raw_bytes = base64.b64decode(att.datas)
                 real_mimetype = _detect_image_mimetype(raw_bytes)
+                used_mimetype = real_mimetype or att.mimetype
 
-                if real_mimetype:
-                    if real_mimetype != att.mimetype:
-                        _logger.debug(
-                            "Image %s: correcting mimetype from %s to %s",
-                            att.name,
-                            att.mimetype,
-                            real_mimetype,
-                        )
-                    images.append(
-                        {
-                            "mimetype": real_mimetype,
-                            "data": att.datas.decode("utf-8"),
-                            "name": att.name or "image",
-                        },
-                    )
-                else:
-                    _logger.warning(
-                        "Could not detect image type for %s, using stored mimetype %s",
+                if real_mimetype and real_mimetype != att.mimetype:
+                    _logger.debug(
+                        "Image %s: correcting mimetype from %s to %s",
                         att.name,
                         att.mimetype,
+                        real_mimetype,
                     )
-                    images.append(
-                        {
-                            "mimetype": att.mimetype,
-                            "data": att.datas.decode("utf-8"),
-                            "name": att.name or "image",
-                        },
-                    )
+
+                raw_bytes, used_mimetype = self._llm_resize_image(
+                    raw_bytes, used_mimetype, att.name
+                )
+                images.append(
+                    {
+                        "mimetype": used_mimetype,
+                        "data": base64.b64encode(raw_bytes).decode("utf-8"),
+                        "name": att.name or "image",
+                    },
+                )
             except (ValueError, TypeError) as e:
                 _logger.warning(
                     "Failed to process image attachment %s: %s",
@@ -304,6 +303,43 @@ class MailMessage(models.Model):
                     e,
                 )
         return images
+
+    def _llm_resize_image(self, raw_bytes, mimetype, name="image"):
+        """Downsample image so its longest side is at most _LLM_IMAGE_MAX_PX.
+
+        Returns (raw_bytes, mimetype) unchanged if PIL is unavailable or the
+        image is already within bounds.
+        """
+        try:
+            import io
+            from PIL import Image
+
+            img = Image.open(io.BytesIO(raw_bytes))
+            if max(img.size) <= self._LLM_IMAGE_MAX_PX:
+                return raw_bytes, mimetype
+
+            scale = self._LLM_IMAGE_MAX_PX / max(img.size)
+            new_size = (int(img.width * scale), int(img.height * scale))
+            img = img.resize(new_size, Image.LANCZOS)
+
+            if img.mode in ("RGBA", "LA"):
+                bg = Image.new("RGB", img.size, (255, 255, 255))
+                bg.paste(img, mask=img.split()[-1])
+                img = bg
+            elif img.mode != "RGB":
+                img = img.convert("RGB")
+
+            buf = io.BytesIO()
+            img.save(buf, format="JPEG", quality=82, optimize=True)
+            resized = buf.getvalue()
+            _logger.debug(
+                "Image %s resized to %s, %.0f KB → %.0f KB",
+                name, new_size, len(raw_bytes) / 1024, len(resized) / 1024,
+            )
+            return resized, "image/jpeg"
+        except Exception as e:
+            _logger.warning("_llm_resize_image failed for %s, using original: %s", name, e)
+            return raw_bytes, mimetype
 
     def _get_pdf_attachments(self):
         """Get PDF attachments as base64 data."""
