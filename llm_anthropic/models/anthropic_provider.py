@@ -101,7 +101,13 @@ class LLMProvider(models.Model):
         }
 
         if system_content:
-            params["system"] = system_content
+            params["system"] = [
+                {
+                    "type": "text",
+                    "text": system_content,
+                    "cache_control": {"type": "ephemeral"},
+                }
+            ]
 
         if tools:
             formatted_tools = self.format_tools(tools)
@@ -344,11 +350,25 @@ class LLMProvider(models.Model):
         is_multimodal = model and model.model_use == "multimodal"
         formatted_messages = []
 
+        # Find the ID of the last user message so we can strip images from older ones
+        last_user_msg_id = None
+        if is_multimodal:
+            for message in reversed(list(messages)):
+                if message.is_llm_user_message()[message]:
+                    last_user_msg_id = message.id
+                    break
+
         for message in messages:
+            is_latest_user = (
+                is_multimodal
+                and message.is_llm_user_message()[message]
+                and message.id == last_user_msg_id
+            )
             formatted_message = self._dispatch(
                 "format_message",
                 record=message,
                 is_multimodal=is_multimodal,
+                is_latest_user_message=is_latest_user,
             )
             if formatted_message:
                 formatted_messages.append(formatted_message)

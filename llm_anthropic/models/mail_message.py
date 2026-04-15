@@ -9,13 +9,20 @@ _logger = logging.getLogger(__name__)
 class MailMessage(models.Model):
     _inherit = "mail.message"
 
-    def anthropic_format_message(self, is_multimodal=False):
+    def anthropic_format_message(self, is_multimodal=False, is_latest_user_message=True):
         """Provider-specific formatting for Anthropic Claude.
 
         Key differences from OpenAI:
         - Tool results use role="user" with content type "tool_result"
         - Assistant messages with tool calls use content as array of blocks
         - Content can be string or list of content blocks
+
+        Args:
+            is_multimodal: Whether the model supports images/PDFs
+            is_latest_user_message: When False, strips base64 image/PDF data from
+                this message and replaces with a lightweight text placeholder.
+                Older images have already been processed by the model; re-sending
+                them every turn wastes ~1,600 tokens each.
         """
         self.ensure_one()
         body = self.body
@@ -27,8 +34,24 @@ class MailMessage(models.Model):
 
             # Only include images/PDFs if model supports multimodal
             if is_multimodal:
-                images = self._get_image_attachments()
-                pdfs = self._get_pdf_attachments()
+                if is_latest_user_message:
+                    images = self._get_image_attachments()
+                    pdfs = self._get_pdf_attachments()
+                else:
+                    # Strip heavy base64 data from older messages — replace with placeholder
+                    raw_images = self._get_image_attachments()
+                    raw_pdfs = self._get_pdf_attachments()
+                    images = []
+                    pdfs = []
+                    placeholders = []
+                    if raw_images:
+                        placeholders.append(f"[{len(raw_images)} image(s) previously sent]")
+                    if raw_pdfs:
+                        placeholders.append(f"[{len(raw_pdfs)} PDF(s) previously sent]")
+                    # Inject placeholder into body text below
+                    if placeholders:
+                        placeholder_text = " ".join(placeholders)
+                        body = f"{body}\n{placeholder_text}" if body and body.strip() else placeholder_text
             else:
                 images = []
                 pdfs = []
