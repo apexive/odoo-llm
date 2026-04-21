@@ -407,13 +407,15 @@ class LLMProvider(models.Model):
         IMPORTANT — tool_result isolation rule:
         A tool_result block must appear in a user message that immediately
         follows the assistant message containing the matching tool_use block.
-        If we merge a tool_result user message with the next plain-text user
-        message, Anthropic sees the tool_use_id in a context where there is
-        no preceding tool_use, and returns:
+        If an incoming user message carries tool_result blocks, do NOT merge
+        it into the preceding user message — that would move the tool_result
+        away from its paired tool_use and trigger:
             HTTP 400 "unexpected tool_use_id found in tool_result blocks"
 
-        Fix: never merge any message that contains (or would receive)
-        tool_result blocks — keep them as separate user turns.
+        However, merging a subsequent plain-text user message INTO an existing
+        tool_result user turn is safe: the tool_result stays first in its turn
+        and remains immediately after its tool_use. This handles the case
+        where a user sends a message mid-turn (while a tool is executing).
         """
         if not messages:
             return []
@@ -424,9 +426,12 @@ class LLMProvider(models.Model):
                 prev_content = merged[-1]["content"]
                 curr_content = msg["content"]
 
-                # Never merge when either side carries tool_result blocks
-                if self._content_has_tool_result(prev_content) or \
-                        self._content_has_tool_result(curr_content):
+                # Never merge when the incoming message carries tool_result blocks —
+                # moving a tool_result away from its paired tool_use breaks Anthropic's
+                # strict pairing rule. Merging plain text INTO a tool_result user turn
+                # (i.e. when only prev has tool_result) is safe: the result stays
+                # immediately after its tool_use.
+                if self._content_has_tool_result(curr_content):
                     merged.append(msg)
                     continue
 
