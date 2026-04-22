@@ -5,6 +5,11 @@ from odoo import api, fields, models
 
 from ..utils import render_template
 
+try:
+    from odoo.addons.llm_thread.models.llm_thread import RelatedRecordProxy as _RelatedRecordProxy
+except ImportError:
+    _RelatedRecordProxy = None
+
 _logger = logging.getLogger(__name__)
 
 
@@ -174,6 +179,10 @@ class LLMAssistant(models.Model):
                 if assistant.prompt_id:
                     # Get evaluated default values for preview
                     default_values = assistant.get_evaluated_default_values({})
+                    # Inject a null proxy so templates using {{ related_record.get_field(...) }}
+                    # render as empty strings instead of raising UndefinedError during preview.
+                    if _RelatedRecordProxy and "related_record" not in default_values:
+                        default_values["related_record"] = _RelatedRecordProxy(None)
                     messages = assistant.prompt_id.get_messages(default_values)
                     if messages:
                         # Find system message or use first message
