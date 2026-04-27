@@ -244,15 +244,24 @@ class LLMProvider(models.Model):
                         target_key = candidate
                         break
 
-            # Resolve integer attachment ID → data URI.
+            # Resolve attachment references → data URI.
+            # Handles: integer 569, string "569", or string "attachment:569".
+            att_id = None
             if isinstance(value, int) and value > 0:
-                att = self.env["ir.attachment"].sudo().browse(value)
+                att_id = value
+            elif isinstance(value, str):
+                raw = value.split(":", 1)[-1] if value.startswith("attachment:") else value
+                if raw.isdigit():
+                    att_id = int(raw)
+
+            if att_id:
+                att = self.env["ir.attachment"].sudo().browse(att_id)
                 if att.exists() and att.datas:
                     mimetype = att.mimetype or "application/octet-stream"
                     resolved[target_key] = f"data:{mimetype};base64,{att.datas.decode()}"
                     _logger.info(
                         "fal_ai: resolved attachment %s (%s) → %s",
-                        value, mimetype, target_key,
+                        att_id, mimetype, target_key,
                     )
                     continue
 
