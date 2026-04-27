@@ -207,10 +207,13 @@ class LLMProvider(models.Model):
     # Maps generic input key names (used by the AI assistant) to the fal.ai schema
     # field variants tried in order. First match in the model's input schema wins.
     _FAL_INPUT_FIELD_ALIASES = {
-        "image": ["image_url", "image"],
-        "audio": ["audio_url", "audio"],
-        "video": ["video_url", "video"],
-        "mask":  ["mask_url",  "mask"],
+        "image":        ["image_url", "image"],
+        "audio":        ["audio_url", "ref_audio_url", "audio"],
+        "video":        ["video_url", "video"],
+        "mask":         ["mask_url",  "mask"],
+        # Voice cloning / TTS models use ref_audio_url for the reference sample.
+        "voice_sample": ["ref_audio_url", "audio_url", "voice_sample"],
+        "ref_audio":    ["ref_audio_url", "audio_url", "ref_audio"],
     }
 
     def _fal_ai_resolve_inputs(self, inputs, model):
