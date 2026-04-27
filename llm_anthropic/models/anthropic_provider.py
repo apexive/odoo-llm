@@ -373,11 +373,76 @@ class LLMProvider(models.Model):
             if formatted_message:
                 formatted_messages.append(formatted_message)
 
+        formatted_messages = self._anthropic_inject_missing_tool_results(
+            formatted_messages,
+        )
         formatted_messages = self._anthropic_merge_consecutive_user_messages(
             formatted_messages,
         )
 
         return formatted_messages
+
+    def _anthropic_inject_missing_tool_results(self, messages):
+        """Inject synthetic tool_result for any tool_use not immediately answered.
+
+        Race condition: an async tool (e.g. odoo_generate job) stores its
+        tool_use in the DB, then a user sends a new message before the job
+        completes and saves its tool_result. The history then has:
+            [assistant{tool_use}, user{new message}]
+        — no tool_result between them — which Anthropic rejects with HTTP 400.
+
+        Fix: scan each assistant message for tool_use blocks; if the next
+        message is not a user message with matching tool_result(s), inject
+        a synthetic error tool_result. The subsequent merge step will then
+        safely fold the user's plain-text message into the same turn.
+        """
+        if not messages:
+            return messages
+
+        result = []
+        for i, msg in enumerate(messages):
+            result.append(msg)
+
+            if msg.get("role") != "assistant":
+                continue
+
+            content = msg.get("content", [])
+            tool_use_ids = [
+                block["id"]
+                for block in (content if isinstance(content, list) else [])
+                if isinstance(block, dict) and block.get("type") == "tool_use" and block.get("id")
+            ]
+            if not tool_use_ids:
+                continue
+
+            # Look ahead in the ORIGINAL list to find matched tool_results.
+            next_msg = messages[i + 1] if i + 1 < len(messages) else None
+            if next_msg and next_msg.get("role") == "user":
+                next_content = next_msg.get("content", [])
+                resolved_ids = {
+                    block.get("tool_use_id")
+                    for block in (next_content if isinstance(next_content, list) else [])
+                    if isinstance(block, dict) and block.get("type") == "tool_result"
+                }
+                missing = [tid for tid in tool_use_ids if tid not in resolved_ids]
+            else:
+                missing = tool_use_ids
+
+            if missing:
+                result.append({
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "tool_result",
+                            "tool_use_id": tid,
+                            "content": "Tool execution was interrupted by a new user message.",
+                            "is_error": True,
+                        }
+                        for tid in missing
+                    ],
+                })
+
+        return result
 
     def _content_has_tool_result(self, content):
         """Check if message content contains tool_result blocks.
