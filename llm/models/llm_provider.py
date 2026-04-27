@@ -24,6 +24,13 @@ class LLMProvider(models.Model):
     api_key = fields.Char()
     api_base = fields.Char()
     model_ids = fields.One2many("llm.model", "provider_id", string="Models")
+    models_fetch_cursor = fields.Char(
+        string="Models Fetch Cursor",
+        readonly=True,
+        copy=False,
+        help="Pagination cursor for incremental model fetching. "
+             "Cleared automatically when all pages are exhausted.",
+    )
 
     @api.constrains("name")
     def _check_unique_name(self):

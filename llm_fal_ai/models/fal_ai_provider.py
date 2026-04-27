@@ -203,17 +203,34 @@ class LLMProvider(models.Model):
             _logger.error(f"Error in FAL AI stream: {e}")
             raise UserError(_(f"FAL AI streaming failed: {str(e)}")) from e
 
-    def fal_ai_models(self, model_id=None):
-        """Retrieve available Fal model endpoints from the platform API."""
-        self.ensure_one()
+    _FAL_MODELS_PER_FETCH = 200  # max models per button click (20 pages × 10)
 
-        for raw_model in self._fal_ai_fetch_models(model_id=model_id):
+    def fal_ai_models(self, model_id=None):
+        """Fetch up to _FAL_MODELS_PER_FETCH models per call, resuming from stored cursor.
+
+        On each call the cursor is advanced. When the API signals no more pages the
+        cursor is cleared so the next call starts over from page 1.
+        """
+        self.ensure_one()
+        start_cursor = self.models_fetch_cursor or None
+        raw_models, next_cursor = self._fal_ai_fetch_models_batched(
+            model_id=model_id,
+            start_cursor=start_cursor,
+            max_items=None if model_id else self._FAL_MODELS_PER_FETCH,
+        )
+        if not model_id:
+            self.sudo().models_fetch_cursor = next_cursor or False
+        for raw_model in raw_models:
             parsed = self._fal_ai_parse_model(raw_model)
             if parsed:
                 yield parsed
 
-    def _fal_ai_fetch_models(self, model_id=None):
-        """Fetch Fal model metadata from the platform API."""
+    def _fal_ai_fetch_models_batched(self, model_id=None, start_cursor=None, max_items=None):
+        """Fetch fal.ai models up to max_items starting from start_cursor.
+
+        Returns (raw_models_list, next_cursor).
+        next_cursor is False when all pages are exhausted (caller should reset).
+        """
         base_url = (self.api_base or "https://api.fal.ai/v1").rstrip("/")
         models_url = base_url if base_url.endswith("/models") else f"{base_url}/models"
 
@@ -224,8 +241,15 @@ class LLMProvider(models.Model):
             params.append(("limit", "10"))
         params.append(("expand", "openapi-3.0"))
 
-        cursor = None
+        cursor = start_cursor
+        raw_models = []
+        next_cursor = False
+
         while True:
+            if max_items is not None and len(raw_models) >= max_items:
+                next_cursor = cursor  # resume here on next call
+                break
+
             current_params = list(params)
             if cursor:
                 current_params.append(("cursor", cursor))
@@ -245,10 +269,7 @@ class LLMProvider(models.Model):
             except HTTPError as e:
                 body = e.read().decode("utf-8", errors="ignore")
                 raise UserError(
-                    _(
-                        "Fal.ai model fetch failed with HTTP %s: %s",
-                    )
-                    % (e.code, body or e.reason)
+                    _("Fal.ai model fetch failed with HTTP %s: %s") % (e.code, body or e.reason)
                 ) from e
             except URLError as e:
                 raise UserError(
@@ -256,14 +277,19 @@ class LLMProvider(models.Model):
                 ) from e
 
             for raw_model in payload.get("models", []):
-                yield raw_model
+                raw_models.append(raw_model)
+                if max_items is not None and len(raw_models) >= max_items:
+                    break
 
             if model_id:
                 break
 
             cursor = payload.get("next_cursor")
             if not cursor or not payload.get("has_more"):
+                next_cursor = False  # exhausted — next call starts from page 1
                 break
+
+        return raw_models, next_cursor
 
     def _fal_ai_parse_model(self, raw_model):
         """Normalize a Fal platform model record into the Odoo import format."""
