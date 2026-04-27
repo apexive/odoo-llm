@@ -8,6 +8,14 @@ _logger = logging.getLogger(__name__)
 
 NOMIC_EMBEDDING_URL = "https://api-atlas.nomic.ai/v1/embedding/text"
 
+# Nomic has no /models discovery endpoint — enumerate known models statically.
+NOMIC_KNOWN_MODELS = [
+    {"name": "nomic-embed-text-v1.5", "capabilities": ["embedding"]},
+    {"name": "nomic-embed-text-v1", "capabilities": ["embedding"]},
+    {"name": "nomic-embed-vision-v1.5", "capabilities": ["embedding"]},
+    {"name": "nomic-embed-vision-v1", "capabilities": ["embedding"]},
+]
+
 
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
@@ -15,6 +23,13 @@ class LLMProvider(models.Model):
     @api.model
     def _get_available_services(self):
         return super()._get_available_services() + [("nomic", "Nomic")]
+
+    def nomic_models(self, model_id=None):
+        """Yield known Nomic models (no discovery API exists)."""
+        for m in NOMIC_KNOWN_MODELS:
+            if model_id and m["name"] != model_id:
+                continue
+            yield {"name": m["name"], "details": {"id": m["name"], "capabilities": m["capabilities"]}}
 
     def nomic_get_client(self):
         """Return a requests.Session pre-configured with the Nomic Bearer token."""
