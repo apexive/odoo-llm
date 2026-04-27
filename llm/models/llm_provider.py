@@ -267,7 +267,7 @@ class LLMProvider(models.Model):
                     "status": status,
                     "details": details,
                     "existing_model_id": existing.id if existing else False,
-                    "selected": status in ["new", "modified"],
+                    "selected": True,
                 },
             )
 
