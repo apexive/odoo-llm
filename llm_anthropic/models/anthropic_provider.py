@@ -383,24 +383,48 @@ class LLMProvider(models.Model):
         return formatted_messages
 
     def _anthropic_inject_missing_tool_results(self, messages):
-        """Inject synthetic tool_result for any tool_use not immediately answered.
+        """Ensure every tool_use is immediately followed by its tool_result.
 
-        Race condition: an async tool (e.g. odoo_generate job) stores its
-        tool_use in the DB, then a user sends a new message before the job
-        completes and saves its tool_result. The history then has:
-            [assistant{tool_use}, user{new message}]
-        — no tool_result between them — which Anthropic rejects with HTTP 400.
+        Two race conditions can corrupt the message history:
 
-        Fix: scan each assistant message for tool_use blocks; if the next
-        message is not a user message with matching tool_result(s), inject
-        a synthetic error tool_result. The subsequent merge step will then
-        safely fold the user's plain-text message into the same turn.
+        A. Job still in-flight — user sends a new message before the async tool
+           finishes.  History: [assistant{tool_use}, user{?}]
+           Fix: inject a synthetic error tool_result between them.
+
+        B. Job completes AFTER the user message is stored.  History:
+           [assistant{tool_use}, user{?}, user{actual_tool_result}]
+           Fix: reorder the actual result to immediately follow the tool_use
+           instead of injecting a duplicate synthetic that would cause a second
+           HTTP 400 ("duplicate tool_result for the same tool_use_id").
+
+        After reordering/injection the existing merge step folds the user's
+        plain-text turn safely into the tool_result turn (tool_result first,
+        user text appended), which Anthropic accepts.
         """
         if not messages:
             return messages
 
-        result = []
+        # Pre-build index: tool_use_id → index of the message carrying its result.
+        actual_result_index = {}
         for i, msg in enumerate(messages):
+            if msg.get("role") != "user":
+                continue
+            content = msg.get("content", [])
+            if not isinstance(content, list):
+                continue
+            for block in content:
+                if isinstance(block, dict) and block.get("type") == "tool_result":
+                    tid = block.get("tool_use_id")
+                    if tid and tid not in actual_result_index:
+                        actual_result_index[tid] = i
+
+        consumed = set()  # message indices already moved forward
+        result = []
+
+        for i, msg in enumerate(messages):
+            if i in consumed:
+                continue
+
             result.append(msg)
 
             if msg.get("role") != "assistant":
@@ -415,20 +439,35 @@ class LLMProvider(models.Model):
             if not tool_use_ids:
                 continue
 
-            # Look ahead in the ORIGINAL list to find matched tool_results.
-            next_msg = messages[i + 1] if i + 1 < len(messages) else None
+            # Check whether the immediately following (unconsumed) message already
+            # satisfies all tool_use IDs.
+            next_i = i + 1
+            while next_i < len(messages) and next_i in consumed:
+                next_i += 1
+            next_msg = messages[next_i] if next_i < len(messages) else None
             if next_msg and next_msg.get("role") == "user":
                 next_content = next_msg.get("content", [])
-                resolved_ids = {
-                    block.get("tool_use_id")
-                    for block in (next_content if isinstance(next_content, list) else [])
-                    if isinstance(block, dict) and block.get("type") == "tool_result"
+                resolved = {
+                    b.get("tool_use_id")
+                    for b in (next_content if isinstance(next_content, list) else [])
+                    if isinstance(b, dict) and b.get("type") == "tool_result"
                 }
-                missing = [tid for tid in tool_use_ids if tid not in resolved_ids]
-            else:
-                missing = tool_use_ids
+                if all(tid in resolved for tid in tool_use_ids):
+                    continue  # Already correctly paired — nothing to do.
 
-            if missing:
+            # For each tool_use: move the actual result forward, or inject synthetic.
+            synthetic_needed = []
+            for tid in tool_use_ids:
+                actual_pos = actual_result_index.get(tid)
+                if actual_pos is not None and actual_pos > i + 1:
+                    # Actual result exists but is out of order — move it here.
+                    consumed.add(actual_pos)
+                    result.append(messages[actual_pos])
+                elif actual_pos is None:
+                    # No result anywhere — job still in-flight.
+                    synthetic_needed.append(tid)
+
+            if synthetic_needed:
                 result.append({
                     "role": "user",
                     "content": [
@@ -438,7 +477,7 @@ class LLMProvider(models.Model):
                             "content": "Tool execution was interrupted by a new user message.",
                             "is_error": True,
                         }
-                        for tid in missing
+                        for tid in synthetic_needed
                     ],
                 })
 
