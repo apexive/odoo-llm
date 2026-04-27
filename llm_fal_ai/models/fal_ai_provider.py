@@ -130,6 +130,7 @@ class LLMProvider(models.Model):
         input_data = (
             json.loads(input_data) if isinstance(input_data, str) else input_data
         )
+        input_data = self._fal_ai_resolve_inputs(input_data, model)
 
         try:
             if stream:
@@ -202,6 +203,59 @@ class LLMProvider(models.Model):
         except Exception as e:
             _logger.error(f"Error in FAL AI stream: {e}")
             raise UserError(_(f"FAL AI streaming failed: {str(e)}")) from e
+
+    # Maps generic input key names (used by the AI assistant) to the fal.ai schema
+    # field variants tried in order. First match in the model's input schema wins.
+    _FAL_INPUT_FIELD_ALIASES = {
+        "image": ["image_url", "image"],
+        "audio": ["audio_url", "audio"],
+        "video": ["video_url", "video"],
+        "mask":  ["mask_url",  "mask"],
+    }
+
+    def _fal_ai_resolve_inputs(self, inputs, model):
+        """Resolve attachment IDs → data URIs and map generic keys to schema field names.
+
+        The AI assistant passes inputs like {"image": <attachment_id>}. This method:
+        1. Looks up the ir.attachment record for any integer value.
+        2. Converts it to a data URI (data:<mimetype>;base64,...).
+        3. Renames the key to match the field name declared in the model's input schema
+           (e.g. "image" → "image_url" when "image_url" is in the schema).
+        """
+        if not inputs or not isinstance(inputs, dict):
+            return inputs
+
+        schema_props = (
+            ((model.details or {}).get("input_schema") or {}).get("properties", {})
+            if model
+            else {}
+        )
+
+        resolved = {}
+        for key, value in inputs.items():
+            # Resolve the target field name via schema aliases.
+            target_key = key
+            if key in self._FAL_INPUT_FIELD_ALIASES:
+                for candidate in self._FAL_INPUT_FIELD_ALIASES[key]:
+                    if candidate in schema_props:
+                        target_key = candidate
+                        break
+
+            # Resolve integer attachment ID → data URI.
+            if isinstance(value, int) and value > 0:
+                att = self.env["ir.attachment"].sudo().browse(value)
+                if att.exists() and att.datas:
+                    mimetype = att.mimetype or "application/octet-stream"
+                    resolved[target_key] = f"data:{mimetype};base64,{att.datas.decode()}"
+                    _logger.info(
+                        "fal_ai: resolved attachment %s (%s) → %s",
+                        value, mimetype, target_key,
+                    )
+                    continue
+
+            resolved[target_key] = value
+
+        return resolved
 
     _FAL_MODELS_PER_FETCH = 200  # max models per button click (20 pages × 10)
 
@@ -687,6 +741,8 @@ class LLMProvider(models.Model):
             # Convert inputs to dictionary if needed
             if isinstance(inputs, str):
                 inputs = json.loads(inputs)
+
+            inputs = self._fal_ai_resolve_inputs(inputs, job_record.model_id)
 
             # Extract prompt from inputs (following standard generation pattern)
             arguments = {
