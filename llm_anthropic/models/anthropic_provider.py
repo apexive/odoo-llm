@@ -358,17 +358,31 @@ class LLMProvider(models.Model):
                     last_user_msg_id = message.id
                     break
 
+        # Find the ID of the last odoo_ai_model_finder tool result so we can
+        # compress older ones — each result is ~1,000+ tokens of dead weight.
+        last_model_finder_msg_id = None
+        for message in reversed(list(messages)):
+            bj = message.body_json
+            if isinstance(bj, dict) and bj.get("tool_name") == "odoo_ai_model_finder":
+                last_model_finder_msg_id = message.id
+                break
+
         for message in messages:
             is_latest_user = (
                 is_multimodal
                 and message.is_llm_user_message()[message]
                 and message.id == last_user_msg_id
             )
+            is_latest_model_finder = (
+                last_model_finder_msg_id is None
+                or message.id == last_model_finder_msg_id
+            )
             formatted_message = self._dispatch(
                 "format_message",
                 record=message,
                 is_multimodal=is_multimodal,
                 is_latest_user_message=is_latest_user,
+                is_latest_model_finder=is_latest_model_finder,
             )
             if formatted_message:
                 formatted_messages.append(formatted_message)
