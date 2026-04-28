@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 class MailMessage(models.Model):
     _inherit = "mail.message"
 
-    def anthropic_format_message(self, is_multimodal=False, is_latest_user_message=True):
+    def anthropic_format_message(self, is_multimodal=False, is_latest_user_message=True, is_latest_model_finder=True):
         """Provider-specific formatting for Anthropic Claude.
 
         Key differences from OpenAI:
@@ -147,7 +147,11 @@ class MailMessage(models.Model):
                 )
                 return None
 
-            if "result" in tool_data:
+            # Compress stale odoo_ai_model_finder results — only the latest is useful;
+            # older ones are ~1,000+ tokens of dead weight in the context window.
+            if not is_latest_model_finder and tool_data.get("tool_name") == "odoo_ai_model_finder":
+                content = "[Model list from a previous search — call odoo_ai_model_finder again to get current options.]"
+            elif "result" in tool_data:
                 content = json.dumps(tool_data["result"])
             elif "error" in tool_data:
                 content = json.dumps({"error": tool_data["error"]})
