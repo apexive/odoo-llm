@@ -2,7 +2,10 @@ import base64
 import logging
 from urllib.parse import urlparse
 
-from mistralai import Mistral
+try:
+    from mistralai import Mistral  # mistralai < 2.0
+except ImportError:
+    from mistralai.client import Mistral  # mistralai >= 2.0
 
 from odoo import _, api, models
 from odoo.exceptions import UserError
