@@ -72,6 +72,8 @@ class LLMProvider(models.Model):
         input_data = (
             json.loads(input_data) if isinstance(input_data, str) else input_data
         )
+        input_data = self._fal_ai_resolve_inputs(input_data, model)
+        self._fal_ai_validate_inputs(input_data, model)
 
         try:
             if stream:
@@ -145,6 +147,101 @@ class LLMProvider(models.Model):
             _logger.error(f"Error in FAL AI stream: {e}")
             raise UserError(_(f"FAL AI streaming failed: {str(e)}")) from e
 
+    # Maps generic input key names (used by the AI assistant) to the fal.ai schema
+    # field variants tried in order. First match in the model's input schema wins.
+    _FAL_INPUT_FIELD_ALIASES = {
+        "image":        ["image_url", "image"],
+        "audio":        ["audio_url", "ref_audio_url", "audio"],
+        "video":        ["video_url", "video"],
+        "mask":         ["mask_url",  "mask"],
+        # Voice cloning / TTS models use ref_audio_url for the reference sample.
+        "voice_sample": ["ref_audio_url", "audio_url", "voice_sample"],
+        "ref_audio":    ["ref_audio_url", "audio_url", "ref_audio"],
+    }
+
+    def _fal_ai_resolve_inputs(self, inputs, model):
+        """Resolve attachment IDs → data URIs and map generic keys to schema field names.
+
+        The AI assistant passes inputs like {"image": <attachment_id>}. This method:
+        1. Looks up the ir.attachment record for any integer value.
+        2. Converts it to a data URI (data:<mimetype>;base64,...).
+        3. Renames the key to match the field name declared in the model's input schema
+           (e.g. "image" → "image_url" when "image_url" is in the schema).
+        """
+        if not inputs or not isinstance(inputs, dict):
+            return inputs
+
+        input_schema = self._fal_ai_get_input_schema(model)
+        schema_props = (input_schema or {}).get("properties", {})
+
+        resolved = {}
+        for key, value in inputs.items():
+            # Resolve the target field name via schema aliases.
+            target_key = key
+            if key in self._FAL_INPUT_FIELD_ALIASES:
+                for candidate in self._FAL_INPUT_FIELD_ALIASES[key]:
+                    if candidate in schema_props:
+                        target_key = candidate
+                        break
+
+            # Resolve attachment references → data URI.
+            # Handles: integer 569, string "569", or string "attachment:569".
+            att_id = None
+            if isinstance(value, int) and value > 0:
+                att_id = value
+            elif isinstance(value, str):
+                raw = value.split(":", 1)[-1] if value.startswith("attachment:") else value
+                if raw.isdigit():
+                    att_id = int(raw)
+
+            if att_id:
+                att = self.env["ir.attachment"].sudo().browse(att_id)
+                if att.exists() and att.datas:
+                    mimetype = att.mimetype or "application/octet-stream"
+                    resolved[target_key] = f"data:{mimetype};base64,{att.datas.decode()}"
+                    _logger.info(
+                        "fal_ai: resolved attachment %s (%s) → %s",
+                        att_id, mimetype, target_key,
+                    )
+                    continue
+
+            resolved[target_key] = value
+
+        return resolved
+
+    def _fal_ai_get_input_schema(self, model):
+        """Return the normalized input schema, falling back to OpenAPI refs."""
+        if not model:
+            return {}
+
+        details = model.details or {}
+        input_schema = details.get("input_schema")
+        if input_schema:
+            return input_schema
+
+        openapi_schema = details.get("openapi")
+        if not openapi_schema:
+            return {}
+
+        extracted_input_schema, _output_schema = self._fal_ai_extract_openapi_io_schemas(
+            openapi_schema
+        )
+        return extracted_input_schema or {}
+
+    def _fal_ai_validate_inputs(self, inputs, model):
+        """Fail fast for missing required fal.ai fields before making the API call."""
+        if not inputs or not isinstance(inputs, dict):
+            raise UserError(_("Generation inputs are required."))
+
+        input_schema = self._fal_ai_get_input_schema(model)
+        required = input_schema.get("required", []) if input_schema else []
+        missing = [field for field in required if inputs.get(field) in (None, "")]
+        if missing:
+            raise UserError(
+                _("Missing required generation input(s): %s")
+                % ", ".join(sorted(missing))
+            )
+
     def fal_ai_models(self, model_id=None):
         """Retrieve available Fal model endpoints from the platform API."""
         self.ensure_one()
@@ -197,8 +294,7 @@ class LLMProvider(models.Model):
                     _("Fal.ai model fetch failed: %s") % (e.reason or str(e))
                 ) from e
 
-            for raw_model in payload.get("models", []):
-                yield raw_model
+            yield from payload.get("models", [])
 
             if model_id:
                 break
@@ -224,15 +320,8 @@ class LLMProvider(models.Model):
 
         openapi_schema = raw_model.get("openapi")
         if openapi_schema:
-            input_schema = (
-                openapi_schema.get("components", {})
-                .get("schemas", {})
-                .get("Input")
-            )
-            output_schema = (
-                openapi_schema.get("components", {})
-                .get("schemas", {})
-                .get("Output")
+            input_schema, output_schema = self._fal_ai_extract_openapi_io_schemas(
+                openapi_schema
             )
             if input_schema:
                 details["input_schema"] = input_schema
@@ -244,6 +333,66 @@ class LLMProvider(models.Model):
             "name": endpoint_id,
             "details": details,
         }
+
+    def _fal_ai_extract_openapi_io_schemas(self, openapi_schema):
+        """Extract fal.ai input/output schemas from OpenAPI, including named refs."""
+        schemas = openapi_schema.get("components", {}).get("schemas", {})
+        input_schema = schemas.get("Input")
+        output_schema = schemas.get("Output")
+
+        input_ref = self._fal_ai_find_request_body_ref(openapi_schema)
+        if input_ref:
+            input_schema = self._fal_ai_resolve_schema_ref(openapi_schema, input_ref)
+
+        output_ref = self._fal_ai_find_success_response_ref(openapi_schema)
+        if output_ref:
+            output_schema = self._fal_ai_resolve_schema_ref(openapi_schema, output_ref)
+
+        return input_schema, output_schema
+
+    def _fal_ai_find_request_body_ref(self, openapi_schema):
+        for path_data in openapi_schema.get("paths", {}).values():
+            for operation in path_data.values():
+                if not isinstance(operation, dict):
+                    continue
+                schema = (
+                    operation.get("requestBody", {})
+                    .get("content", {})
+                    .get("application/json", {})
+                    .get("schema", {})
+                )
+                ref = schema.get("$ref")
+                if ref:
+                    return ref
+        return None
+
+    def _fal_ai_find_success_response_ref(self, openapi_schema):
+        for path_data in openapi_schema.get("paths", {}).values():
+            for operation in path_data.values():
+                if not isinstance(operation, dict):
+                    continue
+                responses = operation.get("responses", {})
+                for status in ("200", 200):
+                    schema = (
+                        responses.get(status, {})
+                        .get("content", {})
+                        .get("application/json", {})
+                        .get("schema", {})
+                    )
+                    ref = schema.get("$ref")
+                    if ref and not ref.endswith("/QueueStatus"):
+                        return ref
+        return None
+
+    def _fal_ai_resolve_schema_ref(self, openapi_schema, ref):
+        prefix = "#/components/schemas/"
+        if not isinstance(ref, str) or not ref.startswith(prefix):
+            return None
+        return (
+            openapi_schema.get("components", {})
+            .get("schemas", {})
+            .get(ref[len(prefix):])
+        )
 
     def _fal_ai_capabilities_from_category(self, category, endpoint_id):
         """Map Fal model categories to Odoo provider capabilities."""
