@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Record Rules -->
+    <record id="llm_training_dataset_rule_all" model="ir.rule">
+        <field
+      name="name"
+    >LLM Training Datasets: read-only for all users</field>
+        <field name="model_id" ref="model_llm_training_dataset" />
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True" />
+        <field name="perm_write" eval="False" />
+        <field name="perm_create" eval="False" />
+        <field name="perm_unlink" eval="False" />
+        <field name="groups" eval="[(4, ref('base.group_user'))]" />
+    </record>
+
+    <record id="llm_training_dataset_rule_manager" model="ir.rule">
+        <field
+      name="name"
+    >LLM Training Datasets: full access for managers</field>
+        <field name="model_id" ref="model_llm_training_dataset" />
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True" />
+        <field name="perm_write" eval="True" />
+        <field name="perm_create" eval="True" />
+        <field name="perm_unlink" eval="True" />
+        <field name="groups" eval="[(4, ref('llm.group_llm_manager'))]" />
+    </record>
+
+    <record id="llm_training_job_rule_all" model="ir.rule">
+        <field name="name">LLM Training Jobs: read-only for all users</field>
+        <field name="model_id" ref="model_llm_training_job" />
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True" />
+        <field name="perm_write" eval="False" />
+        <field name="perm_create" eval="False" />
+        <field name="perm_unlink" eval="False" />
+        <field name="groups" eval="[(4, ref('base.group_user'))]" />
+    </record>
+
+    <record id="llm_training_job_rule_manager" model="ir.rule">
+        <field name="name">LLM Training Jobs: full access for managers</field>
+        <field name="model_id" ref="model_llm_training_job" />
+        <field name="domain_force">[(1, '=', 1)]</field>
+        <field name="perm_read" eval="True" />
+        <field name="perm_write" eval="True" />
+        <field name="perm_create" eval="True" />
+        <field name="perm_unlink" eval="True" />
+        <field name="groups" eval="[(4, ref('llm.group_llm_manager'))]" />
+    </record>
+</odoo>

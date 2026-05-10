@@ -1,4 +1,83 @@
+import base64
+import logging
+
 from odoo import api, fields, models, tools
+
+_logger = logging.getLogger(__name__)
+
+IMAGE_MIMETYPES = (
+    "image/jpeg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+)
+
+IMAGE_MAGIC_BYTES = {
+    b"\x89PNG\r\n\x1a\n": "image/png",
+    b"\xff\xd8\xff": "image/jpeg",
+    b"GIF87a": "image/gif",
+    b"GIF89a": "image/gif",
+    b"RIFF": "image/webp",
+}
+
+PDF_MIMETYPES = ("application/pdf",)
+
+AUDIO_MIMETYPES = (
+    "audio/wav",
+    "audio/x-wav",
+    "audio/mpeg",
+    "audio/mp3",
+    "audio/ogg",
+    "audio/flac",
+    "audio/webm",
+    "audio/mp4",
+    "audio/m4a",
+    "audio/x-m4a",
+)
+
+TEXT_MIMETYPES = (
+    "text/plain",
+    "text/markdown",
+    "text/csv",
+    "text/html",
+    "text/css",
+    "text/javascript",
+    "text/xml",
+    "text/x-python",
+    "application/json",
+    "application/xml",
+    "application/javascript",
+    "application/x-python-code",
+)
+
+SUPPORTED_IMAGE_MIMETYPES = IMAGE_MIMETYPES
+
+
+def _detect_image_mimetype(raw_bytes):
+    """Detect the real image mimetype from magic bytes."""
+    for magic, mimetype in IMAGE_MAGIC_BYTES.items():
+        if raw_bytes.startswith(magic):
+            if magic == b"RIFF" and len(raw_bytes) >= 12:
+                if raw_bytes[8:12] != b"WEBP":
+                    continue
+            return mimetype
+    return None
+
+
+def _detect_audio_format(raw_bytes):
+    """Detect audio format from magic bytes for OpenAI API."""
+    if raw_bytes[:4] == b"RIFF" and len(raw_bytes) >= 12:
+        if raw_bytes[8:12] == b"WAVE":
+            return "wav"
+    if raw_bytes[:3] == b"ID3" or raw_bytes[:2] == b"\xff\xfb":
+        return "mp3"
+    if raw_bytes[:4] == b"fLaC":
+        return "flac"
+    if raw_bytes[:4] == b"OggS":
+        return "ogg"
+    if raw_bytes[4:8] == b"ftyp":
+        return "mp4"
+    return None
 
 
 class MailMessage(models.Model):
@@ -67,7 +146,7 @@ class MailMessage(models.Model):
         DEPRECATED: Use the llm_role computed field instead.
 
         Returns:
-            str or False: The role name ('user', 'assistant', 'tool', 'system') or False if not an LLM message
+            str or False: The role name, or False if not an LLM message.
         """
         self.ensure_one()
         return self.llm_role
@@ -101,7 +180,7 @@ class MailMessage(models.Model):
         return {message: message.llm_role == role for message in self}
 
     def to_store_format(self):
-        """Convert message to store format compatible with Odoo 18.0. Used by frontend js components"""
+        """Convert message to the store format used by frontend components."""
         self.ensure_one()
         from odoo.addons.mail.tools.discuss import Store
 
@@ -110,3 +189,100 @@ class MailMessage(models.Model):
         result = store.get_result()
 
         return result["mail.message"][0]
+
+    def _get_attachments_by_mimetype(self, mimetypes):
+        """Get attachments filtered by mimetype."""
+        self.ensure_one()
+        return self.attachment_ids.filtered(
+            lambda att: att.mimetype and att.mimetype in mimetypes and att.datas,
+        )
+
+    def _get_image_attachments(self):
+        """Get image attachments with validated mimetype from magic bytes."""
+        images = []
+        for att in self._get_attachments_by_mimetype(SUPPORTED_IMAGE_MIMETYPES):
+            try:
+                raw_bytes = base64.b64decode(att.datas)
+                real_mimetype = _detect_image_mimetype(raw_bytes)
+
+                if real_mimetype:
+                    if real_mimetype != att.mimetype:
+                        _logger.debug(
+                            "Image %s: correcting mimetype from %s to %s",
+                            att.name,
+                            att.mimetype,
+                            real_mimetype,
+                        )
+                    images.append(
+                        {
+                            "mimetype": real_mimetype,
+                            "data": att.datas.decode("utf-8"),
+                            "name": att.name or "image",
+                        },
+                    )
+                else:
+                    _logger.warning(
+                        "Could not detect image type for %s, using stored mimetype %s",
+                        att.name,
+                        att.mimetype,
+                    )
+                    images.append(
+                        {
+                            "mimetype": att.mimetype,
+                            "data": att.datas.decode("utf-8"),
+                            "name": att.name or "image",
+                        },
+                    )
+            except (ValueError, TypeError) as e:
+                _logger.warning("Failed to process image attachment %s: %s", att.name, e)
+        return images
+
+    def _get_pdf_attachments(self):
+        """Get PDF attachments as base64 data."""
+        return [
+            {
+                "mimetype": att.mimetype,
+                "data": att.datas.decode("utf-8"),
+                "name": att.name or "document.pdf",
+            }
+            for att in self._get_attachments_by_mimetype(PDF_MIMETYPES)
+        ]
+
+    def _get_text_attachments(self):
+        """Get text attachments with decoded content."""
+        texts = []
+        for att in self._get_attachments_by_mimetype(TEXT_MIMETYPES):
+            try:
+                raw_data = base64.b64decode(att.datas)
+                content = raw_data.decode("utf-8")
+                texts.append(
+                    {
+                        "mimetype": att.mimetype,
+                        "content": content,
+                        "name": att.name or "file.txt",
+                    },
+                )
+            except (UnicodeDecodeError, ValueError) as e:
+                _logger.warning("Failed to decode text attachment %s: %s", att.name, e)
+        return texts
+
+    def _get_audio_attachments(self):
+        """Get audio attachments with detected format for OpenAI API."""
+        audios = []
+        for att in self._get_attachments_by_mimetype(AUDIO_MIMETYPES):
+            try:
+                raw_bytes = base64.b64decode(att.datas)
+                audio_format = _detect_audio_format(raw_bytes)
+                if audio_format:
+                    audios.append(
+                        {
+                            "format": audio_format,
+                            "data": att.datas.decode("utf-8"),
+                            "name": att.name or "audio",
+                        },
+                    )
+                else:
+                    _logger.warning("Could not detect audio format for %s", att.name)
+            except (ValueError, TypeError) as e:
+                _logger.warning("Failed to process audio attachment %s: %s", att.name, e)
+        return audios

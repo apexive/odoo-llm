@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <!-- Main Training Menu (under LLM root menu) -->
+    <menuitem
+    id="menu_llm_training_root"
+    name="Training"
+    parent="llm.menu_llm_root"
+    sequence="20"
+  />
+
+    <!-- Datasets Menu -->
+    <menuitem
+    id="menu_llm_training_dataset"
+    name="Datasets"
+    action="llm_training_dataset_action"
+    parent="menu_llm_training_root"
+    sequence="10"
+  />
+
+    <!-- Jobs Menu -->
+    <menuitem
+    id="menu_llm_training_job"
+    name="Jobs"
+    action="llm_training_job_action"
+    parent="menu_llm_training_root"
+    sequence="20"
+  />
+</odoo>

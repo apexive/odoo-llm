@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_publisher_mistral" model="llm.publisher">
+        <field name="name">Mistral AI</field>
+        <field name="official" eval="True" />
+        <field name="frontier" eval="True" />
+        <field
+      name="description"
+    >Mistral AI is a French company specializing in artificial intelligence. They focus on developing open-source large language models and related technologies.</field>
+        <field
+      name="logo"
+      type="base64"
+      file="llm_mistral/static/description/mistral_logo.png"
+    />
+        <field name="meta">{
+            "website": "https://mistral.ai",
+            "founded": 2023,
+            "headquarters": "Paris, France",
+            "key_products": ["Mistral 7B", "Mixtral 8x7B", "Mistral Large"]
+            }</field>
+    </record>
+</odoo>

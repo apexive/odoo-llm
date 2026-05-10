@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 70 70">
+  <defs>
+    <path id="icon-a" d="M4,0 C36.4160122,0 58.0836068,0 65,0 C69,0 70,1 70,5 C70,43.0488877 70,62.4235458 70,65 C70,69 69,70 65,70 C61,70 9,70 4,70 C1,70 0,69 0,65 C0,62.4676575 0,41.8005206 0,5 C0,1 1,0 4,0 Z"/>
+    <linearGradient id="icon-c" x1="100%" x2="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#9370DB"/>
+      <stop offset="100%" stop-color="#663399"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <mask id="icon-b" fill="#fff">
+      <use xlink:href="#icon-a"/>
+    </mask>
+    <g mask="url(#icon-b)">
+      <rect width="70" height="70" fill="url(#icon-c)"/>
+      <path fill="#FFF" fill-opacity=".383" d="M4,1.8 L65,1.8 C67.6666667,1.8 69.3333333,1.13333333 70,-0.2 C70,2.46666667 70,3.46666667 70,2.8 L0,2.8 C0,3.46666667 0,2.46666667 0,-0.2 C0.666666667,1.13333333 2,1.8 4,1.8 Z" transform="matrix(1 0 0 -1 0 2.8)"/>
+      <path fill="#000" fill-opacity=".383" d="M4,4 L65,4 C67.6666667,4 69.3333333,3 70,1 C70,3.66666667 70,5 70,5 L0,5 C0,5 0,3.66666667 0,1 C0.666666667,3 2,4 4,4 Z" transform="translate(0 65)"/>
+      <!-- Ledger book body -->
+      <rect x="18" y="16" width="34" height="40" rx="2" fill="#FFF" fill-opacity=".95"/>
+      <!-- Book spine -->
+      <rect x="18" y="16" width="6" height="40" rx="1" fill="#FFF" fill-opacity=".6"/>
+      <!-- Ledger lines -->
+      <line x1="28" y1="26" x2="48" y2="26" stroke="#9370DB" stroke-width="1.2" stroke-opacity=".6"/>
+      <line x1="28" y1="32" x2="48" y2="32" stroke="#9370DB" stroke-width="1.2" stroke-opacity=".6"/>
+      <line x1="28" y1="38" x2="48" y2="38" stroke="#9370DB" stroke-width="1.2" stroke-opacity=".6"/>
+      <line x1="28" y1="44" x2="48" y2="44" stroke="#9370DB" stroke-width="1.2" stroke-opacity=".6"/>
+      <!-- Vertical divider for debit/credit columns -->
+      <line x1="38" y1="22" x2="38" y2="50" stroke="#9370DB" stroke-width="1" stroke-opacity=".4"/>
+      <!-- Header line -->
+      <line x1="28" y1="22" x2="48" y2="22" stroke="#663399" stroke-width="1.5" stroke-opacity=".8"/>
+      <!-- Dollar sign -->
+      <text x="35" y="21" font-family="Arial, sans-serif" font-size="7" font-weight="bold" fill="#663399" text-anchor="middle" fill-opacity=".7">$</text>
+      <!-- Checkmark in bottom right -->
+      <path d="M42 46 L44.5 48.5 L49 43" stroke="#28a745" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+</svg>

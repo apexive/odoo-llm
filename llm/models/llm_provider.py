@@ -383,17 +383,20 @@ class LLMProvider(models.Model):
         """Format tools for the specific provider"""
         return self._dispatch("format_tools", tools)
 
-    def format_messages(self, messages, system_prompt=None):
+    def format_messages(self, messages, system_prompt=None, **kwargs):
         """Format messages for this provider
 
         Args:
-            messages: List of messages to format for specific provider, could be mail.message record set or similar data format
+            messages: Messages to format, such as a mail.message recordset
             system_prompt: Optional system prompt to include at the beginning of the messages
+            **kwargs: Additional provider-specific formatting parameters
 
         Returns:
             List of formatted messages in provider-specific format
         """
-        return self._dispatch("format_messages", messages, system_prompt=system_prompt)
+        return self._dispatch(
+            "format_messages", messages, system_prompt=system_prompt, **kwargs
+        )
 
     def _get_provider_tool_params(self, tools, kwargs):
         """Hook for provider-specific tool parameters."""

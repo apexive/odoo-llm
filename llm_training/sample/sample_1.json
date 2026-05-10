@@ -1,0 +1,10 @@
+{"messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "What is the capital of France?"}, {"role": "assistant", "content": "The capital of France is Paris."}]}
+{"messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "What is 2 + 2?"}, {"role": "assistant", "content": "2 + 2 equals 4."}]}
+{"messages": [{"role": "system", "content": "You are a helpful assistant."}, {"role": "user", "content": "Translate 'hello' to French."}, {"role": "assistant", "content": "Bonjour"}]}
+{"messages": [{"role": "system", "content": "You are a helpful assistant specialized in summarization."}, {"role": "user", "content": "Summarize this text: The quick brown fox jumps over the lazy dog near the river bank."}, {"role": "assistant", "content": "A fox jumps over a dog near a river."}]}
+{"messages": [{"role": "system", "content": "You are a sentiment analysis bot."}, {"role": "user", "content": "I absolutely loved the concert!"}, {"role": "assistant", "content": "Positive"}]}
+{"messages": [{"role": "system", "content": "You are a sentiment analysis bot."}, {"role": "user", "content": "The service was slow and the food was cold."}, {"role": "assistant", "content": "Negative"}]}
+{"messages": [{"role": "system", "content": "You are a friendly chatbot."}, {"role": "user", "content": "How are you today?"}, {"role": "assistant", "content": "I'm doing well, thank you for asking!"}]}
+{"messages": [{"role": "system", "content": "You are a friendly chatbot."}, {"role": "user", "content": "What's your name?"}, {"role": "assistant", "content": "I am an AI assistant designed by OpenAI."}]}
+{"messages": [{"role": "system", "content": "You are a code generation assistant."}, {"role": "user", "content": "Write a Python snippet to print 'Hello World'."}, {"role": "assistant", "content": "print('Hello World')"}]}
+{"messages": [{"role": "system", "content": "You are a code generation assistant."}, {"role": "user", "content": "Write Javascript to show an alert box with 'Success'."}, {"role": "assistant", "content": "alert('Success');"}]}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_publisher_openai" model="llm.publisher">
+        <field name="name">OpenAI</field>
+        <field name="official" eval="True" />
+        <field name="frontier" eval="True" />
+        <field
+      name="description"
+    >OpenAI is an artificial intelligence research organization. Founded in 2015, OpenAI's mission is to ensure that artificial general intelligence benefits all of humanity. The company is known for developing the GPT series of language models.</field>
+        <field
+      name="logo"
+      type="base64"
+      file="llm_openai/static/description/openai_logo.png"
+    />
+        <field name="meta">{
+            "website": "https://openai.com",
+            "founded": 2015,
+            "headquarters": "San Francisco, California",
+            "key_products": ["GPT-4", "GPT-3.5", "DALL-E", "Whisper"]
+            }</field>
+    </record>
+</odoo>

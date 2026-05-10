@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 70 70">
+  <defs>
+    <path id="icon-a" d="M4,0 C36.4160122,0 58.0836068,0 65,0 C69,0 70,1 70,5 C70,43.0488877 70,62.4235458 70,65 C70,69 69,70 65,70 C61,70 9,70 4,70 C1,70 0,69 0,65 C0,62.4676575 0,41.8005206 0,5 C0,1 1,0 4,0 Z"/>
+    <linearGradient id="icon-c" x1="100%" x2="0%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#9370DB"/>
+      <stop offset="100%" stop-color="#663399"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <mask id="icon-b" fill="#fff">
+      <use xlink:href="#icon-a"/>
+    </mask>
+    <g mask="url(#icon-b)">
+      <rect width="70" height="70" fill="url(#icon-c)"/>
+      <path fill="#FFF" fill-opacity=".383" d="M4,1.8 L65,1.8 C67.6666667,1.8 69.3333333,1.13333333 70,-0.2 C70,2.46666667 70,3.46666667 70,2.8 L0,2.8 C0,3.46666667 0,2.46666667 0,-0.2 C0.666666667,1.13333333 2,1.8 4,1.8 Z" transform="matrix(1 0 0 -1 0 2.8)"/>
+      <path fill="#000" fill-opacity=".383" d="M4,4 L65,4 C67.6666667,4 69.3333333,3 70,1 C70,3.66666667 70,5 70,5 L0,5 C0,5 0,3.66666667 0,1 C0.666666667,3 2,4 4,4 Z" transform="translate(0 65)"/>
+      <!-- Bar chart bars -->
+      <rect x="16" y="38" width="7" height="18" rx="1.5" fill="#FFF" fill-opacity=".9"/>
+      <rect x="26" y="28" width="7" height="28" rx="1.5" fill="#FFF" fill-opacity=".9"/>
+      <rect x="36" y="22" width="7" height="34" rx="1.5" fill="#FFF" fill-opacity=".9"/>
+      <rect x="46" y="32" width="7" height="24" rx="1.5" fill="#FFF" fill-opacity=".9"/>
+      <!-- Trend line -->
+      <polyline points="19.5,34 29.5,24 39.5,18 49.5,28" stroke="#FFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <!-- Trend dots -->
+      <circle cx="19.5" cy="34" r="2.5" fill="#FFF"/>
+      <circle cx="29.5" cy="24" r="2.5" fill="#FFF"/>
+      <circle cx="39.5" cy="18" r="2.5" fill="#FFF"/>
+      <circle cx="49.5" cy="28" r="2.5" fill="#FFF"/>
+      <!-- KPI indicator -->
+      <text x="35" y="15" font-family="Arial, sans-serif" font-size="6" font-weight="bold" fill="#FFF" text-anchor="middle" fill-opacity=".7">KPI</text>
+    </g>
+  </g>
+</svg>

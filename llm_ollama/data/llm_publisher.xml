@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_publisher_ollama" model="llm.publisher">
+        <field name="name">Ollama</field>
+        <field name="official" eval="True" />
+        <field name="frontier" eval="False" />
+        <field
+      name="description"
+    >Ollama is an open source project that allows running large language models locally. It provides easy deployment and management of various open source models like Llama 2, Mistral, and more.</field>
+        <field
+      name="logo"
+      type="base64"
+      file="llm_ollama/static/description/ollama_logo.png"
+    />
+        <field name="meta">{
+            "website": "https://ollama.ai",
+            "founded": 2023,
+            "key_features": ["Local Deployment", "Model Management", "Open Source"]
+            }</field>
+    </record>
+</odoo>

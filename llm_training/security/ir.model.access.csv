@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_training_dataset_user,llm.training.dataset.user,model_llm_training_dataset,base.group_user,1,0,0,0
+access_llm_training_dataset_manager,llm.training.dataset.manager,model_llm_training_dataset,llm.group_llm_manager,1,1,1,1
+access_llm_training_job_user,llm.training.job.user,model_llm_training_job,base.group_user,1,0,0,0
+access_llm_training_job_manager,llm.training.job.manager,model_llm_training_job,llm.group_llm_manager,1,1,1,1
