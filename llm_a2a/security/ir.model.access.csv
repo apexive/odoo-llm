@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_llm_a2a_agent_user,llm.a2a.agent.user,model_llm_a2a_agent,base.group_user,1,1,1,1
+access_llm_a2a_agent_manager,llm.a2a.agent.manager,model_llm_a2a_agent,llm.group_llm_manager,1,1,1,1
