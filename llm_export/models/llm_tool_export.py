@@ -65,6 +65,7 @@ class LLMToolExport(models.Model):
         domain: list[list[Union[str, int, bool, float, None]]] = [],  # noqa: B006
         limit: int = 500,
         format: str = "csv",
+        mode: str = "human",
     ) -> str:
         """
         Export records from an Odoo model as a file attached to the current thread.
@@ -76,9 +77,14 @@ class LLMToolExport(models.Model):
             domain: Filter domain (list of [field, operator, value] triples)
             limit: Maximum number of records to export (default 500)
             format: Output format — 'csv' (default). More formats coming soon.
+            mode: 'human' (default) for readable labels; 'import' for Odoo-importable
+                external IDs that allow the file to be re-uploaded to update records.
         """
         if format not in FORMATS:
             return f"Unsupported format '{format}'. Supported: {', '.join(FORMATS)}."
+
+        if mode not in ("human", "import"):
+            return "Unsupported mode '{mode}'. Use 'human' or 'import'."
 
         # [SEC] Block sensitive models before touching env
         if model in _BLOCKED_MODELS:
@@ -102,13 +108,13 @@ class LLMToolExport(models.Model):
         if not fields:
             fields = self._get_default_fields(model_obj)
 
+        import_compat = mode == "import"
+
         try:
             records = model_obj.search(domain, limit=limit)
             if not records:
                 return f"No records found in '{model}' matching the given criteria."
-            # import_compat=False yields human-readable labels (selection labels,
-            # m2o display names, formatted dates) instead of raw/external values.
-            rows = records.with_context(import_compat=False).export_data(fields)["datas"]
+            rows = records.with_context(import_compat=import_compat).export_data(fields)["datas"]
         except AccessError:
             return (
                 "You don't have permission to export this data. "
@@ -117,7 +123,9 @@ class LLMToolExport(models.Model):
         except (UserError, ValueError) as exc:
             return f"Export failed: {exc}"
 
-        headers = self._get_headers(model_obj, fields)
+        # import mode: keep raw field paths as headers — they're what Odoo's importer expects.
+        # human mode: resolve to readable labels (e.g. "Partner / Country / Name").
+        headers = fields if import_compat else self._get_headers(model_obj, fields)
 
         mimetype, ext = FORMATS[format]
         content, encoding = self._render(headers, rows, format)
