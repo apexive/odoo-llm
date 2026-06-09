@@ -7,6 +7,7 @@ from typing import Union
 from markupsafe import Markup
 
 from odoo import api, models
+from odoo.exceptions import AccessError, UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -71,6 +72,7 @@ class LLMToolExport(models.Model):
         Parameters:
             model: Technical name of the Odoo model to export (e.g. 'res.partner')
             fields: Fields to include. Exports all stored scalar fields if empty.
+                Relational fields can be traversed with '/' (e.g. 'partner_id/country_id/name').
             domain: Filter domain (list of [field, operator, value] triples)
             limit: Maximum number of records to export (default 500)
             format: Output format — 'csv' (default). More formats coming soon.
@@ -90,20 +92,35 @@ class LLMToolExport(models.Model):
         if not thread.exists():
             return "Error: thread not found."
 
-        # [SEC] search_read runs as the calling user — Odoo's ACL enforces field/record access
+        if model not in self.env:
+            return f"Error: unknown model '{model}'."
+
+        # [SEC] Runs as the calling user — Odoo's ACL enforces model/field/record access,
+        # and export_data() additionally requires the 'base.group_allow_export' group.
         model_obj = self.env[model]
 
         if not fields:
             fields = self._get_default_fields(model_obj)
 
-        records = model_obj.search_read(domain=domain, fields=fields, limit=limit)
-        if not records:
-            return f"No records found in '{model}' matching the given criteria."
+        try:
+            records = model_obj.search(domain, limit=limit)
+            if not records:
+                return f"No records found in '{model}' matching the given criteria."
+            # import_compat=False yields human-readable labels (selection labels,
+            # m2o display names, formatted dates) instead of raw/external values.
+            rows = records.with_context(import_compat=False).export_data(fields)["datas"]
+        except AccessError:
+            return (
+                "You don't have permission to export this data. "
+                "Exporting requires the 'Allowed to export' access right."
+            )
+        except (UserError, ValueError) as exc:
+            return f"Export failed: {exc}"
 
-        flat_records = [self._flatten_record(r) for r in records]
+        headers = self._get_headers(model_obj, fields)
 
         mimetype, ext = FORMATS[format]
-        content, encoding = self._render(flat_records, format)
+        content, encoding = self._render(headers, rows, format)
         filename = f"{model.replace('.', '_')}_export.{ext}"
 
         # [SEC] No sudo — attachment is created as the calling user
@@ -127,18 +144,46 @@ class LLMToolExport(models.Model):
             f"The file has been attached to this conversation."
         )
 
-    def _render(self, records: list[dict], format: str) -> tuple:
+    def _render(self, headers: list[str], rows: list[list], format: str) -> tuple:
         """Dispatch to the format-specific renderer. Returns (content, encoding)."""
-        return getattr(self, f"_render_{format}")(records)
+        return getattr(self, f"_render_{format}")(headers, rows)
 
-    def _render_csv(self, records: list[dict]) -> tuple:
-        if not records:
-            return "", "utf-8"
+    def _render_csv(self, headers: list[str], rows: list[list]) -> tuple:
         buf = io.StringIO()
-        writer = csv.DictWriter(buf, fieldnames=list(records[0].keys()))
-        writer.writeheader()
-        writer.writerows(records)
+        writer = csv.writer(buf, quoting=csv.QUOTE_ALL)
+        writer.writerow(headers)
+        for row in rows:
+            writer.writerow([self._sanitize_cell(cell) for cell in row])
         return buf.getvalue(), "utf-8"
+
+    def _sanitize_cell(self, value):
+        if value is None or value is False:
+            return ""
+        if isinstance(value, bytes):
+            value = value.decode()
+        # [SEC] Prefix formula-injection characters so spreadsheets treat them as text
+        if isinstance(value, str) and value.startswith(_FORMULA_PREFIXES):
+            return "'" + value
+        return value
+
+    def _get_headers(self, model_obj, fields: list[str]) -> list[str]:
+        """Human-readable column labels, resolving '/'-separated relational paths."""
+        return [self._field_path_label(model_obj, path) for path in fields]
+
+    def _field_path_label(self, model_obj, path: str) -> str:
+        labels = []
+        current = model_obj
+        for part in path.split("/"):
+            field = current._fields.get(part)
+            if field is None:
+                labels.append(part)
+                break
+            labels.append(field.string or part)
+            if field.relational:
+                current = self.env[field.comodel_name]
+            else:
+                break
+        return " / ".join(labels)
 
     def _get_default_fields(self, model_obj):
         """Return stored scalar field names, excluding known sensitive field names."""
@@ -150,20 +195,3 @@ class LLMToolExport(models.Model):
             and not name.startswith("_")
             and name not in _BLOCKED_FIELD_NAMES
         ]
-
-    def _flatten_record(self, record: dict) -> dict:
-        return {key: self._flatten_value(value) for key, value in record.items()}
-
-    def _flatten_value(self, value):
-        if value is False or value is None:
-            return ""
-        # many2one: [id, display_name] → id (re-importable)
-        if isinstance(value, list) and len(value) == 2 and isinstance(value[0], int):
-            return value[0]
-        # many2many: [id, id, ...] → comma-joined ids
-        if isinstance(value, list):
-            return ",".join(str(v) for v in value)
-        # [SEC] Prefix formula-injection characters so spreadsheets treat them as text
-        if isinstance(value, str) and value.startswith(_FORMULA_PREFIXES):
-            return "'" + value
-        return value
