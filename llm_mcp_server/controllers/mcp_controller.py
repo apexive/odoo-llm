@@ -89,9 +89,13 @@ class MCPController(http.Controller):
             # All other methods return result directly
             result = dispatch_result
 
-        # Convert pydantic result object to dict
+        # Convert pydantic result object to dict.
+        # by_alias=True is required: mcp >= 2.0 renamed the model fields to
+        # snake_case and keeps the MCP wire names as aliases, so a plain
+        # model_dump() would serialise every response ("initialize",
+        # "tools/list", "tools/call") with the wrong keys. Correct on 1.x too.
         if hasattr(result, "model_dump"):
-            return result.model_dump(exclude_none=True)
+            return result.model_dump(by_alias=True, exclude_none=True)
         else:
             return result or {}
 

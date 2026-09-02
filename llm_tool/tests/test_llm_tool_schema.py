@@ -84,6 +84,51 @@ class TestLLMToolSchema(LLMToolCase):
         self.assertEqual(definition["name"], "test_def_tool")
         self.assertEqual(definition["description"], "Test description")
 
+    def test_generated_definition_uses_mcp_wire_names(self):
+        """Regression: the tool definition must use MCP's camelCase wire names.
+
+        mcp >= 2.0 renamed the ToolAnnotations/Tool fields to snake_case and
+        kept the wire names as aliases, so ``model_dump()`` without
+        ``by_alias=True`` silently emits ``input_schema`` instead of the
+        ``inputSchema`` the MCP spec requires. It does not raise -- the tool
+        definition is simply wrong on the wire. Fails on mcp >= 2.0 unpatched.
+        """
+        tool = self._create_test_tool(
+            name="wire_format_tool",
+            description="Test wire format",
+            input_schema=json.dumps({"type": "object", "properties": {}}),
+            decorator_model="res.users",
+            decorator_method="read",
+            read_only_hint=True,
+        )
+
+        definition = tool.get_tool_definition()
+
+        self.assertIn("inputSchema", definition)
+        self.assertNotIn("input_schema", definition)
+        self.assertIn("readOnlyHint", definition["annotations"])
+        self.assertNotIn("read_only_hint", definition["annotations"])
+
+    def test_generated_schema_does_not_need_mcp_server_package(self):
+        """Regression: schema generation must not import mcp.server.fastmcp.
+
+        That module was removed in mcp >= 2.0 (FastMCP became MCPServer), so
+        generating a schema from a method signature raised ModuleNotFoundError
+        on any fresh install. The schema is built with pydantic instead, the
+        same way the 16.0 branch does it. Fails on mcp >= 2.0 unpatched.
+        """
+        tool = self._create_test_tool(
+            name="generated_schema_tool",
+            decorator_model="res.users",
+            decorator_method="read",
+        )
+
+        schema = tool.get_input_schema()
+
+        self.assertIsInstance(schema, dict)
+        self.assertEqual(schema.get("type"), "object")
+        self.assertIn("properties", schema)
+
     def test_action_reset_input_schema_regenerates(self):
         """Test action_reset_input_schema() regenerates schema"""
         # Create tool with custom schema

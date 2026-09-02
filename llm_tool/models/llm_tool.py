@@ -181,17 +181,14 @@ class LLMTool(models.Model):
         if self.input_schema:
             return json.loads(self.input_schema)
 
-        # Generate schema from method signature
+        # Generate schema from method signature.
+        # Built with pydantic directly rather than mcp's func_metadata: the
+        # latter lives under mcp.server.fastmcp, which no longer exists in
+        # mcp >= 2.0 (FastMCP was renamed to MCPServer). The 16.0 branch
+        # generates the schema the same way -- see PR #205.
         method_func = self._get_implementation_method()
-
-        # Use MCP SDK's func_metadata to generate proper schema
-        from mcp.server.fastmcp.utilities.func_metadata import func_metadata
-
-        func_meta = func_metadata(method_func)
-
-        # Get MCP-compatible schema
-        schema = func_meta.arg_model.model_json_schema(by_alias=True)
-        return schema
+        model = self.get_pydantic_model_from_signature(method_func)
+        return model.model_json_schema(by_alias=True)
 
     def execute(self, parameters):
         """Execute this tool with validated parameters"""
@@ -534,8 +531,12 @@ class LLMTool(models.Model):
             annotations=tool_annotations,
         )
 
-        # Return plain dict following 'Models Return Plain Data' pattern
-        return mcp_tool.model_dump(exclude_none=True)
+        # Return plain dict following 'Models Return Plain Data' pattern.
+        # by_alias=True is required: mcp >= 2.0 renamed the model fields to
+        # snake_case and keeps the wire names as aliases, so a plain
+        # model_dump() emits "input_schema" instead of the "inputSchema"
+        # required by the MCP spec. Harmless and correct on mcp 1.x too.
+        return mcp_tool.model_dump(by_alias=True, exclude_none=True)
 
     @api.onchange("implementation")
     def _onchange_implementation(self):
