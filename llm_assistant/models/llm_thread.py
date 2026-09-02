@@ -2,6 +2,7 @@ import logging
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError
+from odoo.tools import html2plaintext
 
 _logger = logging.getLogger(__name__)
 
@@ -256,6 +257,9 @@ class LLMThread(models.Model):
                     # No user message in prepended messages either
                     raise
 
+        # A user reply may be answering a pending consent request.
+        last_message = yield from self._resume_pending_tool_consent(last_message)
+
         # Continue generation loop
         while self._should_continue(last_message):
             if last_message.llm_role in ("user", "tool"):
@@ -281,6 +285,67 @@ class LLMThread(models.Model):
                 )
                 break
 
+        return last_message
+
+    # Exact, case-insensitive matches only. Anything else is an ordinary
+    # message: "no, don't do that yet" must not be read as a decision.
+    _CONSENT_GRANT_WORDS = ("continue", "yes")
+    _CONSENT_DENY_WORDS = ("no", "stop")
+
+    def _get_pending_consent_messages(self):
+        """Tool messages on this thread awaiting a consent decision."""
+        self.ensure_one()
+        messages = self.env["mail.message"].search(
+            [
+                ("model", "=", self._name),
+                ("res_id", "=", self.id),
+                ("llm_role", "=", "tool"),
+            ],
+            order="id asc",
+        )
+        return messages.filtered(lambda m: m.is_pending_consent())
+
+    def _resume_pending_tool_consent(self, last_message):
+        """Apply a user reply to tool calls awaiting consent.
+
+        Only fires when this thread actually has a pending tool call, so
+        "continue" typed in ordinary conversation stays an ordinary message.
+        A whole assistant turn is decided together: the user is shown all the
+        pending calls at once, so the text shortcut grants or denies all of
+        them. Use grant_tool_consent()/deny_tool_consent() on individual
+        messages for finer control.
+        """
+        self.ensure_one()
+        if not last_message or last_message.llm_role != "user":
+            return last_message
+
+        pending = self._get_pending_consent_messages()
+        if not pending:
+            return last_message
+
+        answer = html2plaintext(last_message.body or "").strip().lower()
+        if answer in self._CONSENT_GRANT_WORDS:
+            pending.grant_tool_consent()
+            resumed = last_message
+            for message in pending:
+                resumed = yield from message.execute_tool_call(thread_model=self)
+            return resumed
+        if answer in self._CONSENT_DENY_WORDS:
+            pending.deny_tool_consent()
+            for message in pending:
+                yield {
+                    "type": "message_update",
+                    "message": message.to_store_format(),
+                }
+            return pending[-1]
+
+        # Ambiguous: leave the calls pending and treat this as normal chat.
+        _logger.info(
+            "Thread %s: %d tool call(s) still pending consent; "
+            "user reply was not an explicit decision",
+            self.id,
+            len(pending),
+        )
         return last_message
 
     def _generate_response(self, last_message):
@@ -409,6 +474,14 @@ class LLMThread(models.Model):
     def _should_continue(self, last_message):
         """Simplified continue logic based on message history."""
         if not last_message:
+            return False
+
+        # A tool call held for user consent ends the turn. Without this the
+        # loop below sees llm_role == "tool", generates another assistant
+        # response, and spins -- the pending call is never the thing that
+        # stops it. This is what makes the consent gate a pause rather than a
+        # deadlock.
+        if last_message.llm_role == "tool" and last_message.is_pending_consent():
             return False
 
         # Continue if:
