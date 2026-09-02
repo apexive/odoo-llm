@@ -62,16 +62,18 @@ class TestLLMToolSync(common.TransactionCase):
     # -- _sync_tools_to_db (raw SQL) --
 
     def test_sync_creates_new_tool(self):
-        self._set_registry({
-            ("res.partner", "new_method"): {
-                "name": "new_tool",
-                "implementation": "function",
-                "decorator_model": "res.partner",
-                "decorator_method": "new_method",
-                "description": "A new tool",
-                "active": True,
+        self._set_registry(
+            {
+                ("res.partner", "new_method"): {
+                    "name": "new_tool",
+                    "implementation": "function",
+                    "decorator_model": "res.partner",
+                    "decorator_method": "new_method",
+                    "description": "A new tool",
+                    "active": True,
+                }
             }
-        })
+        )
         self._set_xml_managed_keys(set())
 
         result = self.LLMTool._sync_tools_to_db()
@@ -84,16 +86,18 @@ class TestLLMToolSync(common.TransactionCase):
     def test_sync_updates_changed_tool(self):
         self._create_tool("upd_tool", method="upd_method", description="Old")
 
-        self._set_registry({
-            ("res.partner", "upd_method"): {
-                "name": "upd_tool",
-                "implementation": "function",
-                "decorator_model": "res.partner",
-                "decorator_method": "upd_method",
-                "description": "New",
-                "active": True,
+        self._set_registry(
+            {
+                ("res.partner", "upd_method"): {
+                    "name": "upd_tool",
+                    "implementation": "function",
+                    "decorator_model": "res.partner",
+                    "decorator_method": "upd_method",
+                    "description": "New",
+                    "active": True,
+                }
             }
-        })
+        )
         self._set_xml_managed_keys(set())
         self.LLMTool.invalidate_model()
 
@@ -106,16 +110,18 @@ class TestLLMToolSync(common.TransactionCase):
     def test_sync_noop_when_unchanged(self):
         self._create_tool("same_tool", method="same_method", description="Same")
 
-        self._set_registry({
-            ("res.partner", "same_method"): {
-                "name": "same_tool",
-                "implementation": "function",
-                "decorator_model": "res.partner",
-                "decorator_method": "same_method",
-                "description": "Same",
-                "active": True,
+        self._set_registry(
+            {
+                ("res.partner", "same_method"): {
+                    "name": "same_tool",
+                    "implementation": "function",
+                    "decorator_model": "res.partner",
+                    "decorator_method": "same_method",
+                    "description": "Same",
+                    "active": True,
+                }
             }
-        })
+        )
         self._set_xml_managed_keys(set())
         self.LLMTool.invalidate_model()
 
@@ -215,16 +221,18 @@ class TestLLMToolSync(common.TransactionCase):
             description="Manual",
             auto_update=False,
         )
-        self._set_registry({
-            ("res.partner", "locked_method"): {
-                "name": "locked_tool",
-                "implementation": "function",
-                "decorator_model": "res.partner",
-                "decorator_method": "locked_method",
-                "description": "Decorator says different",
-                "active": True,
+        self._set_registry(
+            {
+                ("res.partner", "locked_method"): {
+                    "name": "locked_tool",
+                    "implementation": "function",
+                    "decorator_model": "res.partner",
+                    "decorator_method": "locked_method",
+                    "description": "Decorator says different",
+                    "active": True,
+                }
             }
-        })
+        )
         self._set_xml_managed_keys(set())
         self.LLMTool.invalidate_model()
 
@@ -243,16 +251,18 @@ class TestLLMToolSync(common.TransactionCase):
 
     def test_action_already_in_sync(self):
         self._create_tool("btn_tool", method="btn_method", description="OK")
-        self._set_registry({
-            ("res.partner", "btn_method"): {
-                "name": "btn_tool",
-                "implementation": "function",
-                "decorator_model": "res.partner",
-                "decorator_method": "btn_method",
-                "description": "OK",
-                "active": True,
+        self._set_registry(
+            {
+                ("res.partner", "btn_method"): {
+                    "name": "btn_tool",
+                    "implementation": "function",
+                    "decorator_model": "res.partner",
+                    "decorator_method": "btn_method",
+                    "description": "OK",
+                    "active": True,
+                }
             }
-        })
+        )
         self._set_xml_managed_keys(set())
         self.LLMTool.invalidate_model()
 
@@ -260,16 +270,18 @@ class TestLLMToolSync(common.TransactionCase):
         self.assertIn("Already in sync", result["params"]["title"])
 
     def test_action_reports_changes(self):
-        self._set_registry({
-            ("res.partner", "action_new"): {
-                "name": "action_new_tool",
-                "implementation": "function",
-                "decorator_model": "res.partner",
-                "decorator_method": "action_new",
-                "description": "Via button",
-                "active": True,
+        self._set_registry(
+            {
+                ("res.partner", "action_new"): {
+                    "name": "action_new_tool",
+                    "implementation": "function",
+                    "decorator_model": "res.partner",
+                    "decorator_method": "action_new",
+                    "description": "Via button",
+                    "active": True,
+                }
             }
-        })
+        )
         self._set_xml_managed_keys(set())
 
         result = self.LLMTool.action_sync_tools()
