@@ -2,6 +2,7 @@
     "name": "LLM Tool",
     "version": "18.0.4.1.2",
     "category": "Technical",
+    "development_status": "Beta",
     "summary": "Function calling and tool execution for LLM models to interact with Odoo",
     "description": """
         Automate Your Odoo Database with AI Assistants & Chat AI | ChatGPT, Grok, Anthropic, DeepSeek
@@ -41,7 +42,4 @@
     "images": [
         "static/description/banner.jpeg",
     ],
-    "auto_install": False,
-    "application": False,
-    "installable": True,
 }
