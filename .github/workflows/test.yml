@@ -1,0 +1,87 @@
+name: tests
+
+on:
+  # Manual runs, so the workflow can be exercised on a fork before a PR exists.
+  workflow_dispatch:
+  pull_request:
+    branches: ["18.0*"]
+  push:
+    branches: ["18.0"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-22.04
+    name: Odoo 18.0
+
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: odoo
+          POSTGRES_PASSWORD: odoo
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U odoo"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: addons
+          persist-credentials: false
+
+      - uses: actions/checkout@v4
+        with:
+          repository: odoo/odoo
+          ref: "18.0"
+          depth: 1
+          path: odoo
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Odoo and module dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libldap2-dev libsasl2-dev
+          pip install -r odoo/requirements.txt
+          pip install -e odoo
+          # Module external_dependencies. packaging is required by Odoo itself
+          # to parse a version-qualified entry such as "pydantic>=2.0.0".
+          pip install packaging "pydantic>=2.0.0" mcp
+
+      - name: Run tests
+        env:
+          # Add a module here once its tests pass, to bring it under CI.
+          MODULES: llm,llm_tool
+        run: |
+          set -o pipefail
+          odoo \
+            --db_host=localhost --db_user=odoo --db_password=odoo \
+            --addons-path=odoo/addons,addons \
+            -d test -i "$MODULES" --without-demo=all \
+            --test-enable --test-tags="/${MODULES//,/,/}" \
+            --stop-after-init --log-level=test 2>&1 | tee odoo.log
+
+      - name: Assert tests actually ran
+        run: |
+          # A run that selects no tests reports "0 failed, 0 error(s) of 0 tests"
+          # and exits 0. That is a green build proving nothing, so fail on it.
+          line=$(grep -oE "[0-9]+ failed, [0-9]+ error\(s\) of [0-9]+ tests" odoo.log | tail -1)
+          echo "result: ${line:-<no result line found>}"
+          if [ -z "$line" ]; then
+            echo "::error::no test result line in the log"
+            exit 1
+          fi
+          if [ "${line##*of }" = "0 tests" ]; then
+            echo "::error::the run selected 0 tests -- check --test-tags"
+            exit 1
+          fi
