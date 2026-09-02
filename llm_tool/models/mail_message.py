@@ -1,7 +1,7 @@
 import json
 import logging
 
-from odoo import models
+from odoo import _, fields, models
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
@@ -115,6 +115,31 @@ class MailMessage(models.Model):
         fn = tool_call_def.get("function", {})
         name = fn.get("name", "unknown_tool")
         args = fn.get("arguments")
+
+        # Consent gate. A tool flagged requires_user_consent must not run until
+        # a human decision has been recorded on this message. The consent
+        # instructions injected into the system prompt ask the model to request
+        # permission; this is what enforces it. See issue #86 and #22 (3).
+        tool = self._resolve_thread_tool(name, thread_model)
+        if tool and tool.requires_user_consent and self.get_consent_decision() != "granted":
+            tool_data["status"] = "pending_consent"
+            self.write({"body_json": tool_data})
+            _logger.info(
+                "Tool '%s' requires user consent; holding message %s pending a decision",
+                name,
+                self.id,
+            )
+            yield {
+                "type": "tool_pending_consent",
+                "tool_data": {
+                    "tool_call_id": tool_data.get("tool_call_id"),
+                    "tool_name": name,
+                    "arguments": self._parse_tool_arguments(args) if args else {},
+                    "status": "pending_consent",
+                },
+            }
+            yield {"type": "message_update", "message": self.to_store_format()}
+            return self
 
         # Emit tool_called event
         yield {
@@ -245,7 +270,7 @@ class MailMessage(models.Model):
         if not hasattr(thread_model, "tool_ids"):
             raise UserError(f"Thread model {thread_model._name} does not support tools")
 
-        tool = thread_model.tool_ids.filtered(lambda t: t.name == tool_name)[:1]
+        tool = self._resolve_thread_tool(tool_name, thread_model)
         if not tool:
             raise UserError(f"Tool '{tool_name}' not found in thread")
 
@@ -258,6 +283,102 @@ class MailMessage(models.Model):
 
         # Execute with message context
         return tool.with_context(message=self).execute(arguments)
+
+    def _resolve_thread_tool(self, tool_name, thread_model=None):
+        """Resolve a tool by name on the owning thread, or an empty recordset.
+
+        Deliberately forgiving: if the tool cannot be resolved the caller
+        continues and the existing error handling in
+        ``_execute_tool_with_context`` reports it. The consent gate must not
+        turn a lookup failure into a silent refusal.
+        """
+        self.ensure_one()
+        if not thread_model and self.model and self.res_id:
+            thread_model = self.env[self.model].browse(self.res_id)
+        if not thread_model or not hasattr(thread_model, "tool_ids"):
+            return self.env["llm.tool"]
+        return thread_model.tool_ids.filtered(lambda t: t.name == tool_name)[:1]
+
+    def get_consent_decision(self):
+        """Return "granted", "denied" or None for this tool message."""
+        self.ensure_one()
+        tool_data = self.get_tool_data() or {}
+        return (tool_data.get("consent") or {}).get("decision")
+
+    def is_pending_consent(self):
+        """True if this tool message is waiting on a user consent decision."""
+        self.ensure_one()
+        return self.is_tool_message_with_status("pending_consent")
+
+    def _record_consent(self, decision):
+        """Write the consent decision, with who made it and when.
+
+        Stored on the tool message's body_json rather than in new columns, so
+        this carries no schema change. Dedicated fields would make it
+        queryable; see the PR description.
+        """
+        self.ensure_one()
+        tool_data = self.get_tool_data() or {}
+        tool_data["consent"] = {
+            "decision": decision,
+            "user_id": self.env.user.id,
+            "user_login": self.env.user.login,
+            "date": fields.Datetime.to_string(fields.Datetime.now()),
+        }
+        return tool_data
+
+    def grant_tool_consent(self):
+        """Approve execution of the tool calls on these messages.
+
+        This is the API; the "continue" text shortcut in llm.thread is a
+        convenience on top of it. Messages that are not pending are skipped,
+        so granting twice is harmless.
+        """
+        for message in self:
+            if not message.is_pending_consent():
+                continue
+            tool_data = message._record_consent("granted")
+            tool_data["status"] = "requested"
+            message.write({"body_json": tool_data})
+            _logger.info(
+                "Tool consent GRANTED for '%s' by %s (uid=%s) on message %s",
+                tool_data.get("tool_name"),
+                self.env.user.login,
+                self.env.user.id,
+                message.id,
+            )
+        return self
+
+    def deny_tool_consent(self, reason=None):
+        """Refuse execution of the tool calls on these messages.
+
+        Writes a tool result as well as the status: the model must receive a
+        response for the call it made, otherwise the conversation stalls with
+        an unanswered tool call.
+        """
+        for message in self:
+            if not message.is_pending_consent():
+                continue
+            tool_data = message._record_consent("denied")
+            tool_data["status"] = "denied"
+            # A plain string, not an {"error": ...} object. Shaped as an error
+            # a model tends to do what it does with errors -- retry, often
+            # rephrasing the same call -- and the user gets asked again, which
+            # is the outcome this gate exists to prevent. The instruction is
+            # carried in the text.
+            tool_data["result"] = reason or _(
+                "The user declined to run this tool. Do not call it again. "
+                "Ask the user how they'd like to proceed."
+            )
+            message.write({"body_json": tool_data})
+            _logger.info(
+                "Tool consent DENIED for '%s' by %s (uid=%s) on message %s",
+                tool_data.get("tool_name"),
+                self.env.user.login,
+                self.env.user.id,
+                message.id,
+            )
+        return self
 
     def create_tool_error_message(self, tool_call, error_msg, thread_model=None):
         """Create an error tool message.

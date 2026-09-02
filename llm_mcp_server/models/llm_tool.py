@@ -43,6 +43,22 @@ class LLMTool(models.Model):
         if not tool:
             raise UserError(_("Tool '%s' not found or inactive") % tool_name)
 
+        # The MCP path does not go through mail.message.execute_tool_call(),
+        # so the consent gate added for the chat path does not apply here:
+        # there is no interactive Odoo user in an MCP request to ask, and MCP
+        # hosts run their own tool-approval UI. Log it so the gap is visible
+        # in the logs rather than silent. A per-server-config policy is the
+        # obvious follow-up. See issue #86.
+        if tool.requires_user_consent:
+            _logger.warning(
+                "Executing consent-required tool '%s' over MCP without a user "
+                "consent check (authenticated as %s, uid=%s). The MCP host is "
+                "responsible for approval on this path.",
+                tool_name,
+                self.env.user.login,
+                self.env.user.id,
+            )
+
         try:
             # Execute the tool
             result = tool.execute(tool_arguments)
