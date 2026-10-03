@@ -79,7 +79,7 @@
                             <field
                 name="input_schema"
                 widget="ace"
-                options="{'mode': 'text'}"
+                options="{'mode': 'javascript'}"
                 placeholder="{
   'type': 'object',
   'properties': {
