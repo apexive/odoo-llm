@@ -7,6 +7,7 @@ AI-powered invoice data extraction with OCR for Odoo 18 - integrates with OCA's 
 - **Automatic OCR Extraction**: Extract invoice data from PDFs and images using Mistral OCR
 - **One-Shot AI Processing**: Single LLM call extracts all invoice data (vendor, dates, amounts, line items)
 - **OCA Integration**: Seamlessly extends `account_invoice_import` wizard as fallback parser
+- **Email Import**: Automatically processes PDF vendor bills received through a journal alias
 - **Manual Trigger**: "Process with AI" button for on-demand extraction
 - **Smart Data Mapping**: Converts LLM output to OCA's Invoice Pivot Format
 
@@ -73,7 +74,7 @@ After AI processing, the form reloads with extracted data: vendor, date, amounts
 
 ## Usage
 
-### Two Ways to Extract Invoice Data
+### Three Ways to Extract Invoice Data
 
 #### 1. **Manual Processing**
 
@@ -91,6 +92,10 @@ When using OCA's invoice import wizard:
 2. Upload PDF invoice
 3. If no embedded XML found, **LLM extraction is used as fallback**
 4. Invoice is created with extracted data
+
+#### 3. **Vendor Bill Email Alias**
+
+PDF vendor bills sent to a purchase journal's email alias are processed automatically. Standard EDI formats such as UBL and Factur-X retain priority; LLM extraction runs only when no standard decoder handles the PDF.
 
 ### What Gets Extracted
 

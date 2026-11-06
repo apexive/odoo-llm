@@ -1,3 +1,8 @@
+18.0.1.2.0 (2026-08-15)
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* [ADD] Automatically process PDF vendor bills received through journal email aliases
+
 18.0.1.0.0 (2026-01-13)
 ~~~~~~~~~~~~~~~~~~~~~~~
 

@@ -4,14 +4,39 @@ Account Move Extension for LLM-OCR Processing
 Adds "Process with AI" button to draft invoices for manual OCR processing.
 """
 
-import base64
-
 from odoo import models
 from odoo.exceptions import UserError
 
 
 class AccountMove(models.Model):
     _inherit = "account.move"
+
+    def _get_edi_decoder(self, file_data, new=False):
+        decoder = super()._get_edi_decoder(file_data, new=new)
+        if decoder:
+            # Prefer UBL/Factur-X decoder over LLM parsing, if available.
+            return decoder
+
+        # Check if it's a vendor bill with an attachment, from an email alias
+        if (
+            self.env.context.get("from_alias")
+            and self.is_purchase_document(include_receipts=True)
+            and file_data["type"] == "pdf"
+        ):
+            return self._import_invoice_with_llm
+        return None
+
+    def _import_invoice_with_llm(self, invoice, file_data, new=False):
+        """Populate a vendor bill from an attachment using LLM extraction."""
+        pivot_data = self.env["account.invoice.import.ocr"].extract_invoice_data(
+            file_data["content"],
+            invoice.company_id,
+            file_data["attachment"].mimetype or "application/pdf",
+        )
+        invoice.with_context(skip_is_manually_modified=True)._update_invoice_from_pivot(
+            pivot_data
+        )
+        return True
 
     def action_process_with_llm(self):
         """Process with AI button - Update existing draft invoice using OCR.
@@ -36,15 +61,13 @@ class AccountMove(models.Model):
                 "Please attach an invoice document first."
             )
 
-        # Extract pivot data using OCR AbstractModel
-        # Note: extract_invoice_data() raises UserError with details if it fails
-        file_data = base64.b64decode(attachment.datas)
-        pivot_data = self.env["account.invoice.import.ocr"].extract_invoice_data(
-            file_data, self.company_id, attachment.mimetype or "application/pdf"
+        self._import_invoice_with_llm(
+            self,
+            {
+                "attachment": attachment,
+                "content": attachment.raw,
+            },
         )
-
-        # Update invoice from pivot data
-        self._update_invoice_from_pivot(pivot_data)
 
         # Reload form view
         return {
