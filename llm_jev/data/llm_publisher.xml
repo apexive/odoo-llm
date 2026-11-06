@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <record id="llm_publisher_typesafe" model="llm.publisher">
+        <field name="name">TypeSafe</field>
+        <field name="official" eval="True" />
+        <field name="frontier" eval="True" />
+        <field
+      name="description"
+    >TypeSafe AI builds SystemOne (Jev), a typed decision API that evaluates structured state and noul predicates into calibrated probabilities.</field>
+        <field name="meta">{
+            "website": "https://docs.typesafe.ai",
+            "api_endpoint": "https://api.typesafe.ai/v1/systemone",
+            "key_products": ["Jev SystemOne (jev-1.14.0)"]
+        }</field>
+    </record>
+
+    <!-- Provider + default model: noupdate=1 so manually configured API keys
+         and admin customizations survive module upgrades. -->
+    <data noupdate="1">
+        <record id="llm_provider_jev" model="llm.provider">
+            <field name="name">TypeSafe Jev</field>
+            <field name="service">jev</field>
+            <field name="api_base">https://api.typesafe.ai</field>
+            <field name="active" eval="True" />
+        </record>
+
+        <record id="llm_model_jev_1_14_0" model="llm.model">
+            <field name="name">jev-1.14.0</field>
+            <field name="provider_id" ref="llm_provider_jev" />
+            <field name="publisher_id" ref="llm_publisher_typesafe" />
+            <field name="model_use">decision</field>
+            <field name="default" eval="True" />
+            <field name="active" eval="True" />
+        </record>
+    </data>
+</odoo>
