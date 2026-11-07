@@ -133,7 +133,10 @@ class TestPromptArguments(TransactionCase):
             }
         )
 
-        # Check that undefined arguments are detected
+        # Explicit schema edits can leave arguments undefined.
+        arguments = json.loads(prompt.arguments_json)
+        arguments.pop("age", None)
+        prompt.arguments_json = json.dumps(arguments)
         self.assertEqual(prompt.undefined_arguments, "age")
 
     def test_argument_count_computation(self):
@@ -174,3 +177,41 @@ class TestPromptArguments(TransactionCase):
             "Hello {{name}}, again {{name}}."
         )
         self.assertEqual(args, {"name"})
+
+    def test_sync_preserves_explicit_argument_definitions(self):
+        definition = {
+            "type": "integer",
+            "description": "Number of items",
+            "required": False,
+        }
+        prompt = self.prompt_model.create(
+            {
+                "name": "Explicit argument test",
+                "template": "{{count}} {{label}}",
+                "arguments_json": json.dumps({"count": definition}),
+            }
+        )
+        arguments = json.loads(prompt.arguments_json)
+        self.assertEqual(arguments["count"], definition)
+        self.assertIn("label", arguments)
+
+    def test_sync_handles_batch_create_and_write(self):
+        prompts = self.prompt_model.create(
+            [
+                {"name": "First batch prompt", "template": "{{first}}"},
+                {"name": "Second batch prompt", "template": "{{second}}"},
+            ]
+        )
+        self.assertIn("first", json.loads(prompts[0].arguments_json))
+        self.assertIn("second", json.loads(prompts[1].arguments_json))
+        prompts.write({"template": "{{common}}"})
+        for prompt in prompts:
+            self.assertIn("common", json.loads(prompt.arguments_json))
+
+    def test_schema_only_edit_does_not_reenter_sync(self):
+        prompt = self.prompt_model.create(
+            {"name": "Schema edit test", "template": "{{value}}"}
+        )
+        prompt.write({"arguments_json": "{}"})
+        self.assertEqual(json.loads(prompt.arguments_json), {})
+        self.assertEqual(prompt.undefined_arguments, "value")

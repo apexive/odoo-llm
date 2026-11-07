@@ -140,10 +140,16 @@ class LLMPrompt(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         prompts = super().create(vals_list)
+        for prompt in prompts:
+            prompt._ensure_arguments_sync()
         return prompts
 
     def write(self, vals):
         result = super().write(vals)
+        # Schema writes from synchronization must not re-enter synchronization.
+        if "template" in vals:
+            for prompt in self:
+                prompt._ensure_arguments_sync()
         return result
 
     def copy(self, default=None):

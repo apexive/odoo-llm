@@ -1,1 +1,1 @@
-# Test module for llm_assistant
+from . import test_prompt_arguments
