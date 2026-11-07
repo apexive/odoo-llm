@@ -1,10 +1,11 @@
 /** @odoo-module **/
 
-import { _t } from "@web/core/l10n/translation";
 import { Component, useRef, useState } from "@odoo/owl";
 import { Composer } from "@mail/core/common/composer";
 import { LLMThreadHeader } from "../llm_thread_header/llm_thread_header";
 import { Thread } from "@mail/core/common/thread";
+import { _t } from "@web/core/l10n/translation";
+import { deserializeDateTime } from "@web/core/l10n/dates";
 import { useService } from "@web/core/utils/hooks";
 
 /**
@@ -23,7 +24,8 @@ export class LLMChatContainer extends Component {
     this.llmStore = useState(useService("llm.store"));
     this.mailStore = useState(useService("mail.store"));
     this.action = useService("action");
-    this.ui = useState(useService("ui")); // Wrap with useState to make it reactive
+    // Wrap with useState to make it reactive.
+    this.ui = useState(useService("ui"));
 
     // Reference to the scrollable thread container for proper jump-to-present behavior
     this.threadScrollableRef = useRef("threadScrollable");
@@ -130,12 +132,12 @@ export class LLMChatContainer extends Component {
 
   /**
    * Format date for display
-   * @param {String} dateString - Date string to format
+   * @param {String} dateString - Server datetime in UTC
    * @returns {String} Formatted date string
    */
   formatDate(dateString) {
     if (!dateString) return "";
-    const date = new Date(dateString);
+    const date = deserializeDateTime(dateString).toJSDate();
     const now = new Date();
     const diffMs = now - date;
     const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
