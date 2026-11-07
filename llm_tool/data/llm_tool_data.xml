@@ -61,7 +61,7 @@ Due to its data modification capabilities, this tool requires user consent befor
 **VERY HIGH RISK TOOL:** Executes a specified method on an Odoo model or specific records. Provide the model's technical name, the method name, and optionally a list of record IDs, positional arguments ('args'), and keyword arguments ('kwargs'). If record_ids is null/empty, the method is called on the model itself (e.g., for `search`, `create`, `@api.model`, `@staticmethod`).
 **WARNING:** This tool can modify or delete data, trigger complex actions, or cause system errors if used improperly. It bypasses standard UI workflows.
 **IMPORTANT:** The LLM using this tool MUST explicitly ask the user for confirmation before EVERY execution, clearly stating the model, method, records (if any), and arguments being used.
-Private methods (starting with '_') are disallowed by default unless 'allow_private' is explicitly set to true (use with extreme caution).
+Private methods (starting with '_') are disallowed unless an administrator enables the 'llm_tool.allow_private_method_execution' system parameter. This setting applies to all callers. Tool arguments cannot override it.
 Returns a JSON representation of the method's result or an error message.
         ]]></field>
         <field name="default" eval="False" />
