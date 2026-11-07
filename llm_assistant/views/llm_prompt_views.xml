@@ -89,7 +89,6 @@
                             <field
                 name="template"
                 widget="ace"
-                options="{'mode': 'text'}"
                 placeholder="Enter your prompt template here..."
               />
                             <div class="alert alert-info" role="alert">

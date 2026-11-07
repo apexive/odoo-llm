@@ -78,7 +78,7 @@
                                     <field
                     name="test_context"
                     widget="ace"
-                    options="{'mode': 'json'}"
+                    options="{'mode': 'javascript'}"
                     placeholder='{\n  "argument1": "value1",\n  "argument2": "value2"\n}'
                   />
                                 </group>
@@ -109,7 +109,6 @@
                             <field
                 name="rendered_template"
                 widget="ace"
-                options="{'mode': 'text', 'showPrintMargin': false}"
                 readonly="1"
                 placeholder="Select a record or click 'Evaluate Prompt' to see the rendered template..."
               />
@@ -140,7 +139,7 @@
                                 <field
                   name="messages_json"
                   widget="ace"
-                  options="{'mode': 'json', 'showPrintMargin': false}"
+                  options="{'mode': 'javascript'}"
                   readonly="1"
                   placeholder="Select a record or click 'Evaluate Prompt' to see the generated messages in JSON format..."
                 />
@@ -151,7 +150,7 @@
                                 <field
                   name="messages_yaml"
                   widget="ace"
-                  options="{'mode': 'yaml', 'showPrintMargin': false}"
+                  options="{'mode': 'javascript'}"
                   readonly="1"
                   placeholder="Select a record or click 'Evaluate Prompt' to see the generated messages in YAML format..."
                 />
@@ -214,7 +213,6 @@
                                 <field
                   name="original_template"
                   widget="ace"
-                  options="{'mode': 'text', 'showPrintMargin': false}"
                   readonly="1"
                   nolabel="1"
                 />
@@ -225,7 +223,7 @@
                                 <field
                   name="arguments_schema"
                   widget="ace"
-                  options="{'mode': 'json', 'showPrintMargin': false}"
+                  options="{'mode': 'javascript'}"
                   readonly="1"
                   nolabel="1"
                 />
