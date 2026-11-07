@@ -318,8 +318,7 @@ class LLMProvider(models.Model):
             model = self.client.models.retrieve(model_id)
             yield self._anthropic_parse_model(model)
         else:
-            response = self.client.models.list()
-            for model in response.data:
+            for model in self.client.models.list():
                 yield self._anthropic_parse_model(model)
 
     def _anthropic_parse_model(self, model):
