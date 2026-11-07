@@ -192,6 +192,20 @@ class LLMProvider(models.Model):
                 # OpenAI-specific: tool_choice param (Ollama doesn't support this)
                 params["tool_choice"] = kwargs.get("tool_choice", "auto")
 
+        for key in (
+            "max_tokens",
+            "temperature",
+            "top_p",
+            "frequency_penalty",
+            "presence_penalty",
+            "stop",
+            "seed",
+            "response_format",
+            "timeout",
+        ):
+            if kwargs.get(key) is not None:
+                params[key] = kwargs[key]
+
         # Make the API call
         response = self.client.chat.completions.create(**params)
 
