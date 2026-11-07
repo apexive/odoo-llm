@@ -107,6 +107,10 @@ class LLMProvider(models.Model):
                 "budget_tokens": kwargs.get("thinking_budget", 10000),
             }
 
+        for key in ("temperature", "top_p", "stop_sequences", "timeout"):
+            if kwargs.get(key) is not None:
+                params[key] = kwargs[key]
+
         if stream:
             return self._anthropic_stream_response(params)
         return self._anthropic_process_response(params)
