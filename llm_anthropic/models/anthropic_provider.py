@@ -77,10 +77,12 @@ class LLMProvider(models.Model):
 
         system_content = None
         if prepend_messages:
-            for msg in prepend_messages:
-                if msg.get("role") == "system":
-                    system_content = self._extract_content_text(msg.get("content", ""))
-                    break
+            system_parts = [
+                self._extract_content_text(msg.get("content", ""))
+                for msg in prepend_messages
+                if msg.get("role") == "system"
+            ]
+            system_content = "\n\n".join(part for part in system_parts if part)
 
             non_system_prepend = [
                 m for m in prepend_messages if m.get("role") != "system"
