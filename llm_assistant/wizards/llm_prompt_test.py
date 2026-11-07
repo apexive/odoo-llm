@@ -169,17 +169,14 @@ class LLMPromptTest(models.TransientModel):
             llm.thread.mock: Mock thread with same interface as llm.thread
         """
         related_record_ref = self.related_record_ref
-        return (
-            self.env["llm.thread.mock"]
-            .sudo()
-            .create(
-                {
-                    "name": f"Test Thread for {self.prompt_id.name}",
-                    "prompt_id": self.prompt_id.id,
-                    "model": related_record_ref._name if related_record_ref else False,
-                    "res_id": related_record_ref.id if related_record_ref else False,
-                }
-            )
+        # Render related records with the caller's access rights.
+        return self.env["llm.thread.mock"].create(
+            {
+                "name": f"Test Thread for {self.prompt_id.name}",
+                "prompt_id": self.prompt_id.id,
+                "model": related_record_ref._name if related_record_ref else False,
+                "res_id": related_record_ref.id if related_record_ref else False,
+            }
         )
 
     def _populate_context_from_record(self):
