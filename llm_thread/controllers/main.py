@@ -10,6 +10,8 @@ _logger = logging.getLogger(__name__)
 
 
 class LLMThreadController(http.Controller):
+    _CLIENT_WRITABLE_THREAD_FIELDS = ("name",)
+
     @http.route(
         "/llm/thread/<int:thread_id>/update",
         type="json",
@@ -18,14 +20,22 @@ class LLMThreadController(http.Controller):
         csrf=True,
     )
     def llm_thread_update(self, thread_id, **kwargs):
+        """Update the title; ignore other client fields and return neutral errors."""
         try:
             thread = request.env["llm.thread"].browse(thread_id)
             if not thread.exists():
                 raise MissingError(_("LLM Thread not found."))
-            thread.write(kwargs)
+            vals = {
+                key: kwargs[key]
+                for key in self._CLIENT_WRITABLE_THREAD_FIELDS
+                if key in kwargs
+            }
+            if vals:
+                thread.write(vals)
             return {"status": "success"}
-        except Exception as e:
-            return {"status": "error", "error": str(e)}
+        except Exception:
+            _logger.exception("llm_thread_update failed for thread %s", thread_id)
+            return {"status": "error", "error": _("Could not update the thread.")}
 
     @staticmethod
     def _safe_yield(data_to_yield):
