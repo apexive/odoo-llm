@@ -80,6 +80,7 @@ Contact: support@apexive.com
             "llm_thread/static/src/client_actions/llm_chat_client_action.js",
             "llm_thread/static/src/client_actions/open_chatter_action.js",
         ],
+        "web.assets_unit_tests": ["llm_thread/static/tests/**/*.test.js"],
     },
     "images": [
         "static/description/banner.jpeg",
