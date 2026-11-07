@@ -2,7 +2,9 @@ from unittest.mock import patch
 
 from psycopg2 import IntegrityError
 
+from odoo.exceptions import AccessError, UserError
 from odoo.tests import tagged
+from odoo.tests.common import new_test_user
 from odoo.tools import mute_logger
 
 from .common import LLMToolCase
@@ -214,3 +216,70 @@ class TestLLMToolCore(LLMToolCase):
         self.assertTrue(tool1.exists())
         self.assertTrue(tool2.exists())
         self.assertNotEqual(tool1.id, tool2.id)
+
+
+@tagged("post_install", "-at_install")
+class TestPrivateMethodPolicy(LLMToolCase):
+    """Exercise method authorization through the public tool entry point."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.user = new_test_user(
+            cls.env, login="method_policy_user", groups="base.group_user"
+        )
+        cls.partner = cls.env["res.partner"].create({"name": "Method policy fixture"})
+        cls.tool = cls.env.ref("llm_tool.llm_tool_odoo_model_method_executor")
+        cls.parameter = "llm_tool.allow_private_method_execution"
+        cls.env["ir.config_parameter"].sudo().set_param(cls.parameter, False)
+
+    def _execute(self, method="_get_external_ids", **extra):
+        return self.tool.with_user(self.user).execute(
+            {
+                "model": "res.partner",
+                "method": method,
+                "record_ids": self.partner.ids,
+                **extra,
+            }
+        )
+
+    def test_private_methods_denied_by_default(self):
+        with self.assertRaises(UserError):
+            self._execute()
+
+    def test_model_argument_cannot_enable_private_methods(self):
+        with self.assertRaises(UserError):
+            self._execute(allow_private=True)
+
+    def test_context_cannot_enable_private_methods(self):
+        self.tool = self.tool.with_context(allow_private=True)
+        with self.assertRaises(UserError):
+            self._execute()
+
+    def test_schema_has_no_private_authorization_argument(self):
+        schema = self.tool.get_input_schema()
+        self.assertNotIn("allow_private", schema["properties"])
+
+    def test_administrator_can_enable_private_methods(self):
+        for value in ("true", "1", "yes"):
+            with self.subTest(value=value):
+                self.env["ir.config_parameter"].sudo().set_param(self.parameter, value)
+                result = self._execute()
+                self.assertIn(self.partner.id, result["result"])
+
+    def test_false_and_invalid_parameter_values_deny(self):
+        for value in ("false", "0", "no", "invalid"):
+            with self.subTest(value=value):
+                self.env["ir.config_parameter"].sudo().set_param(self.parameter, value)
+                with self.assertRaises(UserError):
+                    self._execute()
+
+    def test_ordinary_user_cannot_change_server_policy(self):
+        with self.assertRaises(AccessError):
+            self.env["ir.config_parameter"].with_user(self.user).set_param(
+                self.parameter, "true"
+            )
+
+    def test_public_methods_remain_available(self):
+        result = self._execute(method="get_external_id")
+        self.assertIn(self.partner.id, result["result"])
