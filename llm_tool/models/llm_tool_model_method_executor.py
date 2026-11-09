@@ -36,6 +36,15 @@ class LLMToolModelMethodExecutor(models.Model):
             # Not valid JSON, return as plain string
             return value
 
+    def _allow_private_method_execution(self) -> bool:
+        """Read the administrator's policy for private method execution."""
+        param = (
+            self.env["ir.config_parameter"]
+            .sudo()
+            .get_param("llm_tool.allow_private_method_execution", "false")
+        )
+        return str(param).strip().lower() in ("1", "true", "yes")
+
     def odoo_model_method_executor_execute(
         self,
         model: str,
@@ -43,7 +52,6 @@ class LLMToolModelMethodExecutor(models.Model):
         record_ids: Union[list[int], None] = None,
         args: Union[list[Union[str, int, bool, float, None]], None] = None,
         kwargs: Union[dict[str, Union[str, int, bool, float, None]], None] = None,
-        allow_private: bool = False,
     ) -> dict[str, Any]:
         """Executes the specified method on the model or records.
 
@@ -53,7 +61,6 @@ class LLMToolModelMethodExecutor(models.Model):
             record_ids: Optional list of database IDs. If provided, the method is called on this recordset; otherwise, it's called on the model.
             args: Optional list of positional arguments. Simple values (str, int, bool, float, None) are passed directly. For complex structures (lists, dicts), pass them as JSON-encoded strings - they will be automatically parsed. Example: '[[\"name\", \"=\", \"John\"]]' for a domain.
             kwargs: Optional dictionary of keyword arguments. Simple values are passed directly. For complex values (lists, dicts), pass them as JSON-encoded strings - they will be automatically parsed. Example: {\"values\": '{\"name\": \"John\", \"age\": 30}'}.
-            allow_private: Set to true to allow calling private methods (those starting with '_'). Defaults to False.
         """
         # Parse args: convert JSON strings to Python objects
         actual_args = [self._parse_json_value(arg) for arg in args] if args else []
@@ -69,10 +76,11 @@ class LLMToolModelMethodExecutor(models.Model):
         if model not in self.env:
             raise UserError(f"Model '{model}' does not exist in the environment.")
 
-        if method.startswith("_") and not allow_private:
+        if method.startswith("_") and not self._allow_private_method_execution():
             raise UserError(
-                f"Execution of private method '{method}' is not allowed by default. "
-                "Set 'allow_private' to true to override."
+                f"Execution of private method '{method}' is not allowed. "
+                "An administrator must enable the "
+                "'llm_tool.allow_private_method_execution' system parameter."
             )
 
         model_obj = self.env[model]
