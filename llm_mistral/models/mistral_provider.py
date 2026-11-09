@@ -2,6 +2,8 @@ import base64
 import logging
 from urllib.parse import urlparse
 
+from openai import OpenAI
+
 try:
     from mistralai import Mistral  # mistralai < 2.0
 except ImportError:
@@ -12,6 +14,8 @@ from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
+MISTRAL_OPENAI_BASE_URL = "https://api.mistral.ai/v1"
+
 
 class LLMProvider(models.Model):
     _inherit = "llm.provider"
@@ -20,6 +24,15 @@ class LLMProvider(models.Model):
     def _get_available_services(self):
         services = super()._get_available_services()
         return services + [("mistral", "Mistral AI")]
+
+    def openai_get_client(self):
+        """Use Mistral's host for its OpenAI-compatible API."""
+        if self.service == "mistral":
+            return OpenAI(
+                api_key=self.api_key,
+                base_url=self.api_base or MISTRAL_OPENAI_BASE_URL,
+            )
+        return super().openai_get_client()
 
     def _dispatch(self, method, *args, record=None, **kwargs):
         if not self.service:
