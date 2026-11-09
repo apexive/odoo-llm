@@ -257,7 +257,20 @@ class LLMThread(models.Model):
                     raise
 
         # Continue generation loop
+        tool_call_count = 0
+        max_calls = self.assistant_id.tool_calls_max if self.assistant_id else 0
         while self._should_continue(last_message):
+            if max_calls and tool_call_count >= max_calls:
+                last_message, event = self._post_error_message(
+                    _(
+                        "Stopped after %s tool calls in a single turn. "
+                        "Send another message to continue."
+                    )
+                    % max_calls,
+                    title=_("Tool call limit reached"),
+                )
+                yield event
+                break
             if last_message.llm_role in ("user", "tool"):
                 if self.model_id.model_use in ("image_generation", "generation"):
                     last_message = yield from self._generate_response(last_message)
@@ -265,14 +278,28 @@ class LLMThread(models.Model):
                     # Generate assistant response
                     last_message = yield from self._generate_assistant_response()
             elif last_message.llm_role == "assistant" and last_message.has_tool_calls():
-                # Execute ALL tool calls from assistant message
+                # Execute tool calls within the remaining allowance.
                 tool_calls = last_message.get_tool_calls()
                 for tool_call in tool_calls:
+                    if max_calls and tool_call_count >= max_calls:
+                        skipped_message = self.env[
+                            "mail.message"
+                        ].create_tool_error_message(
+                            tool_call,
+                            _("Tool call limit reached"),
+                            thread_model=self,
+                        )
+                        yield {
+                            "type": "message_create",
+                            "message": skipped_message.to_store_format(),
+                        }
+                        continue
                     tool_message = yield from self._execute_tool_call(
                         tool_call,
                         last_message,
                     )
                     last_message = tool_message
+                    tool_call_count += 1
                     self.env.cr.commit()
             else:
                 _logger.info(
